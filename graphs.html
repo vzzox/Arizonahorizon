@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Гидро-Физика — Графики</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header>
+    <h1>Гидро-Физика — Графики волн</h1>
+    <p>Визуализируй Энергию волн и зоны опасности!</p>
+
+    <!-- Гамбургер меню -->
+    <div class="hamburger" onclick="toggleMenu()">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+
+    <nav id="navMenu">
+        <a href="index.html">Главная</a>
+        <a href="calculator.html">Калькулятор</a>
+        <a href="graphs.html">Графики</a>
+    </nav>
+</header>
+
+<main>
+    <section class="section">
+        <h2>Добавить волну для графика</h2>
+        <div class="input-row">
+            <label>ГЕ: <input id="GE" type="number" value="2"></label>
+            <label>HM: <input id="HM" type="number" value="3"></label>
+            <label>T: <input id="T" type="number" value="4"></label>
+            <label>AP: <input id="AP" type="number" value="5"></label>
+            <label>WR: <input id="WR" type="number" value="1.5"></label>
+        </div>
+        <button onclick="addWave()">Добавить волну</button>
+        <button onclick="resetChart()">Сбросить график</button>
+    </section>
+
+    <section class="section">
+        <h2>График ЭЕ vs ГЕ с зонами</h2>
+        <canvas id="chart" width="600" height="300"></canvas>
+    </section>
+</main>
+
+<footer style="text-align:center; padding:10px; background:#004d4d; color:#fff;">
+    &copy; 2025 Гидро-Физика. Все права защищены.
+</footer>
+
+<script>
+function toggleMenu() {
+    document.getElementById('navMenu').classList.toggle('show');
+}
+
+// --- Инициализация графика ---
+let ctx = document.getElementById('chart').getContext('2d');
+let chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'ЭЕ',
+            data: [],
+            borderColor: '#006064',
+            backgroundColor: 'rgba(0,96,100,0.1)',
+            fill: true,
+            tension: 0.3
+        }]
+    },
+    options: {
+        scales: {
+            x: { title: { display:true, text:'ГЕ' } },
+            y: { title: { display:true, text:'ЭЕ' } }
+        },
+        plugins: {
+            annotation: {
+                annotations: {
+                    safeZone: {
+                        type: 'box',
+                        yMin: 0,
+                        yMax: 40,
+                        backgroundColor: 'rgba(0,255,0,0.1)',
+                        borderWidth: 0,
+                        label: { content: 'Спокойная вода', enabled: true }
+                    },
+                    stormZone: {
+                        type: 'box',
+                        yMin: 40,
+                        yMax: 80,
+                        backgroundColor: 'rgba(255,255,0,0.1)',
+                        borderWidth: 0,
+                        label: { content: 'Шторм', enabled: true }
+                    },
+                    energyZone: {
+                        type: 'box',
+                        yMin: 80,
+                        yMax: 120,
+                        backgroundColor: 'rgba(255,165,0,0.1)',
+                        borderWidth: 0,
+                        label: { content: 'Энергокатастрофа', enabled: true }
+                    },
+                    superStorm: {
+                        type: 'box',
+                        yMin: 120,
+                        yMax: 200,
+                        backgroundColor: 'rgba(255,0,0,0.1)',
+                        borderWidth: 0,
+                        label: { content: 'Сверхшторм', enabled: true }
+                    }
+                }
+            }
+        }
+    }
+});
+
+// --- Добавление волн ---
+function addWave() {
+    let GE = parseFloat(document.getElementById('GE').value);
+    let HM = parseFloat(document.getElementById('HM').value);
+    let T = parseFloat(document.getElementById('T').value);
+    let AP = parseFloat(document.getElementById('AP').value);
+    let WR = parseFloat(document.getElementById('WR').value);
+
+    let EE = GE * HM * T * Math.exp(AP/10);
+    chart.data.labels.push(GE);
+    chart.data.datasets[0].data.push(EE);
+    chart.update();
+}
+
+// --- Сброс графика ---
+function resetChart() {
+    chart.data.labels = [];
+    chart.data.datasets[0].data = [];
+    chart.update();
+}
+</script>
+
+</body>
+</html>
