@@ -2,60 +2,42 @@
    ОБЩИЕ СТИЛИ
 =========================== */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Fira Mono', monospace;
     margin: 0;
     padding: 0;
-    background: linear-gradient(to bottom, #e0f7fa, #b2ebf2);
-    color: #004d4d;
-    scroll-behavior: smooth;
-}
-
-a {
-    text-decoration: none;
-    color: inherit;
+    background-color: #0d1117; /* тёмный фон */
+    color: #c9d1d9; /* светлый текст */
+    line-height: 1.6;
 }
 
 /* ===========================
    HEADER
 =========================== */
 header {
-    background-color: #006064;
-    color: #fff;
+    background-color: #161b22;
+    color: #58a6ff; /* синий “научный” акцент */
     padding: 15px 25px;
-    position: relative;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #30363d;
 }
 
 header h1 {
+    font-size: 1.8em;
     margin: 0;
-    font-size: 2em;
-    animation: fadeInDown 1s ease;
+    font-weight: 600;
 }
 
-header p {
-    margin: 5px 0 0 0;
-    font-size: 1em;
-    animation: fadeInUp 1s ease;
+header nav a {
+    color: #58a6ff;
+    margin-left: 20px;
+    text-decoration: none;
+    font-weight: 500;
 }
 
-/* ===========================
-   NAVIGATION
-=========================== */
-nav {
-    display: flex;
-    margin-top: 10px;
-}
-
-nav a {
-    color: #fff;
-    font-weight: bold;
-    margin-right: 20px;
-    transition: 0.3s;
-}
-
-nav a:hover {
-    color: #80deea;
+header nav a:hover {
+    text-decoration: underline;
 }
 
 /* ===========================
@@ -63,35 +45,28 @@ nav a:hover {
 =========================== */
 .hamburger {
     display: none;
-    cursor: pointer;
-    position: absolute;
-    top: 18px;
-    right: 25px;
     flex-direction: column;
-    justify-content: space-between;
-    width: 28px;
-    height: 20px;
+    cursor: pointer;
+    gap: 4px;
 }
 
 .hamburger div {
-    background-color: #fff;
+    width: 25px;
     height: 3px;
-    border-radius: 2px;
-    transition: 0.3s;
+    background-color: #58a6ff;
 }
 
-@media(max-width:768px){
+@media (max-width:768px){
     nav {
         display: none;
         flex-direction: column;
-        background: #004d4d;
+        background-color: #161b22;
         position: absolute;
-        top: 65px;
+        top: 60px;
         right: 0;
-        width: 220px;
-        padding: 10px;
-        border-radius: 0 0 0 5px;
-        z-index: 99;
+        width: 200px;
+        border-left: 1px solid #30363d;
+        border-bottom: 1px solid #30363d;
     }
     nav.show {
         display: flex;
@@ -105,22 +80,22 @@ nav a:hover {
    MAIN SECTIONS
 =========================== */
 .section {
-    padding: 25px;
+    padding: 20px;
     margin: 20px auto;
-    max-width: 950px;
-    background: rgba(255,255,255,0.9);
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-    animation: fadeIn 1s ease;
+    max-width: 900px;
+    background-color: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
 }
 
 .section h2 {
-    color: #006064;
+    color: #58a6ff;
     margin-top: 0;
+    font-weight: 600;
 }
 
 /* ===========================
-   FORM & INPUTS
+   INPUTS
 =========================== */
 .input-row {
     display: flex;
@@ -132,41 +107,40 @@ nav a:hover {
 .input-row label {
     display: flex;
     flex-direction: column;
-    font-weight: bold;
+    font-weight: 500;
     flex: 1 1 120px;
 }
 
 input {
     padding: 6px 10px;
-    border: 2px solid #006064;
-    border-radius: 5px;
-    font-size: 1em;
-    transition: 0.3s;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    background-color: #0d1117;
+    color: #c9d1d9;
 }
 
 input:focus {
     outline: none;
-    border-color: #004d4d;
-    box-shadow: 0 0 5px #80deea;
+    border-color: #58a6ff;
 }
 
 /* ===========================
    BUTTONS
 =========================== */
 button {
-    padding: 10px 18px;
-    background-color: #006064;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
+    padding: 8px 16px;
+    background-color: #161b22;
+    color: #58a6ff;
+    border: 1px solid #58a6ff;
+    border-radius: 4px;
     cursor: pointer;
-    transition: 0.3s;
+    font-weight: 500;
+    transition: 0.2s;
 }
 
 button:hover {
-    background-color: #004d4d;
-    transform: translateY(-2px);
+    background-color: #58a6ff;
+    color: #0d1117;
 }
 
 /* ===========================
@@ -174,36 +148,26 @@ button:hover {
 =========================== */
 footer {
     text-align: center;
-    padding: 15px;
-    background: #004d4d;
-    color: #fff;
-    font-size: 0.9em;
+    padding: 12px;
+    border-top: 1px solid #30363d;
+    color: #8b949e;
+    font-size: 0.85em;
 }
 
 /* ===========================
    CANVAS / GRAPH
 =========================== */
 canvas {
-    max-width: 100%;
+    width: 100%;
     height: auto;
-    border: 1px solid #006064;
-    border-radius: 6px;
-    background: rgba(255,255,255,0.8);
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    background-color: #0d1117;
 }
 
 /* ===========================
-   ANIMATIONS
+   RESPONSIVE
 =========================== */
-@keyframes fadeIn { from{opacity:0} to{opacity:1} }
-@keyframes fadeInDown { from{opacity:0; transform:translateY(-25px);} to{opacity:1; transform:translateY(0);} }
-@keyframes fadeInUp { from{opacity:0; transform:translateY(25px);} to{opacity:1; transform:translateY(0);} }
-
-/* ===========================
-   RESPONSIVE ADAPTATION
-=========================== */
-@media(max-width:500px){
+@media (max-width:500px){
     .input-row { flex-direction: column; }
-    nav { width: 100%; top: 65px; right: 0; border-radius: 0; }
-    header h1 { font-size: 1.6em; }
-    header p { font-size: 0.9em; }
 }
