@@ -9,49 +9,67 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #121212;
+      background: linear-gradient(120deg, #0d0d0d, #1a1a1a);
       color: #e0e0e0;
-    }
-
-    h1, h2 {
-      text-align: center;
-      margin-top: 20px;
+      overflow-x: hidden;
     }
 
     h1 {
+      text-align: center;
       font-size: 3em;
       color: #00ffcc;
+      margin: 40px 0 20px;
+      text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
+      animation: glowTitle 2s infinite alternate;
+    }
+
+    @keyframes glowTitle {
+      0% { text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
+      100% { text-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc; }
     }
 
     h2 {
-      color: #00ffff;
+      text-align: center;
       margin-top: 40px;
+      font-size: 1.8em;
+      color: #00ffff;
+      text-shadow: 0 0 5px #00ffff;
     }
 
     /* Контейнеры для правил */
     .rule-box {
       background-color: #1e1e1e;
-      border-left: 4px solid #00ffcc;
-      margin: 20px auto;
-      padding: 20px;
+      border-left: 5px solid #00ffcc;
+      margin: 30px auto;
+      padding: 25px;
       width: 90%;
       max-width: 800px;
-      transition: 0.3s;
-      border-radius: 8px;
+      border-radius: 12px;
+      transition: all 0.4s ease;
+      box-shadow: 0 0 10px rgba(0,255,204,0.2);
+      transform: translateY(0);
     }
 
     .rule-box:hover {
-      box-shadow: 0 0 20px #00ffcc;
-      color: #00ffcc;
+      box-shadow: 0 0 40px #00ffcc, 0 0 80px #00ffcc;
+      transform: translateY(-10px);
     }
 
     ul {
       list-style: none;
       padding-left: 0;
+      margin: 0;
     }
 
     li {
-      padding: 5px 0;
+      padding: 8px 0;
+      font-size: 1.1em;
+      transition: color 0.3s, text-shadow 0.3s;
+    }
+
+    li:hover {
+      color: #00ffcc;
+      text-shadow: 0 0 8px #00ffcc, 0 0 16px #00ffcc;
     }
 
     footer {
@@ -61,6 +79,22 @@
       border-top: 1px solid #333;
       color: #888;
       font-size: 0.9em;
+    }
+
+    /* Анимация появления блоков */
+    .rule-box {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s forwards;
+    }
+
+    .rule-box:nth-child(2) { animation-delay: 0.2s; }
+    .rule-box:nth-child(3) { animation-delay: 0.4s; }
+    .rule-box:nth-child(4) { animation-delay: 0.6s; }
+    .rule-box:nth-child(5) { animation-delay: 0.8s; }
+
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
