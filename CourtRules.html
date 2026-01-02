@@ -1,158 +1,187 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NewToyers - Суд</title>
-  <style>
-    /* Общие стили */
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(120deg, #0d0d0d, #1a1a1a);
-      color: #e0e0e0;
-      overflow-x: hidden;
-    }
+<meta charset="UTF-8">
+<title>NewToyers</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    h1 {
-      text-align: center;
-      font-size: 3em;
-      color: #00ffcc;
-      margin: 40px 0 20px;
-      text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
-      animation: glowTitle 2s infinite alternate;
-    }
+<style>
+:root {
+  --bg: #0b0d10;
+  --card: #12151b;
+  --text: #e6e6e6;
+  --muted: #9aa0a6;
+  --neon: #00f7ff;
+}
 
-    @keyframes glowTitle {
-      0% { text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
-      100% { text-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc; }
-    }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", system-ui, sans-serif;
+}
 
-    h2 {
-      text-align: center;
-      margin-top: 40px;
-      font-size: 1.8em;
-      color: #00ffff;
-      text-shadow: 0 0 5px #00ffff;
-    }
+body {
+  background: radial-gradient(1200px 600px at top, #10141c, var(--bg));
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
-    /* Контейнеры для правил */
-    .rule-box {
-      background-color: #1e1e1e;
-      border-left: 5px solid #00ffcc;
-      margin: 30px auto;
-      padding: 25px;
-      width: 90%;
-      max-width: 800px;
-      border-radius: 12px;
-      transition: all 0.4s ease;
-      box-shadow: 0 0 10px rgba(0,255,204,0.2);
-      transform: translateY(0);
-    }
+/* HEADER */
+header {
+  padding: 80px 20px 40px;
+  text-align: center;
+}
 
-    .rule-box:hover {
-      box-shadow: 0 0 40px #00ffcc, 0 0 80px #00ffcc;
-      transform: translateY(-10px);
-    }
+header h1 {
+  font-size: clamp(2.2rem, 4vw, 3.5rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
 
-    ul {
-      list-style: none;
-      padding-left: 0;
-      margin: 0;
-    }
+header p {
+  color: var(--muted);
+  font-size: 1rem;
+}
 
-    li {
-      padding: 8px 0;
-      font-size: 1.1em;
-      transition: color 0.3s, text-shadow 0.3s;
-    }
+/* CONTENT */
+main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 26px;
+  padding: 40px 8%;
+}
 
-    li:hover {
-      color: #00ffcc;
-      text-shadow: 0 0 8px #00ffcc, 0 0 16px #00ffcc;
-    }
+.card {
+  background: linear-gradient(180deg, #141822, #0f1218);
+  border-radius: 16px;
+  padding: 26px;
+  border: 1px solid rgba(255,255,255,0.04);
+  transition: 0.35s ease;
+  position: relative;
+  overflow: hidden;
+}
 
-    footer {
-      text-align: center;
-      padding: 20px;
-      margin-top: 50px;
-      border-top: 1px solid #333;
-      color: #888;
-      font-size: 0.9em;
-    }
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    600px circle at var(--x, 50%) var(--y, 50%),
+    rgba(0, 247, 255, 0.15),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+}
 
-    /* Анимация появления блоков */
-    .rule-box {
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeInUp 0.8s forwards;
-    }
+.card:hover::before {
+  opacity: 1;
+}
 
-    .rule-box:nth-child(2) { animation-delay: 0.2s; }
-    .rule-box:nth-child(3) { animation-delay: 0.4s; }
-    .rule-box:nth-child(4) { animation-delay: 0.6s; }
-    .rule-box:nth-child(5) { animation-delay: 0.8s; }
+.card:hover {
+  box-shadow:
+    0 0 18px rgba(0, 247, 255, 0.35),
+    inset 0 0 12px rgba(0, 247, 255, 0.15);
+  border-color: rgba(0, 247, 255, 0.5);
+}
 
-    @keyframes fadeInUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
+.card h2 {
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+  letter-spacing: 0.05em;
+}
+
+.card p {
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* FOOTER */
+footer {
+  padding: 20px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.85rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+</style>
 </head>
+
 <body>
 
+<header>
   <h1>NewToyers</h1>
+  <p>Rules</p>
+</header>
 
-  <!-- Блок 1 -->
-  <h2>1. Общие правила суда</h2>
-  <div class="rule-box">
-    <ul>
-      <li>1.1 - Суд рассматривает все жалобы и конфликты между пользователями и/или администрацией.</li>
-      <li>1.2 - Незнание процедур суда не освобождает от ответственности.</li>
-      <li>1.3 - Все участники обязаны вести себя уважительно, без оскорблений и угроз.</li>
-      <li>1.4 - Нарушение правил поведения может привести к немедленному удалению из зала суда.</li>
-      <li>1.5 - Участники обязаны предоставлять правдивые доказательства и факты.</li>
-    </ul>
+<main>
+  <!-- 1. Общие правила суда -->
+  <div class="card">
+    <h2>1. Общие правила суда</h2>
+    <p>
+      <strong>1.1</strong> - Суд рассматривает спорные ситуации между пользователями, администрацией и модерацией.<br><br>
+      <strong>1.2</strong> - Незнание процедур суда не освобождает от ответственности.<br><br>
+      <strong>1.3</strong> - Все участники обязаны вести себя уважительно, без оскорблений и угроз.<br><br>
+      <strong>1.4</strong> - Нарушение правил поведения может привести к немедленному удалению из зала суда.<br><br>
+      <strong>1.5</strong> - Участники обязаны предоставлять правдивые доказательства и факты.
+    </p>
   </div>
 
-  <!-- Блок 2 -->
-  <h2>2. Полномочия и обязанности судьи</h2>
-  <div class="rule-box">
-    <ul>
-      <li>2.1 - Судья имеет полное право направлять ход дела и задавать вопросы сторонам.</li>
-      <li>2.2 - Нельзя перебивать судью или других участников без разрешения.</li>
-      <li>2.3 - Любое вмешательство третьих лиц запрещено без согласия суда.</li>
-      <li>2.4 - Участники должны уважать тайминг и последовательность выступлений.</li>
-      <li>2.5 - Запрещено использовать суд для личной мести или давления на участников.</li>
-    </ul>
+  <!-- 2. Полномочия и обязанности судьи -->
+  <div class="card">
+    <h2>2. Полномочия и обязанности судьи</h2>
+    <p>
+      <strong>2.1</strong> - Судья имеет полное право направлять ход дела и задавать вопросы сторонам.<br><br>
+      <strong>2.2</strong> - Нельзя перебивать судью или других участников без разрешения.<br><br>
+      <strong>2.3</strong> - Любое вмешательство третьих лиц запрещено без согласия суда.<br><br>
+      <strong>2.4</strong> - Участники должны уважать тайминг и последовательность выступлений.<br><br>
+      <strong>2.5</strong> - Запрещено использовать суд для личной мести или давления на участников.
+    </p>
   </div>
 
-  <!-- Блок 3 -->
-  <h2>3. Процесс и решения суда</h2>
-  <div class="rule-box">
-    <ul>
-      <li>3.1 - Решения суда выносятся на основе предоставленных доказательств и правил сервера.</li>
-      <li>3.2 - Решение суда является окончательным и обязательным к исполнению.</li>
-      <li>3.3 - Судья может назначить модератора для помощи в ведении процесса.</li>
-      <li>3.4 - Все споры должны решаться внутри суда, нельзя переносить конфликт в другие каналы.</li>
-      <li>3.5 - Суд обязан фиксировать протокол заседания для отчетности администрации.</li>
-    </ul>
+  <!-- 3. Процесс и решения суда -->
+  <div class="card">
+    <h2>3. Процесс и решения суда</h2>
+    <p>
+      <strong>3.1</strong> - Решения суда выносятся на основе предоставленных доказательств и правил проекта.<br><br>
+      <strong>3.2</strong> - Решение суда является окончательным и обязательным к исполнению.<br><br>
+      <strong>3.3</strong> - Судья может назначить модератора для помощи в ведении процесса.<br><br>
+      <strong>3.4</strong> - Все споры должны решаться внутри суда, нельзя переносить конфликт в другие каналы.<br><br>
+      <strong>3.5</strong> - Суд обязан фиксировать протокол заседания для отчетности администрации.
+    </p>
   </div>
 
-  <!-- Блок 4 -->
-  <h2>4. Поведение участников и санкции</h2>
-  <div class="rule-box">
-    <ul>
-      <li>4.1 - При неявке стороны без уважительной причины, дело может быть рассмотрено в их отсутствие.</li>
-      <li>4.2 - Нарушение правил поведения в суде может повлечь штрафы, временные блокировки или другие санкции.</li>
-      <li>4.3 - Судебные доказательства должны быть предоставлены заранее, если это возможно.</li>
-      <li>4.4 - Любые попытки манипулировать судом строго запрещены и караются.</li>
-      <li>4.5 - Участники обязаны соблюдать решение суда до полного исполнения всех его пунктов.</li>
-    </ul>
+  <!-- 4. Поведение участников и санкции -->
+  <div class="card">
+    <h2>4. Поведение участников и санкции</h2>
+    <p>
+      <strong>4.1</strong> - При неявке стороны без уважительной причины дело может быть рассмотрено в их отсутствие.<br><br>
+      <strong>4.2</strong> - Нарушение правил поведения в суде может повлечь штрафы, временные блокировки или другие санкции.<br><br>
+      <strong>4.3</strong> - Судебные доказательства должны быть предоставлены заранее.<br><br>
+      <strong>4.4</strong> - Любые попытки манипулировать судом строго запрещены и караются.<br><br>
+      <strong>4.5</strong> - Участники обязаны соблюдать решение суда до полного исполнения всех его пунктов.
+    </p>
   </div>
 
-  <footer>
-    &copy; 2026 NewToyers. Все права защищены.
-  </footer>
+<footer>
+  © 2026 NewToyers. All rights reserved.
+</footer>
+
+<script>
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--x', e.clientX - rect.left + 'px');
+    card.style.setProperty('--y', e.clientY - rect.top + 'px');
+  });
+});
+</script>
 
 </body>
 </html>
