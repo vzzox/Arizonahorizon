@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>NewToyers</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+  --bg: #0b0d10;
+  --card: #12151b;
+  --text: #e6e6e6;
+  --muted: #9aa0a6;
+  --neon: #00f7ff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+body {
+  background: radial-gradient(1200px 600px at top, #10141c, var(--bg));
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+header {
+  padding: 80px 20px 40px;
+  text-align: center;
+}
+
+header h1 {
+  font-size: clamp(2.2rem, 4vw, 3.5rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+header p {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+/* CONTENT */
+main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 26px;
+  padding: 40px 8%;
+}
+
+.card {
+  background: linear-gradient(180deg, #141822, #0f1218);
+  border-radius: 16px;
+  padding: 26px;
+  border: 1px solid rgba(255,255,255,0.04);
+  transition: 0.35s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    600px circle at var(--x, 50%) var(--y, 50%),
+    rgba(0, 247, 255, 0.15),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card:hover {
+  box-shadow:
+    0 0 18px rgba(0, 247, 255, 0.35),
+    inset 0 0 12px rgba(0, 247, 255, 0.15);
+  border-color: rgba(0, 247, 255, 0.5);
+}
+
+.card h2 {
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+  letter-spacing: 0.05em;
+}
+
+.card p {
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* FOOTER */
+footer {
+  padding: 20px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.85rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>NewToyers</h1>
+  <p>make text</p>
+</header>
+
+<main>
+  <div class="card">
+    <h2>make text</h2>
+    <p>make text. Minimalist dark interface with calm neon accents for the eyes.</p>
+  </div>
+
+  <div class="card">
+    <h2>make text</h2>
+    <p>make text. Clean layout, soft glow on hover and smooth visual balance.</p>
+  </div>
+
+  <div class="card">
+    <h2>make text</h2>
+    <p>make text. Designed to feel modern, quiet and futuristic.</p>
+  </div>
+
+  <div class="card">
+    <h2>make text</h2>
+    <p>make text. Dark aesthetics with subtle cyber-neon energy.</p>
+  </div>
+</main>
+
+<footer>
+  © 2026 NewToyers. All rights reserved.
+</footer>
+
+<script>
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--x', e.clientX - rect.left + 'px');
+    card.style.setProperty('--y', e.clientY - rect.top + 'px');
+  });
+});
+</script>
+
+</body>
+</html>
