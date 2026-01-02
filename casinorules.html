@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>NewToyers - Правила Казино</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+  --bg: #0b0d10;
+  --card: #12151b;
+  --text: #e6e6e6;
+  --muted: #9aa0a6;
+  --neon: #00f7ff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+body {
+  background: radial-gradient(1200px 600px at top, #10141c, var(--bg));
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+header {
+  padding: 80px 20px 40px;
+  text-align: center;
+}
+
+header h1 {
+  font-size: clamp(2.2rem, 4vw, 3.5rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+header p {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+/* CONTENT */
+main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 26px;
+  padding: 40px 8%;
+}
+
+.card {
+  background: linear-gradient(180deg, #141822, #0f1218);
+  border-radius: 16px;
+  padding: 26px;
+  border: 1px solid rgba(255,255,255,0.04);
+  transition: 0.35s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    600px circle at var(--x, 50%) var(--y, 50%),
+    rgba(0, 247, 255, 0.15),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card:hover {
+  box-shadow:
+    0 0 18px rgba(0, 247, 255, 0.35),
+    inset 0 0 12px rgba(0, 247, 255, 0.15);
+  border-color: rgba(0, 247, 255, 0.5);
+}
+
+.card h2 {
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+  letter-spacing: 0.05em;
+}
+
+.card p {
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* FOOTER */
+footer {
+  padding: 20px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.85rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>NewToyers</h1>
+  <p>Правила Казино</p>
+</header>
+
+<main>
+  <!-- 1. Пользователи -->
+  <div class="card">
+    <h2>1. Пользователи казино</h2>
+    <p>
+      <strong>1.1</strong> - Участвовать в казино могут только зарегистрированные пользователи.<br><br>
+      <strong>1.2</strong> - Игроки обязаны соблюдать честную игру и не использовать сторонние программы.<br><br>
+      <strong>1.3</strong> - Запрещено оскорблять других игроков или устраивать провокации.<br><br>
+      <strong>1.4</strong> - Любые попытки мошенничества фиксируются и караются блокировкой.<br><br>
+      <strong>1.5</strong> - При выигрыше 20% выигрыша переводится в казну сервера.
+    </p>
+  </div>
+
+  <!-- 2. Администрация -->
+  <div class="card">
+    <h2>2. Администрация казино</h2>
+    <p>
+      <strong>2.1</strong> - Администрация контролирует работу казино и проверяет честность всех игр.<br><br>
+      <strong>2.2</strong> - Решения администрации обязательны к исполнению.<br><br>
+      <strong>2.3</strong> - Любые жалобы игроков должны рассматриваться своевременно.<br><br>
+      <strong>2.4</strong> - Злоупотребление полномочиями запрещено.<br><br>
+      <strong>2.5</strong> - Администрация обязана обеспечивать прозрачность всех выплат и транзакций.
+    </p>
+  </div>
+
+  <!-- 3. Модерация -->
+  <div class="card">
+    <h2>3. Модерация казино</h2>
+    <p>
+      <strong>3.1</strong> - Модераторы следят за соблюдением правил и корректностью игр.<br><br>
+      <strong>3.2</strong> - Модераторы могут выдавать предупреждения игрокам за нарушения.<br><br>
+      <strong>3.3</strong> - Все действия модерации должны быть справедливыми и прозрачными.<br><br>
+      <strong>3.4</strong> - Личные конфликты модераторов с игроками не влияют на решения.<br><br>
+      <strong>3.5</strong> - Действия модераторов могут быть пересмотрены администрацией.
+    </p>
+  </div>
+
+  <!-- 4. Суд -->
+  <div class="card">
+    <h2>4. Суд казино</h2>
+    <p>
+      <strong>4.1</strong> - Суд рассматривает спорные ситуации между игроками и администрацией казино.<br><br>
+      <strong>4.2</strong> - Решения суда обязательны для всех сторон.<br><br>
+      <strong>4.3</strong> - Суд формируется из представителей администрации.<br><br>
+      <strong>4.4</strong> - Все разбирательства фиксируются и проверяются документально.<br><br>
+      <strong>4.5</strong> - Попытки давления на суд или фальсификации доказательств запрещены.
+    </p>
+  </div>
+
+  <!-- 5. Коррупция -->
+  <div class="card">
+    <h2>5. Коррупция</h2>
+    <p>
+      <strong>5.1</strong> - Любая коррупционная деятельность в казино строго запрещена.<br><br>
+      <strong>5.2</strong> - Взятки, откаты и личная выгода караются санкциями.<br><br>
+      <strong>5.3</strong> - Любое подозрение в коррупции фиксируется и проверяется администрацией.<br><br>
+      <strong>5.4</strong> - Нарушение этих правил может привести к блокировке и перераспределению ресурсов сервера.<br><br>
+      <strong>5.5</strong> - Жалобы о коррупции должны рассматриваться незамедлительно.
+    </p>
+  </div>
+
+  <!-- 6. Казино -->
+  <div class="card">
+    <h2>6. Казино</h2>
+    <p>
+      <strong>6.1</strong> - Казино работает только по установленным правилам сервера.<br><br>
+      <strong>6.2</strong> - При выигрыше игрока 20% выигрыша автоматически переводятся в казну сервера.<br><br>
+      <strong>6.3</strong> - Запрещено использовать баги, читы или сторонние программы.<br><br>
+      <strong>6.4</strong> - Все транзакции фиксируются для предотвращения мошенничества.<br><br>
+      <strong>6.5</strong> - Нарушение этих правил карается временной или постоянной блокировкой участия в казино.
+    </p>
+  </div>
+</main>
+
+<footer>
+  © 2026 NewToyers. All rights reserved.
+</footer>
+
+<script>
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--x', e.clientX - rect.left + 'px');
+    card.style.setProperty('--y', e.clientY - rect.top + 'px');
+  });
+});
+</script>
+
+</body>
+</html>
