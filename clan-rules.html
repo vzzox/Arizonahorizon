@@ -13,6 +13,7 @@
   font-weight: 400;
 }
 
+/* ===== BASE ===== */
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -20,9 +21,9 @@
 
 body {
   margin: 0;
-  background: #0b0b0f;
+  background: #0a0a0f;
   color: #eaeaea;
-  font-family: 'Gilroy', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Gilroy', system-ui, sans-serif;
   display: flex;
   justify-content: center;
 }
@@ -30,40 +31,69 @@ body {
 .container {
   width: 100%;
   max-width: 520px;
-  padding: 20px 14px 80px;
+  padding: 20px 14px 120px;
 }
 
+/* ===== TITLE ===== */
 h1 {
   text-align: center;
   font-size: 26px;
-  margin-bottom: 24px;
-  letter-spacing: 0.5px;
+  margin-bottom: 26px;
+  letter-spacing: 0.6px;
+  animation: fadeDown 0.8s ease;
 }
 
 /* ===== CARDS ===== */
 .card {
   background: #12121a;
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 18px 18px 20px;
-  margin-bottom: 16px;
-  box-shadow: 0 0 0 rgba(0,0,0,0);
-  transition: box-shadow 0.35s ease, transform 0.2s ease;
+  margin-bottom: 18px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  transform: translateY(20px);
+  opacity: 0;
+  animation: cardAppear 0.6s ease forwards;
+}
+
+.card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3) { animation-delay: 0.2s; }
+.card:nth-child(4) { animation-delay: 0.3s; }
+.card:nth-child(5) { animation-delay: 0.4s; }
+
+.card:hover {
+  box-shadow: 0 0 18px rgba(0,255,200,0.15);
 }
 
 .card:active {
-  transform: scale(0.985);
+  transform: scale(0.97);
 }
 
+/* ===== NEON EFFECT ===== */
 .card.neon {
   box-shadow:
-    0 0 8px rgba(0, 255, 200, 0.6),
-    0 0 18px rgba(0, 255, 200, 0.35),
-    0 0 32px rgba(0, 255, 200, 0.2);
+    0 0 10px rgba(0,255,200,0.7),
+    0 0 30px rgba(0,255,200,0.35),
+    0 0 60px rgba(0,255,200,0.2);
 }
 
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center,
+    rgba(0,255,200,0.25),
+    transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.card.neon::after {
+  opacity: 1;
+}
+
+/* ===== CONTENT ===== */
 .card-title {
   font-size: 18px;
   margin-bottom: 10px;
@@ -82,12 +112,32 @@ h1 {
 /* ===== FOOTER ===== */
 .footer {
   position: fixed;
-  bottom: 12px;
+  bottom: 14px;
   left: 0;
   right: 0;
   text-align: center;
-  font-size: 14px;
-  opacity: 0.6;
+  font-size: 13px;
+  opacity: 0.55;
+}
+
+.copyright {
+  position: fixed;
+  bottom: 36px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.45;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardAppear {
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
 </head>
@@ -96,49 +146,49 @@ h1 {
 <div class="container">
   <h1>NewToyers — Clans</h1>
 
-  <!-- 1 -->
   <div class="card">
     <div class="card-title">Правила создания кланов</div>
     <div class="rules">
       <div>1. Название клана должно быть уникальным.</div>
       <div>2. Запрещены оскорбительные и нецензурные названия.</div>
-      <div>3. Создатель клана несёт полную ответственность.</div>
-      <div>4. Клан создаётся только через официальную команду.</div>
+      <div>3. Создатель несёт полную ответственность.</div>
+      <div>4. Клан создаётся только официальным способом.</div>
     </div>
   </div>
 
-  <!-- 2 -->
   <div class="card">
     <div class="card-title">Правила кланов</div>
     <div class="rules">
-      <div>1. Участники обязаны соблюдать общие правила проекта.</div>
-      <div>2. Запрещены внутренние конфликты и провокации.</div>
-      <div>3. Лидер отвечает за действия участников.</div>
-      <div>4. Нарушения приводят к санкциям против клана.</div>
+      <div>1. Соблюдение правил проекта обязательно.</div>
+      <div>2. Запрещены конфликты и провокации.</div>
+      <div>3. Лидер отвечает за участников.</div>
+      <div>4. Нарушения → санкции.</div>
     </div>
   </div>
 
-  <!-- 3 -->
   <div class="card">
     <div class="card-title">Правила создания каналов клана</div>
     <div class="rules">
-      <div>1. Каналы создаются только для клановой деятельности.</div>
-      <div>2. Название канала должно соответствовать тематике.</div>
-      <div>3. Запрещён спам и реклама.</div>
-      <div>4. Модерация канала — обязанность клана.</div>
+      <div>1. Только для клановой деятельности.</div>
+      <div>2. Название — по теме.</div>
+      <div>3. Спам запрещён.</div>
+      <div>4. Ответственность на клане.</div>
     </div>
   </div>
 
-  <!-- 4 -->
   <div class="card">
     <div class="card-title">Правила поведения в суде</div>
     <div class="rules">
-      <div>1. Уважительное общение обязательно.</div>
-      <div>2. Запрещены крики, флуд и перебивания.</div>
-      <div>3. Решение суда не оспаривается публично.</div>
-      <div>4. За неуважение — мгновенное наказание.</div>
+      <div>1. Уважение обязательно.</div>
+      <div>2. Без флуда и перебиваний.</div>
+      <div>3. Решение суда окончательное.</div>
+      <div>4. Нарушения караются сразу.</div>
     </div>
   </div>
+</div>
+
+<div class="copyright">
+  © 2026 NewToyers. Все права защищены.
 </div>
 
 <div class="footer">/clan</div>
@@ -149,7 +199,7 @@ const cards = document.querySelectorAll('.card');
 cards.forEach(card => {
   card.addEventListener('click', () => {
     card.classList.add('neon');
-    setTimeout(() => card.classList.remove('neon'), 450);
+    setTimeout(() => card.classList.remove('neon'), 500);
   });
 });
 </script>
