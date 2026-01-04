@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>NewToyers - Clans</title>
+
+<!-- Gilroy by Radomir Tinkov -->
+<link href="https://fonts.cdnfonts.com/css/gilroy-bold" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0b0f1a;
+  --card: #12172a;
+  --neon: #00f7ff;
+  --text: #e6e6e6;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: 'Gilroy', sans-serif;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #0f1633, var(--bg));
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  text-align: center;
+  padding: 40px 20px 20px;
+}
+
+header h1 {
+  font-size: 42px;
+  letter-spacing: 2px;
+  color: var(--neon);
+  text-shadow: 0 0 20px rgba(0,247,255,.6);
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  flex: 1;
+}
+
+.card {
+  background: linear-gradient(145deg, #0f1430, var(--card));
+  border-radius: 16px;
+  padding: 25px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 18px;
+  background: linear-gradient(120deg, transparent, var(--neon), transparent);
+  opacity: 0;
+  transition: opacity .3s;
+}
+
+.card:hover,
+.card.active {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 0 25px rgba(0,247,255,.4);
+}
+
+.card:hover::before,
+.card.active::before {
+  opacity: 1;
+  animation: neon 1.5s linear infinite;
+}
+
+@keyframes neon {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+.card h2 {
+  margin-top: 0;
+  color: var(--neon);
+  font-size: 22px;
+}
+
+.card ul {
+  padding-left: 18px;
+  line-height: 1.6;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
+  color: #8faaff;
+  letter-spacing: 2px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>NewToyers – Clans</h1>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>Правила создания клана</h2>
+    <ul>
+      <li>Название клана должно быть уникальным.</li>
+      <li>Запрещены оскорбления, мат и провокации в названии.</li>
+      <li>Создатель автоматически становится лидером.</li>
+      <li>Один игрок — один клан.</li>
+      <li>Администрация вправе отказать без объяснения причин.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Общие правила кланов</h2>
+    <ul>
+      <li>Клан несёт ответственность за действия своих участников.</li>
+      <li>Запрещены рейды, угрозы и шантаж.</li>
+      <li>Запрещено использование багов и эксплойтов.</li>
+      <li>Конфликты решаются через суд.</li>
+      <li>Нарушения → предупреждение / роспуск.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Создание каналов клана</h2>
+    <ul>
+      <li>Каналы создаёт только лидер или заместитель.</li>
+      <li>Название канала должно соответствовать тематике.</li>
+      <li>Запрещён флуд и спам.</li>
+      <li>Голосовые каналы — без посторонних шумов.</li>
+      <li>Администрация может удалить канал.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Правила поведения в суде</h2>
+    <ul>
+      <li>Обращение к судье — уважительное.</li>
+      <li>Мат, крики и перебивания запрещены.</li>
+      <li>Говорить только по делу.</li>
+      <li>Фальшивые доказательства = автоматическое поражение.</li>
+      <li>Решение суда окончательное.</li>
+    </ul>
+  </div>
+
+</div>
+
+<footer>
+  /clan
+</footer>
+
+<script>
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('click', () => {
+    card.classList.toggle('active');
+  });
+});
+</script>
+
+</body>
+</html>
