@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Список кланов NewToyers</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #0d0d0d;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  h1 {
+    margin-bottom: 30px;
+    text-align: center;
+    font-weight: normal;
+  }
+
+  .clan-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    width: 100%;
+    max-width: 1000px;
+  }
+
+  .clan {
+    background-color: #1a1a1a;
+    border-radius: 10px;
+    padding: 20px;
+    width: 250px;
+    transition: 0.3s;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .clan:hover {
+    box-shadow: 0 0 15px var(--color), 0 0 30px var(--color), 0 0 45px var(--color);
+  }
+
+  .clan h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .clan ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .clan ul li {
+    margin-bottom: 5px;
+  }
+
+  /* Минималистичная анимация неона */
+  .clan::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 10px;
+    box-shadow: 0 0 0px transparent;
+    transition: 0.3s;
+  }
+
+  .clan:hover::before {
+    box-shadow: 0 0 20px var(--color), 0 0 40px var(--color);
+  }
+
+</style>
+</head>
+<body>
+
+<h1>Список кланов сервера NewToyers</h1>
+
+<div class="clan-container">
+  <!-- Клан -->
+  <div class="clan" style="--color: #ff00ff;">
+    <h2>Admin Team</h2>
+    <p>Цвет клана: #ff00ff</p>
+    <h3>Игроки:</h3>
+    <ul>
+      <li>-/50</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>
