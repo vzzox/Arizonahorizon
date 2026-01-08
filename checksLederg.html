@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Выборы на зама</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #0a0a0a;
+    --card: #111;
+    --gold: #e6c75a;
+    --white: #f5f5f5;
+}
+
+body {
+    background: var(--bg);
+    font-family: 'Bebas Neue', sans-serif;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.bg-text {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    font-size: 38vw;
+    color: rgba(255,255,255,0.02);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.header {
+    width:100%;
+    padding:20px;
+    text-align:center;
+    color: var(--gold);
+    font-size: 28px;
+    letter-spacing: 0.3em;
+    position: fixed;
+    top:0;
+    background: rgba(10,10,10,0.95);
+    z-index:10;
+}
+
+.main {
+    padding-top: 120px;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:20px;
+    z-index:1;
+}
+
+.card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 30px;
+    width: 90%;
+    max-width: 400px;
+    text-align:center;
+    border: 1px solid #1a1a1a;
+    transition:0.3s ease;
+    opacity:0;
+    transform: translateY(10px);
+    animation: fadeInUp 0.8s forwards;
+}
+
+.card:hover {
+    border-color: var(--gold);
+    box-shadow: 0 0 12px rgba(230,199,90,0.7),
+                0 0 28px rgba(230,199,90,0.4);
+    transform: translateY(-3px);
+}
+
+.card p {
+    color: var(--white);
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+.vote-btn {
+    padding: 12px 26px;
+    border-radius: 25px;
+    border: 1px solid var(--gold);
+    background: transparent;
+    color: var(--gold);
+    cursor:pointer;
+    letter-spacing:0.2em;
+    transition:0.3s;
+}
+
+.vote-btn:hover {
+    background: var(--gold);
+    color:#000;
+    box-shadow:
+        0 0 16px rgba(230,199,90,0.9),
+        0 0 36px rgba(230,199,90,0.7),
+        inset 0 0 18px rgba(255,255,255,0.35);
+}
+
+.results {
+    margin-top: 20px;
+    color: var(--white);
+    font-size:16px;
+    letter-spacing:0.1em;
+}
+
+.footer {
+    margin:40px 0;
+    color: rgba(255,255,255,0.4);
+    font-size:14px;
+}
+@keyframes fadeInUp {
+    to {
+        opacity:1;
+        transform: translateY(0);
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-text">Выборы</div>
+<div class="header">Выборы на зама</div>
+
+<main class="main" id="main">
+    <!-- Карточки кандидатов будут здесь через JS -->
+</main>
+
+<div class="results" id="results">
+    <!-- Результаты -->
+</div>
+
+<div class="footer">© Выборы на зама. Все права защищены.</div>
+
+<script>
+// Кандидаты
+const candidates = [
+    {name: 'Кандидат 1', votes: 0},
+    {name: 'Кандидат 2', votes: 0},
+    {name: 'Кандидат 3', votes: 0}
+];
+
+// Загрузка голосов из localStorage
+if(localStorage.getItem('votes')){
+    const saved = JSON.parse(localStorage.getItem('votes'));
+    candidates.forEach((c,i)=>c.votes = saved[i]);
+}
+
+const main = document.getElementById('main');
+const resultsDiv = document.getElementById('results');
+
+function updateResults(){
+    resultsDiv.innerHTML = candidates.map(c=>`${c.name}: ${c.votes} голос(ов)`).join('<br>');
+}
+
+// Создание карточек кандидатов
+candidates.forEach((c,index)=>{
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.style.animationDelay = `${index*0.2}s`;
+
+    const p = document.createElement('p');
+    p.textContent = c.name;
+    card.appendChild(p);
+
+    const btn = document.createElement('button');
+    btn.textContent = 'Выбрать';
+    btn.classList.add('vote-btn');
+    btn.onclick = ()=>{
+        c.votes++;
+        localStorage.setItem('votes', JSON.stringify(candidates.map(c=>c.votes)));
+        updateResults();
+        alert(`Вы проголосовали за ${c.name}!`);
+    }
+    card.appendChild(btn);
+
+    main.appendChild(card);
+});
+
+updateResults();
+</script>
+
+</body>
+</html>
