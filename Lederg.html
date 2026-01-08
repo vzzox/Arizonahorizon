@@ -62,10 +62,50 @@ html, body {
     font-size: 24px;
 }
 
-.top-text {
+/* ===== ГАМБУРГЕР МЕНЮ ===== */
+.menu {
+    position: relative;
+}
+
+.menu-icon {
+    width: 30px;
+    height: 3px;
+    background-color: var(--gold);
+    display: block;
+    margin: 6px 0;
+    transition: 0.4s;
+    cursor: pointer;
+}
+
+.menu-items {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 64px;
+    background: var(--card);
+    border: 1px solid #1a1a1a;
+    border-radius: 12px;
+    min-width: 160px;
+    z-index: 20;
+    text-align: left;
+}
+
+.menu-items a {
+    display: block;
+    padding: 12px 20px;
     color: var(--white);
-    opacity: 0.8;
-    letter-spacing: 0.2em;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.menu-items a:hover {
+    background: rgba(230,199,90,0.1);
+    color: var(--gold);
+}
+
+/* Активное меню при клике */
+.menu.active .menu-items {
+    display: block;
 }
 
 /* ===== ОСНОВА ===== */
@@ -89,6 +129,10 @@ html, body {
     border: 1px solid #1a1a1a;
     text-align: center;
     transition: 0.35s ease;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInUp 0.8s forwards;
+    animation-delay: 0.2s;
 }
 
 .card p {
@@ -98,7 +142,7 @@ html, body {
     line-height: 1.5;
 }
 
-/* Неон ТОЛЬКО по краям */
+/* Hover эффект по краям */
 .card:hover {
     border-color: var(--gold);
     box-shadow:
@@ -108,33 +152,6 @@ html, body {
 }
 
 /* ===== КНОПКА ===== */
-.neon-btn {
-    margin-top: 10px;
-    padding: 16px 34px;
-    border-radius: 30px;
-    border: 1px solid var(--gold);
-    color: var(--gold);
-    background: transparent;
-    letter-spacing: 0.25em;
-    cursor: pointer;
-    transition: 0.35s ease;
-}
-
-.neon-btn:hover {
-    color: #000;
-    background: var(--gold);
-    box-shadow:
-        0 0 16px rgba(230,199,90,0.9),
-        0 0 36px rgba(230,199,90,0.7),
-        inset 0 0 18px rgba(255,255,255,0.35);
-}
-
-<!-- Кнопка с пульсом -->
-<a href="https://discord.gg/ENCDREZSXm" target="_blank" style="text-decoration:none;">
-    <button class="neon-btn">ВОЙТИ</button>
-</a>
-
-<style>
 .neon-btn {
     margin-top: 10px;
     padding: 16px 34px;
@@ -168,28 +185,11 @@ html, body {
     }
 }
 
-/* Карточки плавное появление */
-.card {
-    opacity: 0;
-    transform: translateY(10px);
-    animation: fadeInUp 0.8s forwards;
-    animation-delay: 0.2s; /* Можно ставить разную задержку для каждой карточки */
-}
-
 @keyframes fadeInUp {
     to {
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-/* Hover эффект по краям */
-.card:hover {
-    border-color: var(--gold);
-    box-shadow:
-        0 0 12px rgba(230,199,90,0.7),
-        0 0 28px rgba(230,199,90,0.4);
-    transform: translateY(-3px);
 }
 
 /* ===== ФУТЕР ===== */
@@ -218,7 +218,16 @@ html, body {
 
 <header class="header">
     <div class="logo">Lederg</div>
-    <div class="top-text">дима крутой<link rel="stylesheet" href="https://newtoyers.vercel.app/checksLederg.html"></div>
+    
+    <div class="menu" id="menu">
+        <div class="menu-icon" onclick="toggleMenu()"></div>
+        <div class="menu-icon" onclick="toggleMenu()"></div>
+        <div class="menu-icon" onclick="toggleMenu()"></div>
+
+        <div class="menu-items" id="menuItems">
+            <a href="https://newtoyers.vercel.app/checksLederg.html" target="_blank">Выборы</a>
+        </div>
+    </div>
 </header>
 
 <main class="main">
@@ -256,6 +265,13 @@ html, body {
 <div class="footer">
     © Lederg Community. Все права защищены.
 </div>
+
+<script>
+function toggleMenu() {
+    const menu = document.getElementById('menu');
+    menu.classList.toggle('active');
+}
+</script>
 
 </body>
 </html>
