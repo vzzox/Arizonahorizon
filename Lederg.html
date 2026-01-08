@@ -129,6 +129,69 @@ html, body {
         inset 0 0 18px rgba(255,255,255,0.35);
 }
 
+<!-- Кнопка с пульсом -->
+<a href="https://discord.gg/ENCDREZSXm" target="_blank" style="text-decoration:none;">
+    <button class="neon-btn">ВОЙТИ</button>
+</a>
+
+<style>
+.neon-btn {
+    margin-top: 10px;
+    padding: 16px 34px;
+    border-radius: 30px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    background: transparent;
+    letter-spacing: 0.25em;
+    cursor: pointer;
+    transition: 0.35s ease;
+    animation: pulse 2s infinite;
+}
+
+.neon-btn:hover {
+    color: #000;
+    background: var(--gold);
+    box-shadow:
+        0 0 16px rgba(230,199,90,0.9),
+        0 0 36px rgba(230,199,90,0.7),
+        inset 0 0 18px rgba(255,255,255,0.35);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 12px rgba(230,199,90,0.5),
+                    0 0 28px rgba(230,199,90,0.3);
+    }
+    50% {
+        box-shadow: 0 0 22px rgba(230,199,90,0.8),
+                    0 0 48px rgba(230,199,90,0.5);
+    }
+}
+
+/* Карточки плавное появление */
+.card {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInUp 0.8s forwards;
+    animation-delay: 0.2s; /* Можно ставить разную задержку для каждой карточки */
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hover эффект по краям */
+.card:hover {
+    border-color: var(--gold);
+    box-shadow:
+        0 0 12px rgba(230,199,90,0.7),
+        0 0 28px rgba(230,199,90,0.4);
+    transform: translateY(-3px);
+}
+
 /* ===== ФУТЕР ===== */
 .footer {
     margin: 60px 0 25px;
