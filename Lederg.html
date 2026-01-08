@@ -5,14 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lederg</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&display=swap" rel="stylesheet">
+<!-- Основной узкий брендовый шрифт -->
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 
 <style>
 :root {
-    --bg: #0b0b0b;
+    --bg: #0a0a0a;
     --card: #111;
     --gold: #e6c75a;
-    --white: #f2f2f2;
+    --white: #f5f5f5;
 }
 
 * {
@@ -24,20 +25,19 @@
 html, body {
     height: 100%;
     background: var(--bg);
-    font-family: 'Roboto Condensed', sans-serif;
+    font-family: 'Bebas Neue', sans-serif;
     overflow-x: hidden;
 }
 
-/* ===== ФОНОВЫЙ ТЕКСТ ===== */
+/* ===== ГИГАНТСКИЙ ФОНОВЫЙ ТЕКСТ ===== */
 .bg-text {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(-45deg);
-    font-size: 22vw;
-    font-weight: 700;
-    letter-spacing: 0.4em;
-    color: rgba(255,255,255,0.03);
+    font-size: 38vw; /* ОЧЕНЬ БОЛЬШОЙ */
+    letter-spacing: 0.45em;
+    color: rgba(255,255,255,0.02);
     text-transform: uppercase;
     white-space: nowrap;
     pointer-events: none;
@@ -51,7 +51,7 @@ html, body {
     top: 0;
     width: 100%;
     height: 64px;
-    background: rgba(11,11,11,0.92);
+    background: rgba(10,10,10,0.94);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -62,9 +62,8 @@ html, body {
 
 .logo {
     color: var(--gold);
-    font-size: 22px;
-    letter-spacing: 0.35em;
-    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: 0.4em;
     text-transform: uppercase;
 }
 
@@ -81,14 +80,14 @@ html, body {
 .burger span {
     height: 2px;
     background: var(--gold);
-    opacity: 0.8;
+    opacity: 0.85;
 }
 
 /* ===== ОСНОВА ===== */
 .main {
     position: relative;
     z-index: 2;
-    padding-top: 120px;
+    padding-top: 130px;
     display: flex;
     justify-content: center;
 }
@@ -96,9 +95,9 @@ html, body {
 /* ===== КАРТОЧКА ===== */
 .card {
     background: var(--card);
-    border-radius: 16px;
-    padding: 42px 36px;
-    max-width: 420px;
+    border-radius: 18px;
+    padding: 46px 40px;
+    max-width: 440px;
     width: 90%;
     text-align: center;
     border: 1px solid #1a1a1a;
@@ -110,16 +109,16 @@ html, body {
 .card p {
     color: var(--white);
     font-size: 22px;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.18em;
 }
 
 /* ЗОЛОТОЙ НЕОН */
 .card.active {
     border-color: var(--gold);
     box-shadow:
-        0 0 10px rgba(230,199,90,0.7),
-        0 0 26px rgba(230,199,90,0.45),
-        inset 0 0 12px rgba(230,199,90,0.3);
+        0 0 14px rgba(230,199,90,0.8),
+        0 0 34px rgba(230,199,90,0.5),
+        inset 0 0 16px rgba(230,199,90,0.35);
 }
 
 /* Hover */
@@ -129,20 +128,20 @@ html, body {
 
 /* Мобилка */
 @media (max-width: 480px) {
-    .card p {
-        font-size: 18px;
+    .bg-text {
+        font-size: 55vw;
+        letter-spacing: 0.3em;
     }
 
-    .bg-text {
-        font-size: 30vw;
-        letter-spacing: 0.25em;
+    .card p {
+        font-size: 18px;
     }
 }
 </style>
 </head>
 <body>
 
-<!-- Фоновый текст -->
+<!-- Гигантский фоновый текст -->
 <div class="bg-text">Lederg</div>
 
 <header class="header">
@@ -162,7 +161,6 @@ html, body {
 
 <script>
 const card = document.getElementById('card');
-
 card.addEventListener('click', () => {
     card.classList.toggle('active');
 });
