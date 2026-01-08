@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lederg</title>
 
-<!-- Основной узкий брендовый шрифт -->
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 
 <style>
@@ -23,25 +22,22 @@
 }
 
 html, body {
-    height: 100%;
     background: var(--bg);
     font-family: 'Bebas Neue', sans-serif;
     overflow-x: hidden;
 }
 
-/* ===== ГИГАНТСКИЙ ФОНОВЫЙ ТЕКСТ ===== */
+/* ===== ФОНОВЫЙ ТЕКСТ ===== */
 .bg-text {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(-45deg);
-    font-size: 38vw; /* ОЧЕНЬ БОЛЬШОЙ */
+    font-size: 38vw;
     letter-spacing: 0.45em;
     color: rgba(255,255,255,0.02);
     text-transform: uppercase;
-    white-space: nowrap;
     pointer-events: none;
-    user-select: none;
     z-index: 0;
 }
 
@@ -51,7 +47,7 @@ html, body {
     top: 0;
     width: 100%;
     height: 64px;
-    background: rgba(10,10,10,0.94);
+    background: rgba(10,10,10,0.95);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -62,109 +58,141 @@ html, body {
 
 .logo {
     color: var(--gold);
-    font-size: 24px;
     letter-spacing: 0.4em;
-    text-transform: uppercase;
+    font-size: 24px;
 }
 
-/* ===== ГАМБУРГЕР ===== */
-.burger {
-    width: 26px;
-    height: 18px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    cursor: pointer;
-}
-
-.burger span {
-    height: 2px;
-    background: var(--gold);
-    opacity: 0.85;
+.top-text {
+    color: var(--white);
+    opacity: 0.8;
+    letter-spacing: 0.2em;
 }
 
 /* ===== ОСНОВА ===== */
 .main {
+    padding-top: 120px;
     position: relative;
     z-index: 2;
-    padding-top: 130px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 26px;
 }
 
-/* ===== КАРТОЧКА ===== */
+/* ===== КАРТОЧКИ ===== */
 .card {
     background: var(--card);
     border-radius: 18px;
-    padding: 46px 40px;
-    max-width: 440px;
+    padding: 38px;
     width: 90%;
-    text-align: center;
+    max-width: 480px;
     border: 1px solid #1a1a1a;
+    text-align: center;
     transition: 0.35s ease;
-    cursor: pointer;
 }
 
-/* Белый текст */
 .card p {
     color: var(--white);
-    font-size: 22px;
-    letter-spacing: 0.18em;
+    font-size: 20px;
+    letter-spacing: 0.14em;
+    line-height: 1.5;
 }
 
-/* ЗОЛОТОЙ НЕОН */
-.card.active {
+/* Неон ТОЛЬКО по краям */
+.card:hover {
     border-color: var(--gold);
     box-shadow:
-        0 0 14px rgba(230,199,90,0.8),
-        0 0 34px rgba(230,199,90,0.5),
-        inset 0 0 16px rgba(230,199,90,0.35);
+        0 0 12px rgba(230,199,90,0.7),
+        0 0 28px rgba(230,199,90,0.4);
+    transform: translateY(-3px);
 }
 
-/* Hover */
-.card:hover {
-    transform: translateY(-2px);
+/* ===== КНОПКА ===== */
+.neon-btn {
+    margin-top: 10px;
+    padding: 16px 34px;
+    border-radius: 30px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    background: transparent;
+    letter-spacing: 0.25em;
+    cursor: pointer;
+    transition: 0.35s ease;
+}
+
+.neon-btn:hover {
+    color: #000;
+    background: var(--gold);
+    box-shadow:
+        0 0 16px rgba(230,199,90,0.9),
+        0 0 36px rgba(230,199,90,0.7),
+        inset 0 0 18px rgba(255,255,255,0.35);
+}
+
+/* ===== ФУТЕР ===== */
+.footer {
+    margin: 60px 0 25px;
+    color: rgba(255,255,255,0.4);
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    text-align: center;
 }
 
 /* Мобилка */
 @media (max-width: 480px) {
     .bg-text {
         font-size: 55vw;
-        letter-spacing: 0.3em;
     }
-
     .card p {
-        font-size: 18px;
+        font-size: 17px;
     }
 }
 </style>
 </head>
 <body>
 
-<!-- Гигантский фоновый текст -->
 <div class="bg-text">Lederg</div>
 
 <header class="header">
     <div class="logo">Lederg</div>
-    <div class="burger">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
+    <div class="top-text">дима крутой</div>
 </header>
 
 <main class="main">
-    <div class="card" id="card">
-        <p>тест, готовы?</p>
+
+    <div class="card">
+        <p>
+            LEDERG — это сообщество игроков,<br>
+            объединённых интересом к разным играм,<br>
+            стилю и атмосфере.
+        </p>
     </div>
+
+    <div class="card">
+        <p>
+            Здесь собрались игроки из разных миров:<br>
+            Minecraft, FPS, sandbox,<br>
+            survival и не только.
+        </p>
+    </div>
+
+    <div class="card">
+        <p>
+            Мы ценим спокойствие,<br>
+            минимализм и уважение.<br>
+            Lederg — не просто сервер.
+        </p>
+    </div>
+
+<a href="https://discord.gg/ENCDREZSXm" target="_blank" style="text-decoration:none;">
+    <button class="neon-btn">ВОЙТИ</button>
+</a>
+
 </main>
 
-<script>
-const card = document.getElementById('card');
-card.addEventListener('click', () => {
-    card.classList.toggle('active');
-});
-</script>
+<div class="footer">
+    © Lederg Community. Все права защищены.
+</div>
 
 </body>
 </html>
