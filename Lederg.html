@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lederg</title>
 
-<!-- Узкий длинный шрифт -->
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
     --bg: #0b0b0b;
-    --text: #e6c75a;
-    --muted: #1a1a1a;
+    --card: #111;
+    --gold: #e6c75a;
+    --white: #f2f2f2;
 }
 
 * {
@@ -22,61 +22,94 @@
 }
 
 html, body {
-    height: 100%;
     background: var(--bg);
     font-family: 'Roboto Condensed', sans-serif;
+    height: 100%;
 }
 
-body {
+/* ===== ШАПКА ===== */
+.header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 64px;
+    background: rgba(11,11,11,0.9);
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: var(--text);
+    justify-content: space-between;
+    padding: 0 22px;
+    border-bottom: 1px solid #1c1c1c;
+    z-index: 100;
 }
 
-/* Контейнер */
-.container {
-    text-align: center;
-    padding: 40px;
-    animation: fadeIn 1.4s ease;
-}
-
-/* Название */
-.title {
-    font-size: clamp(48px, 10vw, 110px);
-    font-weight: 700;
+.logo {
+    color: var(--gold);
+    font-size: 22px;
     letter-spacing: 0.35em;
+    font-weight: 700;
     text-transform: uppercase;
-    margin-bottom: 30px;
 }
 
-/* Текст */
-.text {
+/* ===== ГАМБУРГЕР ===== */
+.burger {
+    width: 26px;
+    height: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.burger span {
+    height: 2px;
+    background: var(--gold);
+    opacity: 0.8;
+}
+
+/* ===== ОСНОВА ===== */
+.main {
+    padding-top: 100px;
+    display: flex;
+    justify-content: center;
+}
+
+/* ===== КАРТОЧКА ===== */
+.card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 40px 32px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    border: 1px solid #1a1a1a;
+    transition: 0.3s ease;
+    cursor: pointer;
+}
+
+/* Белый текст */
+.card p {
+    color: var(--white);
     font-size: 22px;
     letter-spacing: 0.15em;
-    opacity: 0.85;
 }
 
-/* Лёгкое свечение */
-.glow {
-    text-shadow: 0 0 12px rgba(230, 199, 90, 0.15);
+/* НЕОН ПРИ НАЖАТИИ */
+.card.active {
+    border-color: var(--gold);
+    box-shadow:
+        0 0 8px rgba(230,199,90,0.6),
+        0 0 18px rgba(230,199,90,0.4),
+        inset 0 0 10px rgba(230,199,90,0.25);
 }
 
-/* Анимация */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* Лёгкий hover */
+.card:hover {
+    transform: translateY(-2px);
 }
 
-/* Мобильная версия */
-@media (max-width: 600px) {
-    .text {
+/* Мобилка */
+@media (max-width: 480px) {
+    .card p {
         font-size: 18px;
     }
 }
@@ -84,10 +117,28 @@ body {
 </head>
 <body>
 
-<div class="container">
-    <div class="title glow">Lederg</div>
-    <div class="text">тест, готовы?</div>
-</div>
+<header class="header">
+    <div class="logo">Lederg</div>
+    <div class="burger">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</header>
+
+<main class="main">
+    <div class="card" id="card">
+        <p>тест, готовы?</p>
+    </div>
+</main>
+
+<script>
+const card = document.getElementById('card');
+
+card.addEventListener('click', () => {
+    card.classList.toggle('active');
+});
+</script>
 
 </body>
 </html>
