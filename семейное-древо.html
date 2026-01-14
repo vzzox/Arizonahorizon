@@ -6,176 +6,95 @@
 <title>Семейное древо</title>
 
 <style>
-    * {
-        box-sizing: border-box;
-        font-family: 'Segoe UI', Tahoma, sans-serif;
-    }
-
     body {
         margin: 0;
         background: radial-gradient(circle at top, #0f0f0f, #050505);
-        color: #fff;
-        min-height: 100vh;
+        color: white;
         display: flex;
         justify-content: center;
         align-items: center;
+        height: 100vh;
+        font-family: 'Segoe UI', Tahoma, sans-serif;
     }
 
-    .tree {
-        padding: 40px 20px;
-    }
-
-    ul {
-        padding-top: 20px;
-        position: relative;
-        transition: 0.5s;
-    }
-
-    ul::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 50%;
-        border-left: 2px solid #444;
-        height: 20px;
-    }
-
-    li {
-        float: left;
-        text-align: center;
-        list-style-type: none;
-        position: relative;
-        padding: 20px 10px 0 10px;
-    }
-
-    li::before, li::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 50%;
-        border-top: 2px solid #444;
-        width: 50%;
-        height: 20px;
-    }
-
-    li::after {
-        right: auto;
-        left: 50%;
-        border-left: 2px solid #444;
-    }
-
-    li:only-child::after, li:only-child::before {
-        display: none;
-    }
-
-    li:only-child {
-        padding-top: 0;
-    }
-
-    li:first-child::before,
-    li:last-child::after {
-        border: 0 none;
-    }
-
-    li:last-child::before {
-        border-right: 2px solid #444;
-        border-radius: 0 5px 0 0;
-    }
-
-    li:first-child::after {
-        border-radius: 5px 0 0 0;
-    }
-
-    .person {
-        background: #0f0f0f;
-        border: 1px solid #2a2a2a;
-        padding: 15px 25px;
-        border-radius: 12px;
-        display: inline-block;
-        min-width: 220px;
-        transition: 0.3s;
-    }
-
-    .person:hover {
-        border-color: #a855f7;
-        box-shadow: 0 0 20px rgba(168,85,247,0.4);
-        transform: translateY(-3px);
+    .card {
+        fill: #0f0f0f;
+        stroke: #2a2a2a;
+        stroke-width: 2;
+        rx: 14;
+        ry: 14;
+        filter: drop-shadow(0 0 10px rgba(168,85,247,0.25));
     }
 
     .name {
-        font-size: 20px;
+        font-size: 16px;
         font-weight: 600;
+        fill: white;
+        text-anchor: middle;
     }
 
     .role {
-        font-size: 14px;
-        color: #b3b3b3;
-        margin: 4px 0;
+        font-size: 12px;
+        fill: #b3b3b3;
+        text-anchor: middle;
     }
 
-    .username {
-        font-size: 13px;
-        color: #a855f7;
+    .user {
+        font-size: 11px;
+        fill: #a855f7;
+        text-anchor: middle;
     }
 
-    @media (max-width: 900px) {
-        li {
-            float: none;
-        }
+    .branch {
+        stroke: #444;
+        stroke-width: 4;
+        fill: none;
+        stroke-linecap: round;
+    }
 
-        ul::before,
-        li::before,
-        li::after {
-            display: none;
-        }
+    .trunk {
+        stroke-width: 6;
     }
 </style>
 </head>
 
 <body>
 
-<div class="tree">
+<svg width="900" height="600" viewBox="0 0 900 600">
 
-    <ul>
-        <li>
-            <!-- Отец -->
-            <div class="person">
-                <div class="name">Дима</div>
-                <div class="role">Отец</div>
-                <div class="username">@vzzox</div>
-            </div>
+    <!-- Ствол -->
+    <path class="branch trunk" d="M450 160 L450 260" />
 
-            <!-- Дети -->
-            <ul>
-                <li>
-                    <div class="person">
-                        <div class="name">Чина</div>
-                        <div class="role">Старший сын</div>
-                        <div class="username">@kkitayech</div>
-                    </div>
-                </li>
+    <!-- Ветки -->
+    <path class="branch" d="M450 260 C450 320, 250 320, 250 380" />
+    <path class="branch" d="M450 260 C450 320, 450 320, 450 380" />
+    <path class="branch" d="M450 260 C450 320, 650 320, 650 380" />
 
-                <li>
-                    <div class="person">
-                        <div class="name">Фрост</div>
-                        <div class="role">Средний сын</div>
-                        <div class="username">@man_sigma.</div>
-                    </div>
-                </li>
+    <!-- ОТЕЦ -->
+    <rect class="card" x="360" y="90" width="180" height="70"/>
+    <text class="name" x="450" y="120">Дима</text>
+    <text class="role" x="450" y="140">Отец</text>
+    <text class="user" x="450" y="158">@vzzox</text>
 
-                <li>
-                    <div class="person">
-                        <div class="name">Игорь</div>
-                        <div class="role">Младший сын</div>
-                        <div class="username">@ta1lsth3f0x</div>
-                    </div>
-                </li>
-            </ul>
+    <!-- Старший сын -->
+    <rect class="card" x="160" y="380" width="180" height="70"/>
+    <text class="name" x="250" y="410">Чина</text>
+    <text class="role" x="250" y="430">Старший сын</text>
+    <text class="user" x="250" y="448">@kkitayech</text>
 
-        </li>
-    </ul>
+    <!-- Средний сын -->
+    <rect class="card" x="360" y="380" width="180" height="70"/>
+    <text class="name" x="450" y="410">Фрост</text>
+    <text class="role" x="450" y="430">Средний сын</text>
+    <text class="user" x="450" y="448">@man_sigma.</text>
 
-</div>
+    <!-- Младший сын -->
+    <rect class="card" x="560" y="380" width="180" height="70"/>
+    <text class="name" x="650" y="410">Игорь</text>
+    <text class="role" x="650" y="430">Младший сын</text>
+    <text class="user" x="650" y="448">@ta1lsth3f0x</text>
+
+</svg>
 
 </body>
 </html>
