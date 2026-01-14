@@ -8,8 +8,7 @@
 <style>
     body {
         margin: 0;
-        background: radial-gradient(circle at top, #0f0f0f, #050505);
-        color: white;
+        background: radial-gradient(circle at top, #0b0614, #040108);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -17,39 +16,45 @@
         font-family: 'Segoe UI', Tahoma, sans-serif;
     }
 
+    /* НЕОНОВЫЕ КАРТОЧКИ */
     .card {
-        fill: #0f0f0f;
-        stroke: #2a2a2a;
-        stroke-width: 2;
-        rx: 14;
-        ry: 14;
-        filter: drop-shadow(0 0 10px rgba(168,85,247,0.25));
+        fill: #0b0614;
+        stroke: #b26cff;
+        stroke-width: 1.5;
+        rx: 16;
+        ry: 16;
+        filter:
+            drop-shadow(0 0 6px rgba(178,108,255,0.4))
+            drop-shadow(0 0 14px rgba(178,108,255,0.25))
+            drop-shadow(0 0 30px rgba(178,108,255,0.15));
     }
 
     .name {
         font-size: 16px;
         font-weight: 600;
-        fill: white;
+        fill: #ffffff;
         text-anchor: middle;
     }
 
     .role {
         font-size: 12px;
-        fill: #b3b3b3;
+        fill: #cfc6dd;
         text-anchor: middle;
     }
 
     .user {
         font-size: 11px;
-        fill: #a855f7;
+        fill: #c084ff;
         text-anchor: middle;
     }
 
+    /* ВЕТВИ */
     .branch {
-        stroke: #444;
+        stroke: url(#branchGlow);
         stroke-width: 4;
         fill: none;
         stroke-linecap: round;
+        filter: drop-shadow(0 0 10px rgba(178,108,255,0.35));
     }
 
     .trunk {
@@ -62,37 +67,46 @@
 
 <svg width="900" height="600" viewBox="0 0 900 600">
 
-    <!-- Ствол -->
-    <path class="branch trunk" d="M450 160 L450 260" />
+    <!-- ГРАДИЕНТ ДЛЯ НЕЖНЫХ КОНЧИКОВ -->
+    <defs>
+        <linearGradient id="branchGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#9f6bff" stop-opacity="1"/>
+            <stop offset="70%" stop-color="#bfa2ff" stop-opacity="0.8"/>
+            <stop offset="100%" stop-color="#e9dcff" stop-opacity="0.4"/>
+        </linearGradient>
+    </defs>
 
-    <!-- Ветки -->
-    <path class="branch" d="M450 260 C450 320, 250 320, 250 380" />
-    <path class="branch" d="M450 260 C450 320, 450 320, 450 380" />
-    <path class="branch" d="M450 260 C450 320, 650 320, 650 380" />
+    <!-- СТВОЛ -->
+    <path class="branch trunk" d="M450 150 L450 270" />
+
+    <!-- ВЕТВИ (НЕЖНЫЕ КОНЧИКИ) -->
+    <path class="branch" d="M450 270 C450 330, 250 330, 250 395" />
+    <path class="branch" d="M450 270 C450 330, 450 330, 450 395" />
+    <path class="branch" d="M450 270 C450 330, 650 330, 650 395" />
 
     <!-- ОТЕЦ -->
-    <rect class="card" x="360" y="90" width="180" height="70"/>
-    <text class="name" x="450" y="120">Дима</text>
-    <text class="role" x="450" y="140">Отец</text>
-    <text class="user" x="450" y="158">@vzzox</text>
+    <rect class="card" x="360" y="80" width="180" height="70"/>
+    <text class="name" x="450" y="110">Дима</text>
+    <text class="role" x="450" y="130">Отец</text>
+    <text class="user" x="450" y="148">@vzzox</text>
 
     <!-- Старший сын -->
-    <rect class="card" x="160" y="380" width="180" height="70"/>
-    <text class="name" x="250" y="410">Чина</text>
-    <text class="role" x="250" y="430">Старший сын</text>
-    <text class="user" x="250" y="448">@kkitayech</text>
+    <rect class="card" x="160" y="395" width="180" height="70"/>
+    <text class="name" x="250" y="425">Чина</text>
+    <text class="role" x="250" y="445">Старший сын</text>
+    <text class="user" x="250" y="463">@kkitayech</text>
 
     <!-- Средний сын -->
-    <rect class="card" x="360" y="380" width="180" height="70"/>
-    <text class="name" x="450" y="410">Фрост</text>
-    <text class="role" x="450" y="430">Средний сын</text>
-    <text class="user" x="450" y="448">@man_sigma.</text>
+    <rect class="card" x="360" y="395" width="180" height="70"/>
+    <text class="name" x="450" y="425">Фрост</text>
+    <text class="role" x="450" y="445">Средний сын</text>
+    <text class="user" x="450" y="463">@man_sigma.</text>
 
     <!-- Младший сын -->
-    <rect class="card" x="560" y="380" width="180" height="70"/>
-    <text class="name" x="650" y="410">Игорь</text>
-    <text class="role" x="650" y="430">Младший сын</text>
-    <text class="user" x="650" y="448">@ta1lsth3f0x</text>
+    <rect class="card" x="560" y="395" width="180" height="70"/>
+    <text class="name" x="650" y="425">Игорь</text>
+    <text class="role" x="650" y="445">Младший сын</text>
+    <text class="user" x="650" y="463">@ta1lsth3f0x</text>
 
 </svg>
 
