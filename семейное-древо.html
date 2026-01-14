@@ -3,62 +3,98 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Семейное древо</title>
+<title>Семейное древо (Neon)</title>
 
 <style>
+    :root {
+        /* Основной цвет неона */
+        --neon-color: #a855f7;
+        --bg-dark: #0a0a0a;
+        --card-bg: #141414;
+    }
+
     body {
         margin: 0;
-        background: radial-gradient(circle at top, #0b0614, #040108);
+        /* Более глубокий и мягкий фон */
+        background: radial-gradient(circle at 50% 30%, #1a1a2e, var(--bg-dark) 60%);
+        color: white;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        font-family: 'Segoe UI', Tahoma, sans-serif;
+        min-height: 100vh;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
-    /* НЕОНОВЫЕ КАРТОЧКИ */
+    /* Стилизация карточек */
     .card {
-        fill: #0b0614;
-        stroke: #b26cff;
-        stroke-width: 1.5;
-        rx: 16;
-        ry: 16;
-        filter:
-            drop-shadow(0 0 6px rgba(178,108,255,0.4))
-            drop-shadow(0 0 14px rgba(178,108,255,0.25))
-            drop-shadow(0 0 30px rgba(178,108,255,0.15));
+        fill: var(--card-bg);
+        /* Убираем жесткую обводку, неон будет по краям */
+        /* stroke: #2a2a2a; stroke-width: 1; */
+        
+        /* Сильное скругление */
+        rx: 24;
+        ry: 24;
+        
+        /* МНОГОСЛОЙНЫЙ МЯГКИЙ НЕОН */
+        filter: 
+            drop-shadow(0 0 3px rgba(168, 85, 247, 0.8))   /* Блик у самого края */
+            drop-shadow(0 0 8px rgba(168, 85, 247, 0.5))   /* Основное свечение */
+            drop-shadow(0 0 20px rgba(168, 85, 247, 0.2)); /* Дальнее рассеивание */
+        
+        transition: all 0.3s ease;
+    }
+
+    /* Эффект при наведении (опционально) */
+    .card-group:hover .card {
+         fill: #1a1a1a;
+         filter: 
+            drop-shadow(0 0 4px rgba(168, 85, 247, 1))
+            drop-shadow(0 0 12px rgba(168, 85, 247, 0.7))
+            drop-shadow(0 0 30px rgba(168, 85, 247, 0.3));
+    }
+
+    /* Типографика */
+    text {
+        font-family: inherit;
     }
 
     .name {
-        font-size: 16px;
-        font-weight: 600;
+        font-size: 18px;
+        font-weight: 700;
         fill: #ffffff;
         text-anchor: middle;
+        letter-spacing: 0.5px;
     }
 
     .role {
-        font-size: 12px;
-        fill: #cfc6dd;
+        font-size: 13px;
+        fill: #b3b3b3;
         text-anchor: middle;
+        font-weight: 400;
     }
 
     .user {
-        font-size: 11px;
-        fill: #c084ff;
+        font-size: 12px;
+        fill: var(--neon-color);
         text-anchor: middle;
+        font-weight: 500;
+        /* Легкое свечение текста юзернейма */
+        text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
     }
 
-    /* ВЕТВИ */
+    /* Стилизация линий */
     .branch {
-        stroke: url(#branchGlow);
-        stroke-width: 4;
+        stroke: var(--neon-color); /* Цвет линии теперь тоже фиолетовый */
+        stroke-width: 2; /* Линии тоньше и нежнее */
         fill: none;
         stroke-linecap: round;
-        filter: drop-shadow(0 0 10px rgba(178,108,255,0.35));
+        /* Неоновое свечение для линий */
+        filter: drop-shadow(0 0 5px rgba(168, 85, 247, 0.7));
+        opacity: 0.8;
     }
 
     .trunk {
-        stroke-width: 6;
+        stroke-width: 3; /* Ствол чуть толще веток */
     }
 </style>
 </head>
@@ -66,47 +102,42 @@
 <body>
 
 <svg width="900" height="600" viewBox="0 0 900 600">
+    
+    <g id="connections">
+        <path class="branch trunk" d="M450 165 L450 255" />
 
-    <!-- ГРАДИЕНТ ДЛЯ НЕЖНЫХ КОНЧИКОВ -->
-    <defs>
-        <linearGradient id="branchGlow" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#9f6bff" stop-opacity="1"/>
-            <stop offset="70%" stop-color="#bfa2ff" stop-opacity="0.8"/>
-            <stop offset="100%" stop-color="#e9dcff" stop-opacity="0.4"/>
-        </linearGradient>
-    </defs>
+        <path class="branch" d="M450 255 C450 330, 250 310, 250 380" />
+        <path class="branch" d="M450 255 C450 330, 450 330, 450 380" />
+        <path class="branch" d="M450 255 C450 330, 650 310, 650 380" />
+    </g>
 
-    <!-- СТВОЛ -->
-    <path class="branch trunk" d="M450 150 L450 270" />
+    <g class="card-group" transform="translate(360, 90)">
+        <rect class="card" width="180" height="75"/>
+        <text class="name" x="90" y="30">Дима</text>
+        <text class="role" x="90" y="50">Отец</text>
+        <text class="user" x="90" y="66">@vzzox</text>
+    </g>
 
-    <!-- ВЕТВИ (НЕЖНЫЕ КОНЧИКИ) -->
-    <path class="branch" d="M450 270 C450 330, 250 330, 250 395" />
-    <path class="branch" d="M450 270 C450 330, 450 330, 450 395" />
-    <path class="branch" d="M450 270 C450 330, 650 330, 650 395" />
+    <g class="card-group" transform="translate(160, 380)">
+        <rect class="card" width="180" height="75"/>
+        <text class="name" x="90" y="30">Чина</text>
+        <text class="role" x="90" y="50">Старший сын</text>
+        <text class="user" x="90" y="66">@kkitayech</text>
+    </g>
 
-    <!-- ОТЕЦ -->
-    <rect class="card" x="360" y="80" width="180" height="70"/>
-    <text class="name" x="450" y="110">Дима</text>
-    <text class="role" x="450" y="130">Отец</text>
-    <text class="user" x="450" y="148">@vzzox</text>
+    <g class="card-group" transform="translate(360, 380)">
+        <rect class="card" width="180" height="75"/>
+        <text class="name" x="90" y="30">Фрост</text>
+        <text class="role" x="90" y="50">Средний сын</text>
+        <text class="user" x="90" y="66">@man_sigma.</text>
+    </g>
 
-    <!-- Старший сын -->
-    <rect class="card" x="160" y="395" width="180" height="70"/>
-    <text class="name" x="250" y="425">Чина</text>
-    <text class="role" x="250" y="445">Старший сын</text>
-    <text class="user" x="250" y="463">@kkitayech</text>
-
-    <!-- Средний сын -->
-    <rect class="card" x="360" y="395" width="180" height="70"/>
-    <text class="name" x="450" y="425">Фрост</text>
-    <text class="role" x="450" y="445">Средний сын</text>
-    <text class="user" x="450" y="463">@man_sigma.</text>
-
-    <!-- Младший сын -->
-    <rect class="card" x="560" y="395" width="180" height="70"/>
-    <text class="name" x="650" y="425">Игорь</text>
-    <text class="role" x="650" y="445">Младший сын</text>
-    <text class="user" x="650" y="463">@ta1lsth3f0x</text>
+    <g class="card-group" transform="translate(560, 380)">
+        <rect class="card" width="180" height="75"/>
+        <text class="name" x="90" y="30">Игорь</text>
+        <text class="role" x="90" y="50">Младший сын</text>
+        <text class="user" x="90" y="66">@ta1lsth3f0x</text>
+    </g>
 
 </svg>
 
