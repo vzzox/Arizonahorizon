@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NewToyers Team</title>
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Orbitron:wght@500;900&display=swap" rel="stylesheet">
+
     <style>
         /* --- НАСТРОЙКИ СТИЛЯ --- */
         :root {
@@ -12,14 +18,15 @@
             --card-bg: rgba(20, 20, 20, 0.6);
             --primary: #ff9900; /* Оранжевый */
             --text: #ffffff;
-            --gray: #aaa;
+            --gray: #888;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', monospace; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background-color: var(--bg); color: var(--text); min-height: 100vh;
             display: flex; justify-content: center; align-items: center;
+            font-family: 'Inter', sans-serif; /* Современный шрифт */
             overflow-x: hidden; position: relative; padding: 20px;
         }
 
@@ -36,39 +43,40 @@
         }
         @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 0 500px; } }
 
-        /* Контейнер для карточек */
+        /* Контейнер */
         .container {
-            display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; z-index: 10;
+            display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; z-index: 10;
         }
 
-        /* Карточка профиля */
+        /* Карточка */
         .card {
-            width: 320px; padding: 40px 30px; background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
-            backdrop-filter: blur(15px); text-align: center;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8); transition: 0.3s;
+            width: 340px; padding: 40px 30px; background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px;
+            backdrop-filter: blur(20px); text-align: center;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         
-        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .card:hover { transform: translateY(-10px); border-color: var(--primary); }
 
         /* Аватарка */
         .avatar {
-            width: 120px; height: 120px; margin: 0 auto 20px;
+            width: 110px; height: 110px; margin: 0 auto 20px;
             border-radius: 50%; border: 3px solid var(--primary);
             overflow: hidden; background: #000;
-            box-shadow: 0 0 25px rgba(255, 153, 0, 0.4);
+            box-shadow: 0 0 30px rgba(255, 153, 0, 0.3);
             display: flex; align-items: center; justify-content: center;
         }
         .avatar img { width: 100%; height: 100%; object-fit: cover; }
         .avatar i { font-size: 50px; color: var(--primary); }
 
-        /* Имя */
+        /* Имена */
         h1 {
-            font-size: 28px; font-weight: bold; letter-spacing: 2px;
+            font-family: 'Orbitron', sans-serif; /* Кибер-шрифт для заголовков */
+            font-size: 26px; font-weight: 900; letter-spacing: 1px;
             text-transform: uppercase; margin-bottom: 5px; color: white;
         }
 
-        /* Глитч только для vzzox */
+        /* Глитч для vzzox */
         .glitch { position: relative; display: inline-block; }
         .glitch::before, .glitch::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .glitch::before { left: 2px; text-shadow: -1px 0 red; clip: rect(24px, 550px, 90px, 0); animation: glitch-anim 3s infinite linear alternate-reverse; }
@@ -79,23 +87,40 @@
             80% { clip: rect(90px, 9999px, 60px, 0); } 100% { clip: rect(10px, 9999px, 80px, 0); }
         }
 
-        .subtitle { color: var(--primary); font-size: 12px; margin-bottom: 25px; letter-spacing: 1px; font-weight: bold; }
+        .subtitle { 
+            color: var(--primary); font-size: 11px; margin-bottom: 30px; 
+            letter-spacing: 2px; font-weight: 800; text-transform: uppercase; opacity: 0.9;
+        }
 
         /* Кнопки */
-        .links { display: flex; flex-direction: column; gap: 15px; }
+        .links { display: flex; flex-direction: column; gap: 12px; }
+        
         .btn {
             display: flex; align-items: center; justify-content: center; gap: 10px;
-            padding: 15px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
-            color: white; text-decoration: none; border-radius: 10px; transition: 0.3s;
-            cursor: pointer; font-weight: bold;
+            padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: white; text-decoration: none; border-radius: 12px; transition: 0.3s;
+            cursor: pointer; font-weight: 600; font-size: 14px;
         }
-        .btn:hover { background: var(--primary); color: black; border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 5px 20px rgba(255, 153, 0, 0.4); }
+        .btn:hover { 
+            background: var(--primary); color: black; border-color: var(--primary); 
+            transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255, 153, 0, 0.4); 
+        }
         
+        /* Статус-кнопка (неактивная) */
         .btn.status {
-            background: var(--primary); color: black; border-color: var(--primary);
+            background: rgba(255, 153, 0, 0.2); color: var(--primary); border-color: var(--primary);
             cursor: default; font-weight: 800; text-transform: uppercase;
         }
-        .btn.status:hover { transform: none; box-shadow: none; opacity: 1; }
+        .btn.status:hover { transform: none; box-shadow: none; }
+
+        /* Тост уведомление */
+        #toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: var(--primary); color: black; padding: 12px 24px;
+            border-radius: 50px; font-weight: 800; opacity: 0; transition: 0.3s; pointer-events: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 100;
+        }
+        #toast.show { opacity: 1; bottom: 50px; }
 
     </style>
 </head>
@@ -111,14 +136,19 @@
             </div>
             
             <h1 class="glitch" data-text="vzzox">vzzox</h1>
-            <div class="subtitle">FOUNDER OF NEWTOYERS</div>
+            <div class="subtitle">Founder of NewToyers</div>
 
             <div class="links">
                 <a href="https://discord.gg/nt2pA9Dm5P" target="_blank" class="btn">
-                    <i class="fab fa-discord"></i> Join Discord
+                    <i class="fab fa-discord"></i> Discord
                 </a>
-                <div class="btn status">
-                    = папа крутой!
+                
+                <a href="#" target="_blank" class="btn">
+                    <i class="fab fa-telegram-plane"></i> Telegram
+                </a>
+
+                <div class="btn" onclick="copyWallet()">
+                    <i class="fas fa-wallet"></i> Donate TON
                 </div>
             </div>
         </div>
@@ -129,19 +159,36 @@
             </div>
             
             <h1>Чина Лолайет</h1>
-            <div class="subtitle">FOUNDER OF DISCORD SERVER</div>
+            <div class="subtitle">Founder of Discord Server</div>
 
             <div class="links">
                 <a href="https://discord.gg/nt2pA9Dm5P" target="_blank" class="btn">
-                    <i class="fab fa-discord"></i> Join Discord
+                    <i class="fab fa-discord"></i> Discord
                 </a>
+                
                 <div class="btn status">
-                    = Legend
+                    = папа крутой!
                 </div>
             </div>
         </div>
 
     </div>
+
+    <div id="toast">TON адрес скопирован!</div>
+
+    <script>
+        const wallet = "UQAQrLVfJpUpiqTSXvjCOMGVscy0PHcfnj4BWlDSSamgelpq";
+
+        function copyWallet() {
+            navigator.clipboard.writeText(wallet).then(() => {
+                const toast = document.getElementById('toast');
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000);
+            });
+        }
+    </script>
 
 </body>
 </html>
