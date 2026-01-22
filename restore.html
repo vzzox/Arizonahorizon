@@ -1,21 +1,128 @@
-<div style="margin: 30px 0; border: 1px dashed var(--nt-red); padding: 15px; background: rgba(0,0,0,0.5);">
-    <h3 style="margin-top: 0; color: var(--nt-red); font-size: 0.9rem;">// RAID PROTOCOL COPY //</h3>
-    <textarea id="raidText" style="width: 100%; height: 80px; background: transparent; color: #666; border: none; resize: none; font-family: inherit; font-size: 0.7rem;" readonly>
+<div class="raid-container">
+    <div class="raid-header">
+        <span class="raid-title">// RAID PROTOCOL //</span>
+        <span class="raid-status">STATUS: READY</span>
+    </div>
+
+    <textarea id="raidText" class="raid-textarea" readonly>
 /// SYSTEM FAILURE ///
 ВЫ БЫЛИ ВЫЕБАНЫ NEWTOYERS.
 МЫ ПРИШЛИ ЗА ВАШИМИ ДУШАМИ.
 https://discord.gg/2NCxZUv4mc
     </textarea>
-    <button onclick="copyText()" style="background: var(--nt-white); color: var(--nt-black); border: none; padding: 5px 10px; cursor: pointer; font-weight: bold; margin-top: 5px; text-transform: uppercase; font-size: 0.8rem;">
-        Copy Text
+
+    <div class="raid-visual-text">
+        &gt; SYSTEM FAILURE<br>
+        &gt; ВЫ БЫЛИ ВЫЕБАНЫ NEWTOYERS.<br>
+        &gt; МЫ ПРИШЛИ ЗА ВАШИМИ ДУШАМИ.<br>
+        &gt; <span style="color: var(--nt-red);">LINK_ATTACHED</span>
+    </div>
+    
+    <button id="actionBtn" onclick="executeRaid()" class="restore-btn">
+        RESTORE
     </button>
 </div>
 
+<style>
+    /* Стили именно для этого блока */
+    .raid-container {
+        margin: 30px 0;
+        background: #111;
+        border: 1px dashed #333;
+        padding: 20px;
+        position: relative;
+    }
+
+    .raid-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        color: #666;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #222;
+        padding-bottom: 10px;
+    }
+
+    .raid-title {
+        color: var(--nt-red);
+        font-weight: bold;
+    }
+
+    /* Скрываем реальное поле ввода, оставляем красивое текстовое представление */
+    .raid-textarea {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .raid-visual-text {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 0.85rem;
+        color: #888;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        background: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+        background-size: 4px 4px;
+        padding: 10px;
+        border-left: 2px solid #333;
+    }
+
+    .restore-btn {
+        width: 100%;
+        background: transparent;
+        border: 1px solid var(--nt-white);
+        color: var(--nt-white);
+        padding: 12px 0;
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 1rem;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .restore-btn:hover {
+        background: var(--nt-white);
+        color: var(--nt-black);
+    }
+
+    /* Класс для активного состояния "ВЫЕБАНО" */
+    .restore-btn.active {
+        background: var(--nt-red);
+        border-color: var(--nt-red);
+        color: var(--nt-white);
+        font-weight: bold;
+        box-shadow: 0 0 15px rgba(215, 25, 33, 0.4);
+        animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+    }
+
+    @keyframes glitch {
+        0% { transform: translate(0) }
+        20% { transform: translate(-2px, 2px) }
+        40% { transform: translate(-2px, -2px) }
+        60% { transform: translate(2px, 2px) }
+        80% { transform: translate(2px, -2px) }
+        100% { transform: translate(0) }
+    }
+</style>
+
 <script>
-    function copyText() {
+    function executeRaid() {
         var copyText = document.getElementById("raidText");
+        var btn = document.getElementById("actionBtn");
+
+        // Копирование
         copyText.select();
-        document.execCommand("copy");
-        alert("RAID TEXT COPIED TO CLIPBOARD");
+        copyText.setSelectionRange(0, 99999); // Для мобильных
+        navigator.clipboard.writeText(copyText.value);
+
+        // Визуальный эффект
+        btn.innerText = "ВЫЕБАНО";
+        btn.classList.add("active");
+
+        // Через 2 секунды вернуть как было (опционально, можно убрать этот блок если хочешь чтоб оставалось навсегда)
+        setTimeout(function(){
+            btn.innerText = "RESTORE";
+            btn.classList.remove("active");
+        }, 3000);
     }
 </script>
