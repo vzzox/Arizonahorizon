@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYSTEM FAILURE // NEWTOYERS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --nt-black: #050000;
+            --nt-red: #d71921;
+            --nt-white: #f0f0f0;
+        }
+
+        body {
+            background-color: var(--nt-black);
+            color: var(--nt-red);
+            font-family: 'Share Tech Mono', monospace;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+            /* Красная сетка */
+            background-image: radial-gradient(rgba(215, 25, 33, 0.2) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Контейнер */
+        .container {
+            position: relative;
+            z-index: 2;
+            padding: 20px;
+            border: 2px solid var(--nt-red);
+            background: rgba(0,0,0,0.8);
+            box-shadow: 0 0 50px rgba(215, 25, 33, 0.2);
+            max-width: 600px;
+            width: 90%;
+        }
+
+        /* Уголки */
+        .container::before, .container::after {
+            content: ''; position: absolute; width: 15px; height: 15px; background: var(--nt-red);
+        }
+        .container::before { top: -8px; left: -8px; }
+        .container::after { bottom: -8px; right: -8px; }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border: 1px solid var(--nt-red);
+            margin-bottom: 20px;
+        }
+
+        /* Анимация тряски для текста */
+        h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            line-height: 1.1;
+            text-transform: uppercase;
+            animation: shake 0.4s infinite;
+            text-shadow: 2px 2px 0px #fff;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--nt-white);
+            margin: 20px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .description {
+            font-size: 0.8rem;
+            color: #888;
+            margin: 20px 0 40px 0;
+            line-height: 1.4;
+            border-top: 1px dashed #444;
+            padding-top: 15px;
+        }
+
+        /* Кнопка ДИСКОРД */
+        .discord-btn {
+            display: block;
+            width: 100%;
+            padding: 20px 0;
+            background: var(--nt-red);
+            color: var(--nt-white);
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            transition: 0.2s;
+            border: none;
+            cursor: pointer;
+            animation: pulse 1s infinite alternate;
+        }
+
+        .discord-btn:hover {
+            background: var(--nt-white);
+            color: var(--nt-black);
+            box-shadow: 0 0 20px var(--nt-red);
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 0.7rem;
+            color: #555;
+            text-transform: uppercase;
+        }
+
+        /* Анимации */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.03); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <img src="https://s4.iimage.su/s/22/gAQsKrBxTnDuWZoszvtD4tkLBBoTUg5CoYbUv7sV.jpg" alt="Logo" class="logo">
+        
+        <h1>
+            /// SYSTEM FAILURE ///<br>
+            ВЫ БЫЛИ ВЫЕБАНЫ NEWTOYERS
+        </h1>
+        
+        <h2>МЫ ПРИШЛИ ЗА ВАШИМИ ДУШАМИ.</h2>
+
+        <div class="description">
+            МЫ РЕЙДЕРЫ ДИСКОРДОВ. МЫ ДЕЛАЕМ ЭТО, ПОМОГАЯ ЖЕРТВАМ РЕЙДОВ, РЕЙДЯ ИХ РЕЙДЕРОВ. <br>
+            У НАС САМОСУД: ЕСЛИ НЕ ДИСКОРД, ТО МЫ.
+        </div>
+
+        <a href="https://discord.gg/2NCxZUv4mc" class="discord-btn">
+            DISCORD
+        </a>
+
+        <div class="footer">
+            © 2026 NewToyers. All right reserved.
+        </div>
+    </div>
+
+</body>
+</html>
