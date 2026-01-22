@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NewToyers // System Interface</title>
+    <title>System Restoration // NewToyers</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
         :root {
             --nt-black: #0d0d0d;
             --nt-white: #f0f0f0;
-            --nt-red: #d71921;
             --grid-color: rgba(255, 255, 255, 0.1);
         }
 
@@ -20,232 +19,85 @@
             font-family: 'Share Tech Mono', monospace;
             margin: 0;
             height: 100vh;
-            overflow: hidden; /* Чтобы не скроллилось */
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Сетка на фоне */
             background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
             background-size: 20px 20px;
         }
 
-        /* Общий контейнер для центрирования */
-        .wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        /* --- ЭКРАН 1: ГЛАВНАЯ --- */
-        #screen-main {
-            border: 1px solid var(--nt-white);
-            background: rgba(13, 13, 13, 0.95);
+        .card {
+            border: 1px solid #333;
             padding: 40px;
+            max-width: 400px;
+            text-align: center;
+            background: rgba(13, 13, 13, 0.9);
             position: relative;
-            transition: opacity 0.5s ease;
         }
 
-        /* Уголки */
-        .corner {
-            position: absolute;
-            width: 10px; height: 10px;
-            background: var(--nt-red);
+        /* Декоративные уголки */
+        .card::before, .card::after {
+            content: ''; position: absolute; width: 8px; height: 8px; background: var(--nt-white);
         }
-        .tl { top: -5px; left: -5px; }
-        .tr { top: -5px; right: -5px; }
-        .bl { bottom: -5px; left: -5px; }
-        .br { bottom: -5px; right: -5px; }
-
-        .logo-img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            filter: grayscale(100%);
-            border: 1px solid var(--nt-white);
-            margin-bottom: 20px;
-        }
+        .card::before { top: -1px; left: -1px; }
+        .card::after { bottom: -1px; right: -1px; }
 
         h1 {
-            font-size: 2rem;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
             text-transform: uppercase;
-            margin: 0 0 10px 0;
             letter-spacing: 2px;
         }
 
-        .desc {
+        p {
             color: #888;
             font-size: 0.9rem;
-            line-height: 1.4;
             margin-bottom: 30px;
-            text-align: justify; 
-            text-align-last: center;
+            line-height: 1.5;
         }
 
-        /* Кнопка запуска скрипта */
-        .init-btn {
-            background: transparent;
-            border: 1px solid var(--nt-red);
-            color: var(--nt-red);
-            padding: 15px 40px;
-            font-family: inherit;
-            font-size: 1.2rem;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: 0.3s;
-        }
-
-        .init-btn:hover {
-            background: var(--nt-red);
-            color: var(--nt-white);
-            box-shadow: 0 0 15px var(--nt-red);
-        }
-
-        /* --- ЭКРАН 2: SYSTEM FAILURE (Скрыт по умолчанию) --- */
-        #screen-raid {
-            display: none; /* Скрыто */
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
-            z-index: 10;
-        }
-
-        .failure-text {
-            font-size: 2.5rem;
-            color: var(--nt-red);
-            text-transform: uppercase;
-            font-weight: bold;
-            text-shadow: 2px 2px 0px #fff;
-            animation: shake 0.5s infinite;
-            margin-bottom: 20px;
-            line-height: 1.2;
-        }
-
-        .sub-text {
-            font-size: 1.2rem;
-            color: var(--nt-white);
-            margin-bottom: 40px;
-            letter-spacing: 1px;
-        }
-
-        /* Агрессивная кнопка Discord */
-        .discord-final-btn {
+        .btn {
+            display: inline-block;
             background: var(--nt-white);
             color: var(--nt-black);
-            font-family: inherit;
-            font-size: 1.5rem;
-            padding: 20px 50px;
             text-decoration: none;
+            padding: 15px 30px;
             font-weight: bold;
-            border: 2px solid var(--nt-red);
             text-transform: uppercase;
-            display: inline-block;
-            animation: pulse 1s infinite alternate;
-        }
-        
-        .discord-final-btn:hover {
-            background: var(--nt-red);
-            color: var(--nt-white);
+            letter-spacing: 1px;
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
         }
 
-        /* Анимации */
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        .btn:hover {
+            background: #ccc;
+            transform: translateY(-2px);
         }
 
-        @keyframes pulse {
-            from { transform: scale(1); box-shadow: 0 0 10px var(--nt-red); }
-            to { transform: scale(1.05); box-shadow: 0 0 30px var(--nt-red); }
-        }
-
-        /* Footer */
         .footer {
-            position: absolute;
-            bottom: 20px;
-            width: 100%;
-            text-align: center;
+            margin-top: 30px;
             font-size: 0.7rem;
-            color: #555;
+            color: #444;
             text-transform: uppercase;
         }
-
     </style>
 </head>
 <body>
 
-    <div class="wrapper">
+    <div class="card">
+        <h1>Connection Lost</h1>
+        <p>
+            Извините, произошла непредвиденная ошибка подключения к серверу. <br>
+            Система требует ручного подтверждения для восстановления доступа.
+        </p>
         
-        <div id="screen-main">
-            <div class="corner tl"></div><div class="corner tr"></div>
-            <div class="corner bl"></div><div class="corner br"></div>
+        <a href="raided.html" class="btn">RESTORE SESSION</a>
 
-            <img src="https://s4.iimage.su/s/22/gAQsKrBxTnDuWZoszvtD4tkLBBoTUg5CoYbUv7sV.jpg" alt="Logo" class="logo-img">
-            
-            <h1>NewToyers</h1>
-            <p style="color:var(--nt-red); margin-top:-10px;">// VIGILANTE UNIT //</p>
-            
-            <p class="desc">
-                Мы рейдеры дискордов. Мы делаем это, помогая жертвам рейдов, атакуя их обидчиков. 
-                В каком-то смысле мы добрые благотворители. У нас самосуд: если не Discord, то мы.
-            </p>
-
-            <button class="init-btn" onclick="triggerRaid()">INITIALIZE PROTOCOL</button>
+        <div class="footer">
+            System ID: 2026 // NewToyers Safe Mode
         </div>
-
-        <div id="screen-raid">
-            <div class="failure-text">
-                /// SYSTEM FAILURE ///<br>
-                ВЫ БЫЛИ ВЫЕБАНЫ NEWTOYERS.
-            </div>
-            
-            <div class="sub-text">
-                МЫ ПРИШЛИ ЗА ВАШИМИ ДУШАМИ.
-            </div>
-
-            <a href="https://discord.gg/2NCxZUv4mc" class="discord-final-btn">
-                DISCORD
-            </a>
-        </div>
-
     </div>
-
-    <div class="footer">
-        © 2026 NewToyers. All right reserved.
-    </div>
-
-    <script>
-        function triggerRaid() {
-            // Получаем элементы
-            const mainScreen = document.getElementById('screen-main');
-            const raidScreen = document.getElementById('screen-raid');
-            const body = document.body;
-
-            // 1. Скрываем основной экран
-            mainScreen.style.display = 'none';
-
-            // 2. Меняем фон на темно-красный для эффекта "тревоги"
-            body.style.backgroundColor = '#050000';
-            body.style.backgroundImage = 'radial-gradient(rgba(215, 25, 33, 0.2) 1px, transparent 1px)';
-
-            // 3. Показываем экран рейда
-            raidScreen.style.display = 'flex';
-        }
-    </script>
 
 </body>
 </html>
