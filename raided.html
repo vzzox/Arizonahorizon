@@ -37,7 +37,7 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            transition: height 0.3s;
+            transition: all 0.2s ease;
         }
 
         .title-bar {
@@ -48,7 +48,6 @@
             justify-content: space-between;
             align-items: center;
             font-weight: bold;
-            letter-spacing: 1px;
             cursor: default;
             user-select: none;
         }
@@ -62,12 +61,9 @@
             cursor: pointer;
             border: 1px solid var(--nt-white);
             font-weight: bold;
+            transition: 0.2s;
         }
-
-        .close-btn:hover {
-            background: var(--nt-white);
-            color: var(--nt-black);
-        }
+        .close-btn:hover { background: var(--nt-white); color: var(--nt-black); }
 
         .content {
             padding: 30px;
@@ -89,7 +85,6 @@
             text-transform: uppercase;
             margin-bottom: 10px;
             color: var(--nt-red);
-            transition: all 0.2s;
         }
 
         #quote-text {
@@ -99,6 +94,21 @@
             font-style: italic;
         }
 
+        /* Стиль для блока с IP (скрыт сначала) */
+        #dox-info {
+            display: none;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 20px;
+            background: rgba(215, 25, 33, 0.15);
+            border: 1px dashed var(--nt-red);
+            padding: 15px;
+            box-sizing: border-box;
+            font-size: 0.85rem;
+        }
+        .info-line { margin-bottom: 5px; word-break: break-all; }
+        .red-label { color: var(--nt-red); font-weight: bold; margin-right: 5px; }
+
         .discord-btn {
             background: var(--nt-white);
             color: var(--nt-black);
@@ -107,47 +117,25 @@
             font-weight: bold;
             text-transform: uppercase;
             border: 2px solid transparent;
-            margin-top: 10px;
+            transition: 0.2s;
         }
         .discord-btn:hover {
             background: var(--nt-red);
             color: var(--nt-white);
         }
 
-        /* Блок с IP (скрыт по умолчанию) */
-        #user-data {
-            display: none; /* Скрыто */
-            width: 100%;
-            text-align: left;
-            margin-top: 20px;
-            border-top: 1px dashed var(--nt-red);
-            padding-top: 15px;
-            font-size: 0.8rem;
-            color: var(--nt-white);
-            background: rgba(215, 25, 33, 0.1);
-            padding: 15px;
-            box-sizing: border-box;
-        }
-
-        .data-row {
-            margin-bottom: 5px;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-        .label { color: var(--nt-red); font-weight: bold; }
-
         /* Анимации */
-        .shake-hard {
-            animation: shake 0.1s infinite;
-        }
-        
-        .insult-mode {
+        .insult-style {
             font-size: 2.2rem !important;
             color: red !important;
             font-weight: bold;
-            text-shadow: 2px 2px 0 #fff;
+            text-shadow: 3px 3px 0 #fff;
             line-height: 1;
-            margin-bottom: 20px !important;
+            margin-bottom: 30px !important;
+        }
+
+        .shake-animation {
+            animation: shake 0.15s infinite;
         }
 
         @keyframes shake {
@@ -161,8 +149,8 @@
 
     <div class="error-window" id="windowBox">
         <div class="title-bar">
-            <span>SYSTEM_FAILURE.exe</span>
-            <div class="close-btn" onclick="exposeUser()">X</div>
+            <span id="win-title">SYSTEM_ERROR.exe</span>
+            <div class="close-btn" onclick="nextPhase()">X</div>
         </div>
 
         <div class="content">
@@ -174,11 +162,10 @@
                 "Если не дискорд, то мы" <br> ~ vzzox
             </div>
 
-            <div id="user-data">
-                <div class="data-row"><span class="label">IP ADDRESS:</span> <span id="ip-val">CALCULATING...</span></div>
-                <div class="data-row"><span class="label">DEVICE:</span> <span id="device-val">SCANNING...</span></div>
-                <div class="data-row"><span class="label">LOCATION:</span> <span id="loc-val">UNKNOWN</span></div>
-                <div class="data-row" style="margin-top:10px; color:var(--nt-red);">>> DATA UPLOADED TO NEWTOYERS DB</div>
+            <div id="dox-info">
+                <div class="info-line"><span class="red-label">YOUR IP:</span> <span id="ip-display">LOADING...</span></div>
+                <div class="info-line"><span class="red-label">SYSTEM:</span> <span id="agent-display">SCANNING...</span></div>
+                <div class="info-line" style="margin-top:10px; color:#fff;">>> IDENTITY LOGGED AND UPLOADED.</div>
             </div>
 
             <a href="https://discord.gg/2NCxZUv4mc" class="discord-btn">
@@ -188,39 +175,59 @@
     </div>
 
     <script>
-        function exposeUser() {
+        // Переменная для отслеживания этапов (0 - начало, 1 - оскорбление, 2 - IP)
+        let currentStage = 0;
+
+        function nextPhase() {
             const windowBox = document.getElementById('windowBox');
             const mainText = document.getElementById('main-text');
             const quoteText = document.getElementById('quote-text');
             const logo = document.getElementById('logo');
-            const userData = document.getElementById('user-data');
+            const doxInfo = document.getElementById('dox-info');
+            const winTitle = document.getElementById('win-title');
 
-            // 1. Меняем текст на оскорбление
-            mainText.innerHTML = "ТЫ АХУЕЛ?<br>ЧМО ЕБАНОЕ";
-            mainText.classList.add('insult-mode');
+            if (currentStage === 0) {
+                // --- ЭТАП 1: ПЕРВОЕ НАЖАТИЕ (ОСКОРБЛЕНИЕ) ---
+                
+                // Меняем текст
+                mainText.innerHTML = "ТЫ АХУЕЛ?<br>ЧМО ЕБАНОЕ";
+                mainText.classList.add('insult-style');
+                winTitle.innerText = "RUN_BITCH_RUN.exe"; // Меняем заголовок окна
 
-            // 2. Скрываем лишнее
-            quoteText.style.display = 'none';
-            logo.style.display = 'none';
+                // Убираем лишнее
+                quoteText.style.display = 'none';
+                logo.style.display = 'none';
 
-            // 3. Тряска
-            windowBox.classList.add('shake-hard');
-            
-            // 4. Показываем блок с данными
-            userData.style.display = 'block';
+                // Включаем тряску
+                windowBox.classList.add('shake-animation');
 
-            // 5. Получаем данные об устройстве (User Agent)
-            document.getElementById('device-val').innerText = navigator.userAgent;
+                // Переходим к следующему этапу
+                currentStage = 1;
 
-            // 6. Пытаемся получить IP через API
-            fetch('https://api.ipify.org?format=json')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('ip-val').innerText = data.ip;
-                })
-                .catch(error => {
-                    document.getElementById('ip-val').innerText = "HIDDEN_BY_PROXY";
-                });
+            } else if (currentStage === 1) {
+                // --- ЭТАП 2: ВТОРОЕ НАЖАТИЕ (СЛИВ IP) ---
+
+                // Показываем блок с IP
+                doxInfo.style.display = 'block';
+
+                // Заполняем данные об устройстве
+                document.getElementById('agent-display').innerText = navigator.platform + " // " + navigator.language;
+
+                // Запрос IP
+                fetch('https://api.ipify.org?format=json')
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById('ip-display').innerText = data.ip;
+                    })
+                    .catch(() => {
+                        document.getElementById('ip-display').innerText = "192.168.0.1 (PROXY DETECTED)";
+                    });
+
+                // Блокируем кнопку или меняем поведение (чтобы больше ничего не происходило)
+                currentStage = 2; 
+                // Можно усилить тряску или покраснеть экраном, если хочешь
+                windowBox.style.borderColor = "#fff"; // Окно мигнет белым
+            }
         }
     </script>
 
