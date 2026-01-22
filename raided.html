@@ -11,7 +11,6 @@
             --nt-black: #0d0d0d;
             --nt-red: #d71921;
             --nt-white: #f0f0f0;
-            --win-gray: #1a1a1a;
         }
 
         body {
@@ -24,26 +23,23 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            /* Красная сетка на фоне */
             background-image: 
                 linear-gradient(rgba(215, 25, 33, 0.1) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(215, 25, 33, 0.1) 1px, transparent 1px);
             background-size: 30px 30px;
         }
 
-        /* Само окно ошибки */
         .error-window {
-            width: 450px;
+            width: 500px;
             background: var(--nt-black);
             border: 2px solid var(--nt-red);
             box-shadow: 10px 10px 0px rgba(215, 25, 33, 0.2);
             position: relative;
             display: flex;
             flex-direction: column;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: height 0.3s;
         }
 
-        /* Заголовок окна (Title Bar) */
         .title-bar {
             background: var(--nt-red);
             color: var(--nt-white);
@@ -53,22 +49,19 @@
             align-items: center;
             font-weight: bold;
             letter-spacing: 1px;
+            cursor: default;
             user-select: none;
         }
 
-        /* Кнопка Крестик */
         .close-btn {
             background: var(--nt-black);
             color: var(--nt-red);
-            width: 25px; 
-            height: 25px;
+            width: 25px; height: 25px;
             text-align: center;
             line-height: 25px;
             cursor: pointer;
             border: 1px solid var(--nt-white);
-            font-family: sans-serif;
             font-weight: bold;
-            transition: 0.2s;
         }
 
         .close-btn:hover {
@@ -76,7 +69,6 @@
             color: var(--nt-black);
         }
 
-        /* Контент внутри окна */
         .content {
             padding: 30px;
             text-align: center;
@@ -86,19 +78,18 @@
         }
 
         .logo-img {
-            width: 80px;
-            height: 80px;
+            width: 80px; height: 80px;
             object-fit: cover;
             border: 1px solid #333;
             margin-bottom: 20px;
         }
 
-        /* Текст ошибки */
         #main-text {
             font-size: 1.5rem;
             text-transform: uppercase;
             margin-bottom: 10px;
             color: var(--nt-red);
+            transition: all 0.2s;
         }
 
         #quote-text {
@@ -108,7 +99,6 @@
             font-style: italic;
         }
 
-        /* Кнопка Дискорд */
         .discord-btn {
             background: var(--nt-white);
             color: var(--nt-black);
@@ -117,44 +107,54 @@
             font-weight: bold;
             text-transform: uppercase;
             border: 2px solid transparent;
-            transition: 0.3s;
+            margin-top: 10px;
         }
-
         .discord-btn:hover {
             background: var(--nt-red);
             color: var(--nt-white);
-            box-shadow: 0 0 15px var(--nt-red);
         }
 
-        /* Анимация появления */
-        @keyframes popIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+        /* Блок с IP (скрыт по умолчанию) */
+        #user-data {
+            display: none; /* Скрыто */
+            width: 100%;
+            text-align: left;
+            margin-top: 20px;
+            border-top: 1px dashed var(--nt-red);
+            padding-top: 15px;
+            font-size: 0.8rem;
+            color: var(--nt-white);
+            background: rgba(215, 25, 33, 0.1);
+            padding: 15px;
+            box-sizing: border-box;
         }
 
-        /* Анимация жесткой тряски (для скрипта) */
+        .data-row {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .label { color: var(--nt-red); font-weight: bold; }
+
+        /* Анимации */
         .shake-hard {
-            animation: shake 0.2s infinite;
+            animation: shake 0.1s infinite;
+        }
+        
+        .insult-mode {
+            font-size: 2.2rem !important;
+            color: red !important;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #fff;
+            line-height: 1;
+            margin-bottom: 20px !important;
         }
 
         @keyframes shake {
             0% { transform: translate(2px, 2px) rotate(0deg); }
-            20% { transform: translate(-2px, -4px) rotate(-2deg); }
-            40% { transform: translate(-4px, 0px) rotate(2deg); }
-            60% { transform: translate(4px, 4px) rotate(0deg); }
-            80% { transform: translate(2px, -2px) rotate(2deg); }
-            100% { transform: translate(-2px, 2px) rotate(-2deg); }
+            50% { transform: translate(-2px, -2px) rotate(-1deg); }
+            100% { transform: translate(0px, 0px) rotate(1deg); }
         }
-
-        /* Стиль для текста оскорбления */
-        .insult-mode {
-            font-size: 2rem !important;
-            color: red !important;
-            font-weight: bold;
-            text-shadow: 2px 2px 0 #fff;
-            line-height: 1.2;
-        }
-
     </style>
 </head>
 <body>
@@ -162,11 +162,11 @@
     <div class="error-window" id="windowBox">
         <div class="title-bar">
             <span>SYSTEM_FAILURE.exe</span>
-            <div class="close-btn" onclick="triggerInsult()">X</div>
+            <div class="close-btn" onclick="exposeUser()">X</div>
         </div>
 
         <div class="content">
-            <img src="https://s4.iimage.su/s/22/gAQsKrBxTnDuWZoszvtD4tkLBBoTUg5CoYbUv7sV.jpg" alt="Logo" class="logo-img">
+            <img src="https://s4.iimage.su/s/22/gAQsKrBxTnDuWZoszvtD4tkLBBoTUg5CoYbUv7sV.jpg" alt="Logo" class="logo-img" id="logo">
             
             <div id="main-text">CRITICAL ERROR DETECTED</div>
             
@@ -174,38 +174,53 @@
                 "Если не дискорд, то мы" <br> ~ vzzox
             </div>
 
+            <div id="user-data">
+                <div class="data-row"><span class="label">IP ADDRESS:</span> <span id="ip-val">CALCULATING...</span></div>
+                <div class="data-row"><span class="label">DEVICE:</span> <span id="device-val">SCANNING...</span></div>
+                <div class="data-row"><span class="label">LOCATION:</span> <span id="loc-val">UNKNOWN</span></div>
+                <div class="data-row" style="margin-top:10px; color:var(--nt-red);">>> DATA UPLOADED TO NEWTOYERS DB</div>
+            </div>
+
             <a href="https://discord.gg/2NCxZUv4mc" class="discord-btn">
-                Need a help?
+                DISCORD
             </a>
         </div>
     </div>
 
     <script>
-        function triggerInsult() {
-            // Получаем элементы
+        function exposeUser() {
+            const windowBox = document.getElementById('windowBox');
             const mainText = document.getElementById('main-text');
             const quoteText = document.getElementById('quote-text');
-            const windowBox = document.getElementById('windowBox');
-            const logo = document.querySelector('.logo-img');
+            const logo = document.getElementById('logo');
+            const userData = document.getElementById('user-data');
 
             // 1. Меняем текст на оскорбление
             mainText.innerHTML = "ТЫ АХУЕЛ?<br>ЧМО ЕБАНОЕ";
-            
-            // Добавляем класс для увеличения шрифта и агрессии
             mainText.classList.add('insult-mode');
 
-            // 2. Скрываем цитату и лого (чтобы акцент был на тексте)
+            // 2. Скрываем лишнее
             quoteText.style.display = 'none';
             logo.style.display = 'none';
 
-            // 3. Запускаем жесткую тряску окна
+            // 3. Тряска
             windowBox.classList.add('shake-hard');
-
-            // 4. (Опционально) Меняем цвет границ окна на белый для мигания
-            windowBox.style.borderColor = '#fff';
             
-            // Воспроизведение звука "Windows Error" (работает в большинстве браузеров при клике)
-            // Но без файла звука просто визуальный эффект
+            // 4. Показываем блок с данными
+            userData.style.display = 'block';
+
+            // 5. Получаем данные об устройстве (User Agent)
+            document.getElementById('device-val').innerText = navigator.userAgent;
+
+            // 6. Пытаемся получить IP через API
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('ip-val').innerText = data.ip;
+                })
+                .catch(error => {
+                    document.getElementById('ip-val').innerText = "HIDDEN_BY_PROXY";
+                });
         }
     </script>
 
