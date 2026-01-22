@@ -1,128 +1,290 @@
-<div class="raid-container">
-    <div class="raid-header">
-        <span class="raid-title">// RAID PROTOCOL //</span>
-        <span class="raid-status">STATUS: READY</span>
-    </div>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NewToyers // System</title>
+    <style>
+        /* ШРИФТЫ */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-    <textarea id="raidText" class="raid-textarea" readonly>
-/// SYSTEM FAILURE ///
+        /* ПЕРЕМЕННЫЕ ЦВЕТОВ NOTHING */
+        :root {
+            --nt-black: #0d0d0d;
+            --nt-dark-gray: #1a1a1a;
+            --nt-white: #f0f0f0;
+            --nt-red: #d71921; 
+            --grid-color: rgba(255, 255, 255, 0.15);
+        }
+
+        /* ОСНОВНЫЕ НАСТРОЙКИ (ЧТОБЫ НЕ БЫЛО БЕЛОГО ФОНА) */
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--nt-black); /* Принудительно черный */
+            color: var(--nt-white);
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            
+            /* ФОНОВАЯ СЕТКА (DOT MATRIX) */
+            background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            padding: 20px;
+        }
+
+        /* КОНТЕЙНЕР (КАРТОЧКА) */
+        .card {
+            width: 100%;
+            max-width: 450px;
+            margin-top: 20px;
+            border: 1px solid var(--nt-white);
+            background: rgba(13, 13, 13, 0.95);
+            padding: 25px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 50px; /* Место для футера */
+        }
+
+        /* ДЕКОР УГЛОВ */
+        .card::before { content: ''; position: absolute; top: -1px; left: -1px; width: 8px; height: 8px; background: var(--nt-white); }
+        .card::after { content: ''; position: absolute; bottom: -1px; right: -1px; width: 8px; height: 8px; background: var(--nt-white); }
+
+        /* ЛОГОТИП И ШАПКА */
+        .header {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px dashed var(--grid-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            border: 1px solid var(--nt-red);
+            margin-right: 15px;
+            filter: grayscale(100%);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            line-height: 1;
+            text-transform: uppercase;
+        }
+
+        .tagline {
+            color: var(--nt-red);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+        }
+
+        /* ТЕКСТ */
+        p {
+            font-size: 0.9rem;
+            color: #aaa;
+            line-height: 1.4;
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        .highlight { color: var(--nt-white); border-bottom: 1px solid var(--nt-red); }
+
+        /* КНОПКА RESTORE (ИНТЕРАКТИВ) */
+        .restore-section {
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .restore-btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--nt-white);
+            color: var(--nt-white);
+            padding: 20px;
+            font-family: inherit;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .restore-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Состояние "ВЫЕБАНО" */
+        .restore-btn.fucked {
+            background: var(--nt-red);
+            border-color: var(--nt-red);
+            color: black;
+            font-weight: bold;
+            font-size: 1.5rem;
+            animation: shake 0.5s;
+            box-shadow: 0 0 15px var(--nt-red);
+        }
+
+        /* КНОПКА ДИСКОРД */
+        .discord-link {
+            display: block;
+            text-align: center;
+            background: #222;
+            color: var(--nt-white);
+            padding: 15px;
+            text-decoration: none;
+            text-transform: uppercase;
+            border: 1px solid #333;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        .discord-link:hover {
+            background: var(--nt-white);
+            color: black;
+        }
+
+        /* ЗОНА КОПИРОВАНИЯ ТЕКСТА РЕЙДА */
+        .raid-copy-box {
+            background: #000;
+            border: 1px dashed var(--nt-red);
+            padding: 10px;
+            margin-top: 30px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 60px;
+            background: transparent;
+            border: none;
+            color: var(--nt-red);
+            font-family: inherit;
+            font-size: 0.7rem;
+            resize: none;
+            outline: none;
+        }
+
+        .copy-trigger {
+            font-size: 0.7rem;
+            color: #555;
+            text-transform: uppercase;
+            text-align: right;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        /* ФУТЕР */
+        .footer {
+            margin-top: auto;
+            padding: 20px;
+            font-size: 0.7rem;
+            color: #444;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        /* АНИМАЦИЯ ТРЯСКИ */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <header class="header">
+            <img src="https://s4.iimage.su/s/22/gAQsKrBxTnDuWZoszvtD4tkLBBoTUg5CoYbUv7sV.jpg" class="logo">
+            <div>
+                <h1>NewToyers</h1>
+                <div class="tagline">/// VIGILANTE UNIT ///</div>
+            </div>
+        </header>
+
+        <p>
+            Мы — <span class="highlight">РЕЙДЕРЫ ДИСКОРД СЕРВЕРОВ</span>.  
+            Мы существуем, чтобы карать тех, кого не карает система. Мы помогаем жертвам, атакуя агрессоров. Мы рейдим рейдеров.
+        </p>
+        <p>
+            Наш кодекс прост: У нас самосуд. <span style="color:var(--nt-white)">Типа если не дискорд, то МЫ.</span>
+            Мы — добрые благотворители с кулаками.
+        </p>
+
+        <div class="restore-section">
+            <button class="restore-btn" id="restoreBtn" onclick="triggerRestore()">
+                [ RESTORE SYSTEM ]
+            </button>
+        </div>
+
+        <a href="https://discord.gg/2NCxZUv4mc" class="discord-link">
+            Connect to NewToyers HQ
+        </a>
+
+        <div class="raid-copy-box">
+            <div style="font-size:0.6rem; color:#444; margin-bottom:5px;">// RAID PROTOCOL V.2 //</div>
+            <textarea id="raidText" readonly>/// SYSTEM FAILURE ///
 ВЫ БЫЛИ ВЫЕБАНЫ NEWTOYERS.
 МЫ ПРИШЛИ ЗА ВАШИМИ ДУШАМИ.
-https://discord.gg/2NCxZUv4mc
-    </textarea>
-
-    <div class="raid-visual-text">
-        &gt; SYSTEM FAILURE<br>
-        &gt; ВЫ БЫЛИ ВЫЕБАНЫ NEWTOYERS.<br>
-        &gt; МЫ ПРИШЛИ ЗА ВАШИМИ ДУШАМИ.<br>
-        &gt; <span style="color: var(--nt-red);">LINK_ATTACHED</span>
+https://discord.gg/2NCxZUv4mc</textarea>
+            <div class="copy-trigger" onclick="copyText()">[ CLICK TO COPY RAID TEXT ]</div>
+        </div>
     </div>
-    
-    <button id="actionBtn" onclick="executeRaid()" class="restore-btn">
-        RESTORE
-    </button>
-</div>
 
-<style>
-    /* Стили именно для этого блока */
-    .raid-container {
-        margin: 30px 0;
-        background: #111;
-        border: 1px dashed #333;
-        padding: 20px;
-        position: relative;
-    }
+    <footer class="footer">
+        © 2026 NewToyers. All rights reserved.<br>
+        Pure Instinct. No Mercy.
+    </footer>
 
-    .raid-header {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.7rem;
-        color: #666;
-        margin-bottom: 15px;
-        border-bottom: 1px solid #222;
-        padding-bottom: 10px;
-    }
+    <script>
+        // Скрипт для кнопки RESTORE
+        function triggerRestore() {
+            const btn = document.getElementById('restoreBtn');
+            
+            // Имитация загрузки
+            btn.innerText = "PROCESSING...";
+            
+            setTimeout(() => {
+                // Превращение
+                btn.innerText = "ВЫЕБАНО";
+                btn.classList.add('fucked');
+                
+                // Вибрация телефона (если поддерживается)
+                if (navigator.vibrate) {
+                    navigator.vibrate(200);
+                }
+            }, 800); // Задержка 0.8 сек перед эффектом
+        }
 
-    .raid-title {
-        color: var(--nt-red);
-        font-weight: bold;
-    }
-
-    /* Скрываем реальное поле ввода, оставляем красивое текстовое представление */
-    .raid-textarea {
-        position: absolute;
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    .raid-visual-text {
-        font-family: 'Share Tech Mono', monospace;
-        font-size: 0.85rem;
-        color: #888;
-        line-height: 1.6;
-        margin-bottom: 20px;
-        background: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
-        background-size: 4px 4px;
-        padding: 10px;
-        border-left: 2px solid #333;
-    }
-
-    .restore-btn {
-        width: 100%;
-        background: transparent;
-        border: 1px solid var(--nt-white);
-        color: var(--nt-white);
-        padding: 12px 0;
-        font-family: 'Share Tech Mono', monospace;
-        font-size: 1rem;
-        cursor: pointer;
-        text-transform: uppercase;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .restore-btn:hover {
-        background: var(--nt-white);
-        color: var(--nt-black);
-    }
-
-    /* Класс для активного состояния "ВЫЕБАНО" */
-    .restore-btn.active {
-        background: var(--nt-red);
-        border-color: var(--nt-red);
-        color: var(--nt-white);
-        font-weight: bold;
-        box-shadow: 0 0 15px rgba(215, 25, 33, 0.4);
-        animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
-    }
-
-    @keyframes glitch {
-        0% { transform: translate(0) }
-        20% { transform: translate(-2px, 2px) }
-        40% { transform: translate(-2px, -2px) }
-        60% { transform: translate(2px, 2px) }
-        80% { transform: translate(2px, -2px) }
-        100% { transform: translate(0) }
-    }
-</style>
-
-<script>
-    function executeRaid() {
-        var copyText = document.getElementById("raidText");
-        var btn = document.getElementById("actionBtn");
-
-        // Копирование
-        copyText.select();
-        copyText.setSelectionRange(0, 99999); // Для мобильных
-        navigator.clipboard.writeText(copyText.value);
-
-        // Визуальный эффект
-        btn.innerText = "ВЫЕБАНО";
-        btn.classList.add("active");
-
-        // Через 2 секунды вернуть как было (опционально, можно убрать этот блок если хочешь чтоб оставалось навсегда)
-        setTimeout(function(){
-            btn.innerText = "RESTORE";
-            btn.classList.remove("active");
-        }, 3000);
-    }
-</script>
+        // Скрипт для копирования
+        function copyText() {
+            var copyText = document.getElementById("raidText");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); 
+            navigator.clipboard.writeText(copyText.value);
+            alert("ТЕКСТ СКОПИРОВАН. GO RAID.");
+        }
+    </script>
+</body>
+</html>
