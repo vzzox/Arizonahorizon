@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewToyers // Vigilante Unit</title>
+    <style>
+        /* Импорт моноширинного шрифта для техно-стиля */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --nt-black: #0d0d0d;
+            --nt-white: #f0f0f0;
+            --nt-red: #d71921; /* Фирменный красный Nothing */
+            --nt-dark-red: #8a0f14;
+            --grid-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--nt-black);
+            color: var(--nt-white);
+            font-family: 'Share Tech Mono', monospace;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Фон в виде точечной матрицы */
+            background-image: 
+                radial-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%); /* Виньетка */
+            background-size: 20px 20px, 100% 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Основной контейнер */
+        .container {
+            border: 2px solid var(--nt-white);
+            padding: 40px 30px;
+            max-width: 550px;
+            width: 100%;
+            position: relative;
+            background: rgba(13, 13, 13, 0.9);
+            box-shadow: 0 0 30px rgba(215, 25, 33, 0.15); /* Слабое красное свечение */
+        }
+
+        /* Декоративные уголки в стиле Nothing */
+        .container::before, .container::after,
+        .container-corners::before, .container-corners::after {
+            content: '';
+            position: absolute;
+            width: 12px; height: 12px;
+            background: var(--nt-red);
+            z-index: 2;
+        }
+        .container::before { top: -6px; left: -6px; }
+        .container::after { top: -6px; right: -6px; }
+        .container-corners::before { bottom: -6px; left: -6px; }
+        .container-corners::after { bottom: -6px; right: -6px; }
+
+
+        /* Header с лого и названием */
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px dashed var(--grid-color);
+            padding-bottom: 20px;
+        }
+
+        .logo-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin-right: 25px;
+            overflow: hidden;
+            border: 1px solid var(--nt-red);
+        }
+
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(120%); /* ЧБ по умолчанию */
+            transition: all 0.3s ease;
+        }
+
+        /* Эффект при наведении на лого */
+        .logo-container:hover .logo-img {
+            filter: grayscale(0%) contrast(100%);
+            transform: scale(1.05);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .subtitle {
+            color: var(--nt-red);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* Основной контент */
+        .content-block {
+            margin-bottom: 35px;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            color: #888;
+            text-transform: uppercase;
+            border-left: 4px solid var(--nt-red);
+            padding-left: 10px;
+            margin-bottom: 15px;
+        }
+
+        p.description {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #ccc;
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        .highlight {
+            color: var(--nt-red);
+            font-weight: bold;
+        }
+        
+        .quote-box {
+            border: 1px solid var(--grid-color);
+            background: rgba(215, 25, 33, 0.1);
+            padding: 15px;
+            font-style: italic;
+            color: var(--nt-white);
+            position: relative;
+        }
+        .quote-box::before {
+             content: '>_';
+             color: var(--nt-red);
+             margin-right: 10px;
+        }
+
+        /* Кнопка Discord */
+        .discord-btn-container {
+            text-align: center;
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .discord-btn {
+            display: block;
+            width: 100%;
+            padding: 20px 0;
+            background: var(--nt-red);
+            color: var(--nt-white);
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            /* Создаем "срезанный" угол */
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+        }
+
+        .discord-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .discord-btn:hover {
+            background: var(--nt-white);
+            color: var(--nt-black);
+            box-shadow: 5px 5px 0px var(--nt-red);
+            transform: translate(-3px, -3px);
+        }
+        
+        .discord-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Бегущая строка "Scanline" */
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: var(--nt-red);
+            opacity: 0.5;
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: scan 3s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+
+
+        /* Footer */
+        .footer {
+            margin-top: auto;
+            border-top: 1px dotted #333;
+            padding-top: 15px;
+            font-size: 0.7rem;
+            color: #666;
+            text-align: right;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scanline"></div>
+
+    <div class="container">
+        <div class="container-corners"></div>
+
+        <header class="header">
+            <div class="logo-container">
+                <img src="https://s4.iimage.su/s/22/gAQsKrBxTnDuWZoszvtD4tkLBBoTUg5CoYbUv7sV.jpg" alt="NewToyers Logo" class="logo-img">
+            </div>
+            <div>
+                <h1>NewToyers</h1>
+                <span class="subtitle">/// Discord Vigilante Unit ///</span>
+            </div>
+        </header>
+
+        <div class="content-block">
+            <h2>// MISSION: COUNTER-RAID</h2>
+            
+            <p class="description">
+                Мы — <span class="highlight">РЕЙДЕРЫ ДИСКОРД СЕРВЕРОВ</span>. Но мы не такие, как они. Мы — цифровая иммунная система. Мы существуем в серой зоне, чтобы восстанавливать баланс там, где официальная модерация бессильна.
+            </p>
+            <p class="description">
+                Наша цель — помощь жертвам. Мы находим сообщества агрессоров, токсичные сервера, координирующие атаки на невинных, и наносим ответный удар. Мы рейдим их рейдеров. В каком-то смысле мы добрые благотворители с кулаками. Это наш кодекс. Это наша справедливость.
+            </p>
+
+            <div class="quote-box">
+                У НАС САМОСУД ТИПА ЕСЛИ НЕ ДИСКОРД ТО МЫ.
+            </div>
+        </div>
+
+        <div class="discord-btn-container">
+            <p style="font-size: 0.8rem; color: #666; margin-bottom: 10px;">// JOIN THE OPERATION //</p>
+            <a href="https://discord.gg/2NCxZUv4mc" target="_blank" class="discord-btn">
+                INITIALIZE CONNECTION
+            </a>
+        </div>
+
+        <footer class="footer">
+            SYSTEM ID: NT-2026 // <span style="color: var(--nt-red)">© 2026 NewToyers. All right reserved.</span>
+        </footer>
+
+    </div>
+
+</body>
+</html>
