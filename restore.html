@@ -2,201 +2,158 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NewToyers // System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewToyers // System Interface</title>
     <style>
-        /* ШРИФТЫ */
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-        /* ПЕРЕМЕННЫЕ ЦВЕТОВ NOTHING */
         :root {
             --nt-black: #0d0d0d;
-            --nt-dark-gray: #1a1a1a;
             --nt-white: #f0f0f0;
-            --nt-red: #d71921; 
-            --grid-color: rgba(255, 255, 255, 0.15);
-        }
-
-        /* ОСНОВНЫЕ НАСТРОЙКИ (ЧТОБЫ НЕ БЫЛО БЕЛОГО ФОНА) */
-        * {
-            box-sizing: border-box;
-        }
-
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--nt-black); /* Принудительно черный */
-            color: var(--nt-white);
-            font-family: 'Share Tech Mono', monospace;
-            overflow-x: hidden;
+            --nt-red: #d71921;
+            --grid-color: rgba(255, 255, 255, 0.1);
         }
 
         body {
+            background-color: var(--nt-black);
+            color: var(--nt-white);
+            font-family: 'Share Tech Mono', monospace;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden; /* Чтобы не скроллилось */
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            justify-content: flex-start;
-            
-            /* ФОНОВАЯ СЕТКА (DOT MATRIX) */
+            /* Сетка на фоне */
             background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
             background-size: 20px 20px;
-            padding: 20px;
         }
 
-        /* КОНТЕЙНЕР (КАРТОЧКА) */
-        .card {
+        /* Общий контейнер для центрирования */
+        .wrapper {
+            position: relative;
             width: 100%;
-            max-width: 450px;
-            margin-top: 20px;
+            max-width: 600px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* --- ЭКРАН 1: ГЛАВНАЯ --- */
+        #screen-main {
             border: 1px solid var(--nt-white);
             background: rgba(13, 13, 13, 0.95);
-            padding: 25px;
+            padding: 40px;
             position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            margin-bottom: 50px; /* Место для футера */
+            transition: opacity 0.5s ease;
         }
 
-        /* ДЕКОР УГЛОВ */
-        .card::before { content: ''; position: absolute; top: -1px; left: -1px; width: 8px; height: 8px; background: var(--nt-white); }
-        .card::after { content: ''; position: absolute; bottom: -1px; right: -1px; width: 8px; height: 8px; background: var(--nt-white); }
-
-        /* ЛОГОТИП И ШАПКА */
-        .header {
-            display: flex;
-            align-items: center;
-            border-bottom: 1px dashed var(--grid-color);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+        /* Уголки */
+        .corner {
+            position: absolute;
+            width: 10px; height: 10px;
+            background: var(--nt-red);
         }
+        .tl { top: -5px; left: -5px; }
+        .tr { top: -5px; right: -5px; }
+        .bl { bottom: -5px; left: -5px; }
+        .br { bottom: -5px; right: -5px; }
 
-        .logo {
-            width: 60px;
-            height: 60px;
-            border: 1px solid var(--nt-red);
-            margin-right: 15px;
+        .logo-img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
             filter: grayscale(100%);
+            border: 1px solid var(--nt-white);
+            margin-bottom: 20px;
         }
 
         h1 {
-            font-size: 1.8rem;
-            margin: 0;
-            line-height: 1;
+            font-size: 2rem;
             text-transform: uppercase;
-        }
-
-        .tagline {
-            color: var(--nt-red);
-            font-size: 0.8rem;
+            margin: 0 0 10px 0;
             letter-spacing: 2px;
         }
 
-        /* ТЕКСТ */
-        p {
+        .desc {
+            color: #888;
             font-size: 0.9rem;
-            color: #aaa;
             line-height: 1.4;
-            margin-bottom: 20px;
-            text-align: justify;
+            margin-bottom: 30px;
+            text-align: justify; 
+            text-align-last: center;
         }
 
-        .highlight { color: var(--nt-white); border-bottom: 1px solid var(--nt-red); }
-
-        /* КНОПКА RESTORE (ИНТЕРАКТИВ) */
-        .restore-section {
-            margin: 30px 0;
-            text-align: center;
-        }
-
-        .restore-btn {
-            width: 100%;
+        /* Кнопка запуска скрипта */
+        .init-btn {
             background: transparent;
-            border: 1px solid var(--nt-white);
-            color: var(--nt-white);
-            padding: 20px;
+            border: 1px solid var(--nt-red);
+            color: var(--nt-red);
+            padding: 15px 40px;
             font-family: inherit;
             font-size: 1.2rem;
-            text-transform: uppercase;
             cursor: pointer;
-            transition: 0.2s;
-            position: relative;
-            overflow: hidden;
+            text-transform: uppercase;
+            transition: 0.3s;
         }
 
-        .restore-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Состояние "ВЫЕБАНО" */
-        .restore-btn.fucked {
+        .init-btn:hover {
             background: var(--nt-red);
-            border-color: var(--nt-red);
-            color: black;
-            font-weight: bold;
-            font-size: 1.5rem;
-            animation: shake 0.5s;
+            color: var(--nt-white);
             box-shadow: 0 0 15px var(--nt-red);
         }
 
-        /* КНОПКА ДИСКОРД */
-        .discord-link {
-            display: block;
-            text-align: center;
-            background: #222;
-            color: var(--nt-white);
-            padding: 15px;
-            text-decoration: none;
-            text-transform: uppercase;
-            border: 1px solid #333;
-            margin-top: 20px;
-            font-size: 0.9rem;
-        }
-        .discord-link:hover {
-            background: var(--nt-white);
-            color: black;
+        /* --- ЭКРАН 2: SYSTEM FAILURE (Скрыт по умолчанию) --- */
+        #screen-raid {
+            display: none; /* Скрыто */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            z-index: 10;
         }
 
-        /* ЗОНА КОПИРОВАНИЯ ТЕКСТА РЕЙДА */
-        .raid-copy-box {
-            background: #000;
-            border: 1px dashed var(--nt-red);
-            padding: 10px;
-            margin-top: 30px;
+        .failure-text {
+            font-size: 2.5rem;
+            color: var(--nt-red);
+            text-transform: uppercase;
+            font-weight: bold;
+            text-shadow: 2px 2px 0px #fff;
+            animation: shake 0.5s infinite;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .sub-text {
+            font-size: 1.2rem;
+            color: var(--nt-white);
+            margin-bottom: 40px;
+            letter-spacing: 1px;
+        }
+
+        /* Агрессивная кнопка Discord */
+        .discord-final-btn {
+            background: var(--nt-white);
+            color: var(--nt-black);
+            font-family: inherit;
+            font-size: 1.5rem;
+            padding: 20px 50px;
+            text-decoration: none;
+            font-weight: bold;
+            border: 2px solid var(--nt-red);
+            text-transform: uppercase;
+            display: inline-block;
+            animation: pulse 1s infinite alternate;
         }
         
-        textarea {
-            width: 100%;
-            height: 60px;
-            background: transparent;
-            border: none;
-            color: var(--nt-red);
-            font-family: inherit;
-            font-size: 0.7rem;
-            resize: none;
-            outline: none;
+        .discord-final-btn:hover {
+            background: var(--nt-red);
+            color: var(--nt-white);
         }
 
-        .copy-trigger {
-            font-size: 0.7rem;
-            color: #555;
-            text-transform: uppercase;
-            text-align: right;
-            cursor: pointer;
-            margin-top: 5px;
-        }
-
-        /* ФУТЕР */
-        .footer {
-            margin-top: auto;
-            padding: 20px;
-            font-size: 0.7rem;
-            color: #444;
-            text-align: center;
-            text-transform: uppercase;
-        }
-
-        /* АНИМАЦИЯ ТРЯСКИ */
+        /* Анимации */
         @keyframes shake {
             0% { transform: translate(1px, 1px) rotate(0deg); }
             10% { transform: translate(-1px, -2px) rotate(-1deg); }
@@ -210,81 +167,85 @@
             90% { transform: translate(1px, 2px) rotate(0deg); }
             100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
+
+        @keyframes pulse {
+            from { transform: scale(1); box-shadow: 0 0 10px var(--nt-red); }
+            to { transform: scale(1.05); box-shadow: 0 0 30px var(--nt-red); }
+        }
+
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #555;
+            text-transform: uppercase;
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <header class="header">
-            <img src="https://s4.iimage.su/s/22/gAQsKrBxTnDuWZoszvtD4tkLBBoTUg5CoYbUv7sV.jpg" class="logo">
-            <div>
-                <h1>NewToyers</h1>
-                <div class="tagline">/// VIGILANTE UNIT ///</div>
+    <div class="wrapper">
+        
+        <div id="screen-main">
+            <div class="corner tl"></div><div class="corner tr"></div>
+            <div class="corner bl"></div><div class="corner br"></div>
+
+            <img src="https://s4.iimage.su/s/22/gAQsKrBxTnDuWZoszvtD4tkLBBoTUg5CoYbUv7sV.jpg" alt="Logo" class="logo-img">
+            
+            <h1>NewToyers</h1>
+            <p style="color:var(--nt-red); margin-top:-10px;">// VIGILANTE UNIT //</p>
+            
+            <p class="desc">
+                Мы рейдеры дискордов. Мы делаем это, помогая жертвам рейдов, атакуя их обидчиков. 
+                В каком-то смысле мы добрые благотворители. У нас самосуд: если не Discord, то мы.
+            </p>
+
+            <button class="init-btn" onclick="triggerRaid()">INITIALIZE PROTOCOL</button>
+        </div>
+
+        <div id="screen-raid">
+            <div class="failure-text">
+                /// SYSTEM FAILURE ///<br>
+                ВЫ БЫЛИ ВЫЕБАНЫ NEWTOYERS.
             </div>
-        </header>
+            
+            <div class="sub-text">
+                МЫ ПРИШЛИ ЗА ВАШИМИ ДУШАМИ.
+            </div>
 
-        <p>
-            Мы — <span class="highlight">РЕЙДЕРЫ ДИСКОРД СЕРВЕРОВ</span>.  
-            Мы существуем, чтобы карать тех, кого не карает система. Мы помогаем жертвам, атакуя агрессоров. Мы рейдим рейдеров.
-        </p>
-        <p>
-            Наш кодекс прост: У нас самосуд. <span style="color:var(--nt-white)">Типа если не дискорд, то МЫ.</span>
-            Мы — добрые благотворители с кулаками.
-        </p>
-
-        <div class="restore-section">
-            <button class="restore-btn" id="restoreBtn" onclick="triggerRestore()">
-                [ RESTORE SYSTEM ]
-            </button>
+            <a href="https://discord.gg/2NCxZUv4mc" class="discord-final-btn">
+                DISCORD
+            </a>
         </div>
 
-        <a href="https://discord.gg/2NCxZUv4mc" class="discord-link">
-            Connect to NewToyers HQ
-        </a>
-
-        <div class="raid-copy-box">
-            <div style="font-size:0.6rem; color:#444; margin-bottom:5px;">// RAID PROTOCOL V.2 //</div>
-            <textarea id="raidText" readonly>/// SYSTEM FAILURE ///
-ВЫ БЫЛИ ВЫЕБАНЫ NEWTOYERS.
-МЫ ПРИШЛИ ЗА ВАШИМИ ДУШАМИ.
-https://discord.gg/2NCxZUv4mc</textarea>
-            <div class="copy-trigger" onclick="copyText()">[ CLICK TO COPY RAID TEXT ]</div>
-        </div>
     </div>
 
-    <footer class="footer">
-        © 2026 NewToyers. All rights reserved.<br>
-        Pure Instinct. No Mercy.
-    </footer>
+    <div class="footer">
+        © 2026 NewToyers. All right reserved.
+    </div>
 
     <script>
-        // Скрипт для кнопки RESTORE
-        function triggerRestore() {
-            const btn = document.getElementById('restoreBtn');
-            
-            // Имитация загрузки
-            btn.innerText = "PROCESSING...";
-            
-            setTimeout(() => {
-                // Превращение
-                btn.innerText = "ВЫЕБАНО";
-                btn.classList.add('fucked');
-                
-                // Вибрация телефона (если поддерживается)
-                if (navigator.vibrate) {
-                    navigator.vibrate(200);
-                }
-            }, 800); // Задержка 0.8 сек перед эффектом
-        }
+        function triggerRaid() {
+            // Получаем элементы
+            const mainScreen = document.getElementById('screen-main');
+            const raidScreen = document.getElementById('screen-raid');
+            const body = document.body;
 
-        // Скрипт для копирования
-        function copyText() {
-            var copyText = document.getElementById("raidText");
-            copyText.select();
-            copyText.setSelectionRange(0, 99999); 
-            navigator.clipboard.writeText(copyText.value);
-            alert("ТЕКСТ СКОПИРОВАН. GO RAID.");
+            // 1. Скрываем основной экран
+            mainScreen.style.display = 'none';
+
+            // 2. Меняем фон на темно-красный для эффекта "тревоги"
+            body.style.backgroundColor = '#050000';
+            body.style.backgroundImage = 'radial-gradient(rgba(215, 25, 33, 0.2) 1px, transparent 1px)';
+
+            // 3. Показываем экран рейда
+            raidScreen.style.display = 'flex';
         }
     </script>
+
 </body>
 </html>
