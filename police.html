@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Департамент Полиции Цитадели</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+
+        :root {
+            --bg-color: #0a0a0a;
+            --card-bg: #141414;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --accent-blue: #2962ff;
+            --accent-red: #d50000;
+            --border-color: #222;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* --- Эффект Сирены (Свечение по краям) --- */
+        .siren-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: inset 60px 0 100px -20px rgba(41, 98, 255, 0.4), 
+                        inset -60px 0 100px -20px rgba(213, 0, 0, 0.4);
+            animation: sirenPulse 2s infinite alternate ease-in-out;
+        }
+
+        @keyframes sirenPulse {
+            0% {
+                box-shadow: inset 80px 0 120px -20px rgba(41, 98, 255, 0.6), 
+                            inset -80px 0 120px -20px rgba(213, 0, 0, 0.1);
+            }
+            100% {
+                box-shadow: inset 80px 0 120px -20px rgba(41, 98, 255, 0.1), 
+                            inset -80px 0 120px -20px rgba(213, 0, 0, 0.6);
+            }
+        }
+
+        /* --- Контейнер --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- Хедер --- */
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo-shield {
+            width: 80px;
+            height: 100px;
+            background: linear-gradient(135deg, #1e1e1e, #000);
+            border: 2px solid var(--text-muted);
+            border-radius: 4px 4px 40px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: 0 0 20px rgba(255,255,255,0.05);
+        }
+
+        .logo-shield::after {
+            content: "MPF";
+            font-weight: 800;
+            font-size: 24px;
+            color: var(--text-main);
+            letter-spacing: 2px;
+        }
+
+        h1 {
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 2rem;
+            background: linear-gradient(to right, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- Сетка --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        /* --- Карточки --- */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-color: #444;
+        }
+
+        .card-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .tag-blue { background: rgba(41, 98, 255, 0.2); color: var(--accent-blue); }
+        .tag-red { background: rgba(213, 0, 0, 0.2); color: var(--accent-red); }
+
+        ul.rules-list {
+            list-style: none;
+        }
+
+        ul.rules-list li {
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #ccc;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .highlight { color: #fff; font-weight: 600; }
+        .skill-text { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; }
+
+        /* --- Арсенал / Таблица --- */
+        .section-title {
+            margin: 40px 0 20px 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border-left: 4px solid var(--accent-blue);
+            padding-left: 15px;
+        }
+
+        .armory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .weapon-card {
+            background: #111;
+            border: 1px solid #222;
+            padding: 20px;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .weapon-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: #333;
+        }
+        
+        .weapon-card.type-gun::before { background: var(--accent-blue); }
+        .weapon-card.type-gear::before { background: #fff; }
+        .weapon-card.type-ammo::before { background: #fdcc00; }
+
+        .weapon-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .weapon-price {
+            font-size: 1.2rem;
+            font-weight: 300;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .weapon-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .stats-box {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: #aaa;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .stat-val { color: #fff; font-weight: bold; }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            margin-top: 80px;
+            padding-bottom: 20px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="siren-overlay"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo-shield"></div>
+            <h1>Полиция Цитадели</h1>
+            <div class="subtitle">Служить • Защищать • Сохранять</div>
+        </header>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-header">
+                    <span>Директива</span>
+                    <span class="tag tag-blue">Цель</span>
+                </div>
+                <p class="skill-text">
+                    Ваша задача — сохранять абсолютный порядок в поселении и отлавливать нарушителей.<br><br>
+                    <strong>Локация:</strong> Цитадель<br>
+                    <strong>Требуемые навыки:</strong> ПМП <span style="color:var(--text-muted)">ИЛИ</span> Стрельба
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span>Награды</span>
+                    <span class="tag tag-blue">$$$</span>
+                </div>
+                <ul class="rules-list">
+                    <li>Проверка антагониста <span class="highlight">100%</span></li>
+                    <li>Поимка живого преступника <span class="highlight">50%</span></li>
+                    <li>Изъятие штрафов <span class="highlight">50%</span></li>
+                </ul>
+                <div style="margin-top:10px; font-size: 0.7rem; color: #555;">*От установленной комендантом ставки</div>
+            </div>
+
+            <div class="card" style="border-color: rgba(213, 0, 0, 0.3);">
+                <div class="card-header">
+                    <span style="color: var(--accent-red);">Взыскания</span>
+                    <span class="tag tag-red">!!!</span>
+                </div>
+                <ul class="rules-list">
+                    <li>Смерть подозреваемого <span class="highlight" style="color: var(--accent-red);">100%</span></li>
+                    <li>Игнорирование вызова <span class="highlight" style="color: var(--accent-red);">50%</span></li>
+                </ul>
+                <div style="margin-top:10px; font-size: 0.7rem; color: #555;">*Штраф накладывается на ВЕСЬ департамент</div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Арсенал MPF Arms Co.</h2>
+        
+        <div class="armory-grid">
+            <div class="weapon-card type-gun">
+                <div class="weapon-name">Винтовка “Аргумент”</div>
+                <div class="weapon-price">500 $</div>
+                <div class="weapon-meta">Питание: 1 патрон</div>
+                <div class="stats-box">
+                    <div class="stat-row"><span>Дальняя</span> <span class="stat-val">В</span></div>
+                    <div class="stat-row"><span>Средняя</span> <span class="stat-val">С</span></div>
+                    <div class="stat-row"><span>Малая</span> <span class="stat-val">С</span></div>
+                </div>
+            </div>
+
+            <div class="weapon-card type-gun">
+                <div class="weapon-name">Дробовик “Снежинка”</div>
+                <div class="weapon-price">450 $</div>
+                <div class="weapon-meta">Питание: 1 дробь</div>
+                <div class="stats-box">
+                    <div class="stat-row"><span>Дальняя/Сред.</span> <span class="stat-val">Н</span></div>
+                    <div class="stat-row"><span>Малая</span> <span class="stat-val">П</span></div>
+                </div>
+            </div>
+
+            <div class="weapon-card type-gun">
+                <div class="weapon-name">Пистолет “Гамма”</div>
+                <div class="weapon-price">300 $</div>
+                <div class="weapon-meta">Питание: 9 патронов</div>
+                <div class="stats-box">
+                    <div class="stat-row"><span>Все дистанции</span> <span class="stat-val">С</span></div>
+                </div>
+            </div>
+
+            <div class="weapon-card type-gun">
+                <div class="weapon-name">Револьвер “Грэм”</div>
+                <div class="weapon-price">200 $</div>
+                <div class="weapon-meta">Питание: 6 патронов (Бронебойный)</div>
+                <div class="stats-box">
+                    <div class="stat-row"><span>Все дистанции</span> <span class="stat-val">Н</span></div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Спецсредства и Экипировка</h2>
+        <div class="armory-grid">
+            
+            <div class="weapon-card type-gear">
+                <div class="weapon-name">Бронежилет</div>
+                <div class="weapon-price">250 $</div>
+                <div class="weapon-meta">Выдерживает 2 выстрела</div>
+            </div>
+
+            <div class="weapon-card type-gear">
+                <div class="weapon-name">Шлем</div>
+                <div class="weapon-price">200 $</div>
+                <div class="weapon-meta">Выдерживает 1 выстрел</div>
+            </div>
+
+            <div class="weapon-card type-gear">
+                <div class="weapon-name">Светошумовая</div>
+                <div class="weapon-price">150 $</div>
+                <div class="weapon-meta">АОЕ стан (1 ход)</div>
+            </div>
+
+            <div class="weapon-card type-gear">
+                <div class="weapon-name">Аптечка ПМП</div>
+                <div class="weapon-price">90 $</div>
+                <div class="weapon-meta">Обезбол, бинты, жгут, гемостатик</div>
+            </div>
+
+            <div class="weapon-card type-gear">
+                <div class="weapon-name">Мотоцикл</div>
+                <div class="weapon-price">800 $</div>
+                <div class="weapon-meta">1 чел + оборудование</div>
+            </div>
+
+            <div class="weapon-card type-gear">
+                <div class="weapon-name">Шокер</div>
+                <div class="weapon-price">50 $</div>
+                <div class="weapon-meta">Стан (2 хода), Одноразовый</div>
+            </div>
+
+            <div class="weapon-card type-gear">
+                <div class="weapon-name">Дубинка</div>
+                <div class="weapon-price">50 $</div>
+                <div class="weapon-meta">Стан (1 ход)</div>
+            </div>
+
+             <div class="weapon-card type-gear">
+                <div class="weapon-name">Перцовый баллон</div>
+                <div class="weapon-price">70 $</div>
+                <div class="weapon-meta">Стан (2 хода), Одноразовый</div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Расходники</h2>
+        <div class="armory-grid">
+            <div class="weapon-card type-ammo">
+                <div class="weapon-name">Обойма (Пистолет)</div>
+                <div class="weapon-price">60 $</div>
+                <div class="weapon-meta">9 шт</div>
+            </div>
+            <div class="weapon-card type-ammo">
+                <div class="weapon-name">Мунклип (Револьвер)</div>
+                <div class="weapon-price">30 $</div>
+                <div class="weapon-meta">6 шт (Бронебойные)</div>
+            </div>
+            <div class="weapon-card type-ammo">
+                <div class="weapon-name">Винт. патрон</div>
+                <div class="weapon-price">35 $</div>
+                <div class="weapon-meta">1 шт</div>
+            </div>
+            <div class="weapon-card type-ammo">
+                <div class="weapon-name">Дробь</div>
+                <div class="weapon-price">15 $</div>
+                <div class="weapon-meta">1 шт</div>
+            </div>
+        </div>
+
+        <footer>
+            Система управления департаментом v.2.0 <br>
+            Комендант Цитадели
+        </footer>
+    </div>
+</body>
+</html>
