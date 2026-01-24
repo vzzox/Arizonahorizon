@@ -553,7 +553,6 @@
             `
         };
 
-        // ... КОНЕЦ ЧАСТИ 1. НЕ ЗАКРЫВАЙ ТЕГ SCRIPT!
         /* =========================================
            PROCEDURAL ARCHITECT CLASS
            Generates complex geometry from code to avoid assets.
@@ -987,6 +986,8 @@
                             this.isBooted = true;
                             // Trigger animations for HTML elements
                             document.querySelectorAll('.cyber-panel').forEach(el => el.classList.add('visible'));
+                            // Start Loop
+                            this.animate();
                         }, 500);
                     }
                 }, 50); // Speed of loading
