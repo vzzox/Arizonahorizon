@@ -3,167 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Immersive Data Lab</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Rajdhani:wght@300;600&display=swap" rel="stylesheet">
+    <title>VZZOX CYBERNETICS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Rajdhani:wght@300;600&family=Syncopate:wght@700&display=swap" rel="stylesheet">
     <style>
+        /* ОСНОВНЫЕ НАСТРОЙКИ СТРАНИЦЫ */
         body {
             margin: 0;
-            overflow: hidden; /* ЗАПРЕТ СКРОЛЛА */
-            background-color: #020205;
+            background-color: #020205; /* Очень темный фон, если 3D не загрузится */
             color: #ffffff;
             font-family: 'Rajdhani', sans-serif;
-            height: 100vh;
-            width: 100vw;
+            overflow-x: hidden; /* Убираем горизонтальный скролл */
         }
 
-        /* Канвас на весь экран */
+        /* КАНВАС ДЛЯ 3D - ФИКСИРОВАННЫЙ ФОН */
         #canvas-container {
-            position: absolute;
+            position: fixed; /* Самое важное: фиксируем фон */
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            background: radial-gradient(circle at center, #1a0b2e 0%, #000000 100%);
+            width: 100vw;
+            height: 100vh;
+            z-index: -1; /* Убираем на задний план */
+            background: radial-gradient(circle at center, #1a0b2e 0%, #000000 80%);
         }
 
-        /* UI Слой - фиксированный */
-        #ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+        /* КОНТЕНТ САЙТА (Скроллится поверх 3D) */
+        .content-wrapper {
+            position: relative;
             z-index: 2;
-            pointer-events: none;
-            display: grid;
-            grid-template-rows: auto 1fr auto; /* Шапка, Центр, Футер */
-            padding: 30px;
-            box-sizing: border-box;
+            width: 100%;
         }
 
-        /* Элементы интерфейса */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            pointer-events: auto;
-        }
-
-        .logo {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            font-size: 1.5rem;
-            letter-spacing: 2px;
-            color: #fff;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        }
-
-        .nav-btn {
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            color: #00f0ff;
-            padding: 10px 25px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            font-weight: bold;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .nav-btn:hover {
-            background: #00f0ff;
-            color: #000;
-            box-shadow: 0 0 20px #00f0ff;
-        }
-
-        /* Центр меню */
-        .menu-container {
+        /* Секции сайта */
+        section {
+            min-height: 100vh; /* Каждая секция минимум во весь экран */
             display: flex;
             flex-direction: column;
             justify-content: center;
-            pointer-events: auto;
-            max-width: 500px;
+            padding: 50px 10vw;
+            box-sizing: border-box;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.1);
         }
 
-        h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 4vh; /* Размер зависит от высоты экрана */
-            margin: 0 0 10px 0;
+        /* Типографика */
+        h1.main-title {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 5rem;
+            font-weight: 900;
+            margin: 0;
             line-height: 1;
-            background: linear-gradient(90deg, #fff, #a2a2a2);
+            letter-spacing: -2px;
+            /* Градиентный текст */
+            background: linear-gradient(45deg, #fff, #00f0ff, #ff0055);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
         }
 
-        .subtitle {
-            font-size: 1.2rem;
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
             color: #00f0ff;
             margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
         }
 
-        .nav-item {
-            font-size: 2.5vh;
-            margin: 8px 0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            color: rgba(255, 255, 255, 0.6);
-            width: fit-content;
+        p {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            max-width: 600px;
+            color: rgba(255, 255, 255, 0.8);
+            background: rgba(0,0,0,0.5); /* Полупрозрачная подложка для читаемости */
+            padding: 20px;
+            border-left: 3px solid #ff0055;
+            backdrop-filter: blur(5px);
         }
 
-        .nav-item:hover {
-            color: #fff;
-            padding-left: 15px;
-            text-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
-        }
-
-        .nav-item::before {
-            content: '';
-            display: inline-block;
-            width: 0;
-            height: 2px;
-            background: #ff0055;
-            margin-right: 0;
-            transition: width 0.3s;
-        }
-
-        .nav-item:hover::before {
-            width: 20px;
-            margin-right: 10px;
-        }
-
-        /* Футер */
-        .footer {
-            font-size: 12px;
-            color: #555;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-        
-        .status-bar {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .dot {
-            width: 8px;
-            height: 8px;
-            background-color: #00ff00;
-            border-radius: 50%;
-            box-shadow: 0 0 5px #00ff00;
-            animation: blink 2s infinite;
-        }
-
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
+        /* Отступы для секций, чтобы текст не наезжал на центральные 3D объекты */
+        .section-right { align-items: flex-end; text-align: right; }
+        .section-left { align-items: flex-start; }
 
     </style>
 </head>
@@ -171,163 +87,198 @@
 
     <div id="canvas-container"></div>
 
-    <div id="ui-layer">
-        <div class="header">
-            <div class="logo">LAB.3D // RUS</div>
-            <div class="nav-btn">СВЯЗЬ</div>
-        </div>
+    <div class="content-wrapper">
+        
+        <section class="section-left">
+            <h1 class="main-title">VZZOX<br>SYSTEMS</h1>
+            <p>Добро пожаловать в цифровую нейросеть. Листайте вниз, чтобы исследовать структуру данных.</p>
+        </section>
 
-        <div class="menu-container">
-            <div class="subtitle">Интерактивная среда</div>
-            <h1>ЦИФРОВОЕ<br>ПРОСТРАНСТВО</h1>
-            
-            <div class="nav-item">ВЕБ-РАЗРАБОТКА</div>
-            <div class="nav-item">АРТ-ИНСТАЛЛЯЦИИ</div>
-            <div class="nav-item">НЕЙРОСЕТИ & AI</div>
-            <div class="nav-item">МЕТАВСЕЛЕННЫЕ</div>
-            <div class="nav-item">ИГРОВЫЕ ДВИЖКИ</div>
-        </div>
+        <section class="section-right" style="justify-content: flex-start; padding-top: 20vh;">
+            <h2>ОРГАНИЧЕСКИЙ СИНТЕЗ</h2>
+            <p>Мы моделируем сложные биологические структуры. Цифровой "костный мозг" сети, генерирующий новые данные в реальном времени. Обратите внимание на центральный объект.</p>
+        </section>
 
-        <div class="footer">
-            <div>
-                © 2024 FUTURE CORP.<br>
-                ВСЕ ПРАВА ЗАЩИЩЕНЫ ПРОТОКОЛОМ.
-            </div>
-            <div class="status-bar">
-                <div class="dot"></div>
-                ONLINE
-            </div>
-        </div>
+        <section class="section-left">
+            <h2>КИБЕР-АРХИТЕКТУРА</h2>
+            <p>Вместо старых костей — новые полигоны. Структурные узлы, напоминающие древние артефакты, переосмысленные в кремнии и свете. Основа нашей вычислительной мощности.</p>
+        </section>
+
+        <section class="section-center" style="align-items: center; text-align: center;">
+            <h1 class="main-title" style="font-size: 3rem;">VZZOX<br>ONLINE</h1>
+            <p style="border: none; background: none;">Достигнут конец потока данных.</p>
+        </section>
+
     </div>
 
     <script type="module">
         import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
+        // Импортируем загрузчики для шрифтов
+        import { FontLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/FontLoader.js';
+        import { TextGeometry } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/geometries/TextGeometry.js';
 
-        // --- 1. СЦЕНА И КАМЕРА ---
+        // --- НАСТРОЙКА СЦЕНЫ ---
         const scene = new THREE.Scene();
-        // Добавляем туман, чтобы далекие объекты исчезали в темноте
-        scene.fog = new THREE.FogExp2(0x000000, 0.02);
+        // Глубокий черный туман
+        scene.fog = new THREE.Fog(0x000000, 10, 50);
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-        camera.position.z = 5;
-        camera.position.y = 0;
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 20;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        // --- 2. ОБЪЕКТЫ: "МНОГО 3D" ---
+        // --- СВЕТ ---
+        const ambientLight = new THREE.AmbientLight(0x404040); // Мягкий свет
+        scene.add(ambientLight);
+        // Точечные источники света для бликов
+        const pointLight1 = new THREE.PointLight(0x00f0ff, 2, 100);
+        pointLight1.position.set(10, 10, 10);
+        scene.add(pointLight1);
+        const pointLight2 = new THREE.PointLight(0xff0055, 2, 100);
+        pointLight2.position.set(-10, -10, 10);
+        scene.add(pointLight2);
 
-        // ГРУППА 1: Облако частиц (Звездная пыль)
-        const particlesGeometry = new THREE.BufferGeometry();
-        const particlesCount = 4000; // 4000 точек
-        const posArray = new Float32Array(particlesCount * 3);
 
-        for(let i = 0; i < particlesCount * 3; i++) {
-            // Раскидываем точки в случайные позиции (x, y, z)
-            posArray[i] = (Math.random() - 0.5) * 20; 
-        }
+        // --- ОБЪЕКТ 1: 3D ТЕКСТ "VZZOX" ---
+        const fontLoader = new FontLoader();
+        // Загружаем стандартный шрифт Three.js из CDN
+        fontLoader.load('https://cdn.skypack.dev/three@0.136.0/examples/fonts/helvetiker_bold.typeface.json', (font) => {
+            const textGeo = new TextGeometry('VZZOX', {
+                font: font,
+                size: 2, // Размер текста
+                height: 0.5, // Толщина
+                curveSegments: 12,
+                bevelEnabled: true,
+                bevelThickness: 0.03,
+                bevelSize: 0.02,
+                bevelOffset: 0,
+                bevelSegments: 5
+            });
 
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        const particlesMaterial = new THREE.PointsMaterial({
-            size: 0.02,
-            color: 0x00f0ff,
-            transparent: true,
-            opacity: 0.8,
-            blending: THREE.AdditiveBlending
+            // Материал для текста (хромированный, отражающий)
+            const textMaterial = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                metalness: 0.8,
+                roughness: 0.2,
+                emissive: 0x222222
+            });
+
+            const textMesh = new THREE.Mesh(textGeo, textMaterial);
+            // Центрируем текст
+            textGeo.computeBoundingBox();
+            const centerOffset = - 0.5 * ( textGeo.boundingBox.max.x - textGeo.boundingBox.min.x );
+            textMesh.position.x = centerOffset;
+            textMesh.position.y = 5; // Поднимаем повыше
+            textMesh.position.z = -5;
+            
+            scene.add(textMesh);
+
+            // Добавляем тексту анимацию вращения в общий цикл
+            window.textMesh = textMesh;
         });
-        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-        scene.add(particlesMesh);
 
-        // ГРУППА 2: Летающие геометрические фигуры ("Цифровой мусор")
-        const geometryGroup = new THREE.Group();
-        const geometries = [
-            new THREE.BoxGeometry(0.2, 0.2, 0.2),
-            new THREE.ConeGeometry(0.15, 0.3, 4),
-            new THREE.IcosahedronGeometry(0.15, 0)
-        ];
+
+        // --- ОБЪЕКТ 2: "ОРГАНИЧЕСКАЯ СТРУКТУРА" (Вместо костного мозга) ---
+        // Используем сложный TorusKnot с "мясным" материалом
+        const organicGeo = new THREE.TorusKnotGeometry(4, 1.5, 150, 20, 2, 3);
+        const organicMat = new THREE.MeshPhongMaterial({
+            color: 0xaa0033, // Кроваво-красный
+            emissive: 0x220011,
+            shininess: 50,
+            wireframe: false,
+            flatShading: false 
+        });
+        // Добавим второй слой wireframe поверх для технологичности
+        const organicWireMat = new THREE.MeshBasicMaterial({ color: 0xff0055, wireframe: true, transparent: true, opacity: 0.3 });
         
-        const materialFloating = new THREE.MeshBasicMaterial({ 
-            color: 0xff0055, 
-            wireframe: true,
-            transparent: true,
-            opacity: 0.3
+        const organicMesh = new THREE.Mesh(organicGeo, organicMat);
+        const organicWireMesh = new THREE.Mesh(organicGeo, organicWireMat);
+        
+        const organicGroup = new THREE.Group();
+        organicGroup.add(organicMesh);
+        organicGroup.add(organicWireMesh);
+        organicGroup.position.set(0, -10, -15); // Опускаем вниз
+        scene.add(organicGroup);
+
+
+        // --- ОБЪЕКТ 3: "КИБЕР-ЧЕРЕП" (Структурный объект) ---
+        // Вместо черепа - сложная икосаэдрическая структура
+        const cyberGeo = new THREE.IcosahedronGeometry(3, 1);
+        const cyberMat = new THREE.MeshStandardMaterial({
+            color: 0x111111,
+            metalness: 0.9,
+            roughness: 0.1,
+            wireframe: true
         });
-
-        // Создаем 100 летающих объектов
-        for (let i = 0; i < 100; i++) {
-            const whichGeo = Math.floor(Math.random() * geometries.length);
-            const mesh = new THREE.Mesh(geometries[whichGeo], materialFloating);
-            
-            // Случайная позиция
-            mesh.position.x = (Math.random() - 0.5) * 15;
-            mesh.position.y = (Math.random() - 0.5) * 15;
-            mesh.position.z = (Math.random() - 0.5) * 15;
-            
-            // Случайное вращение
-            mesh.rotation.x = Math.random() * Math.PI;
-            mesh.rotation.y = Math.random() * Math.PI;
-
-            // Добавляем рандомную скорость вращения в объект
-            mesh.userData = {
-                rotSpeedX: (Math.random() - 0.5) * 0.02,
-                rotSpeedY: (Math.random() - 0.5) * 0.02
-            };
-
-            geometryGroup.add(mesh);
+        
+        // Создаем много копий этого объекта
+        const cyberGroup = new THREE.Group();
+        for(let i=0; i<5; i++) {
+             const mesh = new THREE.Mesh(cyberGeo, cyberMat);
+             mesh.position.set(
+                 (Math.random() - 0.5) * 30,
+                 (Math.random() - 0.5) * 30,
+                 (Math.random() - 0.5) * 10 - 20
+             );
+             mesh.rotation.set(Math.random(), Math.random(), Math.random());
+             cyberGroup.add(mesh);
         }
-        scene.add(geometryGroup);
+        scene.add(cyberGroup);
 
-        // ГРУППА 3: Основная структура (Туннель)
-        const torusGeo = new THREE.TorusGeometry(3, 0.5, 16, 100);
-        const torusMat = new THREE.PointsMaterial({
-            size: 0.03,
-            color: 0xffffff,
-            transparent: true,
-            opacity: 0.1
-        });
-        const torus = new THREE.Points(torusGeo, torusMat);
-        scene.add(torus);
+        // --- ФОНОВЫЕ ЧАСТИЦЫ ---
+        const particlesGeo = new THREE.BufferGeometry();
+        const particlesCount = 2000;
+        const posArray = new Float32Array(particlesCount * 3);
+        for(let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 100; // Разбрасываем широко
+        }
+        particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particlesMat = new THREE.PointsMaterial({ size: 0.1, color: 0xffffff, transparent: true, opacity: 0.5 });
+        const particles = new THREE.Points(particlesGeo, particlesMat);
+        scene.add(particles);
 
 
-        // --- 3. ИНТЕРАКТИВНОСТЬ (Parallax) ---
-        let mouseX = 0;
-        let mouseY = 0;
-
-        document.addEventListener('mousemove', (event) => {
-            mouseX = event.clientX - window.innerWidth / 2;
-            mouseY = event.clientY - window.innerHeight / 2;
-        });
-
-        // --- 4. АНИМАЦИЯ ---
+        // --- АНИМАЦИЯ И СКРОЛЛ ---
         const clock = new THREE.Clock();
+        let scrollY = 0;
+
+        // Слушаем скролл страницы
+        window.addEventListener('scroll', () => {
+            scrollY = window.scrollY;
+        });
 
         function animate() {
             const elapsedTime = clock.getElapsedTime();
 
-            // Вращаем всё облако частиц
-            particlesMesh.rotation.y = elapsedTime * 0.05;
-            particlesMesh.rotation.x = mouseY * 0.0001; // Легкий наклон от мыши
+            // Анимация текста (если загрузился)
+            if (window.textMesh) {
+                window.textMesh.rotation.y = Math.sin(elapsedTime * 0.5) * 0.2; // Легкое покачивание
+            }
 
-            // Вращаем основное кольцо
-            torus.rotation.x = elapsedTime * 0.2;
-            torus.rotation.y = elapsedTime * 0.1;
+            // Анимация органической структуры
+            organicGroup.rotation.x = elapsedTime * 0.2;
+            organicGroup.rotation.y = elapsedTime * 0.1;
+            // Она пульсирует
+            const scale = 1 + Math.sin(elapsedTime) * 0.05;
+            organicGroup.scale.set(scale, scale, scale);
 
-            // Анимируем каждый летающий объект отдельно
-            geometryGroup.children.forEach(mesh => {
-                mesh.rotation.x += mesh.userData.rotSpeedX;
-                mesh.rotation.y += mesh.userData.rotSpeedY;
-                // Легкое покачивание
-                mesh.position.y += Math.sin(elapsedTime + mesh.position.x) * 0.002;
+            // Анимация кибер-структур
+            cyberGroup.children.forEach((mesh, i) => {
+                mesh.rotation.x += 0.01 * (i + 1);
+                mesh.rotation.y += 0.02;
             });
 
-            // Параллакс эффект для камеры (двигаем камеру чуть-чуть за мышкой)
-            camera.position.x += (mouseX * 0.005 - camera.position.x) * 0.05;
-            camera.position.y += (-mouseY * 0.005 - camera.position.y) * 0.05;
-            
-            // Камера всегда смотрит в центр сцены
-            camera.lookAt(scene.position);
+            // Движение частиц
+            particles.rotation.y = elapsedTime * 0.05;
+
+            // --- САМОЕ ВАЖНОЕ: СВЯЗЬ СКРОЛЛА И 3D ---
+            // Двигаем камеру вниз при скролле
+            camera.position.y = -scrollY * 0.02; 
+            // Немного вращаем сцену при скролле для динамики
+            scene.rotation.y = scrollY * 0.0005;
 
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
@@ -335,7 +286,6 @@
 
         animate();
 
-        // Адаптация под размер окна
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
