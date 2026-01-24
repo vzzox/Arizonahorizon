@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мемасика 2.0 | Регистрация</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* --- CSS Reset & Variables --- */
+        :root {
+            --bg-color: #0f0f11;
+            --text-color: #ffffff;
+            --accent-color: #ff5e00; /* Street Orange */
+            --secondary-color: #2a2a2e;
+            --input-bg: #1a1a1d;
+            --sub-text: #888890;
+            --border-radius: 12px;
+            --font-main: 'Manrope', sans-serif;
+            --font-display: 'Unbounded', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Текстура шума */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            opacity: 0.4; pointer-events: none; z-index: 0;
+        }
+
+        /* Glow эффект */
+        .glow-spot {
+            position: absolute;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(255, 94, 0, 0.15) 0%, rgba(15, 15, 17, 0) 70%);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1; pointer-events: none; transition: transform 0.1s ease-out;
+        }
+
+        /* --- Main UI --- */
+        .container {
+            position: relative; z-index: 10;
+            max-width: 480px; width: 90%;
+            text-align: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .container.blur { opacity: 0.2; pointer-events: none; }
+
+        .logo-box { display: inline-block; margin-bottom: 24px; position: relative; }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: 3.5rem; line-height: 1;
+            text-transform: uppercase; letter-spacing: -2px;
+            background: linear-gradient(180deg, #fff 0%, #ccc 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .version-tag {
+            position: absolute; top: -10px; right: -25px;
+            background: var(--accent-color); color: #000;
+            font-weight: 800; font-size: 0.9rem;
+            padding: 4px 8px; transform: rotate(12deg);
+            border-radius: 4px; box-shadow: 0 4px 10px rgba(255, 94, 0, 0.3);
+        }
+
+        p.description {
+            font-size: 1.1rem; color: var(--sub-text);
+            margin-bottom: 40px; line-height: 1.5;
+        }
+
+        .btn {
+            width: 100%; padding: 18px;
+            font-size: 1rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            border: none; cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+            font-family: var(--font-main);
+            margin-bottom: 16px;
+        }
+
+        .btn-primary { background-color: var(--text-color); color: #000; }
+        .btn-primary:hover { background-color: var(--accent-color); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255, 94, 0, 0.2); }
+        
+        .btn-secondary { background-color: transparent; color: var(--text-color); border: 2px solid var(--secondary-color); }
+        .btn-secondary:hover { border-color: var(--text-color); background: rgba(255,255,255,0.05); }
+
+        .credits {
+            position: absolute; bottom: 30px; font-size: 0.75rem;
+            color: #444; font-family: monospace; text-transform: uppercase; z-index: 10;
+        }
+        .credits .role { color: var(--accent-color); }
+
+        /* --- MODAL (Registration) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 100;
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+        .modal {
+            background: #141416;
+            width: 90%; max-width: 400px;
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid #333;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            transform: translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .modal-overlay.active .modal { transform: translateY(0); }
+
+        .modal h2 {
+            font-family: var(--font-display);
+            font-size: 1.5rem; text-transform: uppercase;
+            margin-bottom: 20px; color: #fff;
+        }
+
+        .input-group { margin-bottom: 15px; text-align: left; }
+        
+        .input-group label {
+            display: block; font-size: 0.75rem; color: var(--sub-text);
+            margin-bottom: 6px; font-weight: 700; letter-spacing: 0.5px;
+        }
+
+        .input-field {
+            width: 100%; padding: 14px;
+            background: var(--input-bg);
+            border: 1px solid #333;
+            color: #fff; border-radius: 8px;
+            font-family: var(--font-main);
+            transition: 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: var(--accent-color);
+            background: #1e1e22;
+        }
+
+        .close-btn {
+            position: absolute; top: 20px; right: 20px;
+            background: none; border: none; color: #555;
+            font-size: 1.5rem; cursor: pointer;
+        }
+        .close-btn:hover { color: #fff; }
+
+        /* Loader */
+        .loader {
+            display: none; width: 18px; height: 18px;
+            border: 2px solid #000; border-bottom-color: transparent;
+            border-radius: 50%; display: inline-block;
+            animation: rotation 1s linear infinite; margin-right: 8px;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Toast */
+        .toast {
+            position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #1e1e20; border-left: 4px solid var(--accent-color);
+            color: #fff; padding: 16px 24px; border-radius: 4px;
+            font-size: 0.9rem; z-index: 200;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; align-items: center; gap: 12px;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.error { border-left-color: #ff3333; }
+        .toast.success { border-left-color: #00ff88; }
+
+    </style>
+</head>
+<body>
+
+    <div class="glow-spot"></div>
+
+    <div class="container" id="main-content">
+        <div class="logo-box">
+            <h1>МЕМАСИК <br> 2.0</h1>
+            <div class="version-tag">BETA</div>
+        </div>
+        
+        <p class="description">
+            Твоя ежедневная доза отборного контента.<br>
+            Врывайся в ленту, создавай тренды.
+        </p>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="openModal('register')">Залететь (Регистрация)</button>
+            <button class="btn btn-secondary" onclick="openModal('login')">Я уже здесь (Войти)</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <h2 id="modal-title">Регистрация</h2>
+            
+            <form id="auth-form" onsubmit="handleAuth(event)">
+                <div class="input-group" id="username-group">
+                    <label>НИКНЕЙМ</label>
+                    <input type="text" id="username" class="input-field" placeholder="vzzox_fan" autocomplete="off">
+                </div>
+
+                <div class="input-group">
+                    <label>E-MAIL</label>
+                    <input type="email" id="email" class="input-field" placeholder="you@memasik.com" required>
+                </div>
+
+                <div class="input-group">
+                    <label>ПАРОЛЬ</label>
+                    <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submit-btn">
+                    <span class="loader" id="btn-loader" style="display:none"></span>
+                    <span id="btn-text">Создать аккаунт</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="credits">
+        Owner: <span class="role">Hokan</span> // Dev: <span class="role">vzzox</span>
+    </div>
+
+    <div id="toast" class="toast">
+        <span id="toast-msg">Notification</span>
+    </div>
+
+    <script>
+        // --- SUPABASE SETUP ---
+        const SUPABASE_URL = 'https://hrrzpftxpafnavlljhum.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_G_N3CM1wO43fjgXMdZBFlg_1za3J227'; // Используем ключ из задания
+        
+        // Инициализация клиента
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // --- UI Logic ---
+        let currentMode = 'register'; // 'register' or 'login'
+
+        function openModal(mode) {
+            currentMode = mode;
+            const modalTitle = document.getElementById('modal-title');
+            const btnText = document.getElementById('btn-text');
+            const usernameGroup = document.getElementById('username-group');
+
+            if (mode === 'register') {
+                modalTitle.innerText = "РЕГИСТРАЦИЯ";
+                btnText.innerText = "СОЗДАТЬ АККАУНТ";
+                usernameGroup.style.display = "block";
+                document.getElementById('username').setAttribute('required', 'true');
+            } else {
+                modalTitle.innerText = "ВХОД";
+                btnText.innerText = "ВОЙТИ";
+                usernameGroup.style.display = "none";
+                document.getElementById('username').removeAttribute('required');
+            }
+
+            document.getElementById('auth-modal').classList.add('active');
+            document.getElementById('main-content').classList.add('blur');
+        }
+
+        function closeModal() {
+            document.getElementById('auth-modal').classList.remove('active');
+            document.getElementById('main-content').classList.remove('blur');
+        }
+
+        function showToast(msg, type = 'normal') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            
+            toastMsg.innerText = msg;
+            toast.className = 'toast show ' + type;
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function setLoading(isLoading) {
+            const btn = document.getElementById('submit-btn');
+            const loader = document.getElementById('btn-loader');
+            const text = document.getElementById('btn-text');
+
+            if (isLoading) {
+                btn.disabled = true;
+                loader.style.display = 'inline-block';
+                text.style.opacity = '0.5';
+            } else {
+                btn.disabled = false;
+                loader.style.display = 'none';
+                text.style.opacity = '1';
+            }
+        }
+
+        // --- AUTH LOGIC ---
+        async function handleAuth(e) {
+            e.preventDefault();
+            setLoading(true);
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const username = document.getElementById('username').value;
+
+            try {
+                if (currentMode === 'register') {
+                    // 1. Создаем пользователя в Auth
+                    const { data, error } = await supabase.auth.signUp({
+                        email: email,
+                        password: password
+                    });
+
+                    if (error) throw error;
+
+                    // 2. Создаем запись в Profiles (согласно схеме)
+                    // profiles.id ссылается на users.id (который возвращает Auth)
+                    if (data.user) {
+                        const { error: profileError } = await supabase
+                            .from('profiles')
+                            .insert([{
+                                id: data.user.id,
+                                username: username,
+                                display_name: username, // Пока используем ник как отображаемое имя
+                                created_at: new Date().toISOString()
+                            }]);
+
+                        if (profileError) {
+                            console.error('Profile creation failed:', profileError);
+                            // Не блокируем пользователя, но сообщаем в консоль
+                        }
+
+                        showToast('Аккаунт создан! Проверь почту.', 'success');
+                        closeModal();
+                    }
+
+                } else {
+                    // Логика Входа (Login)
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+
+                    if (error) throw error;
+
+                    showToast('С возвращением, легенда!', 'success');
+                    // Здесь можно сделать редирект: window.location.href = '/feed';
+                    closeModal();
+                }
+
+            } catch (err) {
+                showToast(err.message || 'Ошибка сервера', 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Mouse Parallax
+        document.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth - e.pageX * 2) / 100;
+            const y = (window.innerHeight - e.pageY * 2) / 100;
+            const spot = document.querySelector('.glow-spot');
+            spot.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+        });
+    </script>
+</body>
+</html>
