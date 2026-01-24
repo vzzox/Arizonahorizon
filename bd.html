@@ -2,89 +2,88 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>FINAL DEBUG</title>
+    <title>Memasik 2.0 | Release</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@900&display=swap" rel="stylesheet">
+    
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; padding: 20px; text-align: center; }
-        input { padding: 10px; width: 90%; margin: 5px 0; font-size: 16px; }
-        button { padding: 20px; width: 100%; background: #00ff00; color: #000; font-weight: bold; font-size: 18px; cursor: pointer; border: none; margin-top: 10px;}
-        #log { margin-top: 20px; border: 1px solid #fff; padding: 10px; min-height: 100px; white-space: pre-wrap; text-align: left; }
+        body { background: #111; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: #222; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; border: 1px solid #333; }
+        input { width: 100%; padding: 15px; margin-bottom: 10px; background: #000; border: 1px solid #444; color: #fff; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #ff5e00; color: #fff; border: none; border-radius: 8px; font-weight: 900; font-family: 'Unbounded'; cursor: pointer; text-transform: uppercase; }
+        button:hover { background: #ff7b00; }
+        #log { margin-top: 20px; color: #00ff88; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; }
+        .error { color: #ff3333 !important; }
     </style>
 </head>
 <body>
 
-    <h1>ФИНАЛЬНЫЙ ТЕСТ</h1>
-    <input type="email" id="email" placeholder="test@mail.com" value="test_user_999@mail.com">
-    <input type="password" id="password" placeholder="password" value="123456">
-    
-    <button id="myBtn">СОЗДАТЬ АККАУНТ</button>
+    <div class="card" id="reg-panel">
+        <h2 style="font-family: 'Unbounded'; margin-top: 0;">РЕГИСТРАЦИЯ</h2>
+        <input type="text" id="username" placeholder="Никнейм (Login)" autocomplete="off">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Пароль">
+        <button id="btn">Создать Аккаунт</button>
+    </div>
 
-    <h3>Журнал событий:</h3>
-    <div id="log">Загрузка страницы...</div>
+    <div id="success-panel" class="card" style="display:none; border-color: #00ff88;">
+        <h1 style="color: #00ff88; font-family: 'Unbounded';">УСПЕХ!</h1>
+        <p>Аккаунт создан.</p>
+        <p>Профиль записан автоматически.</p>
+        <p>Проверяй таблицу Profiles в Supabase.</p>
+        <button onclick="location.reload()">Еще раз</button>
+    </div>
+
+    <div id="log"></div>
 
     <script>
-        // 1. Проверка жизни JS сразу при старте
-        alert("JS ЗАПУСТИЛСЯ! Закрой это окно.");
-        
-        const logBox = document.getElementById('log');
-        
-        function log(msg) {
-            logBox.innerText += "\n> " + msg;
-            console.log(msg);
-        }
-
-        log("Скрипт загружен. Жду нажатия кнопки...");
-
-        // Данные
+        // Твои настройки
         const SUPABASE_URL = 'https://hrrzpftxpafnavlljhum.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNzc1NzYsImV4cCI6MjA4NDg1MzU3Nn0.whczAQ9mUOJqT_hMEujiQnFnEuVi27iEPf8VWvCceFE';
 
-        // 2. Привязываем кнопку жестким методом
-        document.getElementById('myBtn').addEventListener('click', async function() {
-            log("!!! КНОПКА НАЖАТА !!!");
+        const logBox = document.getElementById('log');
+
+        function log(msg, isErr = false) {
+            logBox.innerText = msg;
+            if (isErr) logBox.classList.add('error');
+            console.log(msg);
+        }
+
+        document.getElementById('btn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const username = document.getElementById('username').value.trim();
+
+            if (!email || !password || !username) return log("Заполни все поля!", true);
+
+            log("Регистрирую...");
             
-            // Проверка библиотеки
-            if (typeof window.supabase === 'undefined') {
-                log("ОШИБКА: Библиотека Supabase не загрузилась. Проверь интернет.");
-                return;
-            }
-
             try {
-                log("Подключаюсь к Supabase...");
                 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
 
-                log(`Пробую регистрировать: ${email}`);
-
-                // Запрос
+                // Мы передаем username в options -> data. 
+                // Триггер в базе данных увидит это и сам создаст профиль.
                 const { data, error } = await supabase.auth.signUp({
                     email: email,
-                    password: password
+                    password: password,
+                    options: {
+                        data: {
+                            username: username
+                        }
+                    }
                 });
 
-                if (error) {
-                    log("ОШИБКА ОТ СЕРВЕРА: " + error.message);
-                } else {
-                    log("УСПЕХ! Юзер создан. ID: " + (data.user?.id || 'null'));
-                    
-                    if (data.user) {
-                        log("Создаю профиль...");
-                        const { error: profErr } = await supabase.from('profiles').insert([{
-                            id: data.user.id,
-                            username: "User" + Date.now(),
-                            display_name: "Tester"
-                        }]);
-                        
-                        if (profErr) log("Ошибка профиля: " + profErr.message);
-                        else log("ПРОФИЛЬ ЗАПИСАН! ВСЕ РАБОТАЕТ.");
-                    }
+                if (error) throw error;
+
+                if (data.user) {
+                    log("ГОТОВО! ID: " + data.user.id);
+                    document.getElementById('reg-panel').style.display = 'none';
+                    document.getElementById('success-panel').style.display = 'block';
                 }
 
-            } catch (e) {
-                log("КРИТИЧЕСКАЯ ОШИБКА КОДА: " + e.message);
+            } catch (err) {
+                log("ОШИБКА: " + err.message, true);
             }
         });
     </script>
