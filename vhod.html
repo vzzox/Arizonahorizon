@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мемасика 2.0 | Вход</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --bg-color: #0f0f11;
+            --card-bg: #141416;
+            --text-color: #ffffff;
+            --accent-color: #ff5e00;
+            --input-bg: #1a1a1d;
+            --border-color: #333;
+            --font-main: 'Manrope', sans-serif;
+            --font-display: 'Unbounded', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Текстура шума */
+        body::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            opacity: 0.4; pointer-events: none; z-index: 0;
+        }
+
+        /* Свечение */
+        .glow {
+            position: absolute; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(255, 94, 0, 0.15) 0%, rgba(15, 15, 17, 0) 70%);
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 1; pointer-events: none;
+        }
+
+        /* Карточка */
+        .login-card {
+            position: relative; z-index: 10;
+            background: var(--card-bg);
+            width: 90%; max-width: 420px;
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: 2rem; text-transform: uppercase;
+            margin-bottom: 5px; text-align: center;
+        }
+        .subtitle { color: #666; font-size: 0.9rem; text-align: center; margin-bottom: 30px; }
+
+        /* Поля */
+        .input-group { margin-bottom: 15px; }
+        .input-group label {
+            display: block; font-size: 0.75rem; color: #888; margin-bottom: 8px;
+            font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+        }
+        .input-field {
+            width: 100%; padding: 16px; background: var(--input-bg);
+            border: 1px solid var(--border-color); color: #fff;
+            border-radius: 8px; font-family: var(--font-main); font-size: 1rem;
+            transition: 0.2s;
+        }
+        .input-field:focus { border-color: var(--accent-color); background: #1e1e20; }
+
+        /* Кнопка */
+        .btn-submit {
+            display: flex; justify-content: center; align-items: center;
+            width: 100%; padding: 18px; margin-top: 15px;
+            background: #fff; color: #000;
+            font-family: var(--font-display); font-size: 1rem;
+            border: none; border-radius: 8px; cursor: pointer;
+            text-transform: uppercase; transition: 0.3s;
+            text-decoration: none;
+        }
+        .btn-submit:hover { background: var(--accent-color); transform: translateY(-2px); }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Нижняя ссылка */
+        .bottom-link {
+            text-align: center; margin-top: 20px; font-size: 0.9rem; color: #666;
+        }
+        .bottom-link a { color: #fff; text-decoration: none; font-weight: 700; }
+        .bottom-link a:hover { color: var(--accent-color); }
+
+        /* Сообщения */
+        .msg-box {
+            text-align: center; margin-top: 15px; font-size: 0.9rem; min-height: 20px; white-space: pre-wrap;
+        }
+        .error { color: #ff4444; }
+
+        /* Экран успеха */
+        #success-view { display: none; text-align: center; animation: fadeIn 0.5s ease; }
+        .big-icon { font-size: 4rem; color: #00ff88; margin-bottom: 20px; display: block;}
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .credits {
+            position: absolute; bottom: 20px; width: 100%; text-align: center;
+            font-size: 0.7rem; color: #444; font-family: monospace; text-transform: uppercase; z-index: 10;
+        }
+        .credits span { color: var(--accent-color); }
+    </style>
+</head>
+<body>
+
+    <div class="glow"></div>
+
+    <div class="login-card">
+        
+        <div id="form-view">
+            <h1>Вход</h1>
+            <div class="subtitle">С возвращением, легенда.</div>
+
+            <form onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label>E-mail</label>
+                    <input type="email" id="email" class="input-field" placeholder="mail@memasik.com" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Пароль</label>
+                    <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn-submit" id="btn-submit">Войти</button>
+                
+                <div id="message" class="msg-box"></div>
+
+                <div class="bottom-link">
+                    Нет аккаунта? <a href="register.html">Создать</a>
+                </div>
+            </form>
+        </div>
+
+        <div id="success-view">
+            <span class="big-icon">🔓</span>
+            <h1>ДОСТУП РАЗРЕШЕН</h1>
+            <div class="subtitle">
+                Ты в системе.<br>
+                Загружаем контент...
+            </div>
+            <a href="/" class="btn-submit">Перейти на главную</a>
+        </div>
+
+    </div>
+
+    <div class="credits">Owner: <span>Hokan</span> // Dev: <span>vzzox</span></div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const SUPABASE_URL = 'https://hrrzpftxpafnavlljhum.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNzc1NzYsImV4cCI6MjA4NDg1MzU3Nn0.whczAQ9mUOJqT_hMEujiQnFnEuVi27iEPf8VWvCceFE';
+        
+        // --- LOGIC ---
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btn-submit');
+            const msg = document.getElementById('message');
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Блокируем интерфейс
+            btn.disabled = true;
+            btn.innerText = "Проверка...";
+            msg.innerText = "";
+            msg.className = "msg-box";
+
+            try {
+                if (typeof window.supabase === 'undefined') {
+                    throw new Error("Ошибка: Supabase JS не загрузился.");
+                }
+
+                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+                // АВТОРИЗАЦИЯ
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) throw error;
+
+                // УСПЕХ
+                if (data.session) {
+                    console.log("Logged in:", data.user.id);
+                    document.getElementById('form-view').style.display = 'none';
+                    document.getElementById('success-view').style.display = 'block';
+                    
+                    // (Опционально) Можно сохранить сессию или сразу перекинуть
+                    // setTimeout(() => window.location.href = "/", 2000);
+                }
+
+            } catch (err) {
+                console.error(err);
+                msg.className = "msg-box error";
+                
+                let errorText = "Неверный логин или пароль.";
+                if (err.message.includes("network")) errorText = "Ошибка сети. Проверь интернет.";
+                if (err.message.includes("rate limit")) errorText = "Слишком много попыток. Подожди.";
+                if (err.message.includes("Email not confirmed")) errorText = "Почта не подтверждена! Проверь Inbox.";
+
+                msg.innerText = errorText;
+                
+                btn.disabled = false;
+                btn.innerText = "Войти";
+            }
+        }
+    </script>
+</body>
+</html>
