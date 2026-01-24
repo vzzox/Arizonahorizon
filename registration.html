@@ -35,13 +35,14 @@
             position: relative;
         }
 
-        /* Текстура */
+        /* Текстура шума */
         body::before {
             content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
             opacity: 0.4; pointer-events: none; z-index: 0;
         }
 
+        /* Оранжевое свечение */
         .glow {
             position: absolute; width: 600px; height: 600px;
             background: radial-gradient(circle, rgba(255, 94, 0, 0.15) 0%, rgba(15, 15, 17, 0) 70%);
@@ -67,7 +68,7 @@
         }
         .subtitle { color: #666; font-size: 0.9rem; text-align: center; margin-bottom: 30px; }
 
-        /* Inputs */
+        /* Поля ввода */
         .input-group { margin-bottom: 15px; }
         .input-group label {
             display: block; font-size: 0.75rem; color: #888; margin-bottom: 8px;
@@ -81,25 +82,26 @@
         }
         .input-field:focus { border-color: var(--accent-color); background: #1e1e20; }
 
-        /* Button */
+        /* Кнопка */
         .btn-submit {
+            display: flex; justify-content: center; align-items: center;
             width: 100%; padding: 18px; margin-top: 15px;
             background: #fff; color: #000;
             font-family: var(--font-display); font-size: 1rem;
             border: none; border-radius: 8px; cursor: pointer;
             text-transform: uppercase; transition: 0.3s;
+            text-decoration: none; /* Убираем подчеркивание, если это ссылка */
         }
         .btn-submit:hover { background: var(--accent-color); transform: translateY(-2px); }
         .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* Error/Success Messages */
+        /* Сообщения */
         .msg-box {
             text-align: center; margin-top: 15px; font-size: 0.9rem; min-height: 20px; white-space: pre-wrap;
         }
         .error { color: #ff4444; }
-        .success { color: #00ff88; }
-
-        /* Success View */
+        
+        /* Экран успеха */
         #success-view { display: none; text-align: center; animation: fadeIn 0.5s ease; }
         .big-icon { font-size: 4rem; color: #00ff88; margin-bottom: 20px; display: block;}
         
@@ -148,10 +150,10 @@
             <h1>ГОТОВО!</h1>
             <div class="subtitle">
                 Аккаунт создан.<br>
-                Профиль записан автоматически.<br>
-                Залетай в движ.
+                Профиль записан.<br>
+                Врывайся в движ.
             </div>
-            <button class="btn-submit" onclick="window.location.reload()">На главную</button>
+            <a href="/" class="btn-submit">На главную</a>
         </div>
 
     </div>
@@ -173,52 +175,53 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
-            // UI Reset
+            // Блокируем интерфейс
             btn.disabled = true;
             btn.innerText = "Загрузка...";
             msg.innerText = "";
             msg.className = "msg-box";
 
             try {
-                // Проверка загрузки библиотеки
+                // Проверка библиотеки
                 if (typeof window.supabase === 'undefined') {
-                    throw new Error("Библиотека Supabase не загрузилась. Проверь интернет.");
+                    throw new Error("Ошибка: Supabase JS не загрузился. Проверь VPN или AdBlock.");
                 }
 
                 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-                // 1. Регистрация с передачей Никнейма в мета-данные
-                // База данных (Триггер) сама создаст профиль на основе этих данных
+                // РЕГИСТРАЦИЯ
+                // Передаем username в метаданных (options -> data).
+                // База данных (Триггер) увидит это и сама создаст профиль. Никаких insert вручную!
                 const { data, error } = await supabase.auth.signUp({
                     email: email,
                     password: password,
                     options: {
                         data: {
-                            username: username // <-- Это уйдет в БД автоматически
+                            username: username 
                         }
                     }
                 });
 
                 if (error) throw error;
 
-                // 2. Если Успех
+                // УСПЕХ
                 if (data.user) {
-                    console.log("User created:", data.user.id);
+                    console.log("Success! User ID:", data.user.id);
                     document.getElementById('form-view').style.display = 'none';
                     document.getElementById('success-view').style.display = 'block';
                 } else {
-                    // Если user null, но ошибки нет (редкий кейс, но бывает при подтверждении почты)
-                    msg.innerText = "Проверь почту для подтверждения!";
+                    msg.innerText = "Аккаунт создан, но требует подтверждения почты.";
                 }
 
             } catch (err) {
                 console.error(err);
                 msg.className = "msg-box error";
                 
-                // Перевод ошибок для красоты
+                // Перевод частых ошибок на русский
                 let errorText = err.message;
                 if (errorText.includes("already registered")) errorText = "Этот E-mail уже занят.";
-                if (errorText.includes("password")) errorText = "Пароль слишком слабый.";
+                if (errorText.includes("password")) errorText = "Пароль слишком слабый (минимум 6 символов).";
+                if (errorText.includes("rate limit")) errorText = "Слишком много попыток. Подожди немного.";
                 
                 msg.innerText = errorText;
                 
