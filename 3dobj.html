@@ -3,294 +3,657 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VZZOX CYBERNETICS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Rajdhani:wght@300;600&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+    <title>VZZOX // TERMINAL_01</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
     <style>
-        /* ОСНОВНЫЕ НАСТРОЙКИ СТРАНИЦЫ */
+        /* --- CORE STYLES --- */
+        :root {
+            --c-dark: #050505;
+            --c-accent: #ff003c; /* Cyberpunk Red */
+            --c-sec: #00f3ff; /* Neon Cyan */
+            --c-text: #e0e0e0;
+            --f-head: 'Orbitron', sans-serif;
+            --f-body: 'Rajdhani', sans-serif;
+            --f-mono: 'Share Tech Mono', monospace;
+        }
+
+        * { box-sizing: border-box; }
+
         body {
             margin: 0;
-            background-color: #020205; /* Очень темный фон, если 3D не загрузится */
-            color: #ffffff;
-            font-family: 'Rajdhani', sans-serif;
-            overflow-x: hidden; /* Убираем горизонтальный скролл */
-        }
-
-        /* КАНВАС ДЛЯ 3D - ФИКСИРОВАННЫЙ ФОН */
-        #canvas-container {
-            position: fixed; /* Самое важное: фиксируем фон */
-            top: 0;
-            left: 0;
+            padding: 0;
+            background-color: var(--c-dark);
+            color: var(--c-text);
+            font-family: var(--f-body);
+            overflow: hidden; /* Custom Scroll implementation */
             width: 100vw;
             height: 100vh;
-            z-index: -1; /* Убираем на задний план */
-            background: radial-gradient(circle at center, #1a0b2e 0%, #000000 80%);
         }
 
-        /* КОНТЕНТ САЙТА (Скроллится поверх 3D) */
-        .content-wrapper {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-        }
-
-        /* Секции сайта */
-        section {
-            min-height: 100vh; /* Каждая секция минимум во весь экран */
+        /* --- LOADING SCREEN --- */
+        #loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 9999;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 50px 10vw;
-            box-sizing: border-box;
-            border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+            align-items: center;
+            transition: opacity 1s ease-out;
+        }
+        .loader-text {
+            font-family: var(--f-mono);
+            color: var(--c-accent);
+            font-size: 24px;
+            animation: blink 0.5s infinite;
+        }
+        .loader-bar {
+            width: 300px; height: 2px;
+            background: #222;
+            margin-top: 20px;
+            position: relative;
+        }
+        .loader-progress {
+            position: absolute; top: 0; left: 0; height: 100%;
+            background: var(--c-sec);
+            width: 0%;
+            transition: width 0.2s;
         }
 
-        /* Типографика */
-        h1.main-title {
-            font-family: 'Syncopate', sans-serif;
-            font-size: 5rem;
-            font-weight: 900;
-            margin: 0;
-            line-height: 1;
-            letter-spacing: -2px;
-            /* Градиентный текст */
-            background: linear-gradient(45deg, #fff, #00f0ff, #ff0055);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+        /* --- WEBGL CANVAS --- */
+        #gl-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
         }
 
-        h2 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 3rem;
-            color: #00f0ff;
-            margin-bottom: 20px;
+        /* --- UI OVERLAY (HUD) --- */
+        .ui-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            padding: 40px;
+        }
+        .hud-corner {
+            position: absolute;
+            font-family: var(--f-mono);
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(2px);
+        }
+        .tl { top: 30px; left: 30px; border-left: 3px solid var(--c-accent); }
+        .tr { top: 30px; right: 30px; text-align: right; border-right: 3px solid var(--c-sec); pointer-events: auto; cursor: pointer;}
+        .bl { bottom: 30px; left: 30px; display: flex; gap: 20px; }
+        .br { bottom: 30px; right: 30px; }
+
+        /* --- SCROLL CONTENT --- */
+        #scroll-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            overflow: hidden;
+        }
+
+        section {
+            position: relative;
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 10vw;
+            pointer-events: none; /* Let clicks pass to nowhere unless on text */
+        }
+
+        .content-block {
+            pointer-events: auto;
+            max-width: 600px;
+            z-index: 5;
+        }
+
+        h1 {
+            font-family: var(--f-head);
+            font-size: 6vw;
+            line-height: 0.9;
+            margin: 0 0 20px 0;
+            text-transform: uppercase;
+            mix-blend-mode: exclusion;
+        }
+
+        h1 span {
+            display: block;
+            color: transparent;
+            -webkit-text-stroke: 1px var(--c-text);
+        }
+
+        h1 span.fill {
+            color: var(--c-text);
+            -webkit-text-stroke: 0;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
         }
 
         p {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             line-height: 1.6;
-            max-width: 600px;
-            color: rgba(255, 255, 255, 0.8);
-            background: rgba(0,0,0,0.5); /* Полупрозрачная подложка для читаемости */
+            color: #aaa;
+            background: linear-gradient(90deg, rgba(0,0,0,0.8), transparent);
             padding: 20px;
-            border-left: 3px solid #ff0055;
-            backdrop-filter: blur(5px);
+            border-left: 2px solid var(--c-sec);
         }
 
-        /* Отступы для секций, чтобы текст не наезжал на центральные 3D объекты */
-        .section-right { align-items: flex-end; text-align: right; }
-        .section-left { align-items: flex-start; }
+        .btn-glitch {
+            margin-top: 30px;
+            padding: 15px 40px;
+            background: transparent;
+            border: 1px solid var(--c-accent);
+            color: var(--c-accent);
+            font-family: var(--f-mono);
+            font-size: 1rem;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+        .btn-glitch:hover {
+            background: var(--c-accent);
+            color: #000;
+            box-shadow: 0 0 20px var(--c-accent);
+        }
 
+        /* --- UTILS --- */
+        .right-align { justify-content: flex-end; text-align: right; }
+        .right-align p { 
+            background: linear-gradient(-90deg, rgba(0,0,0,0.8), transparent);
+            border-left: none; border-right: 2px solid var(--c-accent);
+            margin-left: auto;
+        }
+        .center-align { justify-content: center; text-align: center; }
+        .center-align p { border: none; background: rgba(0,0,0,0.8); margin: 0 auto;}
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* DEBUG/STATS */
+        #stats { position: absolute; top: 0; left: 0; z-index: 100; }
     </style>
 </head>
 <body>
 
-    <div id="canvas-container"></div>
-
-    <div class="content-wrapper">
-        
-        <section class="section-left">
-            <h1 class="main-title">VZZOX<br>SYSTEMS</h1>
-            <p>Добро пожаловать в цифровую нейросеть. Листайте вниз, чтобы исследовать структуру данных.</p>
-        </section>
-
-        <section class="section-right" style="justify-content: flex-start; padding-top: 20vh;">
-            <h2>ОРГАНИЧЕСКИЙ СИНТЕЗ</h2>
-            <p>Мы моделируем сложные биологические структуры. Цифровой "костный мозг" сети, генерирующий новые данные в реальном времени. Обратите внимание на центральный объект.</p>
-        </section>
-
-        <section class="section-left">
-            <h2>КИБЕР-АРХИТЕКТУРА</h2>
-            <p>Вместо старых костей — новые полигоны. Структурные узлы, напоминающие древние артефакты, переосмысленные в кремнии и свете. Основа нашей вычислительной мощности.</p>
-        </section>
-
-        <section class="section-center" style="align-items: center; text-align: center;">
-            <h1 class="main-title" style="font-size: 3rem;">VZZOX<br>ONLINE</h1>
-            <p style="border: none; background: none;">Достигнут конец потока данных.</p>
-        </section>
-
+    <div id="loader">
+        <div class="loader-text">INITIALIZING VZZOX PROTOCOL...</div>
+        <div class="loader-bar"><div class="loader-progress" id="load-bar"></div></div>
     </div>
+
+    <div class="ui-layer">
+        <div class="hud-corner tl">
+            SYS: ONLINE<br>
+            FPS: <span id="fps-counter">60</span><br>
+            NET: SECURE
+        </div>
+        <div class="hud-corner tr">
+            MENU // DISCONNECT
+        </div>
+        <div class="hud-corner bl">
+            <span>SCROLL TO NAVIGATE</span>
+            <span>///</span>
+            <span>DATA STREAM: ACTIVE</span>
+        </div>
+        <div class="hud-corner br">
+            COORD: <span id="coord-disp">000.000</span>
+        </div>
+    </div>
+
+    <div id="gl-container"></div>
+
+    <main id="scroll-container">
+        
+        <section class="section-hero">
+            <div class="content-block">
+                <h1>VZZOX<br><span class="fill">SYSTEMS</span></h1>
+                <p>Архитектура цифрового бессмертия. Мы создаем будущее, которого вы боитесь, но которого вы жаждете.</p>
+                <button class="btn-glitch">INITIATE SEQUENCE</button>
+            </div>
+        </section>
+
+        <section class="right-align">
+            <div class="content-block">
+                <h1>SYNAPTIC<br><span class="fill">FLUID</span></h1>
+                <p>Проект "Костный Мозг". Био-цифровой субстрат. Генерация нейронных связей в реальном времени. Это не анимация, это симуляция жизни.</p>
+            </div>
+        </section>
+
+        <section>
+            <div class="content-block">
+                <h1>THE<br><span class="fill">RELIC</span></h1>
+                <p>Артефакт 09. Череп предтеч. Восстановленная геометрия памяти. Структурный анализ завершен на 98%.</p>
+            </div>
+        </section>
+
+        <section class="center-align">
+            <div class="content-block">
+                <h1 style="font-size: 4vw">JOIN THE<br><span class="fill">COLLECTIVE</span></h1>
+                <p>Вы видели достаточно. Ваша сессия записана.<br>© 2026 VZZOX INDUSTRIES.</p>
+            </div>
+        </section>
+
+    </main>
 
     <script type="module">
         import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
-        // Импортируем загрузчики для шрифтов
         import { FontLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/FontLoader.js';
         import { TextGeometry } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/geometries/TextGeometry.js';
+        import { EffectComposer } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/UnrealBloomPass.js';
 
-        // --- НАСТРОЙКА СЦЕНЫ ---
-        const scene = new THREE.Scene();
-        // Глубокий черный туман
-        scene.fog = new THREE.Fog(0x000000, 10, 50);
+        // =========================================================================
+        // GLSL SHADERS (IN-LINE FOR SINGLE FILE DEPLOYMENT)
+        // =========================================================================
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 20;
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-        // --- СВЕТ ---
-        const ambientLight = new THREE.AmbientLight(0x404040); // Мягкий свет
-        scene.add(ambientLight);
-        // Точечные источники света для бликов
-        const pointLight1 = new THREE.PointLight(0x00f0ff, 2, 100);
-        pointLight1.position.set(10, 10, 10);
-        scene.add(pointLight1);
-        const pointLight2 = new THREE.PointLight(0xff0055, 2, 100);
-        pointLight2.position.set(-10, -10, 10);
-        scene.add(pointLight2);
-
-
-        // --- ОБЪЕКТ 1: 3D ТЕКСТ "VZZOX" ---
-        const fontLoader = new FontLoader();
-        // Загружаем стандартный шрифт Three.js из CDN
-        fontLoader.load('https://cdn.skypack.dev/three@0.136.0/examples/fonts/helvetiker_bold.typeface.json', (font) => {
-            const textGeo = new TextGeometry('VZZOX', {
-                font: font,
-                size: 2, // Размер текста
-                height: 0.5, // Толщина
-                curveSegments: 12,
-                bevelEnabled: true,
-                bevelThickness: 0.03,
-                bevelSize: 0.02,
-                bevelOffset: 0,
-                bevelSegments: 5
-            });
-
-            // Материал для текста (хромированный, отражающий)
-            const textMaterial = new THREE.MeshStandardMaterial({
-                color: 0xffffff,
-                metalness: 0.8,
-                roughness: 0.2,
-                emissive: 0x222222
-            });
-
-            const textMesh = new THREE.Mesh(textGeo, textMaterial);
-            // Центрируем текст
-            textGeo.computeBoundingBox();
-            const centerOffset = - 0.5 * ( textGeo.boundingBox.max.x - textGeo.boundingBox.min.x );
-            textMesh.position.x = centerOffset;
-            textMesh.position.y = 5; // Поднимаем повыше
-            textMesh.position.z = -5;
+        // 1. ORGANIC NOISE SHADER (FOR "BONE MARROW")
+        const organicVertexShader = `
+            uniform float uTime;
+            uniform float uScroll;
+            varying vec2 vUv;
+            varying float vDisplacement;
             
-            scene.add(textMesh);
-
-            // Добавляем тексту анимацию вращения в общий цикл
-            window.textMesh = textMesh;
-        });
-
-
-        // --- ОБЪЕКТ 2: "ОРГАНИЧЕСКАЯ СТРУКТУРА" (Вместо костного мозга) ---
-        // Используем сложный TorusKnot с "мясным" материалом
-        const organicGeo = new THREE.TorusKnotGeometry(4, 1.5, 150, 20, 2, 3);
-        const organicMat = new THREE.MeshPhongMaterial({
-            color: 0xaa0033, // Кроваво-красный
-            emissive: 0x220011,
-            shininess: 50,
-            wireframe: false,
-            flatShading: false 
-        });
-        // Добавим второй слой wireframe поверх для технологичности
-        const organicWireMat = new THREE.MeshBasicMaterial({ color: 0xff0055, wireframe: true, transparent: true, opacity: 0.3 });
-        
-        const organicMesh = new THREE.Mesh(organicGeo, organicMat);
-        const organicWireMesh = new THREE.Mesh(organicGeo, organicWireMat);
-        
-        const organicGroup = new THREE.Group();
-        organicGroup.add(organicMesh);
-        organicGroup.add(organicWireMesh);
-        organicGroup.position.set(0, -10, -15); // Опускаем вниз
-        scene.add(organicGroup);
-
-
-        // --- ОБЪЕКТ 3: "КИБЕР-ЧЕРЕП" (Структурный объект) ---
-        // Вместо черепа - сложная икосаэдрическая структура
-        const cyberGeo = new THREE.IcosahedronGeometry(3, 1);
-        const cyberMat = new THREE.MeshStandardMaterial({
-            color: 0x111111,
-            metalness: 0.9,
-            roughness: 0.1,
-            wireframe: true
-        });
-        
-        // Создаем много копий этого объекта
-        const cyberGroup = new THREE.Group();
-        for(let i=0; i<5; i++) {
-             const mesh = new THREE.Mesh(cyberGeo, cyberMat);
-             mesh.position.set(
-                 (Math.random() - 0.5) * 30,
-                 (Math.random() - 0.5) * 30,
-                 (Math.random() - 0.5) * 10 - 20
-             );
-             mesh.rotation.set(Math.random(), Math.random(), Math.random());
-             cyberGroup.add(mesh);
-        }
-        scene.add(cyberGroup);
-
-        // --- ФОНОВЫЕ ЧАСТИЦЫ ---
-        const particlesGeo = new THREE.BufferGeometry();
-        const particlesCount = 2000;
-        const posArray = new Float32Array(particlesCount * 3);
-        for(let i = 0; i < particlesCount * 3; i++) {
-            posArray[i] = (Math.random() - 0.5) * 100; // Разбрасываем широко
-        }
-        particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        const particlesMat = new THREE.PointsMaterial({ size: 0.1, color: 0xffffff, transparent: true, opacity: 0.5 });
-        const particles = new THREE.Points(particlesGeo, particlesMat);
-        scene.add(particles);
-
-
-        // --- АНИМАЦИЯ И СКРОЛЛ ---
-        const clock = new THREE.Clock();
-        let scrollY = 0;
-
-        // Слушаем скролл страницы
-        window.addEventListener('scroll', () => {
-            scrollY = window.scrollY;
-        });
-
-        function animate() {
-            const elapsedTime = clock.getElapsedTime();
-
-            // Анимация текста (если загрузился)
-            if (window.textMesh) {
-                window.textMesh.rotation.y = Math.sin(elapsedTime * 0.5) * 0.2; // Легкое покачивание
+            // Simplex Noise Function (Simplified)
+            vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+            vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+            vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+            vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+            float snoise(vec3 v) {
+                const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
+                const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+                vec3 i  = floor(v + dot(v, C.yyy) );
+                vec3 x0 = v - i + dot(i, C.xxx) ;
+                vec3 g = step(x0.yzx, x0.xyz);
+                vec3 l = 1.0 - g;
+                vec3 i1 = min( g.xyz, l.zxy );
+                vec3 i2 = max( g.xyz, l.zxy );
+                vec3 x1 = x0 - i1 + C.xxx;
+                vec3 x2 = x0 - i2 + C.yyy;
+                vec3 x3 = x0 - D.yyy;
+                i = mod289(i);
+                vec4 p = permute( permute( permute(
+                        i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+                        + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
+                        + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+                float n_ = 0.142857142857;
+                vec3  ns = n_ * D.wyz - D.xzx;
+                vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+                vec4 x_ = floor(j * ns.z);
+                vec4 y_ = floor(j - 7.0 * x_ );
+                vec4 x = x_ *ns.x + ns.yyyy;
+                vec4 y = y_ *ns.x + ns.yyyy;
+                vec4 h = 1.0 - abs(x) - abs(y);
+                vec4 b0 = vec4( x.xy, y.xy );
+                vec4 b1 = vec4( x.zw, y.zw );
+                vec4 s0 = floor(b0)*2.0 + 1.0;
+                vec4 s1 = floor(b1)*2.0 + 1.0;
+                vec4 sh = -step(h, vec4(0.0));
+                vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+                vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+                vec3 p0 = vec3(a0.xy,h.x);
+                vec3 p1 = vec3(a0.zw,h.y);
+                vec3 p2 = vec3(a1.xy,h.z);
+                vec3 p3 = vec3(a1.zw,h.w);
+                vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+                p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+                vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+                m = m * m;
+                return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
             }
 
-            // Анимация органической структуры
-            organicGroup.rotation.x = elapsedTime * 0.2;
-            organicGroup.rotation.y = elapsedTime * 0.1;
-            // Она пульсирует
-            const scale = 1 + Math.sin(elapsedTime) * 0.05;
-            organicGroup.scale.set(scale, scale, scale);
+            void main() {
+                vUv = uv;
+                // Complex noise layering
+                float noise = snoise(position * 1.5 + uTime * 0.5);
+                float noise2 = snoise(position * 4.0 - uTime * 0.2);
+                
+                vDisplacement = noise * 0.6 + noise2 * 0.2;
+                
+                vec3 newPos = position + normal * vDisplacement * (0.5 + sin(uTime)*0.1);
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
+            }
+        `;
 
-            // Анимация кибер-структур
-            cyberGroup.children.forEach((mesh, i) => {
-                mesh.rotation.x += 0.01 * (i + 1);
-                mesh.rotation.y += 0.02;
-            });
+        const organicFragmentShader = `
+            uniform float uTime;
+            varying float vDisplacement;
+            varying vec2 vUv;
 
-            // Движение частиц
-            particles.rotation.y = elapsedTime * 0.05;
+            void main() {
+                // Color ramp based on displacement
+                vec3 colorDark = vec3(0.1, 0.0, 0.05); // Deep red
+                vec3 colorLight = vec3(1.0, 0.0, 0.3); // Bright pink/red
+                vec3 colorHighlight = vec3(0.0, 0.9, 1.0); // Cyan highlights
 
-            // --- САМОЕ ВАЖНОЕ: СВЯЗЬ СКРОЛЛА И 3D ---
-            // Двигаем камеру вниз при скролле
-            camera.position.y = -scrollY * 0.02; 
-            // Немного вращаем сцену при скролле для динамики
-            scene.rotation.y = scrollY * 0.0005;
+                float mixVal = smoothstep(-0.5, 0.8, vDisplacement);
+                vec3 finalColor = mix(colorDark, colorLight, mixVal);
+                
+                // Add "veins"
+                if(vDisplacement > 0.4 && vDisplacement < 0.45) {
+                    finalColor = colorHighlight;
+                }
 
-            renderer.render(scene, camera);
-            requestAnimationFrame(animate);
+                // Rim light effect
+                gl_FragColor = vec4(finalColor, 0.9);
+            }
+        `;
+
+        // 2. HOLOGRAM SHADER (FOR "SKULL")
+        const holoVertexShader = `
+            varying vec2 vUv;
+            varying vec3 vPos;
+            varying vec3 vNormal;
+            void main() {
+                vUv = uv;
+                vPos = position;
+                vNormal = normal;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const holoFragmentShader = `
+            uniform float uTime;
+            varying vec2 vUv;
+            varying vec3 vPos;
+            varying vec3 vNormal;
+
+            void main() {
+                // Scanlines
+                float scanline = sin(vPos.y * 50.0 + uTime * 5.0) * 0.5 + 0.5;
+                
+                // Fresnal / Rim
+                vec3 viewDir = vec3(0.0, 0.0, 1.0);
+                float fresnel = pow(1.0 - dot(vNormal, viewDir), 2.0);
+
+                // Glitch noise
+                float glitch = step(0.98, sin(vPos.y * 10.0 + uTime * 20.0));
+
+                vec3 baseColor = vec3(0.0, 0.2, 0.8);
+                vec3 glowColor = vec3(0.5, 0.8, 1.0);
+
+                float alpha = fresnel * 0.8 + scanline * 0.1 + glitch * 0.5;
+                
+                vec3 finalColor = mix(baseColor, glowColor, fresnel + glitch);
+
+                gl_FragColor = vec4(finalColor, alpha);
+            }
+        `;
+
+
+        // =========================================================================
+        // ENGINE CORE
+        // =========================================================================
+
+        class Engine {
+            constructor() {
+                this.container = document.getElementById('gl-container');
+                this.scrollContainer = document.getElementById('scroll-container');
+                this.width = window.innerWidth;
+                this.height = window.innerHeight;
+                
+                this.scroll = { current: 0, target: 0, ease: 0.08 };
+                this.mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+                
+                this.init();
+                this.addObjects();
+                this.addPostProcessing();
+                this.addEvents();
+                this.resize();
+                
+                // Remove loader
+                setTimeout(() => {
+                    document.getElementById('loader').style.opacity = 0;
+                    setTimeout(()=> document.getElementById('loader').remove(), 1000);
+                }, 2000);
+
+                this.animate();
+            }
+
+            init() {
+                // Scene
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x020205);
+                this.scene.fog = new THREE.FogExp2(0x020205, 0.03);
+
+                // Camera
+                this.camera = new THREE.PerspectiveCamera(75, this.width / this.height, 0.1, 100);
+                this.camera.position.z = 8;
+
+                // Renderer
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+                this.renderer.setSize(this.width, this.height);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.outputEncoding = THREE.sRGBEncoding;
+                this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                this.container.appendChild(this.renderer.domElement);
+                
+                // Lights
+                const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+                this.scene.add(ambient);
+
+                const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+                dirLight.position.set(5, 5, 5);
+                this.scene.add(dirLight);
+            }
+
+            addObjects() {
+                this.objects = {};
+
+                // --- 1. PARTICLES (BACKGROUND) ---
+                const pGeo = new THREE.BufferGeometry();
+                const pCount = 3000;
+                const pPos = new Float32Array(pCount * 3);
+                for(let i=0; i<pCount*3; i++) pPos[i] = (Math.random()-0.5) * 40;
+                pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+                const pMat = new THREE.PointsMaterial({
+                    size: 0.03, color: 0x444444, transparent: true, opacity: 0.6
+                });
+                this.particles = new THREE.Points(pGeo, pMat);
+                this.scene.add(this.particles);
+
+                // --- 2. VZZOX TEXT ---
+                const loader = new FontLoader();
+                loader.load('https://cdn.skypack.dev/three@0.136.0/examples/fonts/droid/droid_sans_bold.typeface.json', (font) => {
+                    const textGeo = new TextGeometry('VZZOX', {
+                        font: font, size: 2.5, height: 0.2, curveSegments: 4,
+                        bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.02, bevelSegments: 3
+                    });
+                    textGeo.center();
+                    const textMat = new THREE.MeshStandardMaterial({ 
+                        color: 0x111111, metalness: 0.9, roughness: 0.1, emissive: 0x00f3ff, emissiveIntensity: 0.2 
+                    });
+                    this.textMesh = new THREE.Mesh(textGeo, textMat);
+                    this.textMesh.position.set(0, 0, -2);
+                    this.scene.add(this.textMesh);
+                    this.objects.text = this.textMesh;
+                });
+
+                // --- 3. BONE MARROW (ORGANIC BLOB) ---
+                // Creating a complex shader mesh
+                const blobGeo = new THREE.IcosahedronGeometry(2, 60); // High detail for vertex shader
+                const blobMat = new THREE.ShaderMaterial({
+                    vertexShader: organicVertexShader,
+                    fragmentShader: organicFragmentShader,
+                    uniforms: {
+                        uTime: { value: 0 },
+                        uScroll: { value: 0 }
+                    },
+                    transparent: true,
+                    side: THREE.DoubleSide
+                });
+                this.marrow = new THREE.Mesh(blobGeo, blobMat);
+                this.marrow.position.set(4, -15, 0); // Positioned for section 2
+                this.scene.add(this.marrow);
+                this.objects.marrow = this.marrow;
+
+                // --- 4. THE RELIC (PROCEDURAL SKULL) ---
+                // Building a "Cyber Head" from primitives
+                this.relicGroup = new THREE.Group();
+                
+                const holoMat = new THREE.ShaderMaterial({
+                    vertexShader: holoVertexShader,
+                    fragmentShader: holoFragmentShader,
+                    uniforms: { uTime: { value: 0 } },
+                    transparent: true,
+                    depthWrite: false,
+                    blending: THREE.AdditiveBlending
+                });
+
+                // Cranium
+                const cranium = new THREE.Mesh(new THREE.IcosahedronGeometry(1.2, 2), holoMat);
+                cranium.position.y = 0.5;
+                this.relicGroup.add(cranium);
+                
+                // Jaw
+                const jaw = new THREE.Mesh(new THREE.BoxGeometry(1, 0.8, 1.2), holoMat);
+                jaw.position.y = -0.8;
+                jaw.position.z = 0.2;
+                this.relicGroup.add(jaw);
+
+                // Eyes (Torus)
+                const eyeL = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.05, 16, 32), holoMat);
+                eyeL.position.set(-0.4, 0.2, 1);
+                this.relicGroup.add(eyeL);
+                const eyeR = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.05, 16, 32), holoMat);
+                eyeR.position.set(0.4, 0.2, 1);
+                this.relicGroup.add(eyeR);
+
+                // Cables
+                for(let i=0; i<5; i++) {
+                    const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 3), holoMat);
+                    cable.position.set((Math.random()-0.5)*2, -1, (Math.random()-0.5)*2);
+                    cable.rotation.x = Math.random();
+                    this.relicGroup.add(cable);
+                }
+
+                this.relicGroup.position.set(-3, -30, 1); // Positioned for section 3
+                this.scene.add(this.relicGroup);
+                this.objects.relic = this.relicGroup;
+            }
+
+            addPostProcessing() {
+                this.composer = new EffectComposer(this.renderer);
+                this.composer.addPass(new RenderPass(this.scene, this.camera));
+
+                // Bloom Effect (Neon Glow)
+                const bloomPass = new UnrealBloomPass(
+                    new THREE.Vector2(window.innerWidth, window.innerHeight), 
+                    1.5, 0.4, 0.85
+                );
+                bloomPass.threshold = 0.2;
+                bloomPass.strength = 1.2;
+                bloomPass.radius = 0.5;
+                this.composer.addPass(bloomPass);
+            }
+
+            addEvents() {
+                window.addEventListener('resize', this.resize.bind(this));
+                document.addEventListener('mousemove', (e) => {
+                    this.mouse.targetX = (e.clientX / this.width) * 2 - 1;
+                    this.mouse.targetY = -(e.clientY / this.height) * 2 + 1;
+                });
+                
+                // Custom scroll event tracking for Virtual Scroll
+                document.addEventListener('wheel', (e) => {
+                    this.scroll.target += e.deltaY;
+                });
+            }
+
+            resize() {
+                this.width = window.innerWidth;
+                this.height = window.innerHeight;
+                this.camera.aspect = this.width / this.height;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(this.width, this.height);
+                this.composer.setSize(this.width, this.height);
+            }
+
+            updateScroll() {
+                // Smooth Scroll Math
+                this.scroll.target = Math.max(0, Math.min(this.scroll.target, this.scrollContainer.scrollHeight - this.height));
+                this.scroll.current += (this.scroll.target - this.scroll.current) * this.scroll.ease;
+                
+                // Translate HTML content
+                this.scrollContainer.style.transform = `translate3d(0, -${this.scroll.current}px, 0)`;
+
+                // Update HUD Coords
+                document.getElementById('coord-disp').innerText = this.scroll.current.toFixed(2);
+                
+                // Update load bar
+                const totalH = this.scrollContainer.scrollHeight - this.height;
+                const prog = (this.scroll.current / totalH) * 100;
+                document.getElementById('load-bar').style.width = `${prog}%`;
+            }
+
+            animate() {
+                requestAnimationFrame(this.animate.bind(this));
+                
+                const time = performance.now() * 0.001;
+                
+                this.updateScroll();
+
+                // Smooth Mouse
+                this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.05;
+                this.mouse.y += (this.mouse.targetY - this.mouse.y) * 0.05;
+
+                // --- SCENE ANIMATIONS ---
+
+                // 1. Camera Parallax based on scroll
+                // We map scroll pixels to "units" in 3D space
+                const scrollUnit = this.scroll.current * 0.015; 
+                this.camera.position.y = -scrollUnit;
+                
+                // Camera Mouse sway
+                this.camera.position.x += (this.mouse.x * 0.5 - this.camera.position.x) * 0.05;
+                this.camera.rotation.y = this.mouse.x * 0.05;
+
+                // 2. VZZOX TEXT Animation
+                if(this.objects.text) {
+                    this.objects.text.rotation.x = Math.sin(time) * 0.1;
+                    this.objects.text.rotation.y = Math.cos(time * 0.5) * 0.1;
+                }
+
+                // 3. MARROW Animation
+                if(this.objects.marrow) {
+                    this.objects.marrow.material.uniforms.uTime.value = time;
+                    this.objects.marrow.rotation.y = time * 0.2;
+                    // It grows when you scroll near it
+                    const dist = Math.abs(this.camera.position.y - this.objects.marrow.position.y);
+                    const scale = Math.max(1, 3 - dist * 0.3); 
+                    this.objects.marrow.scale.setScalar(scale > 0 ? scale : 0.1);
+                }
+
+                // 4. RELIC Animation
+                if(this.objects.relic) {
+                    this.objects.relic.children.forEach(child => {
+                        if(child.material.uniforms) child.material.uniforms.uTime.value = time;
+                    });
+                    this.objects.relic.rotation.y = -time * 0.5;
+                    this.objects.relic.rotation.z = Math.sin(time) * 0.1;
+                }
+
+                // 5. Particles fall
+                this.particles.rotation.y = time * 0.05;
+                this.particles.position.y = this.camera.position.y; // Particles follow camera
+
+                // RENDER
+                this.composer.render();
+            }
         }
 
-        animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        // INIT
+        window.onload = () => {
+            new Engine();
+        };
 
     </script>
 </body>
