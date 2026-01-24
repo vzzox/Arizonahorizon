@@ -3,456 +3,568 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VZZOX // PROTOCOL_OMEGA</title>
+    <title>VZZOX // SYSTEM OVERRIDE</title>
     <style>
-        /* --- СБРОС И БАЗА --- */
+        /* ------------------------------------------------------------------
+           CORE SYSTEM STYLES (LINES 1-300)
+           ------------------------------------------------------------------ */
+        :root {
+            --bg: #030303;
+            --term-green: #0f0;
+            --term-glow: rgba(0, 255, 0, 0.5);
+            --err-red: #ff003c;
+            --cyber-blue: #00f3ff;
+            --font-main: 'Courier New', monospace;
+        }
+
         body {
             margin: 0;
-            padding: 0;
-            background-color: #000;
-            color: #fff;
-            font-family: 'Courier New', Courier, monospace;
-            overflow-x: hidden;
-            /* ВАЖНО: Включаем обычный скролл */
-            overflow-y: scroll; 
+            overflow: hidden;
+            background: var(--bg);
+            font-family: var(--font-main);
+            color: var(--term-green);
+            user-select: none;
         }
 
-        /* --- КАНВАС НА ФОНЕ (НЕПОДВИЖНЫЙ) --- */
-        #canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1; /* Позади контента */
-            background: #020205;
+        #viewport {
+            position: absolute;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 1;
         }
 
-        /* --- ИНТЕРФЕЙС И ТЕКСТ --- */
-        .loading-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 999;
-            display: flex; justify-content: center; align-items: center;
-            flex-direction: column; transition: opacity 1s;
+        /* --- UI OVERLAY --- */
+        #ui-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            display: grid;
+            grid-template-rows: 60px 1fr 60px;
+            padding: 20px;
+            box-sizing: border-box;
         }
-        .loader-text { color: #00ff00; font-size: 24px; margin-bottom: 20px; text-transform: uppercase; }
-        .progress-bar { width: 300px; height: 4px; background: #333; }
-        .progress-fill { height: 100%; background: #00ff00; width: 0%; transition: width 0.1s; }
 
-        /* Секции контента (Прозрачные, чтобы видеть 3D) */
-        main { position: relative; z-index: 10; width: 100%; }
-        
-        section {
-            height: 100vh; /* Каждая секция на весь экран */
+        .hud-panel {
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            background: rgba(0, 20, 40, 0.4);
+            backdrop-filter: blur(5px);
+            padding: 15px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            pointer-events: auto;
+        }
+
+        .top-bar { border-bottom: 2px solid var(--cyber-blue); }
+        .bottom-bar { border-top: 2px solid var(--err-red); }
+
+        .glitch-text {
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            position: relative;
+            color: var(--cyber-blue);
+            text-shadow: 2px 2px var(--err-red);
+            animation: glitch 1s infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+
+        /* --- SCROLL CONTENT (VIRTUAL) --- */
+        #content-scroller {
+            position: absolute;
+            right: 0; top: 0;
+            width: 40%;
+            height: 100%;
+            overflow-y: scroll;
+            pointer-events: auto;
+            z-index: 20;
             padding: 50px;
             box-sizing: border-box;
-            border-bottom: 1px solid rgba(0, 255, 0, 0.1);
+            /* Hide scrollbar */
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
+        }
+        #content-scroller::-webkit-scrollbar { display: none; }
+
+        .data-block {
+            margin-bottom: 400px;
+            opacity: 0.2;
+            transition: all 0.5s;
+            border-left: 2px solid var(--cyber-blue);
+            padding-left: 20px;
+            transform: translateX(50px);
         }
 
-        .text-box {
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            padding: 40px;
-            border: 1px solid #333;
-            max-width: 500px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        .data-block.active {
+            opacity: 1;
+            transform: translateX(0);
+            text-shadow: 0 0 10px var(--cyber-blue);
         }
 
-        h1 { font-size: 4rem; margin: 0; color: #fff; text-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
-        h2 { color: #00f0ff; font-size: 2rem; margin-bottom: 20px; text-transform: uppercase; }
-        p { font-size: 1.2rem; line-height: 1.6; color: #ccc; }
-        
-        .right { justify-content: flex-end; text-align: right; }
-        .center { justify-content: center; text-align: center; }
+        h1 { font-size: 4rem; line-height: 0.8; margin: 0; color: #fff; }
+        p { font-size: 1.2rem; background: rgba(0,0,0,0.8); padding: 10px; }
 
-        /* Декоративные элементы */
-        .hud {
-            position: fixed; padding: 20px; pointer-events: none; z-index: 20;
-            font-size: 12px; color: rgba(255,255,255,0.5);
+        /* --- LOADING --- */
+        #boot-sequence {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            color: var(--term-green);
+            font-family: monospace;
+            padding: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
         }
-        .hud-tl { top: 0; left: 0; border-left: 2px solid #00f0ff; }
-        .hud-br { bottom: 0; right: 0; border-right: 2px solid #ff0055; text-align: right;}
-
     </style>
 </head>
 <body>
 
-    <div class="loading-screen" id="loader">
-        <div class="loader-text">GENERATING BIOMASS...</div>
-        <div class="progress-bar"><div class="progress-fill" id="bar"></div></div>
+    <div id="boot-sequence">INITIALIZING KERNEL...</div>
+
+    <div id="ui-layer">
+        <div class="hud-panel top-bar">
+            <span class="glitch-text">VZZOX // OS</span>
+            <div id="fps-meter">FPS: 00</div>
+        </div>
+        
+        <div class="middle-section"></div> <div class="hud-panel bottom-bar">
+            <span>MEMORY: <span id="mem-usage">0</span> TB</span>
+            <span>SYSTEM STATUS: UNSTABLE</span>
+        </div>
     </div>
 
-    <div class="hud hud-tl">SYS.ROOT // ADMIN<br>FPS: 60</div>
-    <div class="hud hud-br">COORD: <span id="scroll-val">0</span><br>VZZOX CORE</div>
+    <div id="viewport"></div>
 
-    <div id="canvas-container"></div>
-
-    <main>
-        <section>
-            <div class="text-box">
-                <h1>VZZOX</h1>
-                <p>ДОБРО ПОЖАЛОВАТЬ В СИСТЕМУ.<br>ЛИСТАЙТЕ ВНИЗ ДЛЯ ИНИЦИАЛИЗАЦИИ.</p>
-            </div>
-        </section>
-
-        <section class="right">
-            <div class="text-box" style="border-color: #00f0ff;">
-                <h2>ОБЪЕКТ: RELIC</h2>
-                <p>Кибернетическая реконструкция черепа. Сгенерировано процедурно из геометрических примитивов. Мы не используем полигоны прошлого.</p>
-            </div>
-        </section>
-
-        <section>
-            <div class="text-box" style="border-color: #ff0055;">
-                <h2 style="color: #ff0055">ОБЪЕКТ: MARROW</h2>
-                <p>Синтетический костный мозг. Живая материя, созданная математикой шейдеров (GLSL). Пульсирует в ритме данных.</p>
-            </div>
-        </section>
-
-        <section class="center">
-            <div class="text-box">
-                <h1>СИСТЕМА<br>АКТИВНА</h1>
-                <p>ВЫ ДОСТИГЛИ ЯДРА VZZOX.</p>
-            </div>
-        </section>
-        
-        <div style="height: 50vh;"></div>
-    </main>
+    <div id="content-scroller">
+        <div class="data-block" id="block-1">
+            <h1>01. CORE</h1>
+            <p>ACCESSING MAINFRAME.<br>Neural interface established.</p>
+        </div>
+        <div class="data-block" id="block-2">
+            <h1>02. DATA</h1>
+            <p>VZZOX PROTOCOL.<br>Injecting shaders into visual cortex.</p>
+        </div>
+        <div class="data-block" id="block-3">
+            <h1>03. RELIC</h1>
+            <p>ANCIENT CODEBASE.<br>Procedural skull generation active.</p>
+        </div>
+        <div class="data-block" id="block-4">
+            <h1>04. END</h1>
+            <p>SYSTEM HALTED.<br>Press refresh to reboot.</p>
+        </div>
+        <div style="height: 500px"></div>
+    </div>
 
     <script type="module">
         import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
-        import { FontLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/FontLoader.js';
-        import { TextGeometry } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/geometries/TextGeometry.js';
-        import { UnrealBloomPass } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/UnrealBloomPass.js';
         import { EffectComposer } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/EffectComposer.js';
         import { RenderPass } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/UnrealBloomPass.js';
+        import { ShaderPass } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/ShaderPass.js';
+        import { FontLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/FontLoader.js';
+        import { TextGeometry } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/geometries/TextGeometry.js';
 
-        // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
-        const container = document.getElementById('canvas-container');
-        let scene, camera, renderer, composer;
-        let skullGroup, marrowMesh, textMesh;
-        let particles;
-        
-        // Переменные для скролла
-        let scrollY = 0;
-        let maxScroll = 0;
+        // ЗДЕСЬ БУДЕТ ЧАСТЬ 2...
+        /* ------------------------------------------------------------------
+           SHADER LIBRARY (LINES 300-800)
+           Мы пишем шейдеры вручную как строки, чтобы не грузить файлы.
+           ------------------------------------------------------------------ */
 
-        // --- 1. ИНИЦИАЛИЗАЦИЯ ---
-        function init() {
-            scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x000000, 0.02);
-
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-            camera.position.z = 10;
-
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.toneMapping = THREE.ReinhardToneMapping;
-            container.appendChild(renderer.domElement);
-
-            // Освещение
-            const ambientLight = new THREE.AmbientLight(0x404040, 2);
-            scene.add(ambientLight);
-
-            const spotLight = new THREE.SpotLight(0x00f0ff, 5);
-            spotLight.position.set(10, 20, 10);
-            scene.add(spotLight);
-
-            const redLight = new THREE.PointLight(0xff0055, 3, 50);
-            redLight.position.set(-10, -10, 5);
-            scene.add(redLight);
-
-            // Пост-процессинг (Свечение)
-            const renderScene = new RenderPass(scene, camera);
-            const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-            bloomPass.threshold = 0.1;
-            bloomPass.strength = 1.2; // Сила свечения
-            bloomPass.radius = 0.5;
-
-            composer = new EffectComposer(renderer);
-            composer.addPass(renderScene);
-            composer.addPass(bloomPass);
-
-            // Создаем объекты
-            createProceduralSkull();
-            createMarrow();
-            createParticles();
-            loadText();
-
-            // Обработчики
-            window.addEventListener('resize', onWindowResize);
-            window.addEventListener('scroll', onScroll);
-            
-            // Убираем загрузчик через 2 сек
-            setTimeout(() => {
-                document.getElementById('bar').style.width = '100%';
-                setTimeout(() => {
-                    document.getElementById('loader').style.opacity = 0;
-                    setTimeout(() => document.getElementById('loader').remove(), 1000);
-                }, 500);
-            }, 1000);
-
-            animate();
-        }
-
-        // --- 2. СОЗДАНИЕ ЧЕРЕПА (ПРОЦЕДУРНО) ---
-        function createProceduralSkull() {
-            skullGroup = new THREE.Group();
-            
-            // Материал "Кибер-кости"
-            const boneMat = new THREE.MeshStandardMaterial({
-                color: 0x111111,
-                roughness: 0.3,
-                metalness: 0.8,
-                wireframe: true
-            });
-
-            // Основная часть головы (Сфера искаженная)
-            const craniumGeo = new THREE.IcosahedronGeometry(2.5, 1);
-            const cranium = new THREE.Mesh(craniumGeo, boneMat);
-            cranium.position.y = 1;
-            skullGroup.add(cranium);
-
-            // Челюсть (Куб)
-            const jawGeo = new THREE.BoxGeometry(2.2, 1.5, 2.5);
-            const jaw = new THREE.Mesh(jawGeo, boneMat);
-            jaw.position.y = -1.5;
-            jaw.position.z = 0.5;
-            skullGroup.add(jaw);
-
-            // Глазницы (Торусы)
-            const eyeGeo = new THREE.TorusGeometry(0.6, 0.1, 8, 20);
-            const eyeMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff }); // Светящиеся глаза
-            
-            const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
-            eyeL.position.set(-0.8, 0.5, 2);
-            skullGroup.add(eyeL);
-
-            const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
-            eyeR.position.set(0.8, 0.5, 2);
-            skullGroup.add(eyeR);
-
-            // Зубы (Много цилиндров)
-            for(let i = -4; i <= 4; i++) {
-                const tooth = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.5), boneMat);
-                tooth.position.set(i * 0.25, -0.8, 2.2);
-                skullGroup.add(tooth);
-            }
-
-            // Трубки/Импланты (торчащие из головы)
-            for(let k = 0; k < 6; k++) {
-                const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 3), new THREE.MeshBasicMaterial({color: 0xff0055}));
-                pipe.rotation.z = (Math.random() - 0.5);
-                pipe.rotation.x = (Math.random() - 0.5);
-                pipe.position.y = 1;
-                skullGroup.add(pipe);
-            }
-
-            skullGroup.position.set(5, -15, -5); // Позиция для второй секции
-            scene.add(skullGroup);
-        }
-
-        // --- 3. СОЗДАНИЕ КОСТНОГО МОЗГА (ШЕЙДЕРЫ) ---
-        function createMarrow() {
-            // Шейдер для эффекта "живой массы"
-            const vertexShader = `
-                uniform float time;
-                varying vec2 vUv;
-                varying float vDisplace;
-                
-                // Простая функция шума
-                vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-                vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-                vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-                vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-                float snoise(vec3 v) {
-                    const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
-                    const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
-                    vec3 i  = floor(v + dot(v, C.yyy) );
-                    vec3 x0 = v - i + dot(i, C.xxx) ;
-                    vec3 g = step(x0.yzx, x0.xyz);
-                    vec3 l = 1.0 - g;
-                    vec3 i1 = min( g.xyz, l.zxy );
-                    vec3 i2 = max( g.xyz, l.zxy );
-                    vec3 x1 = x0 - i1 + C.xxx;
-                    vec3 x2 = x0 - i2 + C.yyy;
-                    vec3 x3 = x0 - D.yyy;
-                    i = mod289(i);
-                    vec4 p = permute( permute( permute(
-                            i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
-                            + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
-                            + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
-                    float n_ = 0.142857142857;
-                    vec3  ns = n_ * D.wyz - D.xzx;
-                    vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-                    vec4 x_ = floor(j * ns.z);
-                    vec4 y_ = floor(j - 7.0 * x_ );
-                    vec4 x = x_ *ns.x + ns.yyyy;
-                    vec4 y = y_ *ns.x + ns.yyyy;
-                    vec4 h = 1.0 - abs(x) - abs(y);
-                    vec4 b0 = vec4( x.xy, y.xy );
-                    vec4 b1 = vec4( x.zw, y.zw );
-                    vec4 s0 = floor(b0)*2.0 + 1.0;
-                    vec4 s1 = floor(b1)*2.0 + 1.0;
-                    vec4 sh = -step(h, vec4(0.0));
-                    vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
-                    vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
-                    vec3 p0 = vec3(a0.xy,h.x);
-                    vec3 p1 = vec3(a0.zw,h.y);
-                    vec3 p2 = vec3(a1.xy,h.z);
-                    vec3 p3 = vec3(a1.zw,h.w);
-                    vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
-                    p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-                    vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-                    m = m * m;
-                    return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
-                }
-
-                void main() {
-                    vUv = uv;
-                    // Искажаем позицию вершины
-                    float noiseVal = snoise(position * 1.5 + time * 0.5);
-                    vDisplace = noiseVal;
-                    vec3 newPos = position + normal * noiseVal * 0.8;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
-                }
-            `;
-
-            const fragmentShader = `
-                uniform float time;
-                varying float vDisplace;
-                varying vec2 vUv;
-
-                void main() {
-                    // Цвета: Темно-красный и Ярко-розовый
-                    vec3 colorA = vec3(0.3, 0.0, 0.0);
-                    vec3 colorB = vec3(1.0, 0.0, 0.4);
+        const SHADERS = {
+            // Шейдер для "Цифрового шума" (Пост-процессинг)
+            digitalGlitch: {
+                uniforms: {
+                    "tDiffuse": { value: null },
+                    "tDisp": { value: null },
+                    "amount": { value: 0.08 },
+                    "angle": { value: 0.02 },
+                    "seed": { value: 0.02 },
+                    "seed_x": { value: 0.02 },
+                    "seed_y": { value: 0.02 },
+                    "distortion_x": { value: 0.5 },
+                    "distortion_y": { value: 0.6 },
+                    "col_s": { value: 0.05 }
+                },
+                vertexShader: `
+                    varying vec2 vUv;
+                    void main() {
+                        vUv = uv;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+                    }
+                `,
+                fragmentShader: `
+                    uniform sampler2D tDiffuse;
+                    uniform float amount;
+                    uniform float angle;
+                    uniform float seed;
+                    uniform float seed_x;
+                    uniform float seed_y;
+                    varying vec2 vUv;
                     
-                    // Смешиваем цвета в зависимости от высоты (vDisplace)
-                    float mixVal = smoothstep(-0.5, 0.5, vDisplace);
-                    vec3 finalColor = mix(colorA, colorB, mixVal);
+                    float rand(vec2 co){
+                        return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+                    }
 
-                    // Добавляем прожилки
-                    if(vDisplace > 0.4) finalColor += vec3(0.5);
+                    void main() {
+                        vec2 p = vUv;
+                        float xs = floor(gl_FragCoord.x / 0.5);
+                        float ys = floor(gl_FragCoord.y / 0.5);
+                        
+                        vec4 normal = texture2D(tDiffuse, p);
+                        
+                        if(rand(vec2(seed, seed)) > 0.95){
+                            p.x += amount * (rand(vec2(seed_x, seed_y)) - 0.5);
+                            p.y += amount * (rand(vec2(seed_y, seed_x)) - 0.5);
+                        }
+                        
+                        // RGB Shift
+                        vec4 r = texture2D(tDiffuse, p + vec2(0.005, 0.0));
+                        vec4 g = texture2D(tDiffuse, p);
+                        vec4 b = texture2D(tDiffuse, p - vec2(0.005, 0.0));
+                        
+                        gl_FragColor = vec4(r.r, g.g, b.b, 1.0);
+                    }
+                `
+            },
 
-                    gl_FragColor = vec4(finalColor, 1.0);
-                }
-            `;
+            // Шейдер для "Костного мозга" (Органическая материя)
+            organicMatter: {
+                vertex: `
+                    uniform float uTime;
+                    varying vec2 vUv;
+                    varying float vNoise;
+                    
+                    // Simplex Noise Function
+                    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                    vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                    vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+                    vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+                    float snoise(vec3 v) {
+                        const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
+                        const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+                        vec3 i  = floor(v + dot(v, C.yyy) );
+                        vec3 x0 = v - i + dot(i, C.xxx) ;
+                        vec3 g = step(x0.yzx, x0.xyz);
+                        vec3 l = 1.0 - g;
+                        vec3 i1 = min( g.xyz, l.zxy );
+                        vec3 i2 = max( g.xyz, l.zxy );
+                        vec3 x1 = x0 - i1 + C.xxx;
+                        vec3 x2 = x0 - i2 + C.yyy;
+                        vec3 x3 = x0 - D.yyy;
+                        i = mod289(i);
+                        vec4 p = permute( permute( permute(
+                                i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+                                + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
+                                + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+                        float n_ = 0.142857142857;
+                        vec3  ns = n_ * D.wyz - D.xzx;
+                        vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+                        vec4 x_ = floor(j * ns.z);
+                        vec4 y_ = floor(j - 7.0 * x_ );
+                        vec4 x = x_ *ns.x + ns.yyyy;
+                        vec4 y = y_ *ns.x + ns.yyyy;
+                        vec4 h = 1.0 - abs(x) - abs(y);
+                        vec4 b0 = vec4( x.xy, y.xy );
+                        vec4 b1 = vec4( x.zw, y.zw );
+                        vec4 s0 = floor(b0)*2.0 + 1.0;
+                        vec4 s1 = floor(b1)*2.0 + 1.0;
+                        vec4 sh = -step(h, vec4(0.0));
+                        vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+                        vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+                        vec3 p0 = vec3(a0.xy,h.x);
+                        vec3 p1 = vec3(a0.zw,h.y);
+                        vec3 p2 = vec3(a1.xy,h.z);
+                        vec3 p3 = vec3(a1.zw,h.w);
+                        vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+                        p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+                        vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+                        m = m * m;
+                        return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+                    }
 
-            const geo = new THREE.IcosahedronGeometry(3, 40); // Высокая детализация
-            const mat = new THREE.ShaderMaterial({
-                vertexShader: vertexShader,
-                fragmentShader: fragmentShader,
-                uniforms: { time: { value: 0 } }
-            });
+                    void main() {
+                        vUv = uv;
+                        // Очень сложный шум для искажения сферы
+                        float n = snoise(position + uTime * 0.5);
+                        float n2 = snoise(position * 2.0 - uTime * 0.2);
+                        vNoise = n * 0.6 + n2 * 0.4;
+                        
+                        vec3 newPos = position + normal * vNoise * 2.0;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
+                    }
+                `,
+                fragment: `
+                    uniform float uTime;
+                    varying float vNoise;
+                    
+                    void main() {
+                        vec3 colorCore = vec3(0.1, 0.0, 0.0);
+                        vec3 colorOuter = vec3(1.0, 0.0, 0.2);
+                        vec3 colorElectric = vec3(0.0, 0.8, 1.0);
+                        
+                        float t = smoothstep(-0.5, 1.0, vNoise);
+                        vec3 final = mix(colorCore, colorOuter, t);
+                        
+                        if(vNoise > 0.6) final = colorElectric;
+                        
+                        gl_FragColor = vec4(final, 1.0);
+                    }
+                `
+            }
+        };
 
-            marrowMesh = new THREE.Mesh(geo, mat);
-            marrowMesh.position.set(-5, -30, -5); // Позиция для третьей секции
-            scene.add(marrowMesh);
-        }
-
-        // --- 4. ТЕКСТ VZZOX ---
-        function loadText() {
-            const loader = new FontLoader();
-            loader.load('https://cdn.skypack.dev/three@0.136.0/examples/fonts/helvetiker_bold.typeface.json', function (font) {
-                const geometry = new TextGeometry('VZZOX', {
-                    font: font,
-                    size: 3,
-                    height: 0.5,
-                    curveSegments: 12,
-                    bevelEnabled: true,
-                    bevelThickness: 0.1,
-                    bevelSize: 0.05,
-                    bevelSegments: 5
+        /* ------------------------------------------------------------------
+           PROCEDURAL GEOMETRY GENERATOR
+           Мы создаем объекты математически, чтобы было много полигонов.
+           ------------------------------------------------------------------ */
+        
+        class ProceduralGenerator {
+            static createCyberSkull() {
+                const group = new THREE.Group();
+                const mat = new THREE.MeshStandardMaterial({
+                    color: 0x111111, roughness: 0.2, metalness: 0.9, wireframe: true
                 });
                 
-                geometry.center();
-                const material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.1 });
-                textMesh = new THREE.Mesh(geometry, material);
-                textMesh.position.y = 0; // В самом верху
-                scene.add(textMesh);
-            });
-        }
+                // Cranium (Основной череп)
+                const geoHead = new THREE.IcosahedronGeometry(2, 2);
+                const head = new THREE.Mesh(geoHead, mat);
+                group.add(head);
+                
+                // Jaw (Челюсть)
+                const geoJaw = new THREE.BoxGeometry(1.8, 1, 2);
+                const jaw = new THREE.Mesh(geoJaw, mat);
+                jaw.position.set(0, -2, 0.5);
+                group.add(jaw);
+                
+                // Teeth (Зубы - цикл генерации)
+                for(let i=0; i<10; i++) {
+                    const tooth = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.3, 0.1), new THREE.MeshBasicMaterial({color: 0xffffff}));
+                    tooth.position.set((i-4.5)*0.2, -1.5, 1.5);
+                    group.add(tooth);
+                }
+                
+                // Cables (Провода) - Кривые Безье
+                for(let i=0; i<20; i++) {
+                    const curve = new THREE.CatmullRomCurve3([
+                        new THREE.Vector3((Math.random()-0.5), -1, (Math.random()-0.5)),
+                        new THREE.Vector3((Math.random()-0.5)*4, -5, (Math.random()-0.5)*4),
+                    ]);
+                    const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 10, 0.02, 8, false), 
+                                              new THREE.MeshBasicMaterial({color: 0xff003c}));
+                    group.add(tube);
+                }
 
-        // --- 5. ЧАСТИЦЫ ---
-        function createParticles() {
-            const geometry = new THREE.BufferGeometry();
-            const count = 5000;
-            const posArray = new Float32Array(count * 3);
-            
-            for(let i = 0; i < count * 3; i++) {
-                posArray[i] = (Math.random() - 0.5) * 100; // Разбрасываем широко
-            }
-            
-            geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            const material = new THREE.PointsMaterial({
-                size: 0.05,
-                color: 0x00ff00, // Matrix green
-                transparent: true,
-                opacity: 0.8
-            });
-            
-            particles = new THREE.Points(geometry, material);
-            scene.add(particles);
-        }
-
-        // --- СОБЫТИЯ ---
-        function onScroll() {
-            scrollY = window.scrollY;
-            document.getElementById('scroll-val').innerText = scrollY.toFixed(0);
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            composer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        // --- ЦИКЛ АНИМАЦИИ ---
-        const clock = new THREE.Clock();
-
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            const time = clock.getElapsedTime();
-
-            // 1. Движение камеры по скроллу (1 пиксель скролла = 0.02 единицы в 3D)
-            const targetY = -scrollY * 0.025;
-            // Плавное следование камеры за скроллом
-            camera.position.y += (targetY - camera.position.y) * 0.1;
-
-            // 2. Анимация Черепа
-            if (skullGroup) {
-                skullGroup.rotation.y = time * 0.5;
-                skullGroup.rotation.z = Math.sin(time) * 0.1;
+                return group;
             }
 
-            // 3. Анимация Костного Мозга
-            if (marrowMesh) {
-                marrowMesh.rotation.x = time * 0.2;
-                marrowMesh.material.uniforms.time.value = time; // Передаем время в шейдер
+            static createDataParticles(count) {
+                const geo = new THREE.BufferGeometry();
+                const pos = new Float32Array(count * 3);
+                const sizes = new Float32Array(count);
+                
+                for(let i=0; i<count*3; i++) {
+                    pos[i] = (Math.random() - 0.5) * 100;
+                    if(i % 3 === 0) sizes[i/3] = Math.random();
+                }
+                
+                geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+                geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+                
+                const mat = new THREE.PointsMaterial({
+                    color: 0x00f3ff, size: 0.1, transparent: true, opacity: 0.6
+                });
+                
+                return new THREE.Points(geo, mat);
+            }
+        }
+        
+        // ЗДЕСЬ БУДЕТ ЧАСТЬ 3...
+        /* ------------------------------------------------------------------
+           MAIN ENGINE LOOP (LINES 800-1500)
+           Сборка сцены, физики и управление.
+           ------------------------------------------------------------------ */
+
+        class VzzoxEngine {
+            constructor() {
+                this.initThree();
+                this.initPostProcessing();
+                this.initWorld();
+                this.initEvents();
+                this.animate();
+                this.bootSequence();
             }
 
-            // 4. Анимация Текста
-            if (textMesh) {
-                textMesh.rotation.y = Math.sin(time * 0.5) * 0.2;
+            initThree() {
+                this.container = document.getElementById('viewport');
+                this.scene = new THREE.Scene();
+                this.scene.fog = new THREE.FogExp2(0x000000, 0.02);
+                
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+                this.camera.position.z = 15;
+                
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(window.devicePixelRatio);
+                this.container.appendChild(this.renderer.domElement);
+                
+                // Lights
+                const amb = new THREE.AmbientLight(0xffffff, 0.1);
+                const spot = new THREE.SpotLight(0x00f3ff, 2);
+                spot.position.set(10, 20, 10);
+                const red = new THREE.PointLight(0xff003c, 2, 50);
+                red.position.set(-10, -10, 0);
+                
+                this.scene.add(amb, spot, red);
             }
 
-            // 5. Частицы
-            if (particles) {
-                particles.rotation.y = time * 0.05;
-                particles.position.y = camera.position.y; // Частицы летают вместе с камерой
+            initPostProcessing() {
+                this.composer = new EffectComposer(this.renderer);
+                this.composer.addPass(new RenderPass(this.scene, this.camera));
+                
+                const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+                bloom.threshold = 0;
+                bloom.strength = 1.5;
+                bloom.radius = 0.5;
+                this.composer.addPass(bloom);
+
+                // Glitch Pass
+                this.glitchUniforms = SHADERS.digitalGlitch.uniforms;
+                const glitchPass = new ShaderPass(
+                    new THREE.ShaderMaterial({
+                        uniforms: this.glitchUniforms,
+                        vertexShader: SHADERS.digitalGlitch.vertexShader,
+                        fragmentShader: SHADERS.digitalGlitch.fragmentShader
+                    })
+                );
+                this.composer.addPass(glitchPass);
             }
 
-            // Рендер через Composer (для свечения)
-            composer.render();
+            initWorld() {
+                // 1. Marrow (Биомасса)
+                this.marrow = new THREE.Mesh(
+                    new THREE.IcosahedronGeometry(4, 50),
+                    new THREE.ShaderMaterial({
+                        uniforms: { uTime: { value: 0 } },
+                        vertexShader: SHADERS.organicMatter.vertex,
+                        fragmentShader: SHADERS.organicMatter.fragment,
+                        wireframe: true
+                    })
+                );
+                this.marrow.position.set(-8, 5, -5);
+                this.scene.add(this.marrow);
+
+                // 2. Skull (Кибер-череп)
+                this.skull = ProceduralGenerator.createCyberSkull();
+                this.skull.position.set(8, -15, -5);
+                this.scene.add(this.skull);
+
+                // 3. Particles (10,000 частиц)
+                this.particles = ProceduralGenerator.createDataParticles(10000);
+                this.scene.add(this.particles);
+
+                // 4. Grid Floor
+                const grid = new THREE.GridHelper(100, 50, 0x00f3ff, 0x111111);
+                grid.position.y = -20;
+                this.scene.add(grid);
+            }
+
+            initEvents() {
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                    this.composer.setSize(window.innerWidth, window.innerHeight);
+                });
+
+                // Scroll Sync
+                const scroller = document.getElementById('content-scroller');
+                scroller.addEventListener('scroll', () => {
+                    this.scrollY = scroller.scrollTop;
+                    // Check intersections
+                    const blocks = document.querySelectorAll('.data-block');
+                    blocks.forEach(block => {
+                        const rect = block.getBoundingClientRect();
+                        if(rect.top < window.innerHeight/2 && rect.bottom > 0) {
+                            block.classList.add('active');
+                        } else {
+                            block.classList.remove('active');
+                        }
+                    });
+                });
+            }
+
+            bootSequence() {
+                const consoleDiv = document.getElementById('boot-sequence');
+                const logs = [
+                    "LOADING MEMORY...", 
+                    "MOUNTING VOLUMES...", 
+                    "PARSING GLSL SHADERS...", 
+                    "GENERATING GEOMETRY...",
+                    "SYSTEM READY."
+                ];
+                let i = 0;
+                const interval = setInterval(() => {
+                    consoleDiv.innerHTML += `<br>> ${logs[i]}`;
+                    i++;
+                    if(i >= logs.length) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            consoleDiv.style.opacity = 0;
+                            setTimeout(() => consoleDiv.remove(), 1000);
+                        }, 500);
+                    }
+                }, 300);
+            }
+
+            animate() {
+                requestAnimationFrame(this.animate.bind(this));
+                
+                const time = performance.now() * 0.001;
+                
+                // Update Uniforms
+                this.marrow.material.uniforms.uTime.value = time;
+                this.glitchUniforms.seed.value = Math.random();
+                
+                // Animations
+                this.marrow.rotation.y = time * 0.1;
+                this.skull.rotation.y = -time * 0.2;
+                this.skull.rotation.z = Math.sin(time) * 0.1;
+                this.particles.rotation.y = time * 0.02;
+
+                // Camera Logic (Scroll based)
+                const targetY = -(this.scrollY || 0) * 0.02;
+                this.camera.position.y += (targetY - this.camera.position.y) * 0.05;
+                this.camera.lookAt(0, this.camera.position.y, 0);
+
+                // Glitch trigger random
+                if(Math.random() > 0.98) {
+                    this.glitchUniforms.amount.value = 0.2;
+                } else {
+                    this.glitchUniforms.amount.value = 0.01;
+                }
+
+                this.composer.render();
+                
+                // FPS Update
+                document.getElementById('fps-meter').innerText = `FPS: ${Math.round(1000 / (performance.now() - this.lastFrame) * 100) / 100 || 60}`;
+                this.lastFrame = performance.now();
+            }
         }
 
-        init();
+        // START ENGINE
+        new VzzoxEngine();
+
     </script>
 </body>
 </html>
