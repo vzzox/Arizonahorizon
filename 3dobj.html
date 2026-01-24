@@ -407,34 +407,22 @@
     </main>
 
     <script type="module">
-        /* =========================================
-           IMPORT LIBRARIES (CDN)
-           Using Skypack for reliable module loading
-           ========================================= */
         import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
-        import { FontLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/FontLoader.js';
-        import { TextGeometry } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/geometries/TextGeometry.js';
         import { EffectComposer } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/EffectComposer.js';
         import { RenderPass } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/UnrealBloomPass.js';
         import { ShaderPass } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/ShaderPass.js';
 
-        /* =========================================
-           SHADER REPOSITORY (GLSL)
-           Hardcoded for single-file portability
-           ========================================= */
-        
+        // --- SHADER REPOSITORY ---
         const VZZOX_SHADERS = {
-            
-            // --- 1. ORGANIC NOISE (Vertex Shader) ---
             organicVertex: `
                 uniform float uTime;
                 varying vec2 vUv;
                 varying float vDisplacement;
                 varying vec3 vNormal;
                 varying vec3 vPos;
-
-                // GLSL Simplex Noise 3D
+                
+                // GLSL Simplex Noise 3D Helper
                 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
                 vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
                 vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
@@ -487,22 +475,18 @@
                     vUv = uv;
                     vNormal = normal;
                     
-                    // Complex noise layering
                     float n1 = snoise(position * 0.5 + uTime * 0.2);
                     float n2 = snoise(position * 1.5 - uTime * 0.1);
                     float n3 = snoise(position * 4.0 + uTime * 0.3);
                     
                     vDisplacement = n1 * 1.0 + n2 * 0.5 + n3 * 0.1;
                     
-                    // Vertices expand based on noise (Marrow pulsing)
                     vec3 newPos = position + normal * (vDisplacement * 0.8);
                     
                     vPos = newPos;
                     gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
                 }
             `,
-
-            // --- 2. BIOLOGICAL MATERIAL (Fragment Shader) ---
             organicFragment: `
                 uniform float uTime;
                 varying vec2 vUv;
@@ -511,26 +495,21 @@
                 varying vec3 vPos;
 
                 void main() {
-                    // VZZOX Color Palette
                     vec3 bloodRed = vec3(0.4, 0.0, 0.05);
                     vec3 fleshPink = vec3(0.8, 0.1, 0.3);
                     vec3 veinBlue = vec3(0.0, 0.1, 0.3);
                     vec3 highlight = vec3(1.0, 0.8, 0.8);
 
-                    // Mix based on displacement height
                     float mix1 = smoothstep(-0.5, 0.5, vDisplacement);
                     vec3 color = mix(bloodRed, fleshPink, mix1);
                     
-                    // Add veins in the crevices
                     float crevices = smoothstep(-0.8, -0.6, vDisplacement);
                     color = mix(veinBlue, color, crevices);
 
-                    // Fake Subsurface Scattering (Fresnel)
-                    vec3 viewDir = vec3(0.0, 0.0, 1.0); // Simplified view dir
+                    vec3 viewDir = vec3(0.0, 0.0, 1.0);
                     float fresnel = pow(1.0 - dot(vNormal, viewDir), 2.0);
                     color += fleshPink * fresnel * 0.5;
 
-                    // Specular highlights
                     if(vDisplacement > 0.6) {
                         color += highlight * 0.5;
                     }
@@ -538,8 +517,6 @@
                     gl_FragColor = vec4(color, 1.0);
                 }
             `,
-
-            // --- 3. HOLOGRAM/GLITCH GRID (Fragment) ---
             holoFragment: `
                 varying vec2 vUv;
                 uniform float uTime;
@@ -548,54 +525,32 @@
                     float grid = step(0.95, fract(vUv.x * 20.0)) + step(0.95, fract(vUv.y * 20.0));
                     float scan = sin(vUv.y * 100.0 + uTime * 5.0) * 0.1;
                     vec3 col = vec3(0.0, 1.0, 1.0) * grid;
-                    gl_FragColor = vec4(col, 0.2 + scan); // Transparent
+                    gl_FragColor = vec4(col, 0.2 + scan);
                 }
             `
         };
 
-        /* =========================================
-           PROCEDURAL ARCHITECT CLASS
-           Generates complex geometry from code to avoid assets.
-           ========================================= */
+        // --- PROCEDURAL ARCHITECT ---
         class ProceduralArchitect {
-            
-            // --- GENERATOR 1: THE CYBER SKULL ---
-            // Assembles a skull from 50+ geometric primitives
             static createCyberSkull() {
                 const skullGroup = new THREE.Group();
                 
-                // 1. MATERIALS
                 const boneMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x111111,
-                    roughness: 0.4,
-                    metalness: 0.8,
-                    flatShading: true
+                    color: 0x111111, roughness: 0.4, metalness: 0.8, flatShading: true
                 });
-
                 const chromeMaterial = new THREE.MeshStandardMaterial({
-                    color: 0xaaaaaa,
-                    roughness: 0.0,
-                    metalness: 1.0,
-                    emissive: 0x111111,
-                    emissiveIntensity: 0.2
+                    color: 0xaaaaaa, roughness: 0.0, metalness: 1.0, emissive: 0x111111, emissiveIntensity: 0.2
                 });
-
                 const neonMaterial = new THREE.MeshBasicMaterial({
-                    color: 0x00f3ff, // Cyan eyes
-                    transparent: true,
-                    opacity: 0.8
+                    color: 0x00f3ff, transparent: true, opacity: 0.8
                 });
-
                 const wireMaterial = new THREE.MeshBasicMaterial({
-                    color: 0xff003c, // Red wires
-                    wireframe: true
+                    color: 0xff003c, wireframe: true
                 });
 
-                // 2. CRANIUM (MAIN SKULL)
-                // We use a distorted Icosahedron
+                // Cranium
                 const craniumGeo = new THREE.IcosahedronGeometry(2.0, 1);
                 const pos = craniumGeo.attributes.position;
-                // Distort vertices to look more like a head (wider top, narrower bottom)
                 for (let i = 0; i < pos.count; i++) {
                     const y = pos.getY(i);
                     if (y < -0.5) {
@@ -603,17 +558,17 @@
                         pos.setZ(i, pos.getZ(i) * 0.8);
                     }
                 }
+                pos.needsUpdate = true; // Fix: Ensure geometry updates
                 craniumGeo.computeVertexNormals();
                 const cranium = new THREE.Mesh(craniumGeo, boneMaterial);
                 cranium.position.y = 0.5;
                 skullGroup.add(cranium);
 
-                // 3. JAW (LOWER MANDIBLE)
+                // Jaw
                 const jawGroup = new THREE.Group();
                 const jawBase = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.8, 1.8), boneMaterial);
                 jawGroup.add(jawBase);
                 
-                // Jaw mechanism (Chrome pistons)
                 const pistonL = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.2), chromeMaterial);
                 pistonL.position.set(-0.9, 0.2, 0);
                 pistonL.rotation.z = 0.2;
@@ -627,21 +582,18 @@
                 jawGroup.position.set(0, -1.5, 0.2);
                 skullGroup.add(jawGroup);
 
-                // 4. TEETH (PROCEDURAL LOOP)
-                // Generates 12 individual cyber-teeth
+                // Teeth
                 for(let i = 0; i < 6; i++) {
-                    // Top teeth
                     const t1 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.4, 0.1), chromeMaterial);
                     t1.position.set((i - 2.5) * 0.22, -0.9, 1.5);
                     skullGroup.add(t1);
 
-                    // Bottom teeth
                     const t2 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.4, 0.1), chromeMaterial);
-                    t2.position.set((i - 2.5) * 0.22, 0.5, 0.95); // Relative to Jaw Group would be better, but simplified here
+                    t2.position.set((i - 2.5) * 0.22, 0.5, 0.95);
                     jawGroup.add(t2);
                 }
 
-                // 5. EYES (SENSORS)
+                // Eyes
                 const eyeGeo = new THREE.TorusGeometry(0.4, 0.05, 16, 32);
                 const eyeL = new THREE.Mesh(eyeGeo, neonMaterial);
                 eyeL.position.set(-0.6, 0.2, 1.6);
@@ -653,7 +605,6 @@
                 eyeR.rotation.y = 0.3;
                 skullGroup.add(eyeR);
 
-                // Inner Eye Glow (Sphere)
                 const pupilGeo = new THREE.SphereGeometry(0.15, 16, 16);
                 const pupilL = new THREE.Mesh(pupilGeo, new THREE.MeshBasicMaterial({color: 0xffffff}));
                 pupilL.position.copy(eyeL.position);
@@ -662,9 +613,7 @@
                 pupilR.position.copy(eyeR.position);
                 skullGroup.add(pupilR);
 
-                // 6. DATA CABLES (BEZIER CURVES)
-                // Simulating neural link cables coming out of the head
-                const curvePoints = [];
+                // Cables
                 for(let k=0; k<15; k++) {
                     const start = new THREE.Vector3((Math.random()-0.5)*2, 1.5, (Math.random()-0.5)*2);
                     const mid = new THREE.Vector3((Math.random()-0.5)*4, 4, (Math.random()-0.5)*4);
@@ -678,8 +627,7 @@
                     skullGroup.add(tube);
                 }
 
-                // 7. GLITCH HALO
-                // A ring around the head
+                // Halo
                 const halo = new THREE.Mesh(
                     new THREE.RingGeometry(2.5, 2.6, 64),
                     new THREE.MeshBasicMaterial({ color: 0xff003c, side: THREE.DoubleSide, transparent: true, opacity: 0.5 })
@@ -690,8 +638,6 @@
                 return skullGroup;
             }
 
-            // --- GENERATOR 2: DATA CLOUD ---
-            // Generates 15,000 particles with size variation
             static createDataCloud() {
                 const count = 15000;
                 const geometry = new THREE.BufferGeometry();
@@ -703,16 +649,11 @@
                 const color2 = new THREE.Color(0xff003c);
 
                 for (let i = 0; i < count; i++) {
-                    // Random distribution in a large cube
                     const x = (Math.random() - 0.5) * 100;
                     const y = (Math.random() - 0.5) * 100;
                     const z = (Math.random() - 0.5) * 50;
                     positions.push(x, y, z);
-
-                    // Size variation
                     sizes.push(Math.random() * 0.1);
-
-                    // Color mixing based on position
                     const mixedColor = x > 0 ? color1 : color2;
                     colors.push(mixedColor.r, mixedColor.g, mixedColor.b);
                 }
@@ -722,105 +663,65 @@
                 geometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
 
                 const material = new THREE.PointsMaterial({
-                    size: 0.1,
-                    vertexColors: true,
-                    transparent: true,
-                    opacity: 0.6,
-                    sizeAttenuation: true
+                    size: 0.1, vertexColors: true, transparent: true, opacity: 0.6, sizeAttenuation: true
                 });
 
                 return new THREE.Points(geometry, material);
             }
 
-            // --- GENERATOR 3: NEURAL GRID FLOOR ---
             static createGrid() {
                 const group = new THREE.Group();
-                
-                // Main Grid
                 const gridHelper = new THREE.GridHelper(200, 100, 0x00f3ff, 0x111111);
                 gridHelper.position.y = -10;
                 group.add(gridHelper);
 
-                // Moving light planes (Scanning effect)
                 const planeGeo = new THREE.PlaneGeometry(200, 200);
                 const planeMat = new THREE.MeshBasicMaterial({
-                    color: 0x00f3ff,
-                    transparent: true,
-                    opacity: 0.05,
-                    side: THREE.DoubleSide
+                    color: 0x00f3ff, transparent: true, opacity: 0.05, side: THREE.DoubleSide
                 });
                 const plane = new THREE.Mesh(planeGeo, planeMat);
                 plane.rotation.x = -Math.PI / 2;
                 plane.position.y = -10.1;
                 group.add(plane);
-
                 return group;
             }
         }
 
-
-        /* =========================================
-           CORE ENGINE (VZZOX SYSTEM)
-           Handles Rendering, Physics, Input, Loop
-           ========================================= */
+        // --- CORE ENGINE ---
         class VzzoxCore {
             constructor() {
-                // System Status
                 this.isBooted = false;
                 this.width = window.innerWidth;
                 this.height = window.innerHeight;
-                
-                // Input State
                 this.mouse = new THREE.Vector2();
                 this.targetMouse = new THREE.Vector2();
                 this.scrollY = 0;
                 this.targetScrollY = 0;
-
-                // Scene Objects Container
-                this.objects = {
-                    marrow: null,
-                    skull: null,
-                    particles: null,
-                    grid: null
-                };
-
-                // Initialize Subsystems
+                this.objects = { marrow: null, skull: null, particles: null, grid: null };
+                
                 this.initThree();
                 this.initPostProcessing();
                 this.buildWorld();
                 this.bindEvents();
-                
-                // Start Boot Animation
                 this.runBootSequence();
             }
 
-            // --- SUBSYSTEM 1: THREE.JS SETUP ---
             initThree() {
                 this.container = document.getElementById('canvas-world');
-                
                 this.scene = new THREE.Scene();
-                // Deep void fog
                 this.scene.fog = new THREE.FogExp2(0x020202, 0.025);
-
                 this.camera = new THREE.PerspectiveCamera(75, this.width / this.height, 0.1, 1000);
                 this.camera.position.z = 12;
 
                 this.renderer = new THREE.WebGLRenderer({ 
-                    antialias: false, // False for performance with post-processing
-                    alpha: true,
-                    powerPreference: "high-performance"
+                    antialias: false, alpha: true, powerPreference: "high-performance"
                 });
-                
                 this.renderer.setSize(this.width, this.height);
                 this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 this.renderer.toneMapping = THREE.ReinhardToneMapping;
                 this.container.appendChild(this.renderer.domElement);
 
-                // Lighting
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
-                this.scene.add(ambientLight);
-
-                // Cyberpunk Lighting Setup
+                this.scene.add(new THREE.AmbientLight(0xffffff, 0.1));
                 const blueSpot = new THREE.SpotLight(0x00f3ff, 5);
                 blueSpot.position.set(20, 50, 20);
                 blueSpot.angle = 0.3;
@@ -832,38 +733,25 @@
                 this.scene.add(pinkPoint);
             }
 
-            // --- SUBSYSTEM 2: POST-PROCESSING (BLOOM & GLITCH) ---
             initPostProcessing() {
                 this.composer = new EffectComposer(this.renderer);
                 this.composer.addPass(new RenderPass(this.scene, this.camera));
 
-                // 1. UNREAL BLOOM (The Neon Glow)
-                const bloomPass = new UnrealBloomPass(
-                    new THREE.Vector2(this.width, this.height),
-                    1.5, 0.4, 0.85
-                );
+                const bloomPass = new UnrealBloomPass(new THREE.Vector2(this.width, this.height), 1.5, 0.4, 0.85);
                 bloomPass.threshold = 0.1;
-                bloomPass.strength = 1.2; // High intensity
+                bloomPass.strength = 1.2;
                 bloomPass.radius = 0.5;
                 this.composer.addPass(bloomPass);
 
-                // 2. FILM GRAIN (Texture)
-                // We create a custom shader pass for grain on the fly
                 const grainShader = {
-                    uniforms: {
-                        "tDiffuse": { value: null },
-                        "amount":   { value: 0.05 }
-                    },
+                    uniforms: { "tDiffuse": { value: null }, "amount": { value: 0.05 } },
                     vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); }`,
                     fragmentShader: `
                         uniform float amount;
                         uniform sampler2D tDiffuse;
                         varying vec2 vUv;
                         float random( vec2 p ) {
-                            vec2 K1 = vec2(
-                                23.14069263277926, // e^pi (Gelfond's constant)
-                                2.665144142690225 // 2^sqrt(2) (Gelfond–Schneider constant)
-                            );
+                            vec2 K1 = vec2(23.14069263277926, 2.665144142690225);
                             return fract( cos( dot(p,K1) ) * 12345.6789 );
                         }
                         void main() {
@@ -875,45 +763,38 @@
                         }
                     `
                 };
-                const grainPass = new ShaderPass(new THREE.ShaderMaterial(grainShader));
-                this.composer.addPass(grainPass);
+                this.composer.addPass(new ShaderPass(new THREE.ShaderMaterial(grainShader)));
             }
 
-            // --- SUBSYSTEM 3: WORLD BUILDER ---
             buildWorld() {
-                // 1. MARROW (Shader Blob)
-                // Using the shader strings from Part 1
-                const marrowGeo = new THREE.IcosahedronGeometry(4, 60); // High poly for displacement
+                // Marrow
+                const marrowGeo = new THREE.IcosahedronGeometry(4, 60);
                 const marrowMat = new THREE.ShaderMaterial({
                     uniforms: { uTime: { value: 0 } },
                     vertexShader: VZZOX_SHADERS.organicVertex,
                     fragmentShader: VZZOX_SHADERS.organicFragment,
                     wireframe: false
                 });
-                
                 this.objects.marrow = new THREE.Mesh(marrowGeo, marrowMat);
-                // Position it off-screen initially (controlled by scroll later)
                 this.objects.marrow.position.set(-10, 0, -5);
                 this.scene.add(this.objects.marrow);
 
-                // 2. SKULL (Procedural Assembly)
+                // Skull
                 this.objects.skull = ProceduralArchitect.createCyberSkull();
-                this.objects.skull.position.set(10, -20, -5); // Further down
+                this.objects.skull.position.set(10, -20, -5);
                 this.scene.add(this.objects.skull);
 
-                // 3. PARTICLES
+                // Particles
                 this.objects.particles = ProceduralArchitect.createDataCloud();
                 this.scene.add(this.objects.particles);
 
-                // 4. GRID
+                // Grid
                 this.objects.grid = ProceduralArchitect.createGrid();
                 this.objects.grid.position.y = -15;
                 this.scene.add(this.objects.grid);
             }
 
-            // --- SUBSYSTEM 4: INPUT & EVENTS ---
             bindEvents() {
-                // Resize
                 window.addEventListener('resize', () => {
                     this.width = window.innerWidth;
                     this.height = window.innerHeight;
@@ -923,37 +804,23 @@
                     this.composer.setSize(this.width, this.height);
                 });
 
-                // Mouse Move (Parallax & Cursor)
                 document.addEventListener('mousemove', (e) => {
-                    // Normalized coordinates -1 to 1
                     this.targetMouse.x = (e.clientX / this.width) * 2 - 1;
                     this.targetMouse.y = -(e.clientY / this.height) * 2 + 1;
-
-                    // Update Custom Cursor HTML
+                    
                     const dot = document.getElementById('cursor-dot');
                     const circle = document.getElementById('cursor-circle');
-                    
-                    dot.style.left = `${e.clientX}px`;
-                    dot.style.top = `${e.clientY}px`;
-                    
-                    // Laggy circle effect
-                    setTimeout(() => {
-                        circle.style.left = `${e.clientX}px`;
-                        circle.style.top = `${e.clientY}px`;
-                    }, 50);
+                    if(dot) { dot.style.left = `${e.clientX}px`; dot.style.top = `${e.clientY}px`; }
+                    if(circle) { setTimeout(() => { circle.style.left = `${e.clientX}px`; circle.style.top = `${e.clientY}px`; }, 50); }
                 });
 
-                // Native Scroll Listener
                 window.addEventListener('scroll', () => {
                     this.targetScrollY = window.scrollY;
-                    
-                    // Update HUD Scroll Readout
-                    document.getElementById('scroll-readout').innerText = 
-                        this.targetScrollY.toString().padStart(4, '0');
+                    const readout = document.getElementById('scroll-readout');
+                    if(readout) readout.innerText = this.targetScrollY.toString().padStart(4, '0');
                 });
             }
 
-            // --- BOOT SEQUENCE LOGIC ---
             runBootSequence() {
                 const loader = document.getElementById('loader-fill');
                 const log = document.getElementById('console-output');
@@ -961,16 +828,12 @@
                 const canvas = document.getElementById('canvas-world');
 
                 let progress = 0;
-                
-                // Simulated loading interval
                 const interval = setInterval(() => {
                     progress += Math.random() * 5;
                     if (progress > 100) progress = 100;
-                    
-                    loader.style.width = `${progress}%`;
+                    if(loader) loader.style.width = `${progress}%`;
 
-                    // Add random logs
-                    if(Math.random() > 0.8) {
+                    if(Math.random() > 0.8 && log) {
                         const hex = Math.floor(Math.random()*16777215).toString(16);
                         log.innerHTML += `> PARSING BLOCK 0x${hex}... OK<br>`;
                         log.scrollTop = log.scrollHeight;
@@ -978,179 +841,108 @@
 
                     if (progress === 100) {
                         clearInterval(interval);
-                        // Launch!
                         setTimeout(() => {
-                            bootScreen.style.opacity = 0;
-                            canvas.style.opacity = 1;
-                            setTimeout(() => bootScreen.remove(), 1000);
+                            if(bootScreen) bootScreen.style.opacity = 0;
+                            if(canvas) canvas.style.opacity = 1;
+                            setTimeout(() => { if(bootScreen) bootScreen.remove(); }, 1000);
                             this.isBooted = true;
-                            // Trigger animations for HTML elements
                             document.querySelectorAll('.cyber-panel').forEach(el => el.classList.add('visible'));
-                            // Start Loop
-                            this.animate();
+                            this.animate(); // Start Loop
                         }, 500);
                     }
-                }, 50); // Speed of loading
+                }, 50);
             }
-            // --- SUBSYSTEM 5: MAIN RENDER LOOP ---
+
             animate() {
                 requestAnimationFrame(this.animate.bind(this));
-
                 const time = performance.now() * 0.001;
                 const deltaTime = time - (this.lastTime || time);
                 this.lastTime = time;
 
-                // 1. SMOOTH SCROLL PHYSICS (LERP)
-                // We interpolate current scroll to target scroll for that "weighty" feel
                 this.scrollY += (this.targetScrollY - this.scrollY) * 0.05;
-
-                // 2. MOUSE PHYSICS
-                // Smoothly interpolate mouse values
                 this.mouse.x += (this.targetMouse.x - this.mouse.x) * 0.05;
                 this.mouse.y += (this.targetMouse.y - this.mouse.y) * 0.05;
 
-                // 3. SCENE DIRECTOR (Controls objects based on scroll)
                 this.updateSceneDirector(this.scrollY, time);
 
-                // 4. GLOBAL ANIMATIONS
-                
-                // Animate Marrow Shader
                 if (this.objects.marrow) {
                     this.objects.marrow.material.uniforms.uTime.value = time;
-                    // Pulsing rotation
                     this.objects.marrow.rotation.y = time * 0.1;
                     this.objects.marrow.rotation.z = Math.sin(time * 0.5) * 0.1;
                 }
-
-                // Animate Particles (Flow)
                 if (this.objects.particles) {
                     this.objects.particles.rotation.y = time * 0.02;
-                    // Subtle wave effect on particles
                     this.objects.particles.position.y += Math.sin(time) * 0.01;
                 }
-
-                // Animate Grid (Infinite floor illusion)
                 if (this.objects.grid) {
                     this.objects.grid.position.z = (time * 2) % 10;
                 }
 
-                // 5. PARALLAX CAMERA
-                // Camera moves slightly with mouse
                 this.camera.position.x += (this.mouse.x * 0.5 - this.camera.position.x) * 0.05;
                 this.camera.rotation.y = this.mouse.x * 0.02;
                 this.camera.rotation.x = this.mouse.y * 0.02;
 
-                // 6. HUD UPDATES
-                // Randomly update object counter to look like processing
                 if(Math.random() > 0.95) {
-                    const objCount = this.scene.children.length + 
-                                   (this.objects.skull ? this.objects.skull.children.length : 0) +
-                                   Math.floor(Math.random() * 100);
-                    document.getElementById('obj-counter').innerText = objCount;
+                    const counter = document.getElementById('obj-counter');
+                    if(counter) counter.innerText = this.scene.children.length + 50 + Math.floor(Math.random() * 100);
                 }
-                
-                // FPS Counter (Approximation)
                 if(Math.random() > 0.9) {
-                    document.getElementById('fps-counter').innerText = Math.round(1 / deltaTime);
+                    const fps = document.getElementById('fps-counter');
+                    if(fps) fps.innerText = Math.round(1 / (deltaTime + 0.00001));
                 }
 
-                // 7. RENDER
-                // Use composer for bloom, otherwise standard renderer
-                if (this.composer) {
-                    this.composer.render();
-                } else {
-                    this.renderer.render(this.scene, this.camera);
-                }
+                if (this.composer) this.composer.render();
+                else this.renderer.render(this.scene, this.camera);
             }
 
-            // --- THE DIRECTOR: SCROLL-BASED LOGIC ---
-            // This maps HTML scroll position to 3D world coordinates
             updateSceneDirector(scroll, time) {
-                // Determine which "section" we are in based on viewport height
                 const vh = this.height;
                 
-                // SECTION 1: HERO (0 - 1vh)
-                // Marrow is hidden or very far
-                
-                // SECTION 2: MARROW (1vh - 2vh)
-                // We move the Marrow from left off-screen to center
+                // MARROW
                 if (this.objects.marrow) {
-                    // Normalize scroll for this section
                     const start = vh * 0.5;
                     const end = vh * 1.5;
-                    
                     if (scroll > start && scroll < vh * 2.5) {
-                        // Calculate progress 0.0 to 1.0
                         let progress = (scroll - start) / (end - start);
-                        
-                        // Move Marrow: From x:-10 to x:4
-                        // Using a curve for smooth entry
                         const targetX = -10 + (progress * 14); 
-                        
-                        // Limit movement so it stays in view for a bit
                         this.objects.marrow.position.x = Math.min(Math.max(targetX, -10), 5);
-                        
-                        // Scale up effect
                         const scale = 1 + Math.sin(progress * Math.PI) * 0.5;
                         this.objects.marrow.scale.setScalar(scale);
-                        
-                        // Rotate based on scroll
                         this.objects.marrow.rotation.x = scroll * 0.001;
                     }
                 }
 
-                // SECTION 3: SKULL (2vh - 3vh)
+                // SKULL
                 if (this.objects.skull) {
                     const start = vh * 1.5;
-                    
-                    // Parallax lift: Skull rises as we scroll down
-                    // Default pos y is -20. Target is 0.
                     const targetY = -20 + (scroll - start) * 0.03;
-                    
                     this.objects.skull.position.y = targetY;
-
-                    // Skull looks at mouse
-                    this.objects.skull.rotation.y = this.mouse.x * 0.5 + Math.PI; // Face forward
+                    this.objects.skull.rotation.y = this.mouse.x * 0.5 + Math.PI; 
                     this.objects.skull.rotation.x = -this.mouse.y * 0.5;
 
-                    // "Speaking" animation (Jaw movement)
-                    // If near center screen
                     if (targetY > -5 && targetY < 5) {
-                        const jaw = this.objects.skull.children[1]; // We know jaw is index 1 from Architect
-                        if(jaw) {
-                            // Random twitching
-                            jaw.rotation.x = Math.abs(Math.sin(time * 10)) * 0.2;
-                        }
+                        const jaw = this.objects.skull.children[1]; 
+                        if(jaw) jaw.rotation.x = Math.abs(Math.sin(time * 10)) * 0.2;
                     }
                 }
 
-                // SECTION 4: DATA OVERLOAD (3vh+)
+                // CHAOS
                 if (scroll > vh * 2.8) {
-                    // Increase chaos
                     if (this.objects.particles) {
-                        // Spin faster
                         this.objects.particles.rotation.z += 0.01;
-                        // Expand
                         const s = 1 + (scroll - vh * 2.8) * 0.001;
                         this.objects.particles.scale.setScalar(s);
                     }
-                    
-                    // Camera shake effect
                     this.camera.position.x += (Math.random() - 0.5) * 0.1;
                     this.camera.position.y += (Math.random() - 0.5) * 0.1;
                 }
             }
         }
 
-        // --- ENTRY POINT ---
-        // Wait for DOM, then launch the Kernel
         window.addEventListener('DOMContentLoaded', () => {
-            // Instantiate the System
             window.vzzoxSystem = new VzzoxCore();
-            
             console.log("%c VZZOX SYSTEM READY ", "background: #00f3ff; color: #000; font-weight: bold; padding: 5px;");
         });
-
     </script>
 </body>
 </html>
