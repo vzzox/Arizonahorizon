@@ -4,166 +4,226 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мемасика 2.0 | Регистрация</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Unbounded:wght@900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
             --bg-color: #0f0f11;
             --card-bg: #141416;
+            --text-color: #ffffff;
             --accent-color: #ff5e00;
+            --input-bg: #1a1a1d;
+            --border-color: #333;
             --font-main: 'Manrope', sans-serif;
             --font-display: 'Unbounded', sans-serif;
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+
         body {
             background-color: var(--bg-color);
-            color: #fff;
+            color: var(--text-color);
             font-family: var(--font-main);
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
             overflow: hidden;
+            position: relative;
         }
-        
-        /* Шум и фон */
+
+        /* Текстура */
         body::before {
             content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
             opacity: 0.4; pointer-events: none; z-index: 0;
         }
 
+        .glow {
+            position: absolute; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(255, 94, 0, 0.15) 0%, rgba(15, 15, 17, 0) 70%);
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 1; pointer-events: none;
+        }
+
+        /* Карточка */
         .reg-card {
+            position: relative; z-index: 10;
             background: var(--card-bg);
-            width: 90%; max-width: 400px;
+            width: 90%; max-width: 420px;
             padding: 40px;
             border-radius: 16px;
-            border: 1px solid #333;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-            z-index: 10;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
         }
 
-        h1 { font-family: var(--font-display); text-transform: uppercase; text-align: center; margin-bottom: 30px; }
-        
-        input {
-            width: 100%; padding: 15px; margin-bottom: 15px;
-            background: #1a1a1d; border: 1px solid #333;
-            color: #fff; border-radius: 8px; outline: none;
-        }
-        input:focus { border-color: var(--accent-color); }
-
-        button {
-            width: 100%; padding: 15px;
-            background: #fff; color: #000;
-            font-weight: 800; border: none; border-radius: 8px;
-            cursor: pointer; text-transform: uppercase;
+        h1 {
             font-family: var(--font-display);
+            font-size: 2rem; text-transform: uppercase;
+            margin-bottom: 5px; text-align: center;
         }
-        button:hover { background: var(--accent-color); }
-        button:disabled { opacity: 0.5; }
+        .subtitle { color: #666; font-size: 0.9rem; text-align: center; margin-bottom: 30px; }
 
-        .error-msg {
-            color: #ff4444; text-align: center; margin-top: 15px; font-size: 0.9rem;
-            white-space: pre-wrap; /* Чтобы показать переносы строк */
+        /* Inputs */
+        .input-group { margin-bottom: 15px; }
+        .input-group label {
+            display: block; font-size: 0.75rem; color: #888; margin-bottom: 8px;
+            font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
         }
+        .input-field {
+            width: 100%; padding: 16px; background: var(--input-bg);
+            border: 1px solid var(--border-color); color: #fff;
+            border-radius: 8px; font-family: var(--font-main); font-size: 1rem;
+            transition: 0.2s;
+        }
+        .input-field:focus { border-color: var(--accent-color); background: #1e1e20; }
+
+        /* Button */
+        .btn-submit {
+            width: 100%; padding: 18px; margin-top: 15px;
+            background: #fff; color: #000;
+            font-family: var(--font-display); font-size: 1rem;
+            border: none; border-radius: 8px; cursor: pointer;
+            text-transform: uppercase; transition: 0.3s;
+        }
+        .btn-submit:hover { background: var(--accent-color); transform: translateY(-2px); }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Error/Success Messages */
+        .msg-box {
+            text-align: center; margin-top: 15px; font-size: 0.9rem; min-height: 20px; white-space: pre-wrap;
+        }
+        .error { color: #ff4444; }
+        .success { color: #00ff88; }
+
+        /* Success View */
+        #success-view { display: none; text-align: center; animation: fadeIn 0.5s ease; }
+        .big-icon { font-size: 4rem; color: #00ff88; margin-bottom: 20px; display: block;}
         
-        #success-view { display: none; text-align: center; }
-        .credits { position: absolute; bottom: 20px; font-size: 0.7rem; color: #555; font-family: monospace; z-index: 10;}
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .credits {
+            position: absolute; bottom: 20px; width: 100%; text-align: center;
+            font-size: 0.7rem; color: #444; font-family: monospace; text-transform: uppercase; z-index: 10;
+        }
+        .credits span { color: var(--accent-color); }
     </style>
 </head>
 <body>
 
+    <div class="glow"></div>
+
     <div class="reg-card">
+        
         <div id="form-view">
-            <h1>Вход / Рега</h1>
+            <h1>Регистрация</h1>
+            <div class="subtitle">Мемасика 2.0 // Join the cult</div>
+
             <form onsubmit="handleRegister(event)">
-                <input type="text" id="username" placeholder="Никнейм (только для регистрации)">
-                <input type="email" id="email" placeholder="Email" required>
-                <input type="password" id="password" placeholder="Пароль (6+ символов)" required>
-                <button type="submit" id="btn">Погнали</button>
-                <div id="log" class="error-msg"></div>
+                <div class="input-group">
+                    <label>Никнейм</label>
+                    <input type="text" id="username" class="input-field" placeholder="Kiborg_Ubiyca" required autocomplete="off">
+                </div>
+
+                <div class="input-group">
+                    <label>E-mail</label>
+                    <input type="email" id="email" class="input-field" placeholder="mail@memasik.com" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Пароль</label>
+                    <input type="password" id="password" class="input-field" placeholder="••••••••" required minlength="6">
+                </div>
+
+                <button type="submit" class="btn-submit" id="btn-submit">Создать аккаунт</button>
+                <div id="message" class="msg-box"></div>
             </form>
         </div>
 
         <div id="success-view">
-            <h1 style="color: #00ff88;">УСПЕХ!</h1>
-            <p>Пользователь создан.</p>
-            <p>Если включено подтверждение почты — проверь Inbox.</p>
-            <button onclick="location.reload()" style="margin-top:20px">Назад</button>
+            <span class="big-icon">✔</span>
+            <h1>ГОТОВО!</h1>
+            <div class="subtitle">
+                Аккаунт создан.<br>
+                Профиль записан автоматически.<br>
+                Залетай в движ.
+            </div>
+            <button class="btn-submit" onclick="window.location.reload()">На главную</button>
         </div>
+
     </div>
 
-    <div class="credits">Owner: Hokan // Dev: vzzox</div>
+    <div class="credits">Owner: <span>Hokan</span> // Dev: <span>vzzox</span></div>
 
     <script>
-        // --- КОНФИГ ---
+        // --- CONFIGURATION ---
         const SUPABASE_URL = 'https://hrrzpftxpafnavlljhum.supabase.co';
-        
-        // ВЕРНУЛ ТВОЙ ПРЕДЫДУЩИЙ КЛЮЧ (ОН ПРАВИЛЬНЫЙ!)
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNzc1NzYsImV4cCI6MjA4NDg1MzU3Nn0.whczAQ9mUOJqT_hMEujiQnFnEuVi27iEPf8VWvCceFE';
-
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+        
+        // --- LOGIC ---
         async function handleRegister(e) {
             e.preventDefault();
-            const log = document.getElementById('log');
-            const btn = document.getElementById('btn');
             
-            log.innerText = "";
-            btn.disabled = true;
-            btn.innerText = "Думаю...";
-
-            const email = document.getElementById('email').value;
+            const btn = document.getElementById('btn-submit');
+            const msg = document.getElementById('message');
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-            const username = document.getElementById('username').value;
+
+            // UI Reset
+            btn.disabled = true;
+            btn.innerText = "Загрузка...";
+            msg.innerText = "";
+            msg.className = "msg-box";
 
             try {
-                // 1. Попытка РЕГИСТРАЦИИ
+                // Проверка загрузки библиотеки
+                if (typeof window.supabase === 'undefined') {
+                    throw new Error("Библиотека Supabase не загрузилась. Проверь интернет.");
+                }
+
+                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+                // 1. Регистрация с передачей Никнейма в мета-данные
+                // База данных (Триггер) сама создаст профиль на основе этих данных
                 const { data, error } = await supabase.auth.signUp({
                     email: email,
-                    password: password
+                    password: password,
+                    options: {
+                        data: {
+                            username: username // <-- Это уйдет в БД автоматически
+                        }
+                    }
                 });
 
                 if (error) throw error;
 
-                // 2. Если юзер создан, пишем ПРОФИЛЬ
+                // 2. Если Успех
                 if (data.user) {
-                    if (username) {
-                        const { error: profileError } = await supabase
-                            .from('profiles')
-                            .insert([{
-                                id: data.user.id,
-                                username: username,
-                                display_name: username
-                            }]);
-                        
-                        if (profileError) {
-                            // Если auth прошел, а профиль нет -> проблема в SQL Policy
-                            console.error(profileError);
-                            throw new Error("Юзер создан, но ошибка БД (RLS).\nВыполни SQL-код из чата!");
-                        }
-                    }
-                    
+                    console.log("User created:", data.user.id);
                     document.getElementById('form-view').style.display = 'none';
                     document.getElementById('success-view').style.display = 'block';
                 } else {
-                    // Если data.user пуст, возможно юзер уже есть, попробуем войти?
-                    log.innerText = "Проверь почту, возможно нужно подтверждение.";
+                    // Если user null, но ошибки нет (редкий кейс, но бывает при подтверждении почты)
+                    msg.innerText = "Проверь почту для подтверждения!";
                 }
 
             } catch (err) {
                 console.error(err);
-                log.innerText = err.message;
+                msg.className = "msg-box error";
                 
-                // Перевод частых ошибок
-                if (err.message.includes("already registered")) {
-                    log.innerText = "Этот Email уже занят. Попробуй войти.";
-                }
-            } finally {
+                // Перевод ошибок для красоты
+                let errorText = err.message;
+                if (errorText.includes("already registered")) errorText = "Этот E-mail уже занят.";
+                if (errorText.includes("password")) errorText = "Пароль слишком слабый.";
+                
+                msg.innerText = errorText;
+                
                 btn.disabled = false;
-                btn.innerText = "Погнали";
+                btn.innerText = "Создать аккаунт";
             }
         }
     </script>
