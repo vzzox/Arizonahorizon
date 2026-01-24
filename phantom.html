@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHANTOM GUI | NEWTOYERS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --bg-color: #050505;
+            --text-color: #e0e0e0;
+            --accent: #00ff82; /* NewToyers Green */
+            --accent-dirty: #008f49;
+            --grunge-red: #ff3333;
+            --noise-color: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* GRUNGE BACKGROUND NOISE */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E");
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 998;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 700px;
+            position: relative;
+            z-index: 1;
+            padding: 2rem;
+            border: 2px solid #333;
+            background: rgba(10, 10, 10, 0.9);
+            box-shadow: 10px 10px 0px rgba(20, 20, 20, 1);
+            transform: rotate(-1deg);
+        }
+
+        /* GLITCH HEADER */
+        h1 {
+            font-family: 'Rubik Glitch', cursive;
+            font-size: 4rem;
+            text-align: center;
+            color: var(--accent);
+            text-shadow: 3px 3px 0px var(--grunge-red);
+            margin-bottom: 0.5rem;
+            position: relative;
+            animation: shake 2s infinite;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+            letter-spacing: 2px;
+            border-bottom: 1px dashed #444;
+            padding-bottom: 1rem;
+        }
+
+        /* SCRIPT BOX */
+        .script-box {
+            background: #000;
+            border: 1px solid var(--accent-dirty);
+            padding: 1.5rem;
+            position: relative;
+            margin-bottom: 2rem;
+            clip-path: polygon(0 0, 100% 0, 98% 90%, 0% 100%);
+        }
+
+        .code-display {
+            font-family: monospace;
+            color: var(--accent);
+            word-break: break-all;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-bottom: 1rem;
+            background: #0f0f0f;
+            padding: 10px;
+            border-left: 3px solid var(--grunge-red);
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: 15px;
+            font-family: 'Rubik Glitch', cursive;
+            font-size: 1.5rem;
+            background: var(--text-color);
+            color: var(--bg-color);
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            text-transform: uppercase;
+            clip-path: polygon(2% 0, 100% 0, 98% 100%, 0% 100%);
+        }
+
+        .copy-btn:hover {
+            background: var(--accent);
+            color: #000;
+            transform: scale(1.02) rotate(1deg);
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        .copy-btn:active {
+            background: var(--grunge-red);
+            transform: scale(0.98);
+        }
+
+        /* CREDITS */
+        .credits {
+            margin-top: 2rem;
+            border-top: 2px solid #333;
+            padding-top: 1rem;
+        }
+
+        .dev-title {
+            color: #555;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .dev-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .dev-list li {
+            font-size: 1.1rem;
+            margin: 5px 0;
+        }
+
+        .main-dev {
+            color: var(--accent);
+            font-weight: bold;
+            font-size: 1.3rem !important;
+        }
+
+        .main-dev::before {
+            content: "> ";
+            color: var(--grunge-red);
+        }
+
+        .crew {
+            color: #aaa;
+        }
+
+        /* TELEGRAM LINK */
+        .tg-link {
+            display: block;
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--text-color);
+            text-decoration: none;
+            border: 1px solid #333;
+            padding: 10px;
+            transition: 0.3s;
+        }
+
+        .tg-link:hover {
+            background: var(--grunge-red);
+            border-color: var(--grunge-red);
+            color: #000;
+        }
+
+        /* ANIMATIONS */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            h1 { font-size: 2.5rem; }
+            .container { width: 95%; padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="noise-overlay"></div>
+    <div class="scanlines"></div>
+
+    <div class="container">
+        <h1>PHANTOM GUI</h1>
+        <div class="subtitle">STATUS: UNDETECTED // V7.0</div>
+
+        <div class="script-box">
+            <div class="code-display" id="scriptText">loadstring(game:HttpGet("https://raw.githubusercontent.com/vzzox/NewToyers-TSG-Hax/main/p_7.lua"))()</div>
+            <button class="copy-btn" onclick="copyScript()">COPY SCRIPT</button>
+        </div>
+
+        <div class="credits">
+            <div class="dev-title">/// SYSTEM CREATORS ///</div>
+            <ul class="dev-list">
+                <li class="main-dev">vzzox [FOUNDER/DEV]</li>
+                <li class="crew">frost [DEV]</li>
+                <li class="crew">Чина Лолайет [DEV]</li>
+            </ul>
+        </div>
+
+        <a href="https://t.me/newtoyers" target="_blank" class="tg-link">
+            JOIN TELEGRAM: @NewToyers
+        </a>
+    </div>
+
+    <script>
+        function copyScript() {
+            const scriptText = document.getElementById('scriptText').innerText;
+            navigator.clipboard.writeText(scriptText).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.innerText;
+                
+                btn.innerText = "COPIED TO CLIPBOARD!";
+                btn.style.background = "#ff3333";
+                
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.background = "#e0e0e0";
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
