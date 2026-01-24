@@ -30,11 +30,11 @@
         .app-header { position: sticky; top: 0; z-index: 100; background: rgba(15, 15, 17, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); }
         .brand-title { text-align: center; font-family: var(--font-display); font-size: 1.2rem; padding: 15px 0 10px 0; letter-spacing: 1px; text-transform: uppercase; }
         .tabs { display: flex; justify-content: space-around; }
-        .tab-btn { flex: 1; background: none; border: none; color: var(--text-secondary); font-family: var(--font-display); font-size: 0.9rem; padding: 15px 0; text-transform: uppercase; cursor: pointer; position: relative; transition: color 0.3s; }
+        .tab-btn { flex: 1; background: none; border: none; color: var(--text-secondary); font-family: var(--font-display); font-size: 0.9rem; padding: 15px 0; text-transform: uppercase; cursor: pointer; position: relative; }
         .tab-btn.active { color: var(--text-main); }
         .tab-btn.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 40px; height: 3px; background-color: var(--accent-color); box-shadow: 0 0 10px rgba(255, 94, 0, 0.5); }
 
-        /* Post Creation */
+        /* Create Post */
         .create-post-card { background-color: var(--card-bg); margin: 15px; padding: 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--border-color); }
         .user-avatar { width: 40px; height: 40px; background-color: #333; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 700; color: #fff; flex-shrink: 0; border: 2px solid var(--border-color); font-size: 0.9rem; text-transform: uppercase; overflow: hidden; }
         .post-input { background-color: #000; color: #fff; border: 1px solid var(--border-color); border-radius: 20px; padding: 10px 15px; width: 100%; font-size: 0.9rem; font-family: var(--font-main); }
@@ -42,8 +42,8 @@
 
         /* Feed */
         #feed-container { min-height: 200px; padding-bottom: 20px; }
-        .status-msg { text-align: center; color: #555; margin-top: 50px; font-family: var(--font-display); padding: 0 20px; }
-        .error-msg { color: #ff4444; font-family: monospace; font-size: 0.8rem; background: #220000; padding: 10px; border-radius: 8px; display: inline-block; margin-top: 10px; }
+        .status-msg { text-align: center; color: #555; margin-top: 50px; font-family: var(--font-display); padding: 0 20px; word-break: break-all; }
+        .error-big { color: red; border: 1px solid red; padding: 10px; margin: 20px; font-family: monospace; background: #220000; }
 
         .post-card { background-color: var(--card-bg); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin-bottom: 10px; padding: 15px; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -68,8 +68,8 @@
     <header class="app-header">
         <div class="brand-title">Memasik 2.0</div>
         <div class="tabs">
-            <button class="tab-btn active" id="tab-lenta" onclick="loadPosts('new')">LENTA</button>
-            <button class="tab-btn" id="tab-top" onclick="loadPosts('top')">TOP</button>
+            <button class="tab-btn active" id="tab-lenta" onclick="switchTab('new')">LENTA</button>
+            <button class="tab-btn" id="tab-top" onclick="switchTab('top')">TOP</button>
         </div>
     </header>
 
@@ -81,7 +81,7 @@
         </div>
 
         <div id="feed-container">
-            <div class="status-msg">Инициализация...</div>
+            <div class="status-msg">Подключение...</div>
         </div>
     </main>
 
@@ -94,90 +94,95 @@
     </nav>
 
     <script>
-        // --- CONFIG ---
+        // --- HARDCORE CONFIG ---
         const SUPABASE_URL = 'https://hrrzpftxpafnavlljhum.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNzc1NzYsImV4cCI6MjA4NDg1MzU3Nn0.whczAQ9mUOJqT_hMEujiQnFnEuVi27iEPf8VWvCceFE';
         
         let supabase;
         let currentUser = null;
-        let currentTab = 'new';
 
-        // --- INIT ---
+        // UI Helpers
+        const log = (msg, isError=false) => {
+            const el = document.getElementById('feed-container');
+            if (isError) {
+                el.innerHTML = `<div class="status-msg error-big">ОШИБКА:<br>${msg}</div>`;
+            } else {
+                el.innerHTML = `<div class="status-msg">${msg}</div>`;
+            }
+        };
+
         async function init() {
-            const container = document.getElementById('feed-container');
-            
             try {
-                if (typeof window.supabase === 'undefined') throw new Error("Supabase JS не загружен. Проверь VPN.");
+                if (typeof window.supabase === 'undefined') throw new Error("JS не загружен. Проверь сеть.");
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-                // 1. Проверяем пользователя
+                // Check Auth
                 const { data: { user } } = await supabase.auth.getUser();
-                const inputField = document.getElementById('post-text');
+                const input = document.getElementById('post-text');
 
                 if (user) {
                     currentUser = user;
-                    inputField.placeholder = "Что нового, легенда?";
-                    // Грузим аватар
-                    const { data: profile } = await supabase.from('profiles').select('username').eq('id', user.id).single();
-                    if (profile) document.getElementById('current-user-avatar').innerText = profile.username[0].toUpperCase();
+                    input.placeholder = "Что нового?";
+                    // Пытаемся взять аватар, но если ошибка - пофиг
+                    try {
+                        const { data } = await supabase.from('profiles').select('username').eq('id', user.id).single();
+                        if (data) document.getElementById('current-user-avatar').innerText = data.username[0].toUpperCase();
+                    } catch(e) {}
                 } else {
-                    inputField.placeholder = "Войди, чтобы писать...";
-                    inputField.disabled = true;
+                    input.placeholder = "Войди в аккаунт";
+                    input.disabled = true;
                 }
 
-                // 2. Грузим ленту
                 loadPosts('new');
 
             } catch (err) {
-                container.innerHTML = `<div class="status-msg">Сбой инициализации<br><span class="error-msg">${err.message}</span></div>`;
+                log(err.message, true);
             }
         }
 
-        // --- LOAD POSTS (Главная функция) ---
         async function loadPosts(type) {
-            currentTab = type;
-            const container = document.getElementById('feed-container');
+            // UI
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(type === 'new' ? 'tab-lenta' : 'tab-top').classList.add('active');
             
-            // UI Переключение табов
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            if(type === 'new') document.getElementById('tab-lenta').classList.add('active');
-            if(type === 'top') document.getElementById('tab-top').classList.add('active');
-
-            container.innerHTML = '<div class="status-msg">Загрузка базы данных...</div>';
+            const container = document.getElementById('feed-container');
+            container.innerHTML = '<div class="status-msg">Загрузка постов...</div>';
 
             try {
-                // Настраиваем запрос
-                let query = supabase
-                    .from('posts')
-                    .select(`
-                        id, content, created_at,
-                        profiles (username)
-                    `);
-
-                // ЛОГИКА СОРТИРОВКИ
-                if (type === 'new') {
-                    // Новые сверху
-                    query = query.order('created_at', { ascending: false });
-                } else {
-                    // "ТОП" (пока сделаем старые/легендарные, т.к. лайков еще нет в таблице постов)
-                    query = query.order('created_at', { ascending: true });
-                }
+                // 1. БЕРЕМ ПОСТЫ (ПРОСТОЙ ЗАПРОС)
+                let query = supabase.from('posts').select('*'); // БЕЗ JOIN! Это важно.
+                
+                if (type === 'new') query = query.order('created_at', { ascending: false });
+                else query = query.order('created_at', { ascending: true }); // Топ пока старые посты
 
                 const { data: posts, error } = await query;
-
                 if (error) throw error;
 
                 if (!posts || posts.length === 0) {
-                    container.innerHTML = '<div class="status-msg">Постов пока нет.<br>Будь первым!</div>';
+                    container.innerHTML = '<div class="status-msg">Пусто.<br>Напиши первый пост!</div>';
                     return;
                 }
 
-                container.innerHTML = '';
+                // 2. БЕРЕМ ВСЕХ ЮЗЕРОВ (ЧТОБЫ УЗНАТЬ НИКИ)
+                // Собираем ID авторов
+                const userIds = [...new Set(posts.map(p => p.user_id))];
                 
+                // Запрашиваем их имена отдельным запросом (это работает всегда!)
+                const { data: profiles } = await supabase
+                    .from('profiles')
+                    .select('id, username')
+                    .in('id', userIds);
+
+                // Создаем словарь: ID -> Имя
+                const userMap = {};
+                if (profiles) {
+                    profiles.forEach(p => userMap[p.id] = p.username);
+                }
+
+                // 3. РИСУЕМ
+                container.innerHTML = '';
                 posts.forEach(post => {
-                    // Защита от удаленных профилей
-                    const profile = post.profiles || { username: 'Anon' };
-                    const username = profile.username || 'Anon';
+                    const username = userMap[post.user_id] || 'Аноним';
                     const avatar = username[0].toUpperCase();
                     const time = new Date(post.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
@@ -204,44 +209,31 @@
                 });
 
             } catch (err) {
-                // ВЫВОД ОШИБКИ НА ЭКРАН (Чтобы ты видел почему зависло)
-                let errorText = err.message;
-                // Подсказка если ошибка в связях
-                if (err.message.includes("profiles")) {
-                    errorText += "<br><br><b>РЕШЕНИЕ:</b> Выполни SQL-код из чата!";
-                }
-                container.innerHTML = `<div class="status-msg">Ошибка загрузки<br><span class="error-msg">${errorText}</span></div>`;
+                log("ОШИБКА ЗАГРУЗКИ: " + err.message, true);
             }
         }
 
-        // --- CREATE POST ---
         async function createPost() {
-            if (!currentUser) return alert("Войди в аккаунт!");
+            if (!currentUser) return alert("Нужна регистрация!");
             const input = document.getElementById('post-text');
-            const content = input.value.trim();
-            if (!content) return;
-
-            // Блокируем кнопку
-            const btn = document.getElementById('send-btn');
-            btn.style.opacity = '0.5';
+            const val = input.value.trim();
+            if(!val) return;
 
             try {
-                const { error } = await supabase.from('posts').insert([{ user_id: currentUser.id, content: content }]);
+                const { error } = await supabase.from('posts').insert([{
+                    user_id: currentUser.id,
+                    content: val
+                }]);
                 if (error) throw error;
-                
                 input.value = '';
-                loadPosts('new'); // Перезагружаем ленту "Новое"
-            } catch (err) {
-                alert("Ошибка: " + err.message);
-            } finally {
-                btn.style.opacity = '1';
+                loadPosts('new');
+            } catch (e) {
+                alert("Ошибка: " + e.message);
             }
         }
 
-        function escapeHtml(text) {
-            if (!text) return "";
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
+        function switchTab(t) { loadPosts(t); }
+        function escapeHtml(t) { return t ? t.replace(/</g, "&lt;") : ""; }
 
         init();
     </script>
