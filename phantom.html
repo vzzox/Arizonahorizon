@@ -5,246 +5,289 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PHANTOM GUI | NEWTOYERS</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=Share+Tech+Mono&display=swap');
+        /* ПОДКЛЮЧАЕМ ВСЕ ШРИФТЫ СРАЗУ */
+        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rubik+Glitch&family=Share+Tech+Mono&family=Special+Elite&display=swap');
 
+        /* === ПЕРЕМЕННЫЕ (CYBER - DEFAULT) === */
         :root {
+            /* ЦВЕТА */
             --bg-color: #050505;
+            --container-bg: rgba(10, 10, 10, 0.95);
             --text-color: #e0e0e0;
-            --accent: #00ff82; /* NewToyers Green */
-            --accent-dirty: #008f49;
-            --grunge-red: #ff3333;
-            --noise-color: rgba(255, 255, 255, 0.08);
+            --accent: #00ff82; /* Cyber Green */
+            --secondary: #ff3333; /* Cyber Red */
+            --border-style: solid;
+            --border-width: 2px;
+            
+            /* ШРИФТЫ */
+            --font-head: 'Rubik Glitch', cursive;
+            --font-body: 'Share Tech Mono', monospace;
+            
+            /* ЭФФЕКТЫ */
+            --shadow: 0 0 15px rgba(0, 255, 130, 0.2);
+            --transform-container: rotate(-1deg);
+            --btn-clip: polygon(2% 0, 100% 0, 98% 100%, 0% 100%);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        /* === ПЕРЕМЕННЫЕ (STREET MODE) === */
+        body.style-street {
+            /* ЦВЕТА */
+            --bg-color: #111;
+            --container-bg: #2a2a2a; /* Бетон */
+            --text-color: #d9d9d9;
+            --accent: #b7410e; /* Ржавчина */
+            --secondary: #cba12f; /* Желтая лента */
+            --border-style: solid;
+            --border-width: 4px;
+            
+            /* ШРИФТЫ */
+            --font-head: 'Black Ops One', cursive;
+            --font-body: 'Special Elite', cursive;
+            
+            /* ЭФФЕКТЫ */
+            --shadow: 10px 10px 30px rgba(0,0,0,0.9);
+            --transform-container: rotate(0deg);
+            --btn-clip: none;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: all 0.4s ease; }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: 'Share Tech Mono', monospace;
-            overflow-x: hidden;
+            font-family: var(--font-body);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            overflow-x: hidden;
             position: relative;
         }
 
-        /* GRUNGE BACKGROUND NOISE */
-        .noise-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 999;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E");
-        }
-
-        .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                to bottom,
-                rgba(255,255,255,0),
-                rgba(255,255,255,0) 50%,
-                rgba(0,0,0,0.2) 50%,
-                rgba(0,0,0,0.2)
-            );
+        /* === ФОНЫ === */
+        .bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        
+        /* Cyber BG Elements */
+        .cyber-scanlines {
+            background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.3) 50%);
             background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 998;
+            opacity: 1;
+        }
+        
+        /* Street BG Elements */
+        .street-texture {
+            opacity: 0;
+            background-image: radial-gradient(circle at center, transparent 0%, #000 90%), url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.2'/%3E");
         }
 
+        /* Переключение фонов */
+        body.style-street .cyber-scanlines { opacity: 0; }
+        body.style-street .street-texture { opacity: 1; }
+
+        /* === КНОПКА ПЕРЕКЛЮЧЕНИЯ СТИЛЯ === */
+        .switch-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 10px 20px;
+            background: transparent;
+            border: 2px solid var(--text-color);
+            color: var(--text-color);
+            font-family: var(--font-body);
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        
+        .switch-btn:hover {
+            background: var(--text-color);
+            color: var(--bg-color);
+        }
+
+        /* === КОНТЕЙНЕР === */
         .container {
+            position: relative;
+            z-index: 10;
             width: 90%;
             max-width: 700px;
-            position: relative;
-            z-index: 1;
-            padding: 2rem;
-            border: 2px solid #333;
-            background: rgba(10, 10, 10, 0.9);
-            box-shadow: 10px 10px 0px rgba(20, 20, 20, 1);
-            transform: rotate(-1deg);
+            padding: 2.5rem;
+            background: var(--container-bg);
+            border: var(--border-width) var(--border-style) #333;
+            transform: var(--transform-container);
+            box-shadow: var(--shadow);
         }
 
-        /* GLITCH HEADER */
+        /* Специфика Street стиля для контейнера */
+        body.style-street .container {
+            border-color: #000;
+            clip-path: polygon(2% 0%, 98% 1%, 100% 95%, 96% 100%, 3% 98%, 0% 5%);
+        }
+
+        /* Заголовок */
         h1 {
-            font-family: 'Rubik Glitch', cursive;
-            font-size: 4rem;
+            font-family: var(--font-head);
+            font-size: 3.5rem;
             text-align: center;
             color: var(--accent);
-            text-shadow: 3px 3px 0px var(--grunge-red);
+            text-shadow: 2px 2px 0px var(--secondary);
             margin-bottom: 0.5rem;
-            position: relative;
-            animation: shake 2s infinite;
         }
 
         .subtitle {
             text-align: center;
-            font-size: 1.2rem;
-            color: #666;
+            font-size: 1.1rem;
+            color: #777;
             margin-bottom: 2rem;
-            letter-spacing: 2px;
-            border-bottom: 1px dashed #444;
-            padding-bottom: 1rem;
+            border-bottom: 1px dashed #555;
+            padding-bottom: 10px;
         }
 
-        /* SCRIPT BOX */
+        /* Street Style Subtitle Mod */
+        body.style-street .subtitle {
+            background: var(--secondary);
+            color: #000;
+            border: none;
+            width: fit-content;
+            margin: 0 auto 2rem auto;
+            padding: 5px 15px;
+            font-weight: bold;
+            transform: rotate(-1deg);
+        }
+
+        /* === СКРИПТ БОКС === */
         .script-box {
-            background: #000;
-            border: 1px solid var(--accent-dirty);
-            padding: 1.5rem;
-            position: relative;
-            margin-bottom: 2rem;
-            clip-path: polygon(0 0, 100% 0, 98% 90%, 0% 100%);
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--accent);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        body.style-street .script-box {
+            border: 3px solid var(--accent); /* Rust */
+            background: #111;
         }
 
         .code-display {
             font-family: monospace;
+            font-size: 0.9rem;
             color: var(--accent);
             word-break: break-all;
-            font-size: 0.9rem;
-            opacity: 0.7;
             margin-bottom: 1rem;
-            background: #0f0f0f;
             padding: 10px;
-            border-left: 3px solid var(--grunge-red);
+            background: #000;
         }
 
-        .copy-btn {
+        /* === ГЛАВНАЯ КНОПКА (COPY) === */
+        .action-btn {
             width: 100%;
             padding: 15px;
-            font-family: 'Rubik Glitch', cursive;
+            font-family: var(--font-head);
             font-size: 1.5rem;
             background: var(--text-color);
             color: var(--bg-color);
             border: none;
             cursor: pointer;
-            transition: 0.2s;
+            clip-path: var(--btn-clip);
             text-transform: uppercase;
-            clip-path: polygon(2% 0, 100% 0, 98% 100%, 0% 100%);
         }
 
-        .copy-btn:hover {
+        .action-btn:hover {
             background: var(--accent);
             color: #000;
-            transform: scale(1.02) rotate(1deg);
-            box-shadow: 0 0 15px var(--accent);
         }
 
-        .copy-btn:active {
-            background: var(--grunge-red);
-            transform: scale(0.98);
+        /* Street Button Mod */
+        body.style-street .action-btn {
+            background: var(--accent); /* Rust */
+            color: #000;
+            border-top: 3px solid #555;
+        }
+        body.style-street .action-btn:hover {
+            background: var(--secondary); /* Yellow */
+            color: #8a0000;
         }
 
-        /* CREDITS */
+        /* === CREDITS === */
         .credits {
             margin-top: 2rem;
             border-top: 2px solid #333;
             padding-top: 1rem;
         }
-
-        .dev-title {
-            color: #555;
-            font-size: 0.8rem;
-            text-transform: uppercase;
+        
+        body.style-street .credits {
+            border-top: 2px dashed #555;
         }
 
-        .dev-list {
-            list-style: none;
-            margin-top: 10px;
-        }
+        .dev-list { list-style: none; margin-top: 10px; }
+        .dev-list li { margin: 5px 0; font-size: 1.1rem; }
+        
+        .main-dev { color: var(--accent); font-weight: bold; font-size: 1.3rem; }
+        .main-dev::before { content: "> "; color: var(--secondary); }
 
-        .dev-list li {
-            font-size: 1.1rem;
-            margin: 5px 0;
-        }
-
-        .main-dev {
-            color: var(--accent);
-            font-weight: bold;
-            font-size: 1.3rem !important;
-        }
-
-        .main-dev::before {
-            content: "> ";
-            color: var(--grunge-red);
-        }
-
-        .crew {
-            color: #aaa;
-        }
-
-        /* TELEGRAM LINK */
+        /* === TG LINK === */
         .tg-link {
             display: block;
-            margin-top: 2rem;
+            margin-top: 20px;
             text-align: center;
-            color: var(--text-color);
             text-decoration: none;
-            border: 1px solid #333;
-            padding: 10px;
-            transition: 0.3s;
+            padding: 12px;
+            border: 1px solid var(--text-color);
+            color: var(--text-color);
+            transition: 0.2s;
         }
 
         .tg-link:hover {
-            background: var(--grunge-red);
-            border-color: var(--grunge-red);
+            background: var(--accent);
             color: #000;
+            border-color: var(--accent);
         }
 
-        /* ANIMATIONS */
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        /* Street TG Mod */
+        body.style-street .tg-link {
+            background: #000;
+            color: var(--text-color);
+            border: 2px solid var(--text-color);
+            transform: rotate(1deg);
+        }
+        body.style-street .tg-link:hover {
+            background: var(--secondary);
+            border-color: #000;
+            color: #000;
+            transform: scale(1.02);
         }
 
-        /* Responsive */
+        /* Mobile Fix */
         @media (max-width: 600px) {
             h1 { font-size: 2.5rem; }
-            .container { width: 95%; padding: 1rem; }
+            .container { padding: 1.5rem; width: 95%; }
+            .switch-btn { top: 10px; right: 10px; padding: 5px 10px; font-size: 0.8rem; }
         }
     </style>
 </head>
 <body>
 
-    <div class="noise-overlay"></div>
-    <div class="scanlines"></div>
+    <div class="bg-layer cyber-scanlines"></div>
+    <div class="bg-layer street-texture"></div>
+
+    <button class="switch-btn" onclick="toggleStyle()">SWITCH REALITY</button>
 
     <div class="container">
         <h1>PHANTOM GUI</h1>
-        <div class="subtitle">STATUS: Actually // V7.0</div>
+        <div class="subtitle">STATUS: UNDETECTED // V7.0</div>
 
         <div class="script-box">
-            <div class="code-display" id="scriptText">loadstring(game:HttpGet("https://raw.githubusercontent.com/vzzox/NewToyers-TSG-Hax/main/p_7.lua"))()</div>
-            <button class="copy-btn" onclick="copyScript()">COPY SCRIPT</button>
+            <div class="code-display" id="scriptCode">loadstring(game:HttpGet("https://raw.githubusercontent.com/vzzox/NewToyers-TSG-Hax/main/p_7.lua"))()</div>
+            <button class="action-btn" onclick="copyScript()">COPY SCRIPT</button>
         </div>
 
         <div class="credits">
-            <div class="dev-title">/// SYSTEM CREATORS ///</div>
+            <div style="color: #666; font-size: 0.8rem;">/// SYSTEM_CREATORS ///</div>
             <ul class="dev-list">
-                <li class="main-dev">vzzox [FOUNDER/DEV]</li>
-                <li class="crew">frost [DEV]</li>
-                <li class="crew">Чина Лолайет [DEV]</li>
+                <li class="main-dev">vzzox [FOUNDER]</li>
+                <li style="color: #888;">frost [DEV]</li>
+                <li style="color: #888;">Чина Лолайет [DEV]</li>
             </ul>
         </div>
 
@@ -254,21 +297,35 @@
     </div>
 
     <script>
+        function toggleStyle() {
+            document.body.classList.toggle('style-street');
+            const btn = document.querySelector('.switch-btn');
+            
+            if (document.body.classList.contains('style-street')) {
+                btn.innerText = "BACK TO CYBER";
+            } else {
+                btn.innerText = "SWITCH REALITY";
+            }
+        }
+
         function copyScript() {
-            const scriptText = document.getElementById('scriptText').innerText;
-            navigator.clipboard.writeText(scriptText).then(() => {
-                const btn = document.querySelector('.copy-btn');
+            const code = document.getElementById('scriptCode').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = document.querySelector('.action-btn');
                 const originalText = btn.innerText;
                 
-                btn.innerText = "COPIED TO CLIPBOARD!";
-                btn.style.background = "#ff3333";
+                // Проверяем текущий стиль для цвета успеха
+                const isStreet = document.body.classList.contains('style-street');
                 
+                btn.innerText = isStreet ? "/// СКРИПТ В БУФЕРЕ! ///" : "COPIED SUCCESSFULLY!";
+                btn.style.background = isStreet ? "var(--secondary)" : "var(--secondary)";
+                btn.style.color = isStreet ? "#8a0000" : "#fff";
+
                 setTimeout(() => {
                     btn.innerText = originalText;
-                    btn.style.background = "#e0e0e0";
+                    btn.style.background = "";
+                    btn.style.color = "";
                 }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
             });
         }
     </script>
