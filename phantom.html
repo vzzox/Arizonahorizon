@@ -5,52 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PHANTOM GUI | NEWTOYERS</title>
     <style>
-        /* ПОДКЛЮЧАЕМ ВСЕ ШРИФТЫ СРАЗУ */
+        /* === ШРИФТЫ === */
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rubik+Glitch&family=Share+Tech+Mono&family=Special+Elite&display=swap');
 
         /* === ПЕРЕМЕННЫЕ (CYBER - DEFAULT) === */
         :root {
-            /* ЦВЕТА */
             --bg-color: #050505;
-            --container-bg: rgba(10, 10, 10, 0.95);
+            --container-bg: rgba(10, 10, 10, 0.90);
             --text-color: #e0e0e0;
-            --accent: #00ff82; /* Cyber Green */
-            --secondary: #ff3333; /* Cyber Red */
-            --border-style: solid;
-            --border-width: 2px;
-            
-            /* ШРИФТЫ */
+            --accent: #00ff82;
+            --secondary: #ff3333;
             --font-head: 'Rubik Glitch', cursive;
             --font-body: 'Share Tech Mono', monospace;
-            
-            /* ЭФФЕКТЫ */
-            --shadow: 0 0 15px rgba(0, 255, 130, 0.2);
-            --transform-container: rotate(-1deg);
-            --btn-clip: polygon(2% 0, 100% 0, 98% 100%, 0% 100%);
+            --btn-clip: polygon(5% 0, 100% 0, 95% 100%, 0% 100%);
+            --shadow: 0 0 20px rgba(0, 255, 130, 0.1);
         }
 
         /* === ПЕРЕМЕННЫЕ (STREET MODE) === */
         body.style-street {
-            /* ЦВЕТА */
-            --bg-color: #111;
-            --container-bg: #2a2a2a; /* Бетон */
+            --bg-color: #1a1a1a;
+            --container-bg: #222;
             --text-color: #d9d9d9;
             --accent: #b7410e; /* Ржавчина */
-            --secondary: #cba12f; /* Желтая лента */
-            --border-style: solid;
-            --border-width: 4px;
-            
-            /* ШРИФТЫ */
+            --secondary: #cba12f; /* Желтый */
             --font-head: 'Black Ops One', cursive;
             --font-body: 'Special Elite', cursive;
-            
-            /* ЭФФЕКТЫ */
-            --shadow: 10px 10px 30px rgba(0,0,0,0.9);
-            --transform-container: rotate(0deg);
             --btn-clip: none;
+            --shadow: 10px 10px 0px #000;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; transition: all 0.4s ease; }
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: color 0.3s, background 0.3s, border 0.3s; }
 
         body {
             background-color: var(--bg-color);
@@ -61,112 +45,187 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow-x: hidden;
+            overflow: hidden; /* Чтобы анимации не растягивали экран */
             position: relative;
         }
 
-        /* === ФОНЫ === */
-        .bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
-        
-        /* Cyber BG Elements */
-        .cyber-scanlines {
-            background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.3) 50%);
-            background-size: 100% 4px;
+        /* =========================================
+           BACKGROUND LAYERS (АНИМАЦИИ)
+           ========================================= */
+
+        .bg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+
+        /* --- CYBER ANIMATIONS --- */
+        .cyber-grid {
+            background: 
+                linear-gradient(transparent 95%, rgba(0, 255, 130, 0.2) 95%),
+                linear-gradient(90deg, transparent 95%, rgba(0, 255, 130, 0.2) 95%);
+            background-size: 40px 40px;
+            perspective: 500px;
+            transform: scale(1.1);
+            opacity: 0.3;
+        }
+
+        /* Машины (Traffic) */
+        .cyber-traffic {
             opacity: 1;
         }
-        
-        /* Street BG Elements */
-        .street-texture {
+        .car-light {
+            position: absolute;
+            height: 2px;
+            width: 150px;
+            background: linear-gradient(90deg, transparent, var(--secondary), #fff);
+            box-shadow: 0 0 10px var(--secondary);
+            border-radius: 50%;
             opacity: 0;
-            background-image: radial-gradient(circle at center, transparent 0%, #000 90%), url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.2'/%3E");
+        }
+        /* Анимация проезда машин */
+        @keyframes drive-right {
+            0% { left: -200px; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { left: 100%; opacity: 0; }
+        }
+        @keyframes drive-left {
+            0% { right: -200px; opacity: 0; background: linear-gradient(-90deg, transparent, #fff, cyan); }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { right: 100%; opacity: 0; }
         }
 
-        /* Переключение фонов */
-        body.style-street .cyber-scanlines { opacity: 0; }
-        body.style-street .street-texture { opacity: 1; }
+        /* Настройка машин */
+        .c1 { bottom: 10%; animation: drive-right 3s linear infinite; }
+        .c2 { bottom: 15%; animation: drive-left 4s linear infinite; animation-delay: 1s; }
+        .c3 { bottom: 5%; width: 300px; animation: drive-right 2s linear infinite; animation-delay: 0.5s; background: linear-gradient(90deg, transparent, var(--accent), #fff); }
 
-        /* === КНОПКА ПЕРЕКЛЮЧЕНИЯ СТИЛЯ === */
+        /* --- STREET ANIMATIONS --- */
+        .street-layer { opacity: 0; }
+        
+        /* Текстура стены */
+        .street-wall {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.3'/%3E");
+        }
+
+        /* Мигающий фонарь */
+        .street-light {
+            background: radial-gradient(circle at 50% 30%, rgba(255, 200, 100, 0.15), transparent 60%);
+            animation: flicker 4s infinite;
+        }
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+            20%, 24%, 55% { opacity: 0.4; }
+        }
+
+        /* Брейкдансер (Граффити силуэт) - CSS отрисовка */
+        .dancer-stencil {
+            position: absolute;
+            bottom: 0;
+            right: 5%;
+            width: 300px;
+            height: 300px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 20 L60 40 L80 30 L70 50 L90 80 L60 70 L50 90 L40 70 L10 80 L30 50 L20 30 L40 40 Z" fill="%23111" stroke="%23b7410e" stroke-width="2"/></svg>') no-repeat center;
+            opacity: 0.6;
+            filter: drop-shadow(5px 5px 0px rgba(0,0,0,0.5));
+            transform-origin: bottom center;
+            animation: breakdance 0.5s infinite alternate; /* Дергается как в брейке */
+        }
+        
+        @keyframes breakdance {
+            0% { transform: scaleY(1) skewX(0deg); }
+            25% { transform: scaleY(0.95) skewX(2deg); }
+            50% { transform: scaleY(1.02) skewX(-2deg); }
+            75% { transform: scaleY(0.98) skewX(1deg); }
+            100% { transform: scaleY(1) skewX(0deg); }
+        }
+
+        /* ПЕРЕКЛЮЧЕНИЕ СЛОЕВ */
+        body.style-street .cyber-grid, 
+        body.style-street .cyber-traffic { display: none; }
+        
+        body.style-street .street-layer { opacity: 1; }
+
+        /* =========================================
+           INTERFACE
+           ========================================= */
+
         .switch-btn {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 1000;
             padding: 10px 20px;
-            background: transparent;
+            background: rgba(0,0,0,0.5);
             border: 2px solid var(--text-color);
             color: var(--text-color);
             font-family: var(--font-body);
             font-weight: bold;
             cursor: pointer;
-            text-transform: uppercase;
+            backdrop-filter: blur(5px);
         }
-        
-        .switch-btn:hover {
-            background: var(--text-color);
-            color: var(--bg-color);
-        }
+        .switch-btn:hover { background: var(--text-color); color: #000; }
 
-        /* === КОНТЕЙНЕР === */
         .container {
             position: relative;
             z-index: 10;
             width: 90%;
-            max-width: 700px;
-            padding: 2.5rem;
+            max-width: 650px;
+            padding: 2rem;
             background: var(--container-bg);
-            border: var(--border-width) var(--border-style) #333;
-            transform: var(--transform-container);
+            border: 2px solid #333;
             box-shadow: var(--shadow);
         }
 
-        /* Специфика Street стиля для контейнера */
+        /* Street Container Style */
         body.style-street .container {
-            border-color: #000;
-            clip-path: polygon(2% 0%, 98% 1%, 100% 95%, 96% 100%, 3% 98%, 0% 5%);
+            border: 4px solid #000;
+            background: #2a2a2a;
+            transform: rotate(-1deg);
+            clip-path: polygon(2% 0%, 99% 1%, 100% 98%, 0% 100%);
+        }
+        /* Болты для street */
+        body.style-street .container::before {
+            content: ''; position: absolute; top: 10px; left: 10px; width: 10px; height: 10px; background: #000; border-radius: 50%;
+        }
+        body.style-street .container::after {
+            content: ''; position: absolute; bottom: 10px; right: 10px; width: 10px; height: 10px; background: #000; border-radius: 50%;
         }
 
-        /* Заголовок */
         h1 {
             font-family: var(--font-head);
             font-size: 3.5rem;
             text-align: center;
             color: var(--accent);
-            text-shadow: 2px 2px 0px var(--secondary);
+            text-shadow: 3px 3px 0px var(--secondary);
             margin-bottom: 0.5rem;
         }
 
         .subtitle {
             text-align: center;
             font-size: 1.1rem;
-            color: #777;
+            color: #888;
             margin-bottom: 2rem;
-            border-bottom: 1px dashed #555;
-            padding-bottom: 10px;
+            letter-spacing: 2px;
         }
-
-        /* Street Style Subtitle Mod */
         body.style-street .subtitle {
             background: var(--secondary);
             color: #000;
-            border: none;
-            width: fit-content;
-            margin: 0 auto 2rem auto;
-            padding: 5px 15px;
+            display: inline-block;
+            padding: 5px 10px;
             font-weight: bold;
-            transform: rotate(-1deg);
+            transform: rotate(2deg);
+            margin-left: 20%;
         }
 
-        /* === СКРИПТ БОКС === */
+        /* Script Box */
         .script-box {
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             border: 1px solid var(--accent);
-            padding: 1rem;
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
-
         body.style-street .script-box {
-            border: 3px solid var(--accent); /* Rust */
             background: #111;
+            border: 3px dashed var(--accent);
         }
 
         .code-display {
@@ -177,56 +236,37 @@
             margin-bottom: 1rem;
             padding: 10px;
             background: #000;
+            border-left: 2px solid var(--secondary);
         }
 
-        /* === ГЛАВНАЯ КНОПКА (COPY) === */
+        /* COPY BUTTON */
         .action-btn {
             width: 100%;
             padding: 15px;
             font-family: var(--font-head);
             font-size: 1.5rem;
             background: var(--text-color);
-            color: var(--bg-color);
+            color: #000;
             border: none;
             cursor: pointer;
             clip-path: var(--btn-clip);
-            text-transform: uppercase;
         }
-
-        .action-btn:hover {
+        .action-btn:hover { background: var(--accent); }
+        
+        body.style-street .action-btn {
             background: var(--accent);
             color: #000;
+            border-top: 4px solid #444;
         }
+        body.style-street .action-btn:hover { background: var(--secondary); color: #8a0000; }
 
-        /* Street Button Mod */
-        body.style-street .action-btn {
-            background: var(--accent); /* Rust */
-            color: #000;
-            border-top: 3px solid #555;
-        }
-        body.style-street .action-btn:hover {
-            background: var(--secondary); /* Yellow */
-            color: #8a0000;
-        }
+        /* Credits & Links */
+        .credits { margin-top: 2rem; border-top: 1px solid #444; padding-top: 1rem; }
+        body.style-street .credits { border-top: 2px dashed #000; }
 
-        /* === CREDITS === */
-        .credits {
-            margin-top: 2rem;
-            border-top: 2px solid #333;
-            padding-top: 1rem;
-        }
+        .dev-list li { list-style: none; margin: 5px 0; font-size: 1.1rem; }
+        .main-dev { color: var(--accent); font-weight: bold; }
         
-        body.style-street .credits {
-            border-top: 2px dashed #555;
-        }
-
-        .dev-list { list-style: none; margin-top: 10px; }
-        .dev-list li { margin: 5px 0; font-size: 1.1rem; }
-        
-        .main-dev { color: var(--accent); font-weight: bold; font-size: 1.3rem; }
-        .main-dev::before { content: "> "; color: var(--secondary); }
-
-        /* === TG LINK === */
         .tg-link {
             display: block;
             margin-top: 20px;
@@ -235,43 +275,30 @@
             padding: 12px;
             border: 1px solid var(--text-color);
             color: var(--text-color);
-            transition: 0.2s;
         }
+        .tg-link:hover { background: var(--secondary); border-color: var(--secondary); color: #000; }
 
-        .tg-link:hover {
-            background: var(--accent);
-            color: #000;
-            border-color: var(--accent);
-        }
-
-        /* Street TG Mod */
         body.style-street .tg-link {
-            background: #000;
-            color: var(--text-color);
-            border: 2px solid var(--text-color);
-            transform: rotate(1deg);
+            background: #000; border: 2px solid #fff; transform: rotate(-1deg);
         }
         body.style-street .tg-link:hover {
-            background: var(--secondary);
-            border-color: #000;
-            color: #000;
-            transform: scale(1.02);
+            background: var(--secondary); border-color: #000; color: #000; transform: scale(1.02);
         }
-
-        /* Mobile Fix */
-        @media (max-width: 600px) {
-            h1 { font-size: 2.5rem; }
-            .container { padding: 1.5rem; width: 95%; }
-            .switch-btn { top: 10px; right: 10px; padding: 5px 10px; font-size: 0.8rem; }
-        }
+        
     </style>
 </head>
 <body>
 
-    <div class="bg-layer cyber-scanlines"></div>
-    <div class="bg-layer street-texture"></div>
+    <div class="bg-layer cyber-grid"></div>
+    <div class="bg-layer cyber-traffic">
+        <div class="car-light c1"></div>
+        <div class="car-light c2"></div>
+        <div class="car-light c3"></div>
+    </div>
 
-    <button class="switch-btn" onclick="toggleStyle()">SWITCH REALITY</button>
+    <div class="bg-layer street-layer street-wall"></div>
+    <div class="bg-layer street-layer street-light"></div>
+    <div class="bg-layer street-layer dancer-stencil"></div> <button class="switch-btn" onclick="toggleStyle()">SWITCH REALITY</button>
 
     <div class="container">
         <h1>PHANTOM GUI</h1>
@@ -283,7 +310,7 @@
         </div>
 
         <div class="credits">
-            <div style="color: #666; font-size: 0.8rem;">/// SYSTEM_CREATORS ///</div>
+            <div style="font-size: 0.8rem; color: #666; margin-bottom: 10px;">/// SYSTEM_CREATORS ///</div>
             <ul class="dev-list">
                 <li class="main-dev">vzzox [FOUNDER]</li>
                 <li style="color: #888;">frost [DEV]</li>
@@ -313,13 +340,14 @@
             navigator.clipboard.writeText(code).then(() => {
                 const btn = document.querySelector('.action-btn');
                 const originalText = btn.innerText;
-                
-                // Проверяем текущий стиль для цвета успеха
                 const isStreet = document.body.classList.contains('style-street');
+
+                btn.innerText = isStreet ? "/// КОД СКОПИРОВАН! ///" : "COPIED SUCCESSFULLY!";
                 
-                btn.innerText = isStreet ? "/// СКРИПТ В БУФЕРЕ! ///" : "COPIED SUCCESSFULLY!";
-                btn.style.background = isStreet ? "var(--secondary)" : "var(--secondary)";
-                btn.style.color = isStreet ? "#8a0000" : "#fff";
+                // Визуальный отклик
+                const originalBg = btn.style.background;
+                btn.style.background = isStreet ? "#8a0000" : "#fff";
+                btn.style.color = isStreet ? "#fff" : "#000";
 
                 setTimeout(() => {
                     btn.innerText = originalText;
