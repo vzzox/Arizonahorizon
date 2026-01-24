@@ -273,6 +273,12 @@
                 window.location.href = 'https://newtoyers.vercel.app/registration.html';
                 return;
             }
+            
+            if (type === 'login') {
+                // Перенаправление на страницу регистрации
+                window.location.href = 'https://newtoyers.vercel.app/vhod.html';
+                return;
+            }
 
             // Логика для входа (оставил как было - заглушкой)
             const toast = document.getElementById('toast');
