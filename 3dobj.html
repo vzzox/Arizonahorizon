@@ -3,567 +3,1152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VZZOX // SYSTEM OVERRIDE</title>
+    <title>VZZOX // NEURAL_LINK_V1.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;800&family=Orbitron:wght@400;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    
     <style>
-        /* ------------------------------------------------------------------
-           CORE SYSTEM STYLES (LINES 1-300)
-           ------------------------------------------------------------------ */
+        /* =========================================
+           GLOBAL VARS & RESET
+           ========================================= */
         :root {
-            --bg: #030303;
-            --term-green: #0f0;
-            --term-glow: rgba(0, 255, 0, 0.5);
-            --err-red: #ff003c;
-            --cyber-blue: #00f3ff;
-            --font-main: 'Courier New', monospace;
+            --c-void: #020202;
+            --c-grid: #0a0a0a;
+            --c-text-primary: #e0e0e0;
+            --c-text-dim: #555555;
+            
+            /* NEON PALETTE */
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff003c;
+            --neon-green: #0aff0a;
+            --neon-purple: #bc13fe;
+
+            /* UI DIMENSIONS */
+            --header-h: 80px;
+            --border-w: 1px;
+            
+            /* FONTS */
+            --f-mono: 'JetBrains Mono', monospace;
+            --f-head: 'Orbitron', sans-serif;
+            --f-ui: 'Rajdhani', sans-serif;
         }
 
-        body {
+        *, *::before, *::after {
+            box-sizing: border-box;
+            cursor: none; /* Custom cursor everywhere */
+        }
+
+        body, html {
             margin: 0;
-            overflow: hidden;
-            background: var(--bg);
-            font-family: var(--font-main);
-            color: var(--term-green);
-            user-select: none;
-        }
-
-        #viewport {
-            position: absolute;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 1;
-        }
-
-        /* --- UI OVERLAY --- */
-        #ui-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 10;
-            pointer-events: none;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%;
-            display: grid;
-            grid-template-rows: 60px 1fr 60px;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .hud-panel {
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            background: rgba(0, 20, 40, 0.4);
-            backdrop-filter: blur(5px);
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            pointer-events: auto;
-        }
-
-        .top-bar { border-bottom: 2px solid var(--cyber-blue); }
-        .bottom-bar { border-top: 2px solid var(--err-red); }
-
-        .glitch-text {
-            font-size: 24px;
-            font-weight: bold;
-            text-transform: uppercase;
-            position: relative;
-            color: var(--cyber-blue);
-            text-shadow: 2px 2px var(--err-red);
-            animation: glitch 1s infinite;
-        }
-
-        @keyframes glitch {
-            0% { transform: translate(0) }
-            20% { transform: translate(-2px, 2px) }
-            40% { transform: translate(-2px, -2px) }
-            60% { transform: translate(2px, 2px) }
-            80% { transform: translate(2px, -2px) }
-            100% { transform: translate(0) }
-        }
-
-        /* --- SCROLL CONTENT (VIRTUAL) --- */
-        #content-scroller {
-            position: absolute;
-            right: 0; top: 0;
-            width: 40%;
+            padding: 0;
+            width: 100%;
             height: 100%;
-            overflow-y: scroll;
-            pointer-events: auto;
-            z-index: 20;
-            padding: 50px;
-            box-sizing: border-box;
-            /* Hide scrollbar */
+            background-color: var(--c-void);
+            color: var(--c-text-primary);
+            font-family: var(--f-mono);
+            overflow-x: hidden;
+            /* Enabling Native Scroll but hiding bar */
             scrollbar-width: none; 
-            -ms-overflow-style: none;
-        }
-        #content-scroller::-webkit-scrollbar { display: none; }
-
-        .data-block {
-            margin-bottom: 400px;
-            opacity: 0.2;
-            transition: all 0.5s;
-            border-left: 2px solid var(--cyber-blue);
-            padding-left: 20px;
-            transform: translateX(50px);
         }
 
-        .data-block.active {
-            opacity: 1;
-            transform: translateX(0);
-            text-shadow: 0 0 10px var(--cyber-blue);
+        body::-webkit-scrollbar { 
+            display: none; 
         }
 
-        h1 { font-size: 4rem; line-height: 0.8; margin: 0; color: #fff; }
-        p { font-size: 1.2rem; background: rgba(0,0,0,0.8); padding: 10px; }
+        /* =========================================
+           CUSTOM CURSOR SYSTEM
+           ========================================= */
+        #cursor-dot, #cursor-circle {
+            position: fixed;
+            top: 0; left: 0;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+        }
+        #cursor-dot {
+            width: 8px; height: 8px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+        }
+        #cursor-circle {
+            width: 40px; height: 40px;
+            border: 1px solid var(--neon-cyan);
+            border-radius: 50%;
+            transition: width 0.2s, height 0.2s;
+        }
 
-        /* --- LOADING --- */
-        #boot-sequence {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999;
-            color: var(--term-green);
-            font-family: monospace;
-            padding: 20px;
-            overflow: hidden;
+        /* =========================================
+           WEBGL CANVAS CONTAINER
+           ========================================= */
+        #canvas-world {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            opacity: 0; /* Will fade in via JS */
+            transition: opacity 2s ease-in-out;
+        }
+
+        /* =========================================
+           LOADING SCREEN (TERMINAL STYLE)
+           ========================================= */
+        #boot-layer {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: var(--c-void);
+            z-index: 10000;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
         }
+
+        .boot-log {
+            font-size: 14px;
+            color: var(--neon-green);
+            text-align: left;
+            width: 100%;
+            max-width: 600px;
+            height: 300px;
+            overflow: hidden;
+            border: 1px solid #333;
+            padding: 20px;
+            background: rgba(0,20,0,0.1);
+            position: relative;
+        }
+        
+        .boot-log::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,0,0,0.15),
+                rgba(0,0,0,0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+        }
+
+        .loader-bar-container {
+            width: 100%;
+            max-width: 600px;
+            height: 4px;
+            background: #333;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .loader-bar-fill {
+            position: absolute;
+            top: 0; left: 0; height: 100%;
+            background: var(--neon-cyan);
+            width: 0%;
+            box-shadow: 0 0 10px var(--neon-cyan);
+            transition: width 0.1s linear;
+        }
+
+        /* =========================================
+           UI OVERLAY (HEADS UP DISPLAY)
+           ========================================= */
+        .hud-layer {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            padding: 40px;
+        }
+
+        .corner-data {
+            position: absolute;
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 12px;
+            backdrop-filter: blur(2px);
+        }
+
+        .tl { top: 30px; left: 30px; border-left: 3px solid var(--neon-cyan); }
+        .tr { top: 30px; right: 30px; border-right: 3px solid var(--neon-pink); text-align: right; }
+        .bl { bottom: 30px; left: 30px; display: flex; align-items: center; gap: 10px; }
+        .br { bottom: 30px; right: 30px; text-align: right; }
+
+        .scan-line {
+            width: 100%;
+            height: 100px;
+            z-index: 9999;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.1;
+            position: fixed;
+            bottom: 100%;
+            pointer-events: none;
+            animation: scanline 10s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { bottom: 100%; }
+            100% { bottom: -100px; }
+        }
+
+        /* =========================================
+           SCROLLABLE CONTENT SECTIONS
+           ========================================= */
+        main {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            padding-bottom: 20vh;
+        }
+
+        section {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 10vw;
+            position: relative;
+            border-bottom: 1px dashed rgba(255,255,255,0.05);
+        }
+
+        .content-wrapper {
+            max-width: 800px;
+            pointer-events: auto; /* Allow text selection */
+        }
+
+        h1.hero-title {
+            font-family: var(--f-head);
+            font-size: 8vw;
+            line-height: 0.8;
+            margin: 0 0 40px 0;
+            text-transform: uppercase;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.8);
+            position: relative;
+        }
+
+        h1.hero-title span {
+            display: block;
+        }
+
+        h1.hero-title .filled {
+            color: var(--c-text-primary);
+            -webkit-text-stroke: 0;
+            text-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+
+        .cyber-panel {
+            background: rgba(10, 10, 10, 0.85);
+            border-left: 4px solid var(--neon-cyan);
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transform: translateX(-50px);
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .cyber-panel.visible {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        h2 {
+            font-family: var(--f-ui);
+            color: var(--neon-cyan);
+            font-size: 2rem;
+            margin-top: 0;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        h2::before {
+            content: '';
+            display: block;
+            width: 20px; height: 20px;
+            background: var(--neon-cyan);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 20%, 20% 0);
+        }
+
+        p.description {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 30px;
+            font-family: var(--f-ui);
+            font-size: 12px;
+            color: var(--neon-pink);
+        }
+        .stat-item { border: 1px solid #333; padding: 10px; text-align: center; }
+
+        /* Alignment Utilities */
+        .align-right { justify-content: flex-end; text-align: right; }
+        .align-right .cyber-panel { border-left: none; border-right: 4px solid var(--neon-pink); }
+        .align-right h2 { justify-content: flex-end; color: var(--neon-pink); }
+        .align-right h2::before { display: none; }
+        .align-right h2::after {
+            content: ''; display: block; width: 20px; height: 20px;
+            background: var(--neon-pink);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 20%, 20% 0);
+        }
+
+        .align-center { justify-content: center; text-align: center; }
+        .align-center .cyber-panel { border: 1px solid var(--neon-green); border-top: 4px solid var(--neon-green); }
+        .align-center h2 { justify-content: center; color: var(--neon-green); }
+
     </style>
 </head>
 <body>
 
-    <div id="boot-sequence">INITIALIZING KERNEL...</div>
-
-    <div id="ui-layer">
-        <div class="hud-panel top-bar">
-            <span class="glitch-text">VZZOX // OS</span>
-            <div id="fps-meter">FPS: 00</div>
+    <div id="boot-layer">
+        <div class="boot-log" id="console-output">
+            > SYSTEM POWER... ON<br>
+            > CHECKING MEMORY INTEGRITY... OK<br>
+            > MOUNTING VOLUME [VZZOX_CORE]...<br>
         </div>
+        <div class="loader-bar-container">
+            <div class="loader-bar-fill" id="loader-fill"></div>
+        </div>
+        <div style="margin-top: 10px; font-size: 10px; opacity: 0.5;">DO NOT TURN OFF TARGET SYSTEM</div>
+    </div>
+
+    <div class="hud-layer">
+        <div class="corner-data tl">
+            VZZOX OS // KERNEL v4.9<br>
+            SECURE CONNECTION
+        </div>
+        <div class="corner-data tr">
+            <span id="fps-counter">60</span> FPS<br>
+            LATENCY: 2ms
+        </div>
+        <div class="corner-data bl">
+            <div style="width: 10px; height: 10px; background: red; border-radius: 50%; animation: blink 1s infinite;"></div>
+            REC
+        </div>
+        <div class="corner-data br">
+            SCROLL: <span id="scroll-readout">0000</span><br>
+            OBJ_COUNT: <span id="obj-counter">0</span>
+        </div>
+    </div>
+
+    <div class="scan-line"></div>
+
+    <div id="cursor-dot"></div>
+    <div id="cursor-circle"></div>
+
+    <div id="canvas-world"></div>
+
+    <main>
+        <section>
+            <div class="content-wrapper">
+                <h1 class="hero-title">VZZOX<br><span class="filled">GENESIS</span></h1>
+                <div class="cyber-panel visible">
+                    <h2>Init_Sequence</h2>
+                    <p class="description">Добро пожаловать в архитектуру будущего. VZZOX - это процедурная генерация смыслов и форм. Скролльте вниз, чтобы дешифровать данные.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="align-right">
+            <div class="content-wrapper">
+                <div class="cyber-panel">
+                    <h2>Organic_Core</h2>
+                    <p class="description">
+                        ОБЪЕКТ "КОСТНЫЙ МОЗГ". 
+                        Синтетическая биология, воссозданная через Raymarching и SDF-функции. Это не полигоны. Это математическая формула жизни, пульсирующая в реальном времени.
+                    </p>
+                    <div class="stat-grid">
+                        <div class="stat-item">DNA: 99%</div>
+                        <div class="stat-item">TEMP: 38°C</div>
+                        <div class="stat-item">STABLE</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="content-wrapper">
+                <div class="cyber-panel" style="border-color: #ff003c">
+                    <h2>Project_Relic</h2>
+                    <p class="description">
+                        Артефакт из эпохи до Цифрового Сбоя. Черепная коробка, модифицированная для прямого подключения к сети. Структура собрана процедурно из 1500 геометрических примитивов.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="align-center">
+            <div class="content-wrapper">
+                <h1 class="hero-title" style="font-size: 5vw"><span class="filled">SYSTEM</span><br>OVERLOAD</h1>
+                <div class="cyber-panel">
+                    <p class="description">
+                        Вы достигли предела визуализации. Данные загружаются...
+                    </p>
+                </div>
+            </div>
+        </section>
         
-        <div class="middle-section"></div> <div class="hud-panel bottom-bar">
-            <span>MEMORY: <span id="mem-usage">0</span> TB</span>
-            <span>SYSTEM STATUS: UNSTABLE</span>
-        </div>
-    </div>
-
-    <div id="viewport"></div>
-
-    <div id="content-scroller">
-        <div class="data-block" id="block-1">
-            <h1>01. CORE</h1>
-            <p>ACCESSING MAINFRAME.<br>Neural interface established.</p>
-        </div>
-        <div class="data-block" id="block-2">
-            <h1>02. DATA</h1>
-            <p>VZZOX PROTOCOL.<br>Injecting shaders into visual cortex.</p>
-        </div>
-        <div class="data-block" id="block-3">
-            <h1>03. RELIC</h1>
-            <p>ANCIENT CODEBASE.<br>Procedural skull generation active.</p>
-        </div>
-        <div class="data-block" id="block-4">
-            <h1>04. END</h1>
-            <p>SYSTEM HALTED.<br>Press refresh to reboot.</p>
-        </div>
-        <div style="height: 500px"></div>
-    </div>
+        <div style="height: 50vh;"></div>
+    </main>
 
     <script type="module">
+        /* =========================================
+           IMPORT LIBRARIES (CDN)
+           Using Skypack for reliable module loading
+           ========================================= */
         import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
+        import { FontLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/FontLoader.js';
+        import { TextGeometry } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/geometries/TextGeometry.js';
         import { EffectComposer } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/EffectComposer.js';
         import { RenderPass } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/UnrealBloomPass.js';
         import { ShaderPass } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/postprocessing/ShaderPass.js';
-        import { FontLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/FontLoader.js';
-        import { TextGeometry } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/geometries/TextGeometry.js';
 
-        // ЗДЕСЬ БУДЕТ ЧАСТЬ 2...
-        /* ------------------------------------------------------------------
-           SHADER LIBRARY (LINES 300-800)
-           Мы пишем шейдеры вручную как строки, чтобы не грузить файлы.
-           ------------------------------------------------------------------ */
+        /* =========================================
+           SHADER REPOSITORY (GLSL)
+           Hardcoded for single-file portability
+           ========================================= */
+        
+        const VZZOX_SHADERS = {
+            
+            // --- 1. ORGANIC NOISE (Vertex Shader) ---
+            organicVertex: `
+                uniform float uTime;
+                varying vec2 vUv;
+                varying float vDisplacement;
+                varying vec3 vNormal;
+                varying vec3 vPos;
 
-        const SHADERS = {
-            // Шейдер для "Цифрового шума" (Пост-процессинг)
-            digitalGlitch: {
-                uniforms: {
-                    "tDiffuse": { value: null },
-                    "tDisp": { value: null },
-                    "amount": { value: 0.08 },
-                    "angle": { value: 0.02 },
-                    "seed": { value: 0.02 },
-                    "seed_x": { value: 0.02 },
-                    "seed_y": { value: 0.02 },
-                    "distortion_x": { value: 0.5 },
-                    "distortion_y": { value: 0.6 },
-                    "col_s": { value: 0.05 }
-                },
-                vertexShader: `
-                    varying vec2 vUv;
-                    void main() {
-                        vUv = uv;
-                        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-                    }
-                `,
-                fragmentShader: `
-                    uniform sampler2D tDiffuse;
-                    uniform float amount;
-                    uniform float angle;
-                    uniform float seed;
-                    uniform float seed_x;
-                    uniform float seed_y;
-                    varying vec2 vUv;
+                // GLSL Simplex Noise 3D
+                vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+                vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+                float snoise(vec3 v) { 
+                    const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
+                    const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+                    vec3 i  = floor(v + dot(v, C.yyy) );
+                    vec3 x0 = v - i + dot(i, C.xxx) ;
+                    vec3 g = step(x0.yzx, x0.xyz);
+                    vec3 l = 1.0 - g;
+                    vec3 i1 = min( g.xyz, l.zxy );
+                    vec3 i2 = max( g.xyz, l.zxy );
+                    vec3 x1 = x0 - i1 + C.xxx;
+                    vec3 x2 = x0 - i2 + C.yyy;
+                    vec3 x3 = x0 - D.yyy;
+                    i = mod289(i);
+                    vec4 p = permute( permute( permute( 
+                                 i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+                               + i.y + vec4(0.0, i1.y, i2.y, 1.0 )) 
+                               + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+                    float n_ = 0.142857142857;
+                    vec3  ns = n_ * D.wyz - D.xzx;
+                    vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+                    vec4 x_ = floor(j * ns.z);
+                    vec4 y_ = floor(j - 7.0 * x_ );
+                    vec4 x = x_ *ns.x + ns.yyyy;
+                    vec4 y = y_ *ns.x + ns.yyyy;
+                    vec4 h = 1.0 - abs(x) - abs(y);
+                    vec4 b0 = vec4( x.xy, y.xy );
+                    vec4 b1 = vec4( x.zw, y.zw );
+                    vec4 s0 = floor(b0)*2.0 + 1.0;
+                    vec4 s1 = floor(b1)*2.0 + 1.0;
+                    vec4 sh = -step(h, vec4(0.0));
+                    vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+                    vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+                    vec3 p0 = vec3(a0.xy,h.x);
+                    vec3 p1 = vec3(a0.zw,h.y);
+                    vec3 p2 = vec3(a1.xy,h.z);
+                    vec3 p3 = vec3(a1.zw,h.w);
+                    vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+                    p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+                    vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+                    m = m * m;
+                    return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+                }
+
+                void main() {
+                    vUv = uv;
+                    vNormal = normal;
                     
-                    float rand(vec2 co){
-                        return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-                    }
-
-                    void main() {
-                        vec2 p = vUv;
-                        float xs = floor(gl_FragCoord.x / 0.5);
-                        float ys = floor(gl_FragCoord.y / 0.5);
-                        
-                        vec4 normal = texture2D(tDiffuse, p);
-                        
-                        if(rand(vec2(seed, seed)) > 0.95){
-                            p.x += amount * (rand(vec2(seed_x, seed_y)) - 0.5);
-                            p.y += amount * (rand(vec2(seed_y, seed_x)) - 0.5);
-                        }
-                        
-                        // RGB Shift
-                        vec4 r = texture2D(tDiffuse, p + vec2(0.005, 0.0));
-                        vec4 g = texture2D(tDiffuse, p);
-                        vec4 b = texture2D(tDiffuse, p - vec2(0.005, 0.0));
-                        
-                        gl_FragColor = vec4(r.r, g.g, b.b, 1.0);
-                    }
-                `
-            },
-
-            // Шейдер для "Костного мозга" (Органическая материя)
-            organicMatter: {
-                vertex: `
-                    uniform float uTime;
-                    varying vec2 vUv;
-                    varying float vNoise;
+                    // Complex noise layering
+                    float n1 = snoise(position * 0.5 + uTime * 0.2);
+                    float n2 = snoise(position * 1.5 - uTime * 0.1);
+                    float n3 = snoise(position * 4.0 + uTime * 0.3);
                     
-                    // Simplex Noise Function
-                    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-                    vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-                    vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-                    vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-                    float snoise(vec3 v) {
-                        const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
-                        const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
-                        vec3 i  = floor(v + dot(v, C.yyy) );
-                        vec3 x0 = v - i + dot(i, C.xxx) ;
-                        vec3 g = step(x0.yzx, x0.xyz);
-                        vec3 l = 1.0 - g;
-                        vec3 i1 = min( g.xyz, l.zxy );
-                        vec3 i2 = max( g.xyz, l.zxy );
-                        vec3 x1 = x0 - i1 + C.xxx;
-                        vec3 x2 = x0 - i2 + C.yyy;
-                        vec3 x3 = x0 - D.yyy;
-                        i = mod289(i);
-                        vec4 p = permute( permute( permute(
-                                i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
-                                + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
-                                + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
-                        float n_ = 0.142857142857;
-                        vec3  ns = n_ * D.wyz - D.xzx;
-                        vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-                        vec4 x_ = floor(j * ns.z);
-                        vec4 y_ = floor(j - 7.0 * x_ );
-                        vec4 x = x_ *ns.x + ns.yyyy;
-                        vec4 y = y_ *ns.x + ns.yyyy;
-                        vec4 h = 1.0 - abs(x) - abs(y);
-                        vec4 b0 = vec4( x.xy, y.xy );
-                        vec4 b1 = vec4( x.zw, y.zw );
-                        vec4 s0 = floor(b0)*2.0 + 1.0;
-                        vec4 s1 = floor(b1)*2.0 + 1.0;
-                        vec4 sh = -step(h, vec4(0.0));
-                        vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
-                        vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
-                        vec3 p0 = vec3(a0.xy,h.x);
-                        vec3 p1 = vec3(a0.zw,h.y);
-                        vec3 p2 = vec3(a1.xy,h.z);
-                        vec3 p3 = vec3(a1.zw,h.w);
-                        vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
-                        p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-                        vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-                        m = m * m;
-                        return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+                    vDisplacement = n1 * 1.0 + n2 * 0.5 + n3 * 0.1;
+                    
+                    // Vertices expand based on noise (Marrow pulsing)
+                    vec3 newPos = position + normal * (vDisplacement * 0.8);
+                    
+                    vPos = newPos;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
+                }
+            `,
+
+            // --- 2. BIOLOGICAL MATERIAL (Fragment Shader) ---
+            organicFragment: `
+                uniform float uTime;
+                varying vec2 vUv;
+                varying float vDisplacement;
+                varying vec3 vNormal;
+                varying vec3 vPos;
+
+                void main() {
+                    // VZZOX Color Palette
+                    vec3 bloodRed = vec3(0.4, 0.0, 0.05);
+                    vec3 fleshPink = vec3(0.8, 0.1, 0.3);
+                    vec3 veinBlue = vec3(0.0, 0.1, 0.3);
+                    vec3 highlight = vec3(1.0, 0.8, 0.8);
+
+                    // Mix based on displacement height
+                    float mix1 = smoothstep(-0.5, 0.5, vDisplacement);
+                    vec3 color = mix(bloodRed, fleshPink, mix1);
+                    
+                    // Add veins in the crevices
+                    float crevices = smoothstep(-0.8, -0.6, vDisplacement);
+                    color = mix(veinBlue, color, crevices);
+
+                    // Fake Subsurface Scattering (Fresnel)
+                    vec3 viewDir = vec3(0.0, 0.0, 1.0); // Simplified view dir
+                    float fresnel = pow(1.0 - dot(vNormal, viewDir), 2.0);
+                    color += fleshPink * fresnel * 0.5;
+
+                    // Specular highlights
+                    if(vDisplacement > 0.6) {
+                        color += highlight * 0.5;
                     }
 
-                    void main() {
-                        vUv = uv;
-                        // Очень сложный шум для искажения сферы
-                        float n = snoise(position + uTime * 0.5);
-                        float n2 = snoise(position * 2.0 - uTime * 0.2);
-                        vNoise = n * 0.6 + n2 * 0.4;
-                        
-                        vec3 newPos = position + normal * vNoise * 2.0;
-                        gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
-                    }
-                `,
-                fragment: `
-                    uniform float uTime;
-                    varying float vNoise;
-                    
-                    void main() {
-                        vec3 colorCore = vec3(0.1, 0.0, 0.0);
-                        vec3 colorOuter = vec3(1.0, 0.0, 0.2);
-                        vec3 colorElectric = vec3(0.0, 0.8, 1.0);
-                        
-                        float t = smoothstep(-0.5, 1.0, vNoise);
-                        vec3 final = mix(colorCore, colorOuter, t);
-                        
-                        if(vNoise > 0.6) final = colorElectric;
-                        
-                        gl_FragColor = vec4(final, 1.0);
-                    }
-                `
-            }
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `,
+
+            // --- 3. HOLOGRAM/GLITCH GRID (Fragment) ---
+            holoFragment: `
+                varying vec2 vUv;
+                uniform float uTime;
+                
+                void main() {
+                    float grid = step(0.95, fract(vUv.x * 20.0)) + step(0.95, fract(vUv.y * 20.0));
+                    float scan = sin(vUv.y * 100.0 + uTime * 5.0) * 0.1;
+                    vec3 col = vec3(0.0, 1.0, 1.0) * grid;
+                    gl_FragColor = vec4(col, 0.2 + scan); // Transparent
+                }
+            `
         };
 
-        /* ------------------------------------------------------------------
-           PROCEDURAL GEOMETRY GENERATOR
-           Мы создаем объекты математически, чтобы было много полигонов.
-           ------------------------------------------------------------------ */
-        
-        class ProceduralGenerator {
+        // ... КОНЕЦ ЧАСТИ 1. НЕ ЗАКРЫВАЙ ТЕГ SCRIPT!
+        /* =========================================
+           PROCEDURAL ARCHITECT CLASS
+           Generates complex geometry from code to avoid assets.
+           ========================================= */
+        class ProceduralArchitect {
+            
+            // --- GENERATOR 1: THE CYBER SKULL ---
+            // Assembles a skull from 50+ geometric primitives
             static createCyberSkull() {
-                const group = new THREE.Group();
-                const mat = new THREE.MeshStandardMaterial({
-                    color: 0x111111, roughness: 0.2, metalness: 0.9, wireframe: true
+                const skullGroup = new THREE.Group();
+                
+                // 1. MATERIALS
+                const boneMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x111111,
+                    roughness: 0.4,
+                    metalness: 0.8,
+                    flatShading: true
                 });
-                
-                // Cranium (Основной череп)
-                const geoHead = new THREE.IcosahedronGeometry(2, 2);
-                const head = new THREE.Mesh(geoHead, mat);
-                group.add(head);
-                
-                // Jaw (Челюсть)
-                const geoJaw = new THREE.BoxGeometry(1.8, 1, 2);
-                const jaw = new THREE.Mesh(geoJaw, mat);
-                jaw.position.set(0, -2, 0.5);
-                group.add(jaw);
-                
-                // Teeth (Зубы - цикл генерации)
-                for(let i=0; i<10; i++) {
-                    const tooth = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.3, 0.1), new THREE.MeshBasicMaterial({color: 0xffffff}));
-                    tooth.position.set((i-4.5)*0.2, -1.5, 1.5);
-                    group.add(tooth);
+
+                const chromeMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xaaaaaa,
+                    roughness: 0.0,
+                    metalness: 1.0,
+                    emissive: 0x111111,
+                    emissiveIntensity: 0.2
+                });
+
+                const neonMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x00f3ff, // Cyan eyes
+                    transparent: true,
+                    opacity: 0.8
+                });
+
+                const wireMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xff003c, // Red wires
+                    wireframe: true
+                });
+
+                // 2. CRANIUM (MAIN SKULL)
+                // We use a distorted Icosahedron
+                const craniumGeo = new THREE.IcosahedronGeometry(2.0, 1);
+                const pos = craniumGeo.attributes.position;
+                // Distort vertices to look more like a head (wider top, narrower bottom)
+                for (let i = 0; i < pos.count; i++) {
+                    const y = pos.getY(i);
+                    if (y < -0.5) {
+                        pos.setX(i, pos.getX(i) * 0.7);
+                        pos.setZ(i, pos.getZ(i) * 0.8);
+                    }
                 }
+                craniumGeo.computeVertexNormals();
+                const cranium = new THREE.Mesh(craniumGeo, boneMaterial);
+                cranium.position.y = 0.5;
+                skullGroup.add(cranium);
+
+                // 3. JAW (LOWER MANDIBLE)
+                const jawGroup = new THREE.Group();
+                const jawBase = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.8, 1.8), boneMaterial);
+                jawGroup.add(jawBase);
                 
-                // Cables (Провода) - Кривые Безье
-                for(let i=0; i<20; i++) {
-                    const curve = new THREE.CatmullRomCurve3([
-                        new THREE.Vector3((Math.random()-0.5), -1, (Math.random()-0.5)),
-                        new THREE.Vector3((Math.random()-0.5)*4, -5, (Math.random()-0.5)*4),
-                    ]);
-                    const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 10, 0.02, 8, false), 
-                                              new THREE.MeshBasicMaterial({color: 0xff003c}));
-                    group.add(tube);
+                // Jaw mechanism (Chrome pistons)
+                const pistonL = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.2), chromeMaterial);
+                pistonL.position.set(-0.9, 0.2, 0);
+                pistonL.rotation.z = 0.2;
+                jawGroup.add(pistonL);
+
+                const pistonR = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.2), chromeMaterial);
+                pistonR.position.set(0.9, 0.2, 0);
+                pistonR.rotation.z = -0.2;
+                jawGroup.add(pistonR);
+
+                jawGroup.position.set(0, -1.5, 0.2);
+                skullGroup.add(jawGroup);
+
+                // 4. TEETH (PROCEDURAL LOOP)
+                // Generates 12 individual cyber-teeth
+                for(let i = 0; i < 6; i++) {
+                    // Top teeth
+                    const t1 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.4, 0.1), chromeMaterial);
+                    t1.position.set((i - 2.5) * 0.22, -0.9, 1.5);
+                    skullGroup.add(t1);
+
+                    // Bottom teeth
+                    const t2 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.4, 0.1), chromeMaterial);
+                    t2.position.set((i - 2.5) * 0.22, 0.5, 0.95); // Relative to Jaw Group would be better, but simplified here
+                    jawGroup.add(t2);
                 }
+
+                // 5. EYES (SENSORS)
+                const eyeGeo = new THREE.TorusGeometry(0.4, 0.05, 16, 32);
+                const eyeL = new THREE.Mesh(eyeGeo, neonMaterial);
+                eyeL.position.set(-0.6, 0.2, 1.6);
+                eyeL.rotation.y = -0.3;
+                skullGroup.add(eyeL);
+
+                const eyeR = new THREE.Mesh(eyeGeo, neonMaterial);
+                eyeR.position.set(0.6, 0.2, 1.6);
+                eyeR.rotation.y = 0.3;
+                skullGroup.add(eyeR);
+
+                // Inner Eye Glow (Sphere)
+                const pupilGeo = new THREE.SphereGeometry(0.15, 16, 16);
+                const pupilL = new THREE.Mesh(pupilGeo, new THREE.MeshBasicMaterial({color: 0xffffff}));
+                pupilL.position.copy(eyeL.position);
+                skullGroup.add(pupilL);
+                const pupilR = new THREE.Mesh(pupilGeo, new THREE.MeshBasicMaterial({color: 0xffffff}));
+                pupilR.position.copy(eyeR.position);
+                skullGroup.add(pupilR);
+
+                // 6. DATA CABLES (BEZIER CURVES)
+                // Simulating neural link cables coming out of the head
+                const curvePoints = [];
+                for(let k=0; k<15; k++) {
+                    const start = new THREE.Vector3((Math.random()-0.5)*2, 1.5, (Math.random()-0.5)*2);
+                    const mid = new THREE.Vector3((Math.random()-0.5)*4, 4, (Math.random()-0.5)*4);
+                    const end = new THREE.Vector3((Math.random()-0.5)*10, 10, (Math.random()-0.5)*5);
+                    
+                    const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
+                    const tube = new THREE.Mesh(
+                        new THREE.TubeGeometry(curve, 8, 0.02 + Math.random()*0.03, 6, false),
+                        wireMaterial
+                    );
+                    skullGroup.add(tube);
+                }
+
+                // 7. GLITCH HALO
+                // A ring around the head
+                const halo = new THREE.Mesh(
+                    new THREE.RingGeometry(2.5, 2.6, 64),
+                    new THREE.MeshBasicMaterial({ color: 0xff003c, side: THREE.DoubleSide, transparent: true, opacity: 0.5 })
+                );
+                halo.rotation.x = Math.PI / 2;
+                skullGroup.add(halo);
+
+                return skullGroup;
+            }
+
+            // --- GENERATOR 2: DATA CLOUD ---
+            // Generates 15,000 particles with size variation
+            static createDataCloud() {
+                const count = 15000;
+                const geometry = new THREE.BufferGeometry();
+                const positions = [];
+                const colors = [];
+                const sizes = [];
+
+                const color1 = new THREE.Color(0x00f3ff);
+                const color2 = new THREE.Color(0xff003c);
+
+                for (let i = 0; i < count; i++) {
+                    // Random distribution in a large cube
+                    const x = (Math.random() - 0.5) * 100;
+                    const y = (Math.random() - 0.5) * 100;
+                    const z = (Math.random() - 0.5) * 50;
+                    positions.push(x, y, z);
+
+                    // Size variation
+                    sizes.push(Math.random() * 0.1);
+
+                    // Color mixing based on position
+                    const mixedColor = x > 0 ? color1 : color2;
+                    colors.push(mixedColor.r, mixedColor.g, mixedColor.b);
+                }
+
+                geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+                geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+                geometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
+
+                const material = new THREE.PointsMaterial({
+                    size: 0.1,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.6,
+                    sizeAttenuation: true
+                });
+
+                return new THREE.Points(geometry, material);
+            }
+
+            // --- GENERATOR 3: NEURAL GRID FLOOR ---
+            static createGrid() {
+                const group = new THREE.Group();
+                
+                // Main Grid
+                const gridHelper = new THREE.GridHelper(200, 100, 0x00f3ff, 0x111111);
+                gridHelper.position.y = -10;
+                group.add(gridHelper);
+
+                // Moving light planes (Scanning effect)
+                const planeGeo = new THREE.PlaneGeometry(200, 200);
+                const planeMat = new THREE.MeshBasicMaterial({
+                    color: 0x00f3ff,
+                    transparent: true,
+                    opacity: 0.05,
+                    side: THREE.DoubleSide
+                });
+                const plane = new THREE.Mesh(planeGeo, planeMat);
+                plane.rotation.x = -Math.PI / 2;
+                plane.position.y = -10.1;
+                group.add(plane);
 
                 return group;
             }
-
-            static createDataParticles(count) {
-                const geo = new THREE.BufferGeometry();
-                const pos = new Float32Array(count * 3);
-                const sizes = new Float32Array(count);
-                
-                for(let i=0; i<count*3; i++) {
-                    pos[i] = (Math.random() - 0.5) * 100;
-                    if(i % 3 === 0) sizes[i/3] = Math.random();
-                }
-                
-                geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-                geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-                
-                const mat = new THREE.PointsMaterial({
-                    color: 0x00f3ff, size: 0.1, transparent: true, opacity: 0.6
-                });
-                
-                return new THREE.Points(geo, mat);
-            }
         }
-        
-        // ЗДЕСЬ БУДЕТ ЧАСТЬ 3...
-        /* ------------------------------------------------------------------
-           MAIN ENGINE LOOP (LINES 800-1500)
-           Сборка сцены, физики и управление.
-           ------------------------------------------------------------------ */
 
-        class VzzoxEngine {
+
+        /* =========================================
+           CORE ENGINE (VZZOX SYSTEM)
+           Handles Rendering, Physics, Input, Loop
+           ========================================= */
+        class VzzoxCore {
             constructor() {
+                // System Status
+                this.isBooted = false;
+                this.width = window.innerWidth;
+                this.height = window.innerHeight;
+                
+                // Input State
+                this.mouse = new THREE.Vector2();
+                this.targetMouse = new THREE.Vector2();
+                this.scrollY = 0;
+                this.targetScrollY = 0;
+
+                // Scene Objects Container
+                this.objects = {
+                    marrow: null,
+                    skull: null,
+                    particles: null,
+                    grid: null
+                };
+
+                // Initialize Subsystems
                 this.initThree();
                 this.initPostProcessing();
-                this.initWorld();
-                this.initEvents();
-                this.animate();
-                this.bootSequence();
+                this.buildWorld();
+                this.bindEvents();
+                
+                // Start Boot Animation
+                this.runBootSequence();
             }
 
+            // --- SUBSYSTEM 1: THREE.JS SETUP ---
             initThree() {
-                this.container = document.getElementById('viewport');
+                this.container = document.getElementById('canvas-world');
+                
                 this.scene = new THREE.Scene();
-                this.scene.fog = new THREE.FogExp2(0x000000, 0.02);
+                // Deep void fog
+                this.scene.fog = new THREE.FogExp2(0x020202, 0.025);
+
+                this.camera = new THREE.PerspectiveCamera(75, this.width / this.height, 0.1, 1000);
+                this.camera.position.z = 12;
+
+                this.renderer = new THREE.WebGLRenderer({ 
+                    antialias: false, // False for performance with post-processing
+                    alpha: true,
+                    powerPreference: "high-performance"
+                });
                 
-                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-                this.camera.position.z = 15;
-                
-                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.setPixelRatio(window.devicePixelRatio);
+                this.renderer.setSize(this.width, this.height);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.toneMapping = THREE.ReinhardToneMapping;
                 this.container.appendChild(this.renderer.domElement);
-                
-                // Lights
-                const amb = new THREE.AmbientLight(0xffffff, 0.1);
-                const spot = new THREE.SpotLight(0x00f3ff, 2);
-                spot.position.set(10, 20, 10);
-                const red = new THREE.PointLight(0xff003c, 2, 50);
-                red.position.set(-10, -10, 0);
-                
-                this.scene.add(amb, spot, red);
+
+                // Lighting
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+                this.scene.add(ambientLight);
+
+                // Cyberpunk Lighting Setup
+                const blueSpot = new THREE.SpotLight(0x00f3ff, 5);
+                blueSpot.position.set(20, 50, 20);
+                blueSpot.angle = 0.3;
+                blueSpot.penumbra = 1;
+                this.scene.add(blueSpot);
+
+                const pinkPoint = new THREE.PointLight(0xff003c, 3, 50);
+                pinkPoint.position.set(-10, 0, 10);
+                this.scene.add(pinkPoint);
             }
 
+            // --- SUBSYSTEM 2: POST-PROCESSING (BLOOM & GLITCH) ---
             initPostProcessing() {
                 this.composer = new EffectComposer(this.renderer);
                 this.composer.addPass(new RenderPass(this.scene, this.camera));
-                
-                const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-                bloom.threshold = 0;
-                bloom.strength = 1.5;
-                bloom.radius = 0.5;
-                this.composer.addPass(bloom);
 
-                // Glitch Pass
-                this.glitchUniforms = SHADERS.digitalGlitch.uniforms;
-                const glitchPass = new ShaderPass(
-                    new THREE.ShaderMaterial({
-                        uniforms: this.glitchUniforms,
-                        vertexShader: SHADERS.digitalGlitch.vertexShader,
-                        fragmentShader: SHADERS.digitalGlitch.fragmentShader
-                    })
+                // 1. UNREAL BLOOM (The Neon Glow)
+                const bloomPass = new UnrealBloomPass(
+                    new THREE.Vector2(this.width, this.height),
+                    1.5, 0.4, 0.85
                 );
-                this.composer.addPass(glitchPass);
-            }
+                bloomPass.threshold = 0.1;
+                bloomPass.strength = 1.2; // High intensity
+                bloomPass.radius = 0.5;
+                this.composer.addPass(bloomPass);
 
-            initWorld() {
-                // 1. Marrow (Биомасса)
-                this.marrow = new THREE.Mesh(
-                    new THREE.IcosahedronGeometry(4, 50),
-                    new THREE.ShaderMaterial({
-                        uniforms: { uTime: { value: 0 } },
-                        vertexShader: SHADERS.organicMatter.vertex,
-                        fragmentShader: SHADERS.organicMatter.fragment,
-                        wireframe: true
-                    })
-                );
-                this.marrow.position.set(-8, 5, -5);
-                this.scene.add(this.marrow);
-
-                // 2. Skull (Кибер-череп)
-                this.skull = ProceduralGenerator.createCyberSkull();
-                this.skull.position.set(8, -15, -5);
-                this.scene.add(this.skull);
-
-                // 3. Particles (10,000 частиц)
-                this.particles = ProceduralGenerator.createDataParticles(10000);
-                this.scene.add(this.particles);
-
-                // 4. Grid Floor
-                const grid = new THREE.GridHelper(100, 50, 0x00f3ff, 0x111111);
-                grid.position.y = -20;
-                this.scene.add(grid);
-            }
-
-            initEvents() {
-                window.addEventListener('resize', () => {
-                    this.camera.aspect = window.innerWidth / window.innerHeight;
-                    this.camera.updateProjectionMatrix();
-                    this.renderer.setSize(window.innerWidth, window.innerHeight);
-                    this.composer.setSize(window.innerWidth, window.innerHeight);
-                });
-
-                // Scroll Sync
-                const scroller = document.getElementById('content-scroller');
-                scroller.addEventListener('scroll', () => {
-                    this.scrollY = scroller.scrollTop;
-                    // Check intersections
-                    const blocks = document.querySelectorAll('.data-block');
-                    blocks.forEach(block => {
-                        const rect = block.getBoundingClientRect();
-                        if(rect.top < window.innerHeight/2 && rect.bottom > 0) {
-                            block.classList.add('active');
-                        } else {
-                            block.classList.remove('active');
+                // 2. FILM GRAIN (Texture)
+                // We create a custom shader pass for grain on the fly
+                const grainShader = {
+                    uniforms: {
+                        "tDiffuse": { value: null },
+                        "amount":   { value: 0.05 }
+                    },
+                    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); }`,
+                    fragmentShader: `
+                        uniform float amount;
+                        uniform sampler2D tDiffuse;
+                        varying vec2 vUv;
+                        float random( vec2 p ) {
+                            vec2 K1 = vec2(
+                                23.14069263277926, // e^pi (Gelfond's constant)
+                                2.665144142690225 // 2^sqrt(2) (Gelfond–Schneider constant)
+                            );
+                            return fract( cos( dot(p,K1) ) * 12345.6789 );
                         }
-                    });
+                        void main() {
+                            vec4 color = texture2D( tDiffuse, vUv );
+                            vec2 uvRandom = vUv;
+                            uvRandom.y *= random(vec2(uvRandom.y,amount));
+                            color.rgb += random( uvRandom ) * amount;
+                            gl_FragColor = vec4( color );
+                        }
+                    `
+                };
+                const grainPass = new ShaderPass(new THREE.ShaderMaterial(grainShader));
+                this.composer.addPass(grainPass);
+            }
+
+            // --- SUBSYSTEM 3: WORLD BUILDER ---
+            buildWorld() {
+                // 1. MARROW (Shader Blob)
+                // Using the shader strings from Part 1
+                const marrowGeo = new THREE.IcosahedronGeometry(4, 60); // High poly for displacement
+                const marrowMat = new THREE.ShaderMaterial({
+                    uniforms: { uTime: { value: 0 } },
+                    vertexShader: VZZOX_SHADERS.organicVertex,
+                    fragmentShader: VZZOX_SHADERS.organicFragment,
+                    wireframe: false
+                });
+                
+                this.objects.marrow = new THREE.Mesh(marrowGeo, marrowMat);
+                // Position it off-screen initially (controlled by scroll later)
+                this.objects.marrow.position.set(-10, 0, -5);
+                this.scene.add(this.objects.marrow);
+
+                // 2. SKULL (Procedural Assembly)
+                this.objects.skull = ProceduralArchitect.createCyberSkull();
+                this.objects.skull.position.set(10, -20, -5); // Further down
+                this.scene.add(this.objects.skull);
+
+                // 3. PARTICLES
+                this.objects.particles = ProceduralArchitect.createDataCloud();
+                this.scene.add(this.objects.particles);
+
+                // 4. GRID
+                this.objects.grid = ProceduralArchitect.createGrid();
+                this.objects.grid.position.y = -15;
+                this.scene.add(this.objects.grid);
+            }
+
+            // --- SUBSYSTEM 4: INPUT & EVENTS ---
+            bindEvents() {
+                // Resize
+                window.addEventListener('resize', () => {
+                    this.width = window.innerWidth;
+                    this.height = window.innerHeight;
+                    this.camera.aspect = this.width / this.height;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(this.width, this.height);
+                    this.composer.setSize(this.width, this.height);
+                });
+
+                // Mouse Move (Parallax & Cursor)
+                document.addEventListener('mousemove', (e) => {
+                    // Normalized coordinates -1 to 1
+                    this.targetMouse.x = (e.clientX / this.width) * 2 - 1;
+                    this.targetMouse.y = -(e.clientY / this.height) * 2 + 1;
+
+                    // Update Custom Cursor HTML
+                    const dot = document.getElementById('cursor-dot');
+                    const circle = document.getElementById('cursor-circle');
+                    
+                    dot.style.left = `${e.clientX}px`;
+                    dot.style.top = `${e.clientY}px`;
+                    
+                    // Laggy circle effect
+                    setTimeout(() => {
+                        circle.style.left = `${e.clientX}px`;
+                        circle.style.top = `${e.clientY}px`;
+                    }, 50);
+                });
+
+                // Native Scroll Listener
+                window.addEventListener('scroll', () => {
+                    this.targetScrollY = window.scrollY;
+                    
+                    // Update HUD Scroll Readout
+                    document.getElementById('scroll-readout').innerText = 
+                        this.targetScrollY.toString().padStart(4, '0');
                 });
             }
 
-            bootSequence() {
-                const consoleDiv = document.getElementById('boot-sequence');
-                const logs = [
-                    "LOADING MEMORY...", 
-                    "MOUNTING VOLUMES...", 
-                    "PARSING GLSL SHADERS...", 
-                    "GENERATING GEOMETRY...",
-                    "SYSTEM READY."
-                ];
-                let i = 0;
+            // --- BOOT SEQUENCE LOGIC ---
+            runBootSequence() {
+                const loader = document.getElementById('loader-fill');
+                const log = document.getElementById('console-output');
+                const bootScreen = document.getElementById('boot-layer');
+                const canvas = document.getElementById('canvas-world');
+
+                let progress = 0;
+                
+                // Simulated loading interval
                 const interval = setInterval(() => {
-                    consoleDiv.innerHTML += `<br>> ${logs[i]}`;
-                    i++;
-                    if(i >= logs.length) {
+                    progress += Math.random() * 5;
+                    if (progress > 100) progress = 100;
+                    
+                    loader.style.width = `${progress}%`;
+
+                    // Add random logs
+                    if(Math.random() > 0.8) {
+                        const hex = Math.floor(Math.random()*16777215).toString(16);
+                        log.innerHTML += `> PARSING BLOCK 0x${hex}... OK<br>`;
+                        log.scrollTop = log.scrollHeight;
+                    }
+
+                    if (progress === 100) {
                         clearInterval(interval);
+                        // Launch!
                         setTimeout(() => {
-                            consoleDiv.style.opacity = 0;
-                            setTimeout(() => consoleDiv.remove(), 1000);
+                            bootScreen.style.opacity = 0;
+                            canvas.style.opacity = 1;
+                            setTimeout(() => bootScreen.remove(), 1000);
+                            this.isBooted = true;
+                            // Trigger animations for HTML elements
+                            document.querySelectorAll('.cyber-panel').forEach(el => el.classList.add('visible'));
                         }, 500);
                     }
-                }, 300);
+                }, 50); // Speed of loading
             }
-
+            // --- SUBSYSTEM 5: MAIN RENDER LOOP ---
             animate() {
                 requestAnimationFrame(this.animate.bind(this));
-                
+
                 const time = performance.now() * 0.001;
-                
-                // Update Uniforms
-                this.marrow.material.uniforms.uTime.value = time;
-                this.glitchUniforms.seed.value = Math.random();
-                
-                // Animations
-                this.marrow.rotation.y = time * 0.1;
-                this.skull.rotation.y = -time * 0.2;
-                this.skull.rotation.z = Math.sin(time) * 0.1;
-                this.particles.rotation.y = time * 0.02;
+                const deltaTime = time - (this.lastTime || time);
+                this.lastTime = time;
 
-                // Camera Logic (Scroll based)
-                const targetY = -(this.scrollY || 0) * 0.02;
-                this.camera.position.y += (targetY - this.camera.position.y) * 0.05;
-                this.camera.lookAt(0, this.camera.position.y, 0);
+                // 1. SMOOTH SCROLL PHYSICS (LERP)
+                // We interpolate current scroll to target scroll for that "weighty" feel
+                this.scrollY += (this.targetScrollY - this.scrollY) * 0.05;
 
-                // Glitch trigger random
-                if(Math.random() > 0.98) {
-                    this.glitchUniforms.amount.value = 0.2;
-                } else {
-                    this.glitchUniforms.amount.value = 0.01;
+                // 2. MOUSE PHYSICS
+                // Smoothly interpolate mouse values
+                this.mouse.x += (this.targetMouse.x - this.mouse.x) * 0.05;
+                this.mouse.y += (this.targetMouse.y - this.mouse.y) * 0.05;
+
+                // 3. SCENE DIRECTOR (Controls objects based on scroll)
+                this.updateSceneDirector(this.scrollY, time);
+
+                // 4. GLOBAL ANIMATIONS
+                
+                // Animate Marrow Shader
+                if (this.objects.marrow) {
+                    this.objects.marrow.material.uniforms.uTime.value = time;
+                    // Pulsing rotation
+                    this.objects.marrow.rotation.y = time * 0.1;
+                    this.objects.marrow.rotation.z = Math.sin(time * 0.5) * 0.1;
                 }
 
-                this.composer.render();
+                // Animate Particles (Flow)
+                if (this.objects.particles) {
+                    this.objects.particles.rotation.y = time * 0.02;
+                    // Subtle wave effect on particles
+                    this.objects.particles.position.y += Math.sin(time) * 0.01;
+                }
+
+                // Animate Grid (Infinite floor illusion)
+                if (this.objects.grid) {
+                    this.objects.grid.position.z = (time * 2) % 10;
+                }
+
+                // 5. PARALLAX CAMERA
+                // Camera moves slightly with mouse
+                this.camera.position.x += (this.mouse.x * 0.5 - this.camera.position.x) * 0.05;
+                this.camera.rotation.y = this.mouse.x * 0.02;
+                this.camera.rotation.x = this.mouse.y * 0.02;
+
+                // 6. HUD UPDATES
+                // Randomly update object counter to look like processing
+                if(Math.random() > 0.95) {
+                    const objCount = this.scene.children.length + 
+                                   (this.objects.skull ? this.objects.skull.children.length : 0) +
+                                   Math.floor(Math.random() * 100);
+                    document.getElementById('obj-counter').innerText = objCount;
+                }
                 
-                // FPS Update
-                document.getElementById('fps-meter').innerText = `FPS: ${Math.round(1000 / (performance.now() - this.lastFrame) * 100) / 100 || 60}`;
-                this.lastFrame = performance.now();
+                // FPS Counter (Approximation)
+                if(Math.random() > 0.9) {
+                    document.getElementById('fps-counter').innerText = Math.round(1 / deltaTime);
+                }
+
+                // 7. RENDER
+                // Use composer for bloom, otherwise standard renderer
+                if (this.composer) {
+                    this.composer.render();
+                } else {
+                    this.renderer.render(this.scene, this.camera);
+                }
+            }
+
+            // --- THE DIRECTOR: SCROLL-BASED LOGIC ---
+            // This maps HTML scroll position to 3D world coordinates
+            updateSceneDirector(scroll, time) {
+                // Determine which "section" we are in based on viewport height
+                const vh = this.height;
+                
+                // SECTION 1: HERO (0 - 1vh)
+                // Marrow is hidden or very far
+                
+                // SECTION 2: MARROW (1vh - 2vh)
+                // We move the Marrow from left off-screen to center
+                if (this.objects.marrow) {
+                    // Normalize scroll for this section
+                    const start = vh * 0.5;
+                    const end = vh * 1.5;
+                    
+                    if (scroll > start && scroll < vh * 2.5) {
+                        // Calculate progress 0.0 to 1.0
+                        let progress = (scroll - start) / (end - start);
+                        
+                        // Move Marrow: From x:-10 to x:4
+                        // Using a curve for smooth entry
+                        const targetX = -10 + (progress * 14); 
+                        
+                        // Limit movement so it stays in view for a bit
+                        this.objects.marrow.position.x = Math.min(Math.max(targetX, -10), 5);
+                        
+                        // Scale up effect
+                        const scale = 1 + Math.sin(progress * Math.PI) * 0.5;
+                        this.objects.marrow.scale.setScalar(scale);
+                        
+                        // Rotate based on scroll
+                        this.objects.marrow.rotation.x = scroll * 0.001;
+                    }
+                }
+
+                // SECTION 3: SKULL (2vh - 3vh)
+                if (this.objects.skull) {
+                    const start = vh * 1.5;
+                    
+                    // Parallax lift: Skull rises as we scroll down
+                    // Default pos y is -20. Target is 0.
+                    const targetY = -20 + (scroll - start) * 0.03;
+                    
+                    this.objects.skull.position.y = targetY;
+
+                    // Skull looks at mouse
+                    this.objects.skull.rotation.y = this.mouse.x * 0.5 + Math.PI; // Face forward
+                    this.objects.skull.rotation.x = -this.mouse.y * 0.5;
+
+                    // "Speaking" animation (Jaw movement)
+                    // If near center screen
+                    if (targetY > -5 && targetY < 5) {
+                        const jaw = this.objects.skull.children[1]; // We know jaw is index 1 from Architect
+                        if(jaw) {
+                            // Random twitching
+                            jaw.rotation.x = Math.abs(Math.sin(time * 10)) * 0.2;
+                        }
+                    }
+                }
+
+                // SECTION 4: DATA OVERLOAD (3vh+)
+                if (scroll > vh * 2.8) {
+                    // Increase chaos
+                    if (this.objects.particles) {
+                        // Spin faster
+                        this.objects.particles.rotation.z += 0.01;
+                        // Expand
+                        const s = 1 + (scroll - vh * 2.8) * 0.001;
+                        this.objects.particles.scale.setScalar(s);
+                    }
+                    
+                    // Camera shake effect
+                    this.camera.position.x += (Math.random() - 0.5) * 0.1;
+                    this.camera.position.y += (Math.random() - 0.5) * 0.1;
+                }
             }
         }
 
-        // START ENGINE
-        new VzzoxEngine();
+        // --- ENTRY POINT ---
+        // Wait for DOM, then launch the Kernel
+        window.addEventListener('DOMContentLoaded', () => {
+            // Instantiate the System
+            window.vzzoxSystem = new VzzoxCore();
+            
+            console.log("%c VZZOX SYSTEM READY ", "background: #00f3ff; color: #000; font-weight: bold; padding: 5px;");
+        });
 
     </script>
 </body>
