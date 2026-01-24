@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VZZOX // REBOOT</title>
+    <style>
+        body { margin: 0; overflow-x: hidden; background: #000; font-family: monospace; color: #fff; }
+        
+        /* КАНВАС */
+        #c { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
+        
+        /* ИНТЕРФЕЙС */
+        .hud { position: fixed; padding: 20px; z-index: 10; pointer-events: none; mix-blend-mode: exclusion; }
+        .top-left { top: 0; left: 0; border-left: 2px solid #0ff; }
+        .bot-right { bottom: 0; right: 0; text-align: right; border-right: 2px solid #f0f; }
+        
+        /* СЕКЦИИ САЙТА */
+        section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            text-shadow: 0 0 20px #000;
+            border-bottom: 1px dashed #333;
+        }
+        
+        h1 { font-size: 4rem; margin: 0; color: #fff; background: rgba(0,0,0,0.5); padding: 20px; border: 1px solid #fff; }
+        p { font-size: 1.5rem; color: #0ff; background: rgba(0,0,0,0.8); padding: 20px; max-width: 600px; }
+        
+        .right { justify-content: flex-end; padding-right: 10%; }
+        .left { justify-content: flex-start; padding-left: 10%; }
+    </style>
+</head>
+<body>
+
+    <div class="hud top-left">SYS: ONLINE<br>RENDER: GPU</div>
+    <div class="hud bot-right">VZZOX<br>SCROLL TO NAVIGATE</div>
+
+    <canvas id="c"></canvas>
+
+    <main>
+        <section>
+            <h1>VZZOX SYSTEM</h1>
+        </section>
+        
+        <section class="right">
+            <div>
+                <h1>CYBER SKULL</h1>
+                <p>Процедурная генерация объекта. Это не картинка, это 3D геометрия.</p>
+            </div>
+        </section>
+        
+        <section class="left">
+            <div>
+                <h1>CORE DATA</h1>
+                <p>Центральный узел обработки данных.</p>
+            </div>
+        </section>
+        
+        <section>
+            <h1>END OF LINE</h1>
+        </section>
+    </main>
+
+    <script type="module">
+        import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
+
+        // 1. НАСТРОЙКА
+        const canvas = document.querySelector('#c');
+        const renderer = new THREE.WebGLRenderer({canvas, antialias: true, alpha: true});
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.z = 10;
+
+        // СВЕТ
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(0, 10, 10);
+        scene.add(light);
+        const ambient = new THREE.AmbientLight(0x404040, 2);
+        scene.add(ambient);
+        const redLight = new THREE.PointLight(0xff0055, 3, 20);
+        redLight.position.set(-5, -5, 5);
+        scene.add(redLight);
+
+        // --- ГЕНЕРАТОР ЧЕРЕПА (ПРОСТОЙ) ---
+        const skullGroup = new THREE.Group();
+        
+        // Материал (Каркасный для стиля)
+        const boneMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.2, metalness: 0.8 });
+        const wireMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true, transparent: true, opacity: 0.3 });
+        
+        // Голова
+        const headGeo = new THREE.IcosahedronGeometry(2.2, 1);
+        const head = new THREE.Mesh(headGeo, boneMat);
+        const headWire = new THREE.Mesh(headGeo, wireMat);
+        skullGroup.add(head);
+        skullGroup.add(headWire);
+
+        // Челюсть
+        const jawGeo = new THREE.BoxGeometry(1.8, 1, 2);
+        const jaw = new THREE.Mesh(jawGeo, boneMat);
+        jaw.position.set(0, -2, 0.5);
+        skullGroup.add(jaw);
+
+        // Глаза
+        const eyeGeo = new THREE.TorusGeometry(0.5, 0.1, 16, 20);
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff0055 });
+        const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
+        eyeL.position.set(-0.8, 0, 1.8);
+        skullGroup.add(eyeL);
+        const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
+        eyeR.position.set(0.8, 0, 1.8);
+        skullGroup.add(eyeR);
+
+        skullGroup.position.set(5, -10, 0); // Спрятан внизу для второй секции
+        scene.add(skullGroup);
+
+
+        // --- ЦЕНТРАЛЬНОЕ ЯДРО (CORE) ---
+        const coreGeo = new THREE.OctahedronGeometry(1.5, 0);
+        const coreMat = new THREE.MeshStandardMaterial({ color: 0xff0055, wireframe: false });
+        const core = new THREE.Mesh(coreGeo, coreMat);
+        
+        // Оболочка ядра
+        const shellGeo = new THREE.IcosahedronGeometry(2.5, 1);
+        const shellMat = new THREE.MeshBasicMaterial({ color: 0xff0055, wireframe: true, transparent: true, opacity: 0.1 });
+        const shell = new THREE.Mesh(shellGeo, shellMat);
+        
+        const coreGroup = new THREE.Group();
+        coreGroup.add(core);
+        coreGroup.add(shell);
+        coreGroup.position.set(-5, -20, 0); // Спрятан еще ниже
+        scene.add(coreGroup);
+
+
+        // --- ЧАСТИЦЫ ---
+        const pGeo = new THREE.BufferGeometry();
+        const pCount = 2000;
+        const pPos = new Float32Array(pCount * 3);
+        for(let i=0; i<pCount*3; i++) {
+            pPos[i] = (Math.random() - 0.5) * 50;
+        }
+        pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+        const pMat = new THREE.PointsMaterial({ size: 0.05, color: 0x00ffff });
+        const particles = new THREE.Points(pGeo, pMat);
+        scene.add(particles);
+
+
+        // --- АНИМАЦИЯ ---
+        let scrollY = 0;
+        
+        function animate(time) {
+            time *= 0.001;
+            
+            // Получаем скролл
+            scrollY = window.scrollY;
+
+            // Двигаем камеру вниз при скролле
+            const targetY = -scrollY * 0.02;
+            camera.position.y += (targetY - camera.position.y) * 0.1;
+
+            // Анимация Черепа
+            skullGroup.rotation.y = time * 0.5;
+            skullGroup.rotation.z = Math.sin(time) * 0.1;
+            // Челюсть двигается
+            jaw.rotation.x = Math.abs(Math.sin(time * 5)) * 0.2;
+
+            // Анимация Ядра
+            core.rotation.x = time;
+            core.rotation.y = time;
+            shell.rotation.y = -time * 0.5;
+
+            // Анимация частиц
+            particles.rotation.y = time * 0.05;
+
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+
+        // РЕСАЙЗ ОКНА
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
