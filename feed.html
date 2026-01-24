@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Мемасика 2.0 | Лента</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&family=Unbounded:wght@600;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -24,88 +23,26 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: var(--font-main);
-            overflow-x: hidden;
-            padding-bottom: calc(var(--nav-height) + 20px);
-        }
-
-        /* Шум */
-        body::before {
-            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-            opacity: 0.4; pointer-events: none; z-index: -1;
-        }
-
-        /* Header */
-        .app-header {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(15, 15, 17, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .brand-title {
-            text-align: center; font-family: var(--font-display);
-            font-size: 1.2rem; padding: 15px 0 10px 0;
-            letter-spacing: 1px; text-transform: uppercase;
-        }
-
-        .tabs { display: flex; justify-content: space-around; }
-        .tab-btn {
-            flex: 1; background: none; border: none;
-            color: var(--text-secondary); font-family: var(--font-display);
-            font-size: 0.9rem; padding: 15px 0; text-transform: uppercase;
-            cursor: pointer; position: relative; transition: color 0.3s;
-        }
-        .tab-btn.active { color: var(--text-main); }
-        .tab-btn.active::after {
-            content: ''; position: absolute; bottom: 0; left: 50%;
-            transform: translateX(-50%); width: 40px; height: 3px;
-            background-color: var(--accent-color);
-            box-shadow: 0 0 10px rgba(255, 94, 0, 0.5);
-        }
-
-        /* Create Post */
-        .create-post-card {
-            background-color: var(--card-bg); margin: 15px; padding: 15px;
-            border-radius: 16px; display: flex; align-items: center; gap: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .user-avatar {
-            width: 40px; height: 40px; background-color: #333;
-            border-radius: 50%; display: flex; justify-content: center; align-items: center;
-            font-weight: 700; color: #fff; flex-shrink: 0; border: 2px solid var(--border-color);
-            font-size: 0.9rem; text-transform: uppercase; overflow: hidden;
-        }
-        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-        .post-input {
-            background-color: #000; color: #fff; border: 1px solid var(--border-color);
-            border-radius: 20px; padding: 10px 15px; width: 100%; font-size: 0.9rem;
-            font-family: var(--font-main);
-        }
-
-        .send-btn-icon { color: var(--accent-color); font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
-        .send-btn-icon:hover { transform: scale(1.1); }
-        .send-btn-icon.disabled { opacity: 0.5; cursor: not-allowed; }
-
-        /* Feed */
-        #feed-container { min-height: 200px; }
+        body { background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-main); overflow-x: hidden; padding-bottom: calc(var(--nav-height) + 20px); }
         
+        body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E"); opacity: 0.4; pointer-events: none; z-index: -1; }
+
+        .app-header { position: sticky; top: 0; z-index: 100; background: rgba(15, 15, 17, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); }
+        .brand-title { text-align: center; font-family: var(--font-display); font-size: 1.2rem; padding: 15px 0 10px 0; letter-spacing: 1px; text-transform: uppercase; }
+        .tabs { display: flex; justify-content: space-around; }
+        .tab-btn { flex: 1; background: none; border: none; color: var(--text-secondary); font-family: var(--font-display); font-size: 0.9rem; padding: 15px 0; text-transform: uppercase; cursor: pointer; position: relative; transition: color 0.3s; }
+        .tab-btn.active { color: var(--text-main); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 40px; height: 3px; background-color: var(--accent-color); box-shadow: 0 0 10px rgba(255, 94, 0, 0.5); }
+
+        .create-post-card { background-color: var(--card-bg); margin: 15px; padding: 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--border-color); }
+        .user-avatar { width: 40px; height: 40px; background-color: #333; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 700; color: #fff; flex-shrink: 0; border: 2px solid var(--border-color); font-size: 0.9rem; text-transform: uppercase; overflow: hidden; }
+        .post-input { background-color: #000; color: #fff; border: 1px solid var(--border-color); border-radius: 20px; padding: 10px 15px; width: 100%; font-size: 0.9rem; font-family: var(--font-main); }
+        .send-btn-icon { color: var(--accent-color); font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
+
+        #feed-container { min-height: 200px; padding-bottom: 20px;}
         .loading-text { text-align: center; color: #555; margin-top: 50px; font-family: var(--font-display); }
 
-        .post-card {
-            background-color: var(--card-bg);
-            border-top: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 10px; padding: 15px;
-            animation: fadeIn 0.4s ease;
-        }
+        .post-card { background-color: var(--card-bg); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin-bottom: 10px; padding: 15px; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -113,28 +50,20 @@
         .author-name { font-weight: 700; font-size: 0.95rem; color: #fff; }
         .post-time { font-size: 0.75rem; color: var(--text-secondary); }
         .post-content { font-size: 0.95rem; line-height: 1.5; color: #ddd; margin-bottom: 15px; white-space: pre-wrap; word-break: break-word; }
-
-        .post-actions {
-            display: flex; gap: 20px; margin-top: 15px;
-            border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;
-        }
+        .post-actions { display: flex; gap: 20px; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; }
         .action-btn { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; cursor: pointer; }
-        .action-btn:hover { color: var(--text-main); }
-        .action-btn i { font-size: 1.2rem; }
 
-        /* Nav */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height);
-            background-color: var(--nav-bg); border-top: 1px solid var(--border-color);
-            display: flex; justify-content: space-around; align-items: center; z-index: 200;
-        }
-        .nav-item { color: var(--text-secondary); font-size: 1.4rem; padding: 10px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height); background-color: var(--nav-bg); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; z-index: 200; }
+        .nav-item { color: var(--text-secondary); font-size: 1.4rem; padding: 10px; cursor: pointer;}
         .nav-item.active { color: var(--text-main); }
-        .nav-item-center {
-            background-color: var(--accent-color); color: #000; width: 48px; height: 48px;
-            border-radius: 50%; display: flex; justify-content: center; align-items: center;
-            transform: translateY(-20%); box-shadow: 0 5px 15px rgba(255, 94, 0, 0.4);
-            border: 2px solid #000;
+        .nav-item-center { background-color: var(--accent-color); color: #000; width: 48px; height: 48px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transform: translateY(-20%); box-shadow: 0 5px 15px rgba(255, 94, 0, 0.4); border: 2px solid #000; cursor: pointer; }
+
+        /* DEBUG CONSOLE */
+        #debug-console {
+            background: #000; color: #ff3333; 
+            font-family: monospace; font-size: 0.7rem; 
+            padding: 10px; margin: 20px; border: 1px solid #333;
+            display: none; white-space: pre-wrap;
         }
     </style>
 </head>
@@ -143,62 +72,103 @@
     <header class="app-header">
         <div class="brand-title">Memasik 2.0</div>
         <div class="tabs">
-            <button class="tab-btn active" onclick="loadPosts()">LENTA</button>
-            <button class="tab-btn">TOP</button>
+            <button class="tab-btn active" id="tab-lenta" onclick="switchTab('lenta')">LENTA</button>
+            <button class="tab-btn" id="tab-top" onclick="switchTab('top')">TOP</button>
         </div>
     </header>
 
     <main>
         <div class="create-post-card">
             <div class="user-avatar" id="current-user-avatar">?</div>
-            <input type="text" id="post-text" class="post-input" placeholder="Что нового, легенда?">
+            <input type="text" id="post-text" class="post-input" placeholder="Загрузка...">
             <i class="ri-send-plane-fill send-btn-icon" id="send-btn" onclick="createPost()"></i>
         </div>
 
         <div id="feed-container">
-            <div class="loading-text">Загрузка базы данных...</div>
+            <div class="loading-text">Загрузка базы...</div>
         </div>
+        
+        <div id="debug-console"></div>
     </main>
 
     <nav class="bottom-nav">
         <div class="nav-item active"><i class="ri-file-list-3-line"></i></div>
         <div class="nav-item"><i class="ri-notification-3-line"></i></div>
-        <div class="nav-item-center"><i class="ri-pencil-fill"></i></div>
+        <div class="nav-item-center" onclick="document.getElementById('post-text').focus()"><i class="ri-pencil-fill"></i></div>
         <div class="nav-item"><i class="ri-shopping-cart-2-line"></i></div>
         <div class="nav-item" onclick="window.location.reload()"><i class="ri-user-3-line"></i></div>
     </nav>
 
     <script>
+        // --- LOG SYSTEM ---
+        function showError(msg) {
+            const el = document.getElementById('debug-console');
+            el.style.display = 'block';
+            el.innerText += "\n[ERROR]: " + msg;
+            console.error(msg);
+        }
+
         // --- CONFIG ---
         const SUPABASE_URL = 'https://hrrzpftxpafnavlljhum.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNzc1NzYsImV4cCI6MjA4NDg1MzU3Nn0.whczAQ9mUOJqT_hMEujiQnFnEuVi27iEPf8VWvCceFE';
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let supabase;
         let currentUser = null;
+
+        // --- TABS LOGIC ---
+        function switchTab(tabName) {
+            // Визуал
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            const container = document.getElementById('feed-container');
+
+            if (tabName === 'lenta') {
+                loadPosts(); // Грузим ленту
+            } else {
+                container.innerHTML = '<div class="loading-text">Топ посты скоро будут...</div>';
+            }
+        }
 
         // --- INIT ---
         async function init() {
-            // 1. Проверяем, вошел ли юзер
-            const { data: { user } } = await supabase.auth.getUser();
-            
-            if (user) {
-                currentUser = user;
-                // Грузим профиль, чтобы показать аватарку
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('username, avatar_url')
-                    .eq('id', user.id)
-                    .single();
+            try {
+                if (typeof window.supabase === 'undefined') throw new Error("Библиотека Supabase не загрузилась. Проверь интернет.");
                 
-                if (profile && profile.username) {
-                    document.getElementById('current-user-avatar').innerText = profile.username[0].toUpperCase();
-                }
-            } else {
-                document.getElementById('post-text').placeholder = "Войди, чтобы писать...";
-            }
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-            // 2. Грузим посты
-            loadPosts();
+                // 1. Проверяем вход
+                const { data: { user }, error: authError } = await supabase.auth.getUser();
+                if (authError) throw authError;
+
+                const inputField = document.getElementById('post-text');
+
+                if (user) {
+                    currentUser = user;
+                    inputField.placeholder = "Что нового, легенда?";
+                    
+                    // Грузим аватарку
+                    const { data: profile, error: profError } = await supabase
+                        .from('profiles')
+                        .select('username')
+                        .eq('id', user.id)
+                        .single();
+                    
+                    if (profile) {
+                        document.getElementById('current-user-avatar').innerText = profile.username[0].toUpperCase();
+                    }
+                } else {
+                    inputField.placeholder = "Войди, чтобы писать...";
+                    inputField.disabled = true;
+                }
+
+                // 2. Грузим посты
+                loadPosts();
+
+            } catch (err) {
+                showError(err.message);
+                document.getElementById('feed-container').innerHTML = '<div class="loading-text" style="color:#ff3333">Сбой системы.<br>См. лог ниже.</div>';
+            }
         }
 
         // --- LOAD POSTS ---
@@ -206,110 +176,90 @@
             const container = document.getElementById('feed-container');
             container.innerHTML = '<div class="loading-text">Загрузка ленты...</div>';
 
-            // Выбираем посты и джойним (соединяем) с таблицей profiles
-            const { data: posts, error } = await supabase
-                .from('posts')
-                .select(`
-                    id, 
-                    content, 
-                    created_at, 
-                    user_id,
-                    profiles (username, display_name, avatar_url)
-                `)
-                .order('created_at', { ascending: false });
+            try {
+                // ВАЖНО: Запрос с JOIN (объединением таблиц)
+                const { data: posts, error } = await supabase
+                    .from('posts')
+                    .select(`
+                        id, content, created_at,
+                        profiles (username)
+                    `)
+                    .order('created_at', { ascending: false });
 
-            if (error) {
-                console.error(error);
-                container.innerHTML = `<div class="loading-text" style="color:red">Ошибка БД: ${error.message}</div>`;
-                return;
-            }
+                if (error) throw error;
 
-            if (!posts || posts.length === 0) {
-                container.innerHTML = '<div class="loading-text">Тут пока пусто.<br>Будь первым!</div>';
-                return;
-            }
+                if (!posts || posts.length === 0) {
+                    container.innerHTML = '<div class="loading-text">Постов нет.<br>Напиши первый!</div>';
+                    return;
+                }
 
-            // Рендерим посты
-            container.innerHTML = '';
-            posts.forEach(post => {
-                const profile = post.profiles || { username: 'Anon', display_name: 'Anonymous' };
-                const time = new Date(post.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const avatarLetter = profile.username ? profile.username[0].toUpperCase() : 'A';
+                container.innerHTML = '';
+                posts.forEach(post => {
+                    // Защита если профиль удален
+                    const profile = post.profiles || { username: 'Deleted' };
+                    const username = profile.username || 'Anon';
+                    const avatar = username[0].toUpperCase();
+                    const time = new Date(post.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-                const html = `
-                <article class="post-card">
-                    <div class="post-header">
-                        <div class="post-author-info">
-                            <div class="user-avatar">${avatarLetter}</div>
-                            <div>
-                                <div class="author-name">${profile.username || 'Неизвестный'}</div>
-                                <div class="post-time">${time}</div>
+                    const html = `
+                    <article class="post-card">
+                        <div class="post-header">
+                            <div class="post-author-info">
+                                <div class="user-avatar">${avatar}</div>
+                                <div>
+                                    <div class="author-name">${username}</div>
+                                    <div class="post-time">${time}</div>
+                                </div>
                             </div>
+                            <i class="ri-more-2-fill" style="color:#666"></i>
                         </div>
-                        <i class="ri-more-2-fill" style="color:#666"></i>
-                    </div>
-                    <div class="post-content">${escapeHtml(post.content)}</div>
-                    <div class="post-actions">
-                        <div class="action-btn"><i class="ri-heart-3-line"></i> 0</div>
-                        <div class="action-btn"><i class="ri-chat-3-line"></i> 0</div>
-                    </div>
-                </article>
-                `;
-                container.innerHTML += html;
-            });
+                        <div class="post-content">${escapeHtml(post.content)}</div>
+                        <div class="post-actions">
+                            <div class="action-btn"><i class="ri-heart-3-line"></i> 0</div>
+                            <div class="action-btn"><i class="ri-chat-3-line"></i> 0</div>
+                        </div>
+                    </article>
+                    `;
+                    container.innerHTML += html;
+                });
+
+            } catch (err) {
+                // Если ошибка связана с profiles, даем подсказку
+                if (err.message.includes('profiles')) {
+                    showError("Ошибка связи таблиц! Выполни SQL-код из чата в Supabase.");
+                } else {
+                    showError(err.message);
+                }
+            }
         }
 
         // --- CREATE POST ---
         async function createPost() {
             if (!currentUser) {
-                alert("Сначала войди или зарегистрируйся!");
+                alert("Нужна регистрация!");
                 return;
             }
-
             const input = document.getElementById('post-text');
             const content = input.value.trim();
-            const btn = document.getElementById('send-btn');
-
             if (!content) return;
 
-            btn.classList.add('disabled');
-
             try {
-                const { error } = await supabase
-                    .from('posts')
-                    .insert([{ 
-                        user_id: currentUser.id, 
-                        content: content 
-                    }]);
-
+                const { error } = await supabase.from('posts').insert([{ user_id: currentUser.id, content: content }]);
                 if (error) throw error;
-
-                // Очистка и обновление
+                
                 input.value = '';
-                loadPosts(); // Перезагружаем ленту
-
+                loadPosts();
             } catch (err) {
-                console.error(err);
-                alert("Ошибка публикации: " + err.message);
-            } finally {
-                btn.classList.remove('disabled');
+                alert("Ошибка: " + err.message);
             }
         }
 
-        // Защита от XSS (чтобы не вставили скрипт в пост)
         function escapeHtml(text) {
             if (!text) return "";
-            return text
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        // Запуск
         init();
-
     </script>
 </body>
 </html>
