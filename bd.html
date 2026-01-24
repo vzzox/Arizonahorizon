@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>FINAL DEBUG</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; padding: 20px; text-align: center; }
+        input { padding: 10px; width: 90%; margin: 5px 0; font-size: 16px; }
+        button { padding: 20px; width: 100%; background: #00ff00; color: #000; font-weight: bold; font-size: 18px; cursor: pointer; border: none; margin-top: 10px;}
+        #log { margin-top: 20px; border: 1px solid #fff; padding: 10px; min-height: 100px; white-space: pre-wrap; text-align: left; }
+    </style>
+</head>
+<body>
+
+    <h1>ФИНАЛЬНЫЙ ТЕСТ</h1>
+    <input type="email" id="email" placeholder="test@mail.com" value="test_user_999@mail.com">
+    <input type="password" id="password" placeholder="password" value="123456">
+    
+    <button id="myBtn">СОЗДАТЬ АККАУНТ</button>
+
+    <h3>Журнал событий:</h3>
+    <div id="log">Загрузка страницы...</div>
+
+    <script>
+        // 1. Проверка жизни JS сразу при старте
+        alert("JS ЗАПУСТИЛСЯ! Закрой это окно.");
+        
+        const logBox = document.getElementById('log');
+        
+        function log(msg) {
+            logBox.innerText += "\n> " + msg;
+            console.log(msg);
+        }
+
+        log("Скрипт загружен. Жду нажатия кнопки...");
+
+        // Данные
+        const SUPABASE_URL = 'https://hrrzpftxpafnavlljhum.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNzc1NzYsImV4cCI6MjA4NDg1MzU3Nn0.whczAQ9mUOJqT_hMEujiQnFnEuVi27iEPf8VWvCceFE';
+
+        // 2. Привязываем кнопку жестким методом
+        document.getElementById('myBtn').addEventListener('click', async function() {
+            log("!!! КНОПКА НАЖАТА !!!");
+            
+            // Проверка библиотеки
+            if (typeof window.supabase === 'undefined') {
+                log("ОШИБКА: Библиотека Supabase не загрузилась. Проверь интернет.");
+                return;
+            }
+
+            try {
+                log("Подключаюсь к Supabase...");
+                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+
+                log(`Пробую регистрировать: ${email}`);
+
+                // Запрос
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    log("ОШИБКА ОТ СЕРВЕРА: " + error.message);
+                } else {
+                    log("УСПЕХ! Юзер создан. ID: " + (data.user?.id || 'null'));
+                    
+                    if (data.user) {
+                        log("Создаю профиль...");
+                        const { error: profErr } = await supabase.from('profiles').insert([{
+                            id: data.user.id,
+                            username: "User" + Date.now(),
+                            display_name: "Tester"
+                        }]);
+                        
+                        if (profErr) log("Ошибка профиля: " + profErr.message);
+                        else log("ПРОФИЛЬ ЗАПИСАН! ВСЕ РАБОТАЕТ.");
+                    }
+                }
+
+            } catch (e) {
+                log("КРИТИЧЕСКАЯ ОШИБКА КОДА: " + e.message);
+            }
+        });
+    </script>
+</body>
+</html>
