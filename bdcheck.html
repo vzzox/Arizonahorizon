@@ -2,86 +2,103 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <title>Debug Memasik</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Debug | Memasik</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #111; color: #fff; font-family: 'Manrope', sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .box { background: #222; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; border: 1px solid #333; }
-        input { width: 100%; padding: 12px; margin-bottom: 10px; background: #000; color: #fff; border: 1px solid #444; border-radius: 6px; }
-        button { width: 100%; padding: 12px; background: #ff5e00; color: #fff; border: none; cursor: pointer; font-weight: bold; border-radius: 6px; }
-        button:hover { background: #ff7b33; }
-        #log { margin-top: 20px; padding: 15px; background: #000; color: #0f0; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; word-break: break-all; border-radius: 6px; border: 1px solid #333; min-height: 50px;}
-        .error { color: #ff3333 !important; }
+        body { background: #111; color: #fff; font-family: sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        input { width: 100%; padding: 10px; margin: 5px 0; display: block; }
+        button { padding: 15px; width: 100%; background: orange; font-weight: bold; cursor: pointer; border: none; }
+        #log { margin-top: 20px; white-space: pre-wrap; color: yellow; border: 1px solid #555; padding: 10px; width: 100%; min-height: 50px;}
     </style>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <div class="box">
-        <h2>Тест Регистрации</h2>
-        <input type="text" id="username" placeholder="Никнейм (eng)" autocomplete="off">
-        <input type="email" id="email" placeholder="Email (новый!)">
-        <input type="password" id="password" placeholder="Пароль (123456)">
-        <button onclick="runTest()">Создать</button>
-    </div>
+    <h2>СУПЕР ТЕСТ</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Пароль">
+    <button onclick="startTest()">НАЖМИ МЕНЯ</button>
 
-    <div id="log">Ожидание...</div>
+    <div id="log">Статус: Готов к тесту. Нажми кнопку.</div>
 
     <script>
-        // ТВОИ ДАННЫЕ
-        const SUPABASE_URL = 'https://hrrzpftxpafnavlljhum.supabase.co';
-        // Anon key (публичный)
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNzc1NzYsImV4cCI6MjA4NDg1MzU3Nn0.whczAQ9mUOJqT_hMEujiQnFnEuVi27iEPf8VWvCceFE';
-
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const logBox = document.getElementById('log');
-
-        function log(msg, isError = false) {
-            logBox.innerText = msg;
-            logBox.className = isError ? 'error' : '';
-            console.log(msg);
+        // Функция логирования
+        function log(text) {
+            const el = document.getElementById('log');
+            el.innerText += "\n" + text;
+            console.log(text);
         }
 
-        async function runTest() {
-            log("1. Начинаем регистрацию...");
-            
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const username = document.getElementById('username').value.trim();
+        // Данные
+        const SUPABASE_URL = 'https://hrrzpftxpafnavlljhum.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNzc1NzYsImV4cCI6MjA4NDg1MzU3Nn0.whczAQ9mUOJqT_hMEujiQnFnEuVi27iEPf8VWvCceFE';
+        
+        let supabase = null;
 
-            if(!email || !password || !username) return log("Заполни все поля!", true);
+        function startTest() {
+            // 1. Проверяем, жива ли кнопка
+            log(">>> Кнопка нажата.");
+
+            // 2. Проверяем, загрузилась ли библиотека
+            if (typeof window.supabase === 'undefined') {
+                log("!!! ОШИБКА: Библиотека Supabase НЕ загрузилась. Проверь интернет или VPN.");
+                return;
+            }
+
+            // 3. Пробуем инициализировать клиент
+            try {
+                if (!supabase) {
+                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                    log("Клиент Supabase создан.");
+                }
+                
+                // Запускаем регистрацию
+                doRegister();
+
+            } catch (e) {
+                log("!!! Ошибка при создании клиента: " + e.message);
+            }
+        }
+
+        async function doRegister() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                log("Поля пустые! Введите данные.");
+                return;
+            }
+
+            log("Отправка запроса...");
 
             try {
-                // ШАГ 1: AUTH
-                const { data: authData, error: authError } = await supabase.auth.signUp({
+                const { data, error } = await supabase.auth.signUp({
                     email: email,
                     password: password
                 });
 
-                if (authError) throw new Error("Ошибка Auth: " + authError.message);
-                if (!authData.user) throw new Error("Пользователь не создан (возможно, подтверждение почты включено?)");
-
-                log(`2. Auth OK! User ID: ${authData.user.id}\n3. Пишем профиль...`);
-
-                // ШАГ 2: PROFILES INSERT
-                const { error: profileError } = await supabase
-                    .from('profiles')
-                    .insert([{
-                        id: authData.user.id,
-                        username: username,
-                        display_name: username,
-                        created_at: new Date().toISOString()
-                    }]);
-
-                if (profileError) {
-                    throw new Error("Ошибка БД (Profiles): " + JSON.stringify(profileError, null, 2));
+                if (error) {
+                    log("ОШИБКА ОТ СЕРВЕРА: " + error.message);
+                } else {
+                    log("УСПЕХ! User ID: " + (data.user ? data.user.id : 'нет ID'));
+                    
+                    // Пробуем писать профиль
+                    if(data.user) {
+                        log("Пишем профиль...");
+                        const { error: profileError } = await supabase.from('profiles').insert([{
+                            id: data.user.id,
+                            username: "User_" + Math.floor(Math.random() * 1000), // Рандомный ник
+                            created_at: new Date().toISOString()
+                        }]);
+                        
+                        if(profileError) log("Ошибка профиля: " + profileError.message);
+                        else log("ПРОФИЛЬ СОЗДАН! ВСЕ РАБОТАЕТ.");
+                    }
                 }
 
-                log("УСПЕХ! Аккаунт создан и профиль записан.\nМожно проверять таблицу.");
-
             } catch (err) {
-                log(err.message, true);
+                log("Критическая ошибка JS: " + err.message);
             }
         }
     </script>
