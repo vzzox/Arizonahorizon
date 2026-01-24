@@ -137,6 +137,9 @@
             position: relative;
             overflow: hidden;
             font-family: var(--font-main);
+            text-decoration: none; /* Для ссылок */
+            display: inline-block; /* Для ссылок */
+            line-height: 1.2; /* Выравнивание */
         }
 
         /* Кнопка Регистрации (Primary) */
@@ -264,18 +267,18 @@
         // --- Logic ---
         
         function handleAction(type) {
-            const toast = document.getElementById('toast');
-            const msg = document.getElementById('toast-msg');
-
-            // Симуляция перехода
+            
             if (type === 'register') {
-                msg.innerText = "Переход к регистрации...";
-                // Здесь будет логика перехода: window.location.href = '/register';
-            } else {
-                msg.innerText = "Загрузка формы входа...";
-                // Здесь будет логика перехода: window.location.href = '/login';
+                // Перенаправление на страницу регистрации
+                window.location.href = 'https://newtoyers.vercel.app/registration.html';
+                return;
             }
 
+            // Логика для входа (оставил как было - заглушкой)
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toast-msg');
+            msg.innerText = "Загрузка формы входа...";
+            
             // Показываем уведомление
             toast.classList.add('show');
 
@@ -285,7 +288,7 @@
             }, 2000);
         }
 
-        // Параллакс эффект для мышки (легкий "живой" фон)
+        // Параллакс эффект для мышки
         document.addEventListener('mousemove', (e) => {
             const x = (window.innerWidth - e.pageX * 2) / 100;
             const y = (window.innerHeight - e.pageY * 2) / 100;
