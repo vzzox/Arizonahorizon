@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MEMASIK 2.0 | PROFILE</title>
+    <title>MEMASIK 2.0 | PROFILE ULTIMATE</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@300;500;700;900&display=swap" rel="stylesheet">
     
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
@@ -18,22 +18,22 @@
            1. CORE VARIABLES & RESET
            ========================================= */
         :root {
-            --bg-body: #0a0a0c;
-            --bg-card: #141416;
-            --bg-nav: rgba(18, 18, 20, 0.98);
+            --bg-body: #050505;
+            --bg-card: #0f0f11;
+            --bg-overlay: rgba(0,0,0,0.85);
             --bg-input: #000000;
+            --bg-nav: rgba(10, 10, 12, 0.9);
             
             --text-main: #ffffff;
-            --text-gray: #888890;
+            --text-secondary: #a0a0a5;
             --text-muted: #55555e;
             
             --accent: #ff5e00;
-            --accent-hover: #ff7b00;
-            --accent-glow: rgba(255, 94, 0, 0.3);
+            --accent-glow: rgba(255, 94, 0, 0.25);
             --danger: #ff3333;
             --success: #00ff88;
             
-            --border: #2a2a2e;
+            --border: #1f1f22;
             --radius-L: 24px;
             --radius-M: 16px;
             --radius-S: 8px;
@@ -49,265 +49,246 @@
             color: var(--text-main);
             font-family: var(--font-main);
             min-height: 100vh;
-            padding-bottom: 90px; /* Space for Nav */
+            padding-bottom: 90px;
             overflow-y: scroll;
+            overscroll-behavior-y: none;
         }
 
-        /* Noise Texture */
+        /* TEXTURE OVERLAY */
         body::before {
             content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
-            opacity: 0.6; pointer-events: none; z-index: -1;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+            opacity: 0.8; pointer-events: none; z-index: -1;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: var(--bg-body); }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+        ::-webkit-scrollbar { width: 0px; }
 
         /* =========================================
            2. HEADER AREA
            ========================================= */
         .profile-header {
-            padding: 20px;
+            padding: 15px 20px;
             display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(180deg, rgba(10,10,12,1) 0%, rgba(10,10,12,0) 100%);
             position: sticky; top: 0; z-index: 50;
+            background: linear-gradient(180deg, rgba(5,5,5,0.95) 0%, rgba(5,5,5,0) 100%);
+            backdrop-filter: blur(5px);
         }
 
         .header-title {
-            font-family: var(--font-display); font-weight: 800; font-size: 1.1rem;
-            letter-spacing: 2px; color: #fff;
+            font-family: var(--font-display); font-weight: 800; font-size: 1rem;
+            letter-spacing: 2px; color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
         .icon-btn {
             font-size: 1.4rem; color: #fff; cursor: pointer;
             width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; transition: background 0.2s;
+            border-radius: 50%; transition: 0.2s;
         }
-        .icon-btn:active { background: rgba(255,255,255,0.1); }
+        .icon-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.1); }
 
         /* =========================================
-           3. PROFILE INFO CARD
+           3. PROFILE CARD
            ========================================= */
         .profile-card {
-            padding: 10px 20px 30px;
-            text-align: center;
+            padding: 20px; text-align: center;
             display: flex; flex-direction: column; align-items: center;
+            animation: fadeIn 0.5s ease;
         }
 
-        .avatar-container {
-            position: relative; margin-bottom: 15px;
-        }
+        .avatar-wrap { position: relative; margin-bottom: 15px; }
 
         .avatar-xl {
-            width: 110px; height: 110px; border-radius: 50%;
-            background: #1a1a1d; border: 3px solid var(--accent);
+            width: 100px; height: 100px; border-radius: 50%;
+            background: #141416; border: 2px solid var(--accent);
             display: flex; justify-content: center; align-items: center;
             font-family: var(--font-display); font-weight: 800;
-            font-size: 3rem; color: #fff; object-fit: cover;
-            box-shadow: 0 0 30px var(--accent-glow);
-            text-transform: uppercase;
+            font-size: 2.5rem; color: #fff; object-fit: cover;
+            box-shadow: 0 0 40px var(--accent-glow);
         }
-
-        .edit-badge {
+        
+        .avatar-edit-btn {
             position: absolute; bottom: 0; right: 0;
-            background: var(--bg-card); border: 1px solid var(--border);
-            width: 32px; height: 32px; border-radius: 50%;
+            width: 30px; height: 30px; background: #fff; border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
-            color: var(--accent); font-size: 1rem; cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            color: #000; font-size: 1rem; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
         .user-name {
-            font-family: var(--font-display); font-size: 1.3rem;
-            font-weight: 700; margin-bottom: 5px; color: #fff;
+            font-family: var(--font-display); font-size: 1.2rem;
+            font-weight: 700; margin-bottom: 4px; color: #fff;
         }
 
         .user-tag {
-            font-size: 0.85rem; color: var(--text-gray); font-weight: 500; margin-bottom: 12px;
+            font-size: 0.8rem; color: var(--accent); font-weight: 600; 
+            margin-bottom: 10px; font-family: monospace;
         }
 
         .user-bio {
-            font-size: 0.9rem; color: #ccc; max-width: 300px;
+            font-size: 0.85rem; color: var(--text-secondary); max-width: 320px;
             line-height: 1.4; margin-bottom: 20px;
         }
 
         /* =========================================
-           4. STATISTICS BAR
+           4. STATS
            ========================================= */
-        .stats-container {
-            display: flex; justify-content: space-evenly;
-            padding: 15px 10px; margin: 0 15px 25px;
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius-M);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        .stats-row {
+            display: flex; justify-content: space-around;
+            padding: 15px; margin: 0 15px 25px;
+            background: rgba(255,255,255,0.03); border-radius: var(--radius-M);
+            border: 1px solid var(--border);
         }
 
-        .stat-box { text-align: center; flex: 1; position: relative; }
-        .stat-box:not(:last-child)::after {
-            content: ''; position: absolute; right: 0; top: 20%; height: 60%;
-            width: 1px; background: rgba(255,255,255,0.1);
+        .stat-item { text-align: center; }
+        .stat-val { 
+            font-family: var(--font-display); font-size: 1.1rem; 
+            font-weight: 800; display: block; margin-bottom: 2px; 
         }
-
-        .stat-num {
-            display: block; font-family: var(--font-display);
-            font-size: 1.2rem; font-weight: 800; color: #fff;
-            margin-bottom: 2px;
-        }
-        .stat-label {
-            font-size: 0.7rem; color: var(--text-gray);
-            text-transform: uppercase; letter-spacing: 1px; font-weight: 700;
-        }
+        .stat-lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
 
         /* =========================================
-           5. POSTS GRID (INSTAGRAM STYLE)
+           5. TABS & GRID
            ========================================= */
         .grid-tabs {
-            display: flex; justify-content: center; gap: 30px;
+            display: flex; justify-content: center; gap: 40px;
             border-bottom: 1px solid var(--border); margin-bottom: 2px;
         }
         .g-tab {
-            padding: 10px 5px; color: var(--text-gray); cursor: pointer;
-            font-size: 1.2rem; position: relative;
+            padding: 12px 10px; color: var(--text-muted); cursor: pointer;
+            font-size: 1.2rem; position: relative; transition: 0.3s;
         }
-        .g-tab.active { color: var(--accent); }
+        .g-tab.active { color: #fff; }
         .g-tab.active::after {
-            content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--accent);
+            content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; 
+            height: 2px; background: var(--accent); box-shadow: 0 -2px 10px var(--accent);
         }
 
         .posts-grid {
             display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 2px; padding-bottom: 20px;
+            gap: 2px; padding-bottom: 20px; min-height: 200px;
         }
 
         .grid-item {
-            aspect-ratio: 1; background: #161618;
-            position: relative; overflow: hidden; cursor: pointer;
+            aspect-ratio: 1; background: #111; position: relative; 
+            overflow: hidden; cursor: pointer; transition: 0.2s;
         }
+        .grid-item:active { opacity: 0.7; }
 
-        .grid-img {
-            width: 100%; height: 100%; object-fit: cover;
-            transition: transform 0.3s;
+        .grid-img { width: 100%; height: 100%; object-fit: cover; }
+        .grid-txt {
+            width: 100%; height: 100%; display: flex; align-items: center; 
+            justify-content: center; padding: 5px; text-align: center;
+            font-size: 0.6rem; color: #888; background: #0e0e10; line-height: 1.2;
         }
-
-        .grid-text-only {
-            width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center;
-            padding: 10px; text-align: center;
-            font-size: 0.65rem; color: #aaa;
-            background: #111; line-height: 1.3;
-        }
-
-        /* Overlay for Delete/View */
-        .grid-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: flex; justify-content: center; align-items: center;
-            opacity: 0; transition: opacity 0.2s;
-            color: var(--danger); font-size: 1.5rem;
-            backdrop-filter: blur(2px);
-        }
-        .grid-item:hover .grid-overlay { opacity: 1; }
-
-        /* SKELETONS */
-        .skeleton { background: #1a1a1c; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
         /* =========================================
-           6. SETTINGS MODAL
+           6. FULLSCREEN POST MODAL (LIGHTBOX)
+           ========================================= */
+        .lightbox {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 5000; display: none;
+            flex-direction: column; opacity: 0; transition: opacity 0.3s;
+        }
+        .lightbox.open { display: flex; opacity: 1; }
+
+        .lb-header {
+            padding: 15px; display: flex; justify-content: space-between; 
+            align-items: center; background: rgba(0,0,0,0.5);
+        }
+        .lb-back { color: #fff; font-size: 1.5rem; cursor: pointer; }
+        .lb-title { font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 1px; }
+        
+        .lb-content {
+            flex: 1; display: flex; align-items: center; justify-content: center;
+            padding: 20px; overflow-y: auto; flex-direction: column;
+        }
+        .lb-img {
+            max-width: 100%; max-height: 60vh; border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); margin-bottom: 20px;
+        }
+        .lb-caption {
+            width: 100%; font-size: 1rem; line-height: 1.5; color: #ddd;
+            background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333;
+        }
+        
+        .lb-footer {
+            padding: 20px; border-top: 1px solid #222;
+            display: flex; justify-content: center;
+        }
+        .btn-delete-post {
+            background: rgba(255, 51, 51, 0.1); color: var(--danger);
+            border: 1px solid var(--danger); padding: 12px 30px;
+            border-radius: 30px; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        /* =========================================
+           7. SETTINGS MODAL
            ========================================= */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 2000;
-            display: none; justify-content: center; align-items: center;
-            backdrop-filter: blur(8px);
+            background: rgba(0,0,0,0.85); z-index: 4000; display: none;
+            justify-content: center; align-items: center; backdrop-filter: blur(8px);
         }
-        .modal-overlay.open { display: flex; animation: fadeIn 0.2s; }
+        .modal-overlay.open { display: flex; animation: zoomIn 0.2s; }
 
         .settings-card {
-            background: var(--bg-card); width: 90%; max-width: 400px;
-            padding: 25px; border-radius: var(--radius-L);
-            border: 1px solid var(--border);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            transform: scale(0.9); transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .modal-overlay.open .settings-card { transform: scale(1); }
-
-        .modal-title {
-            font-family: var(--font-display); font-size: 1.2rem;
-            text-align: center; margin-bottom: 25px; color: #fff;
-        }
-
-        .inp-group { margin-bottom: 15px; }
-        .inp-label { display: block; font-size: 0.75rem; color: var(--text-gray); margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
-        .inp-field {
-            width: 100%; background: var(--bg-input); border: 1px solid var(--border);
-            padding: 14px; border-radius: 12px; color: #fff;
-            font-family: var(--font-main); font-size: 1rem;
-        }
-        .inp-field:focus { border-color: var(--accent); }
-
-        .btn-save {
-            width: 100%; padding: 15px; background: #fff; color: #000;
-            border: none; border-radius: 12px; font-weight: 800;
-            font-family: var(--font-display); text-transform: uppercase;
-            margin-top: 10px; cursor: pointer; transition: 0.2s;
-        }
-        .btn-save:active { transform: scale(0.98); }
-
-        .btn-logout {
-            width: 100%; padding: 15px; background: rgba(255, 51, 51, 0.1);
-            color: var(--danger); border: 1px solid var(--danger);
-            border-radius: 12px; font-weight: 700; margin-top: 10px;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: var(--bg-card); width: 85%; max-width: 380px;
+            padding: 30px 20px; border-radius: var(--radius-L);
+            border: 1px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            position: relative;
         }
         
-        .close-modal-btn {
-            position: absolute; top: 15px; right: 15px;
-            background: none; border: none; color: #666; font-size: 1.5rem; cursor: pointer;
+        .set-head { text-align: center; font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 25px; }
+        
+        .inp-g { margin-bottom: 15px; }
+        .inp-l { display: block; font-size: 0.7rem; color: var(--text-gray); margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
+        .inp-f {
+            width: 100%; background: #000; border: 1px solid var(--border);
+            padding: 14px; border-radius: 12px; color: #fff; font-family: var(--font-main);
+        }
+        .inp-f:focus { border-color: var(--accent); }
+
+        .btn-main {
+            width: 100%; padding: 16px; background: #fff; color: #000;
+            border: none; border-radius: 12px; font-weight: 800; text-transform: uppercase;
+            font-family: var(--font-display); cursor: pointer; margin-top: 10px;
+        }
+        
+        .btn-sec {
+            width: 100%; padding: 16px; background: transparent; color: var(--danger);
+            border: 1px solid var(--danger); border-radius: 12px; font-weight: 700;
+            margin-top: 10px; cursor: pointer;
         }
 
+        .close-set { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; color: #555; background: none; border: none; cursor: pointer; }
+
         /* =========================================
-           7. NAVIGATION BAR
+           8. NAV & TOASTS
            ========================================= */
         .nav-bar {
             position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
             background: var(--bg-nav); border-top: 1px solid var(--border);
             display: flex; justify-content: space-around; align-items: center;
             z-index: 100; backdrop-filter: blur(10px);
-            padding-bottom: env(safe-area-inset-bottom);
         }
-        .nav-icon { color: var(--text-gray); font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
-        .nav-icon.active { color: #fff; transform: scale(1.1); }
-        
+        .nav-icon { color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
+        .nav-icon.active { color: #fff; transform: scale(1.1); text-shadow: 0 0 15px rgba(255,255,255,0.3); }
         .nav-fab {
             width: 50px; height: 50px; background: var(--accent);
             border-radius: 50%; display: flex; justify-content: center; align-items: center;
             color: #000; font-size: 1.6rem; transform: translateY(-25%);
-            border: 4px solid var(--bg-body);
-            box-shadow: 0 5px 20px rgba(255, 94, 0, 0.5); cursor: pointer;
+            border: 4px solid var(--bg-body); box-shadow: 0 5px 20px var(--accent-glow); cursor: pointer;
         }
 
-        /* =========================================
-           8. TOASTS & UTILS
-           ========================================= */
-        #toast-box {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 5000; width: 90%; max-width: 350px; pointer-events: none;
-        }
-        .toast {
-            background: #222; color: #fff; padding: 14px;
-            border-radius: 10px; border-left: 4px solid #fff;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-            margin-bottom: 10px; display: flex; align-items: center; gap: 10px;
-            animation: slideDown 0.3s; pointer-events: auto;
-        }
-        .toast.success { border-left-color: var(--success); }
-        .toast.error { border-left-color: var(--danger); }
+        .toast-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 6000; width: 90%; pointer-events: none; }
+        .toast { pointer-events: auto; background: #222; color: #fff; padding: 12px 16px; border-radius: 8px; border-left: 4px solid #fff; box-shadow: 0 10px 40px #000; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; animation: slideIn 0.3s; }
+        .toast.ok { border-left-color: var(--success); } .toast.err { border-left-color: var(--danger); }
         
-        .hidden { display: none; }
-        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .hidden { display: none !important; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
     </style>
 </head>
@@ -315,49 +296,81 @@
 
     <div class="profile-header">
         <div class="header-title">ПРОФИЛЬ</div>
-        <div class="icon-btn" onclick="app.openSettings()"><i class="ri-equalizer-line"></i></div>
+        <div class="icon-btn" onclick="app.openSettings()"><i class="ri-settings-4-line"></i></div>
     </div>
 
     <div class="profile-card">
-        <div class="avatar-container">
+        <div class="avatar-wrap">
             <img id="p-ava-img" class="avatar-xl hidden">
-            <div id="p-ava-text" class="avatar-xl">U</div>
-            
-            <label class="edit-badge">
-                <i class="ri-camera-fill"></i>
-                <input type="file" id="avatar-upload" class="hidden" accept="image/*" onchange="app.uploadAvatar()">
+            <div id="p-ava-txt" class="avatar-xl">?</div>
+            <label class="avatar-edit-btn">
+                <i class="ri-camera-line"></i>
+                <input type="file" id="ava-upl" class="hidden" accept="image/*" onchange="app.uploadAvatar()">
             </label>
         </div>
-        
-        <div class="user-name" id="p-name">Загрузка...</div>
+        <div class="user-name" id="p-name">...</div>
         <div class="user-tag" id="p-tag">@...</div>
-        <div class="user-bio" id="p-bio">...</div>
+        <div class="user-bio" id="p-bio">Загрузка данных...</div>
     </div>
 
-    <div class="stats-container">
+    <div class="stats-row">
         <div class="stat-box">
-            <span class="stat-num" id="s-posts">0</span>
-            <span class="stat-label">Постов</span>
+            <span class="stat-num" id="stat-posts">0</span>
+            <span class="stat-label">Посты</span>
         </div>
         <div class="stat-box">
-            <span class="stat-num" id="s-karma">0</span>
+            <span class="stat-num" id="stat-karma">0</span>
             <span class="stat-label">Карма</span>
         </div>
         <div class="stat-box">
-            <span class="stat-num" id="s-comms">0</span>
-            <span class="stat-label">Комментов</span>
+            <span class="stat-num" id="stat-comms">0</span>
+            <span class="stat-label">Комменты</span>
         </div>
     </div>
 
     <div class="grid-tabs">
-        <div class="g-tab active"><i class="ri-grid-fill"></i></div>
-        <div class="g-tab"><i class="ri-price-tag-3-line"></i></div>
+        <div class="g-tab active" id="tab-my" onclick="app.switchGrid('my')"><i class="ri-grid-fill"></i></div>
+        <div class="g-tab" id="tab-liked" onclick="app.switchGrid('liked')"><i class="ri-heart-3-line"></i></div>
     </div>
 
     <div class="posts-grid" id="grid">
-        <div class="grid-item skeleton"></div>
-        <div class="grid-item skeleton"></div>
-        <div class="grid-item skeleton"></div>
+        </div>
+
+    <div class="modal-overlay" id="set-modal">
+        <div class="settings-card">
+            <button class="close-set" onclick="app.closeSettings()">&times;</button>
+            <div class="set-head">РЕДАКТИРОВАТЬ</div>
+            
+            <div class="inp-g">
+                <label class="inp-l">Имя профиля</label>
+                <input type="text" id="in-name" class="inp-f" placeholder="Твое имя">
+            </div>
+            <div class="inp-g">
+                <label class="inp-l">Никнейм</label>
+                <input type="text" id="in-user" class="inp-f" placeholder="username_123">
+            </div>
+            <div class="inp-g">
+                <label class="inp-l">Био</label>
+                <input type="text" id="in-bio" class="inp-f" placeholder="Пару слов о себе">
+            </div>
+
+            <button class="btn-main" onclick="app.saveProfile()">Сохранить</button>
+            <button class="btn-sec" onclick="app.logout()">Выйти</button>
+        </div>
+    </div>
+
+    <div class="lightbox" id="lightbox">
+        <div class="lb-header">
+            <div class="lb-back" onclick="app.closeLightbox()"><i class="ri-arrow-left-line"></i></div>
+            <div class="lb-title">ПРОСМОТР</div>
+            <div style="width:24px"></div>
+        </div>
+        <div class="lb-content">
+            <img id="lb-img" class="lb-img hidden">
+            <div id="lb-txt" class="lb-caption"></div>
+        </div>
+        <div class="lb-footer" id="lb-footer">
+            </div>
     </div>
 
     <nav class="nav-bar">
@@ -368,81 +381,53 @@
         <div class="nav-icon active"><i class="ri-user-3-fill"></i></div>
     </nav>
 
-    <div class="modal-overlay" id="set-modal">
-        <div class="settings-card">
-            <button class="close-modal-btn" onclick="app.closeSettings()">&times;</button>
-            <div class="modal-title">Редактировать</div>
-            
-            <div class="inp-group">
-                <label class="inp-label">Никнейм (без @)</label>
-                <input type="text" id="inp-username" class="inp-field" placeholder="username">
-            </div>
-            
-            <div class="inp-group">
-                <label class="inp-label">Имя профиля</label>
-                <input type="text" id="inp-name" class="inp-field" placeholder="Имя">
-            </div>
-            
-            <div class="inp-group">
-                <label class="inp-label">Био</label>
-                <input type="text" id="inp-bio" class="inp-field" placeholder="Расскажи о себе...">
-            </div>
-
-            <button class="btn-save" onclick="app.saveSettings()">Сохранить</button>
-            <button class="btn-logout" onclick="app.logout()"><i class="ri-logout-box-r-line"></i> Выйти</button>
-        </div>
-    </div>
-
-    <div id="toast-box"></div>
+    <div class="toast-box" id="toast-box"></div>
 
     <script>
         /**
-         * MEMASIK 2.0 PROFILE ENGINE
-         * High-Performance, Robust Error Handling, Admin-Key Powered
+         * MEMASIK 2.0 PROFILE SYSTEM
+         * v6.0 Ultimate Edition
          */
-        
         const CFG = {
             URL: 'https://hrrzpftxpafnavlljhum.supabase.co',
-            // ADMIN KEY (SERVICE ROLE) - Чтобы все грузилось без ошибок прав
+            // ADMIN KEY: Используем для гарантии работы всех функций
             KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTI3NzU3NiwiZXhwIjoyMDg0ODUzNTc2fQ.5Dt7zXjEF_lVc5Komkg11A4Jy97rxI94PF3UE40X1RE',
-            BUCKET: 'memasik_files'
+            BUCKET_AVATAR: 'avatars'
         };
 
         class ProfileApp {
             constructor() {
                 this.sb = window.supabase.createClient(CFG.URL, CFG.KEY);
                 this.user = null;
+                this.postsCache = {};
+                this.currentTab = 'my';
                 this.init();
             }
 
             async init() {
                 try {
-                    // 1. Auth Check
+                    // 1. Auth
                     const { data: { user } } = await this.sb.auth.getUser();
-                    if (!user) {
-                        window.location.href = 'index.html';
-                        return;
-                    }
+                    if (!user) { window.location.href = 'index.html'; return; }
                     this.user = user;
 
-                    // 2. Parallel Fetching for Speed
+                    // 2. Fetch Data
                     await Promise.all([
                         this.fetchProfile(),
                         this.fetchStats(),
-                        this.fetchGrid()
+                        this.fetchGrid('my')
                     ]);
-
-                } catch (e) {
-                    this.notify(e.message, 'error');
+                } catch(e) {
+                    this.toast(e.message, 'err');
                 }
             }
 
-            // --- 1. PROFILE INFO ---
+            // === 1. PROFILE INFO ===
             async fetchProfile() {
                 const { data } = await this.sb.from('profiles').select('*').eq('id', this.user.id).single();
                 
                 if (data) {
-                    // Smart Name Logic: DisplayName -> Username -> Email
+                    // Fallback Name Logic
                     const name = data.display_name || data.username || this.user.email.split('@')[0];
                     const tag = data.username ? `@${data.username}` : '@anon';
                     
@@ -450,145 +435,140 @@
                     document.getElementById('p-tag').innerText = tag;
                     document.getElementById('p-bio').innerText = data.bio || "Описание отсутствует";
                     
-                    // Avatar Logic
                     if (data.avatar_url) {
                         const img = document.getElementById('p-ava-img');
                         img.src = data.avatar_url;
                         img.classList.remove('hidden');
-                        document.getElementById('p-ava-text').classList.add('hidden');
+                        document.getElementById('p-ava-txt').classList.add('hidden');
                     } else {
-                        document.getElementById('p-ava-text').innerText = name[0].toUpperCase();
+                        document.getElementById('p-ava-txt').innerText = name[0].toUpperCase();
                     }
 
-                    // Fill Inputs
-                    document.getElementById('inp-username').value = data.username || "";
-                    document.getElementById('inp-name').value = data.display_name || "";
-                    document.getElementById('inp-bio').value = data.bio || "";
+                    // Fill inputs
+                    document.getElementById('in-name').value = data.display_name || "";
+                    document.getElementById('in-user').value = data.username || "";
+                    document.getElementById('in-bio').value = data.bio || "";
                 }
             }
 
-            // --- 2. STATS (NO SUBSCRIPTIONS) ---
+            // === 2. REAL STATS ===
             async fetchStats() {
-                // Posts Count
-                const { count: posts } = await this.sb.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', this.user.id);
-                document.getElementById('s-posts').innerText = posts || 0;
+                // My Posts
+                const { count: pCnt } = await this.sb.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', this.user.id);
+                document.getElementById('stat-posts').innerText = pCnt || 0;
 
-                // Comments Count
-                const { count: comms } = await this.sb.from('comments').select('*', { count: 'exact', head: true }).eq('user_id', this.user.id);
-                document.getElementById('s-comms').innerText = comms || 0;
+                // My Comments
+                const { count: cCnt } = await this.sb.from('comments').select('*', { count: 'exact', head: true }).eq('user_id', this.user.id);
+                document.getElementById('stat-comms').innerText = cCnt || 0;
 
-                // KARMA (Likes Received) - Сложный запрос, эмулируем
-                // Считаем лайки, где post_owner = me. Это требует JOIN, который сложен в простом клиенте.
-                // Для скорости посчитаем "Сколько лайков Я ПОСТАВИЛ" пока что, или оставим 0.
-                // Либо сделаем запрос на все мои посты и посчитаем лайки (тяжело).
-                // Оставим пока заглушку или простой счетчик
-                document.getElementById('s-karma').innerText = "∞"; 
+                // Karma (Total Likes Received)
+                // Сначала берем ID всех моих постов
+                const { data: myPosts } = await this.sb.from('posts').select('id').eq('user_id', this.user.id);
+                if (myPosts && myPosts.length > 0) {
+                    const pids = myPosts.map(p => p.id);
+                    const { count: karma } = await this.sb.from('likes').select('*', { count: 'exact', head: true }).in('post_id', pids);
+                    document.getElementById('stat-karma').innerText = karma || 0;
+                }
             }
 
-            // --- 3. POSTS GRID ---
-            async fetchGrid() {
-                const grid = document.getElementById('grid');
+            // === 3. GRID SYSTEM ===
+            async switchGrid(type) {
+                this.currentTab = type;
+                document.querySelectorAll('.g-tab').forEach(t => t.classList.remove('active'));
                 
-                const { data: posts } = await this.sb
-                    .from('posts')
-                    .select('*')
-                    .eq('user_id', this.user.id)
-                    .order('created_at', { ascending: false });
+                if(type === 'my') document.getElementById('tab-my').classList.add('active');
+                else document.getElementById('tab-liked').classList.add('active');
+                
+                await this.fetchGrid(type);
+            }
 
-                if (!posts || posts.length === 0) {
-                    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:50px; color:#555;">Нет публикаций</div>`;
+            async fetchGrid(type) {
+                const grid = document.getElementById('grid');
+                grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:50px;color:#444">Загрузка...</div>';
+
+                let posts = [];
+
+                if (type === 'my') {
+                    // Fetch my posts
+                    const { data } = await this.sb.from('posts').select('*').eq('user_id', this.user.id).order('created_at', {ascending: false});
+                    posts = data || [];
+                } else {
+                    // Fetch liked posts
+                    // 1. Get post_ids from likes
+                    const { data: likes } = await this.sb.from('likes').select('post_id').eq('user_id', this.user.id);
+                    if (likes && likes.length > 0) {
+                        const pids = likes.map(l => l.post_id);
+                        const { data } = await this.sb.from('posts').select('*').in('id', pids).order('created_at', {ascending: false});
+                        posts = data || [];
+                    }
+                }
+
+                if (posts.length === 0) {
+                    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:50px;color:#444">Здесь пусто</div>';
                     return;
                 }
 
                 grid.innerHTML = '';
                 posts.forEach(p => {
+                    this.postsCache[p.id] = p; // Cache for lightbox
                     const item = document.createElement('div');
                     item.className = 'grid-item';
-                    
-                    // Logic: Image vs Text
+                    item.onclick = () => this.openLightbox(p.id);
+
                     if (p.image_url) {
                         item.innerHTML = `<img src="${p.image_url}" class="grid-img">`;
                     } else {
-                        const txt = p.content.length > 30 ? p.content.slice(0,30) + '...' : p.content;
-                        item.innerHTML = `<div class="grid-text-only">${this.esc(txt)}</div>`;
+                        const txt = p.content.length > 40 ? p.content.slice(0,40)+'...' : p.content;
+                        item.innerHTML = `<div class="grid-txt">${this.esc(txt)}</div>`;
                     }
-
-                    // Delete Overlay
-                    const overlay = document.createElement('div');
-                    overlay.className = 'grid-overlay';
-                    overlay.innerHTML = `<i class="ri-delete-bin-line"></i>`;
-                    overlay.onclick = (e) => { e.stopPropagation(); this.deletePost(p.id); };
-                    
-                    item.appendChild(overlay);
                     grid.appendChild(item);
                 });
             }
 
-            // --- ACTIONS ---
-            
+            // === 4. ACTIONS (UPLOAD, EDIT) ===
             async uploadAvatar() {
-                const file = document.getElementById('avatar-upload').files[0];
+                const file = document.getElementById('ava-upl').files[0];
                 if (!file) return;
 
-                this.notify("Загрузка...", "info");
-                
+                this.toast("Загрузка фото...", "ok");
+
                 try {
-                    // 1. Upload
                     const ext = file.name.split('.').pop();
-                    const path = `avatars/${this.user.id}_${Date.now()}.${ext}`;
+                    const path = `${this.user.id}_${Date.now()}.${ext}`;
                     
-                    const { error: upErr } = await this.sb.storage.from(CFG.BUCKET).upload(path, file);
-                    if (upErr) throw upErr;
+                    const { error } = await this.sb.storage.from(CFG.BUCKET_AVATAR).upload(path, file);
+                    if (error) throw error;
 
-                    const { data: { publicUrl } } = this.sb.storage.from(CFG.BUCKET).getPublicUrl(path);
+                    const { data: { publicUrl } } = this.sb.storage.from(CFG.BUCKET_AVATAR).getPublicUrl(path);
 
-                    // 2. Update Profile
-                    const { error: upPr } = await this.sb.from('profiles').update({ avatar_url: publicUrl }).eq('id', this.user.id);
-                    if (upPr) throw upPr;
-
-                    this.notify("Аватар обновлен!", "success");
-                    this.fetchProfile(); // Refresh UI
-
-                } catch (e) {
-                    this.notify("Ошибка: " + e.message, "error");
+                    await this.sb.from('profiles').update({ avatar_url: publicUrl }).eq('id', this.user.id);
+                    
+                    this.toast("Аватар обновлен", "ok");
+                    this.fetchProfile();
+                } catch(e) {
+                    this.toast("Ошибка загрузки", "err");
                 }
             }
 
-            async saveSettings() {
-                const username = document.getElementById('inp-username').value.trim();
-                const name = document.getElementById('inp-name').value.trim();
-                const bio = document.getElementById('inp-bio').value.trim();
+            async saveProfile() {
+                const name = document.getElementById('in-name').value.trim();
+                const username = document.getElementById('in-user').value.trim();
+                const bio = document.getElementById('in-bio').value.trim();
 
                 try {
                     const { error } = await this.sb.from('profiles').update({
-                        username: username,
                         display_name: name,
+                        username: username,
                         bio: bio
                     }).eq('id', this.user.id);
 
                     if (error) throw error;
-
-                    this.notify("Сохранено!", "success");
+                    
+                    this.toast("Профиль сохранен", "ok");
                     this.closeSettings();
                     this.fetchProfile();
-
-                } catch (e) {
-                    this.notify("Ошибка сохранения", "error");
-                }
-            }
-
-            async deletePost(pid) {
-                if(!confirm("Удалить этот пост?")) return;
-                
-                try {
-                    const { error } = await this.sb.from('posts').delete().eq('id', pid);
-                    if (error) throw error;
-                    
-                    this.notify("Пост удален", "success");
-                    this.fetchGrid();
-                    this.fetchStats();
                 } catch(e) {
-                    this.notify("Не удалось удалить", "error");
+                    this.toast("Ошибка сохранения", "err");
                 }
             }
 
@@ -597,20 +577,62 @@
                 window.location.href = 'index.html';
             }
 
-            // --- UTILS ---
-            openSettings() { document.getElementById('set-modal').classList.add('open'); }
-            closeSettings() { document.getElementById('set-modal').classList.remove('open'); }
+            // === 5. LIGHTBOX & DELETE ===
+            openLightbox(pid) {
+                const p = this.postsCache[pid];
+                if (!p) return;
+                
+                const box = document.getElementById('lightbox');
+                const img = document.getElementById('lb-img');
+                const txt = document.getElementById('lb-txt');
+                const footer = document.getElementById('lb-footer');
 
-            notify(msg, type='success') {
-                const box = document.getElementById('toast-box');
-                const t = document.createElement('div');
-                t.className = `toast ${type}`;
-                let icon = type==='error' ? '<i class="ri-error-warning-fill"></i>' : '<i class="ri-check-double-line"></i>';
-                t.innerHTML = `${icon} <span>${msg}</span>`;
-                box.appendChild(t);
-                setTimeout(() => { t.style.opacity = '0'; setTimeout(()=>t.remove(), 300); }, 3000);
+                if (p.image_url) {
+                    img.src = p.image_url;
+                    img.classList.remove('hidden');
+                } else {
+                    img.classList.add('hidden');
+                }
+                
+                txt.innerText = p.content;
+
+                // Show delete button ONLY if it's my post
+                if (p.user_id === this.user.id) {
+                    footer.innerHTML = `<button class="btn-delete-post" onclick="app.deletePost('${pid}')"><i class="ri-delete-bin-line"></i> Удалить пост</button>`;
+                } else {
+                    footer.innerHTML = '';
+                }
+
+                box.classList.add('open');
             }
 
+            closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+
+            async deletePost(pid) {
+                if(!confirm("Удалить этот пост?")) return;
+                
+                const { error } = await this.sb.from('posts').delete().eq('id', pid);
+                if (error) return this.toast("Ошибка удаления", "err");
+                
+                this.toast("Удалено", "ok");
+                this.closeLightbox();
+                this.fetchGrid(this.currentTab);
+                this.fetchStats();
+            }
+
+            // === UTILS ===
+            openSettings() { document.getElementById('set-modal').classList.add('open'); }
+            closeSettings() { document.getElementById('set-modal').classList.remove('open'); }
+            
+            toast(msg, type) {
+                const b = document.getElementById('toast-box');
+                const t = document.createElement('div');
+                t.className = `toast ${type}`;
+                let icon = type==='ok'?'<i class="ri-check-line"></i>':'<i class="ri-error-warning-line"></i>';
+                t.innerHTML = `${icon} <span>${msg}</span>`;
+                b.appendChild(t);
+                setTimeout(()=> t.remove(), 3000);
+            }
             esc(t) { return t ? t.replace(/</g, "&lt;") : ""; }
         }
 
