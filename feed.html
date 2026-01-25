@@ -10,118 +10,224 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <style>
-        /* === VARIABLES & RESET === */
+        /* --- 1. GLOBAL VARIABLES --- */
         :root {
-            --bg-body: #0a0a0c; --bg-card: #141416; --bg-input: #000000; --bg-nav: rgba(18, 18, 20, 0.95);
-            --text-main: #ffffff; --text-gray: #888890; --accent: #ff5e00; --danger: #ff3333; --border: #2a2a2e;
-            --radius: 16px;
+            --bg-body: #0a0a0c; --bg-card: #141416; --bg-nav: rgba(18, 18, 20, 0.98);
+            --text-main: #ffffff; --text-muted: #888890; 
+            --accent: #ff5e00; --accent-hover: #ff7b00; --danger: #ff3333;
+            --border: #2a2a2e; --radius: 16px;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { background: var(--bg-body); color: var(--text-main); font-family: 'Manrope', sans-serif; height: 100vh; padding-top: 60px; padding-bottom: 90px; overflow-y: scroll; }
 
-        /* HEADER */
-        .header { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: rgba(10,10,12,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 100; display: flex; flex-direction: column; justify-content: flex-end; }
-        .logo { text-align: center; font-family: 'Unbounded'; font-size: 0.9rem; margin-bottom: 5px; letter-spacing: 1px; color: #fff; text-shadow: 0 0 10px rgba(255, 94, 0, 0.3); }
-        .tabs { display: flex; height: 30px; }
-        .tab { flex: 1; background: none; border: none; color: var(--text-gray); font-weight: 700; font-family: 'Unbounded'; font-size: 0.75rem; cursor: pointer; transition: 0.2s; position: relative; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
+        body {
+            background: var(--bg-body); color: var(--text-main);
+            font-family: 'Manrope', sans-serif; height: 100vh;
+            padding-top: 60px; padding-bottom: 90px;
+            overflow-y: scroll; scroll-behavior: smooth;
+        }
+        
+        /* Noise Texture */
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+            opacity: 0.6; pointer-events: none; z-index: -1;
+        }
+
+        /* --- 2. HEADER --- */
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+            background: rgba(10,10,12,0.9); backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border); z-index: 100;
+            display: flex; flex-direction: column; justify-content: flex-end;
+        }
+        .logo { 
+            text-align: center; font-family: 'Unbounded'; font-weight: 800; 
+            font-size: 0.8rem; margin-bottom: 4px; letter-spacing: 2px; color: #fff;
+            text-shadow: 0 0 10px rgba(255, 94, 0, 0.3);
+        }
+        .tabs { display: flex; height: 32px; }
+        .tab { 
+            flex: 1; background: none; border: none; color: var(--text-muted); 
+            font-weight: 700; font-family: 'Unbounded'; font-size: 0.7rem; 
+            cursor: pointer; transition: 0.3s; position: relative; 
+        }
         .tab.active { color: #fff; }
-        .tab.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 20px; height: 3px; background: var(--accent); border-radius: 2px; }
+        .tab.active::after { 
+            content: ''; position: absolute; bottom: 0; left: 50%; 
+            transform: translateX(-50%); width: 20px; height: 2px; 
+            background: var(--accent); box-shadow: 0 -2px 5px var(--accent);
+        }
 
         .container { max-width: 600px; margin: 0 auto; padding: 15px; }
 
-        /* CREATE POST */
-        .create-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; transition: border-color 0.3s; }
-        .create-box:focus-within { border-color: var(--accent); }
-        .create-top { display: flex; align-items: center; gap: 10px; width: 100%; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #222; display: flex; align-items: center; justify-content: center; font-family: 'Unbounded'; font-weight: 700; flex-shrink: 0; border: 2px solid #333; text-transform: uppercase; object-fit: cover; overflow: hidden; }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .input-bar { flex: 1; background: #000; border: 1px solid var(--border); border-radius: 20px; padding: 12px 15px; color: #fff; font-family: 'Manrope'; font-size: 0.95rem; }
+        /* --- 3. CREATE POST --- */
+        .create-box {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 15px; margin-bottom: 25px;
+            display: flex; flex-direction: column; gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .create-top { display: flex; align-items: center; gap: 12px; }
+        .avatar { 
+            width: 42px; height: 42px; border-radius: 50%; background: #1a1a1d; 
+            display: flex; align-items: center; justify-content: center; 
+            font-family: 'Unbounded'; font-weight: 700; flex-shrink: 0; 
+            border: 2px solid #333; color: #fff; font-size: 1rem;
+        }
+        .input-bar { 
+            flex: 1; background: #000; border: 1px solid var(--border); 
+            border-radius: 12px; padding: 12px 15px; color: #fff; 
+            font-family: 'Manrope'; font-size: 0.95rem; transition: 0.2s;
+        }
+        .input-bar:focus { border-color: var(--accent); }
         
-        .create-actions { display: flex; justify-content: space-between; align-items: center; padding-left: 50px; }
-        .attach-btn { color: var(--text-gray); cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+        .create-actions { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding-left: 54px; 
+        }
+        .attach-btn { 
+            color: var(--text-muted); cursor: pointer; font-size: 1.2rem; 
+            display: flex; align-items: center; gap: 8px; transition: 0.2s;
+        }
         .attach-btn:hover { color: #fff; }
         .attach-btn.has-file { color: var(--accent); }
-        .send-icon { color: var(--accent); font-size: 1.6rem; cursor: pointer; transition: transform 0.2s; }
-        .send-icon:active { transform: scale(0.9); }
-
-        /* IMAGE PREVIEW */
-        .preview-area { margin-left: 50px; display: none; position: relative; width: fit-content; }
-        .preview-area.show { display: block; animation: fadeIn 0.3s; }
-        .preview-img { max-height: 100px; border-radius: 8px; border: 1px solid var(--border); }
-        .remove-preview { position: absolute; top: -5px; right: -5px; background: var(--danger); color: #fff; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem; }
-
-        /* POSTS */
-        .post { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 15px; margin-bottom: 12px; position: relative; overflow: hidden; }
-        .post-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-        .user-info { display: flex; gap: 10px; align-items: center; }
-        .username { font-weight: 700; font-size: 0.95rem; line-height: 1.2; }
-        .time { font-size: 0.75rem; color: var(--text-gray); }
-        .post-text { font-size: 0.95rem; line-height: 1.5; color: #eee; margin-bottom: 10px; white-space: pre-wrap; word-break: break-word; }
-        .post-img { width: 100%; border-radius: 12px; margin-bottom: 10px; display: block; max-height: 400px; object-fit: cover; border: 1px solid var(--border); cursor: zoom-in; }
         
-        .actions { display: flex; gap: 20px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); }
-        .act-btn { display: flex; align-items: center; gap: 6px; color: var(--text-gray); cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+        .send-btn { 
+            background: var(--accent); color: #000; border: none;
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 15px rgba(255,94,0,0.4);
+            transition: transform 0.2s;
+        }
+        .send-btn:active { transform: scale(0.9); }
+
+        /* --- 4. POST CARD --- */
+        .post { 
+            background: var(--bg-card); border: 1px solid var(--border); 
+            border-radius: var(--radius); padding: 16px; margin-bottom: 16px; 
+            position: relative; animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .post-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .user-info { display: flex; gap: 10px; align-items: center; }
+        .username { font-weight: 700; font-size: 0.95rem; line-height: 1.2; color: #fff; }
+        .time { font-size: 0.75rem; color: var(--text-muted); }
+        
+        .post-text { 
+            font-size: 1rem; line-height: 1.5; color: #eee; margin-bottom: 12px; 
+            white-space: pre-wrap; word-break: break-word; 
+        }
+        .post-img { 
+            width: 100%; border-radius: 12px; margin-bottom: 12px; 
+            display: block; max-height: 500px; object-fit: cover; 
+            border: 1px solid #333; 
+        }
+        
+        .actions { 
+            display: flex; gap: 20px; padding-top: 12px; 
+            border-top: 1px solid rgba(255,255,255,0.06); 
+        }
+        .act-btn { 
+            display: flex; align-items: center; gap: 6px; 
+            color: var(--text-muted); cursor: pointer; transition: 0.2s; 
+            font-size: 0.9rem; font-weight: 500;
+        }
         .act-btn:hover { color: #fff; }
         .act-btn.liked { color: var(--danger); }
         .act-btn.liked i { font-weight: 900; animation: pop 0.3s; }
+        @keyframes pop { 50% { transform: scale(1.3); } }
 
-        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
-
-        /* MENU */
+        /* Menu */
         .menu-wrap { position: relative; }
-        .menu-dots { padding: 5px; color: var(--text-gray); cursor: pointer; }
-        .menu-pop { position: absolute; top: 25px; right: 0; background: #222; border: 1px solid var(--border); border-radius: 8px; width: 140px; display: none; z-index: 10; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
-        .menu-pop.show { display: block; animation: fadeIn 0.2s; }
-        .menu-item { padding: 10px 15px; font-size: 0.85rem; border-bottom: 1px solid #333; cursor: pointer; }
+        .menu-dots { padding: 5px; color: var(--text-muted); cursor: pointer; }
+        .menu-pop { 
+            position: absolute; top: 30px; right: 0; background: #222; 
+            border: 1px solid var(--border); border-radius: 12px; width: 150px; 
+            display: none; z-index: 10; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            overflow: hidden;
+        }
+        .menu-pop.show { display: block; animation: slideDown 0.2s; }
+        .menu-item { padding: 12px 15px; font-size: 0.85rem; border-bottom: 1px solid #333; cursor: pointer; transition: 0.2s; }
+        .menu-item:hover { background: #333; }
         .menu-item:last-child { border-bottom: none; }
         .menu-item.red { color: var(--danger); }
 
-        /* NAV */
-        .nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--bg-nav); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 99; backdrop-filter: blur(10px); }
-        .nav-icon { color: var(--text-gray); font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
-        .nav-icon.active { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
-        .fab { width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #000; font-size: 1.5rem; transform: translateY(-20%); border: 4px solid var(--bg-body); box-shadow: 0 5px 20px rgba(255,94,0,0.4); cursor: pointer; transition: transform 0.2s; }
-        .fab:active { transform: translateY(-20%) scale(0.9); }
-
-        /* MODALS (COMMENTS & PROFILE) */
-        .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; align-items: flex-end; opacity: 0; transition: opacity 0.3s; }
-        .modal-bg.open { display: flex; opacity: 1; }
-        .sheet { background: #141416; width: 100%; height: 85vh; border-radius: 20px 20px 0 0; border-top: 1px solid var(--accent); display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .modal-bg.open .sheet { transform: translateY(0); }
+        /* --- 5. MODAL & STICKERS --- */
+        .modal-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 2000;
+            display: none; align-items: flex-end; backdrop-filter: blur(5px);
+        }
+        .modal-bg.open { display: flex; }
+        .sheet {
+            background: #141416; width: 100%; height: 85vh;
+            border-radius: 24px 24px 0 0; border-top: 1px solid var(--border);
+            display: flex; flex-direction: column; animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 -10px 50px rgba(0,0,0,0.5);
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         
-        .sheet-head { padding: 15px; text-align: center; font-family: 'Unbounded'; font-size: 0.9rem; border-bottom: 1px solid var(--border); position: relative; color: #fff; }
-        .close-btn { position: absolute; right: 15px; top: 15px; background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; }
+        .sheet-head { 
+            padding: 18px; text-align: center; font-family: 'Unbounded'; font-size: 0.9rem; 
+            border-bottom: 1px solid var(--border); position: relative; color: #fff; 
+        }
+        .close-btn { position: absolute; right: 20px; top: 18px; background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; }
         
-        /* Comments Specifics */
-        .original-post-mini { padding: 10px 15px; background: #1a1a1d; border-bottom: 1px solid var(--border); font-size: 0.85rem; color: #ccc; display: flex; gap: 10px; align-items: center; max-height: 100px; overflow: hidden; }
-        .comments-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+        .original-post-preview {
+            padding: 15px; background: #0f0f11; border-bottom: 1px solid var(--border);
+            font-size: 0.85rem; color: #bbb; max-height: 150px; overflow: hidden;
+            display: flex; gap: 10px; opacity: 0.8;
+        }
+        
+        .comments-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 18px; }
         .comment { display: flex; gap: 10px; font-size: 0.9rem; }
-        .comm-bubble { background: #222; padding: 10px; border-radius: 12px; color: #ddd; max-width: 85%; border: 1px solid #333; }
-        .comm-author { font-weight: 700; font-size: 0.8rem; color: #fff; margin-bottom: 4px; }
-        .comm-img { max-width: 150px; border-radius: 8px; margin-top: 5px; display: block; border: 1px solid #444; }
-        .comm-input-area { padding: 10px 15px 30px; border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: center; background: #141416; }
+        .comm-bubble { background: #222; padding: 10px 14px; border-radius: 0 16px 16px 16px; color: #ddd; max-width: 85%; border: 1px solid #333; }
+        .comm-author { font-weight: 700; font-size: 0.75rem; color: var(--accent); margin-bottom: 4px; }
+        .comm-img { max-width: 120px; border-radius: 8px; margin-top: 8px; display: block; }
+        .comm-sticker { width: 80px; height: 80px; object-fit: contain; margin-top: 5px; }
 
-        /* PROFILE MODAL */
-        .profile-content { padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
-        .profile-avatar-xl { width: 100px; height: 100px; border-radius: 50%; background: #222; border: 3px solid var(--accent); display: flex; justify-content: center; align-items: center; font-size: 2rem; font-family: 'Unbounded'; font-weight: bold; overflow: hidden; }
-        .profile-avatar-xl img { width: 100%; height: 100%; object-fit: cover; }
-        .btn-outline { padding: 10px 20px; border: 1px solid var(--border); background: transparent; color: #fff; border-radius: 8px; font-family: 'Manrope'; cursor: pointer; }
-        .btn-primary { padding: 12px 24px; border: none; background: var(--accent); color: #000; font-weight: bold; border-radius: 12px; font-family: 'Unbounded'; cursor: pointer; width: 100%; }
+        .comm-input-area { 
+            padding: 15px; border-top: 1px solid var(--border); 
+            display: flex; gap: 10px; align-items: center; background: #141416; 
+            position: relative;
+        }
 
-        /* LIGHTBOX (IMAGE VIEWER) */
-        .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 3000; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
-        .lightbox.active { display: flex; opacity: 1; }
-        .lightbox-img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .lightbox-close { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 2rem; cursor: pointer; background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+        /* STICKER BOARD */
+        .sticker-board {
+            position: absolute; bottom: 80px; left: 0; width: 100%;
+            background: #1a1a1d; border-top: 1px solid var(--border);
+            padding: 15px; display: none; grid-template-columns: repeat(4, 1fr);
+            gap: 10px; max-height: 200px; overflow-y: auto;
+            border-radius: 20px 20px 0 0; z-index: 5;
+        }
+        .sticker-board.open { display: grid; }
+        .sticker-item { width: 100%; aspect-ratio: 1; cursor: pointer; transition: 0.2s; }
+        .sticker-item:hover { transform: scale(1.1); }
 
-        /* TOASTS */
-        .toast-box { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 4000; display: flex; flex-direction: column; gap: 10px; width: 90%; pointer-events: none; }
-        .toast { background: #222; color: #fff; padding: 12px 16px; border-radius: 8px; font-size: 0.9rem; border-left: 4px solid #fff; box-shadow: 0 10px 40px #000; display: flex; align-items: center; gap: 10px; animation: slideDown 0.3s; pointer-events: all; }
+        /* --- 6. NAV & UTILS --- */
+        .nav { 
+            position: fixed; bottom: 0; width: 100%; height: 70px; 
+            background: var(--bg-nav); border-top: 1px solid var(--border); 
+            display: flex; justify-content: space-around; align-items: center; 
+            z-index: 99; backdrop-filter: blur(10px); 
+        }
+        .nav-icon { color: var(--text-muted); font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
+        .nav-icon.active { color: #fff; }
+        .fab { 
+            width: 52px; height: 52px; background: var(--accent); border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; color: #000; 
+            font-size: 1.6rem; transform: translateY(-25%); border: 4px solid var(--bg-body); 
+            box-shadow: 0 5px 20px rgba(255,94,0,0.5); cursor: pointer; 
+        }
+
+        .toast-box { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 3000; display: flex; flex-direction: column; gap: 10px; width: 90%; pointer-events: none; }
+        .toast { pointer-events: auto; background: #222; color: #fff; padding: 12px 16px; border-radius: 8px; font-size: 0.9rem; border-left: 4px solid #fff; box-shadow: 0 10px 40px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 10px; animation: slideDown 0.3s; }
         .toast.ok { border-left-color: #00ff88; } .toast.err { border-left-color: #ff3333; }
-
-        .hidden-file { display: none; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .hidden-file { display: none; }
     </style>
 </head>
 <body>
@@ -129,7 +235,7 @@
     <div class="header">
         <div class="logo">MEMASIK 2.0</div>
         <div class="tabs">
-            <button class="tab active" onclick="app.load('new')">НОВЫЕ</button>
+            <button class="tab active" onclick="app.load('new')">ЛЕНТА</button>
             <button class="tab" onclick="app.load('top')">ТОП</button>
         </div>
     </div>
@@ -138,127 +244,136 @@
         <div class="create-box">
             <div class="create-top">
                 <div class="avatar" id="my-ava">?</div>
-                <input type="text" id="post-input" class="input-bar" placeholder="Что нового?" autocomplete="off">
-            </div>
-            <div class="preview-area" id="post-preview-area">
-                <img src="" class="preview-img" id="post-preview-img">
-                <div class="remove-preview" onclick="app.clearFile('post')">×</div>
+                <input type="text" id="post-input" class="input-bar" placeholder="Что нового, легенда?">
             </div>
             <div class="create-actions">
                 <label class="attach-btn" id="post-attach-lbl">
-                    <i class="ri-image-add-line"></i>
-                    <input type="file" id="post-file" class="hidden-file" accept="image/*" onchange="app.handleFileSelect('post')">
+                    <i class="ri-image-add-line"></i> <span id="post-file-name" style="font-size:0.75rem; color:#fff"></span>
+                    <input type="file" id="post-file" class="hidden-file" accept="image/*" onchange="app.fileSelect('post')">
                 </label>
-                <i class="ri-send-plane-fill send-icon" onclick="app.sendPost()"></i>
+                <button class="send-btn" onclick="app.sendPost()"><i class="ri-arrow-up-line"></i></button>
             </div>
         </div>
 
         <div id="feed">
-            <div style="text-align:center; color:#555; margin-top:50px;">Загрузка ленты...</div>
+            <div style="text-align:center; color:#555; margin-top:50px;">
+                <i class="ri-loader-4-line ri-spin" style="font-size:2rem"></i><br>Загрузка контента...
+            </div>
         </div>
     </div>
 
     <div class="nav">
         <i class="ri-home-5-fill nav-icon active"></i>
-        <i class="ri-search-line nav-icon"></i>
+        <i class="ri-search-2-line nav-icon"></i>
         <div class="fab" onclick="document.getElementById('post-input').focus()"><i class="ri-add-line"></i></div>
         <i class="ri-heart-3-line nav-icon"></i>
-        <i class="ri-settings-4-line nav-icon" onclick="app.openProfile()"></i>
+        <i class="ri-user-3-line nav-icon" onclick="window.location.href='index.html'"></i>
     </div>
 
     <div class="modal-bg" id="comm-modal">
         <div class="sheet">
             <div class="sheet-head">Комментарии <button class="close-btn" onclick="app.closeComm()"><i class="ri-close-line"></i></button></div>
-            <div id="original-post-view" class="original-post-mini"></div>
+            
+            <div id="op-preview" class="original-post-preview"></div>
+
             <div class="comments-box" id="comm-list"></div>
-            <div class="preview-area" id="comm-preview-area" style="margin: 0 15px;">
-                <img src="" class="preview-img" id="comm-preview-img" style="max-height: 60px;">
-                <div class="remove-preview" onclick="app.clearFile('comm')">×</div>
-            </div>
-            <div class="comm-input-area">
-                <label class="attach-btn" id="comm-attach-lbl" style="font-size:1.2rem;">
-                    <i class="ri-image-add-line"></i>
-                    <input type="file" id="comm-file" class="hidden-file" accept="image/*" onchange="app.handleFileSelect('comm')">
-                </label>
-                <input type="text" id="comm-input" class="input-bar" placeholder="Написать..." autocomplete="off">
-                <i class="ri-send-plane-fill send-icon" onclick="app.sendComm()"></i>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-bg" id="profile-modal">
-        <div class="sheet" style="height: 50vh;">
-            <div class="sheet-head">Профиль <button class="close-btn" onclick="app.closeProfile()"><i class="ri-close-line"></i></button></div>
-            <div class="profile-content">
-                <div class="profile-avatar-xl" id="profile-ava-xl">?</div>
-                <div style="text-align:center;">
-                    <h2 id="profile-username" style="font-family:'Unbounded';">Username</h2>
-                    <p style="color:#888; font-size:0.9rem;">ID: <span id="profile-id">...</span></p>
+            
+            <div class="sticker-board" id="stickers">
                 </div>
-                <label class="btn-outline">
-                    Сменить фото
-                    <input type="file" class="hidden-file" accept="image/*" onchange="app.updateAvatar(this)">
+
+            <div class="comm-input-area">
+                <i class="ri-emotion-line nav-icon" onclick="app.toggleStickers()"></i>
+                <label class="nav-icon">
+                    <i class="ri-image-add-line"></i>
+                    <input type="file" id="comm-file" class="hidden-file" accept="image/*" onchange="app.fileSelect('comm')">
                 </label>
-                <button class="btn-primary" onclick="window.location.href='index.html'">Выйти</button>
+                <input type="text" id="comm-input" class="input-bar" placeholder="Коммент..." autocomplete="off">
+                <button class="send-btn" onclick="app.sendComm()"><i class="ri-arrow-up-line"></i></button>
             </div>
         </div>
-    </div>
-
-    <div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">
-        <div class="lightbox-close">&times;</div>
-        <img src="" class="lightbox-img" id="lightbox-img">
     </div>
 
     <div class="toast-box" id="toasts"></div>
 
     <script>
+        // --- CONSTANTS ---
         const CFG = {
             URL: 'https://hrrzpftxpafnavlljhum.supabase.co',
+            // SERVICE KEY (ADMIN) - Для гарантированной работы
             KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTI3NzU3NiwiZXhwIjoyMDg0ODUzNTc2fQ.5Dt7zXjEF_lVc5Komkg11A4Jy97rxI94PF3UE40X1RE',
             BUCKET: 'memasik_files'
         };
+
+        // Набор стикеров (Ссылки на PNG/WEBP)
+        const STICKERS = [
+            'https://cdn-icons-png.flaticon.com/128/742/742751.png', // Pepe Smile
+            'https://cdn-icons-png.flaticon.com/128/742/742752.png', // Pepe Sad
+            'https://cdn-icons-png.flaticon.com/128/742/742921.png', // Pepe Cool
+            'https://cdn-icons-png.flaticon.com/128/1933/1933691.png', // Cat 1
+            'https://cdn-icons-png.flaticon.com/128/616/616430.png', // Cat 2
+            'https://cdn-icons-png.flaticon.com/128/742/742824.png', // Clown
+            'https://cdn-icons-png.flaticon.com/128/166/166538.png', // Fire
+            'https://cdn-icons-png.flaticon.com/128/478/478544.png'  // Heart
+        ];
 
         class App {
             constructor() {
                 this.sb = window.supabase.createClient(CFG.URL, CFG.KEY);
                 this.me = null;
                 this.currPost = null;
-                this.cache = {}; // Cache posts for quick access
+                this.postsCache = {};
+                
                 document.addEventListener('click', e => {
                     if (!e.target.closest('.menu-wrap')) document.querySelectorAll('.menu-pop').forEach(el => el.classList.remove('show'));
                 });
+
+                this.initStickers();
                 this.init();
+            }
+
+            initStickers() {
+                const board = document.getElementById('stickers');
+                STICKERS.forEach(url => {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.className = 'sticker-item';
+                    img.onclick = () => this.sendSticker(url);
+                    board.appendChild(img);
+                });
             }
 
             async init() {
                 const { data: { user } } = await this.sb.auth.getUser();
                 if (user) {
                     this.me = user;
-                    this.loadProfile();
+                    this.loadProfile(user.id);
                 }
+                
+                // Проверяем бакет
+                try {
+                    const { data: buckets } = await this.sb.storage.listBuckets();
+                    if (!buckets.find(b => b.name === CFG.BUCKET)) {
+                        await this.sb.storage.createBucket(CFG.BUCKET, { public: true });
+                    }
+                } catch(e) {}
+
                 this.load('new');
             }
 
-            async loadProfile() {
-                const { data } = await this.sb.from('profiles').select('*').eq('id', this.me.id).single();
-                if (data) {
-                    this.renderAvatar('my-ava', data.username, data.avatar_url);
-                    this.renderAvatar('profile-ava-xl', data.username, data.avatar_url);
-                    document.getElementById('profile-username').innerText = data.username;
-                    document.getElementById('profile-id').innerText = data.id.slice(0,8);
-                }
+            async loadProfile(uid) {
+                const { data } = await this.sb.from('profiles').select('username').eq('id', uid).single();
+                if (data) document.getElementById('my-ava').innerText = data.username[0].toUpperCase();
             }
 
-            // === CORE FEED ===
+            // === CORE FEED LOGIC ===
             async load(type) {
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 event?.target.classList.add('active');
                 
                 const feed = document.getElementById('feed');
-                feed.innerHTML = '<div style="text-align:center;color:#555;margin-top:20px">Обновление...</div>';
                 const order = type === 'new' ? false : true;
 
-                // 1. Posts
+                // 1. Грузим посты
                 const { data: posts } = await this.sb.from('posts').select('*').order('created_at', { ascending: order }).limit(50);
                 
                 if (!posts || !posts.length) {
@@ -266,17 +381,17 @@
                     return;
                 }
 
-                // 2. Parallel Fetch
+                // 2. Сбор данных (Параллельно)
                 const uids = [...new Set(posts.map(p => p.user_id))];
                 const [profilesRes, likesRes, commsRes, myLikesRes] = await Promise.all([
-                    this.sb.from('profiles').select('id, username, avatar_url').in('id', uids),
+                    this.sb.from('profiles').select('id, username').in('id', uids),
                     this.sb.from('likes').select('post_id'),
                     this.sb.from('comments').select('post_id'),
                     this.me ? this.sb.from('likes').select('post_id').eq('user_id', this.me.id) : { data: [] }
                 ]);
 
                 const userMap = {};
-                profilesRes.data?.forEach(p => userMap[p.id] = p);
+                profilesRes.data?.forEach(p => userMap[p.id] = p.username);
                 const likeCounts = {};
                 likesRes.data?.forEach(l => likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1);
                 const commCounts = {};
@@ -285,26 +400,25 @@
 
                 feed.innerHTML = '';
                 posts.forEach(post => {
-                    this.cache[post.id] = post;
-                    const u = userMap[post.user_id] || { username: 'Anon' };
+                    this.postsCache[post.id] = post;
+                    // FIX ANON: Если юзера нет в мапе, показываем ID или заглушку
+                    const name = userMap[post.user_id] || 'User';
+                    const ava = name[0].toUpperCase();
                     const liked = myLikedPosts.has(post.id);
                     const isMine = this.me && this.me.id === post.user_id;
-                    const time = this.timeAgo(post.created_at);
-
-                    const imgHtml = post.image_url ? `<img src="${post.image_url}" class="post-img" onclick="app.openLightbox(this.src)">` : '';
-
-                    // Safe Avatar Rendering
-                    let avatarHtml = `<div class="avatar">${u.username[0].toUpperCase()}</div>`;
-                    if (u.avatar_url) avatarHtml = `<div class="avatar"><img src="${u.avatar_url}"></div>`;
+                    const safeTxt = this.esc(post.content);
+                    const timeAgo = this.timeAgo(post.created_at);
+                    
+                    const imgHtml = post.image_url ? `<img src="${post.image_url}" class="post-img" loading="lazy" onclick="window.open(this.src)">` : '';
 
                     const html = `
                     <div class="post" id="post-${post.id}">
                         <div class="post-head">
                             <div class="user-info">
-                                ${avatarHtml}
+                                <div class="avatar" style="width:34px;height:34px;font-size:0.8rem">${ava}</div>
                                 <div>
-                                    <div class="username">${u.username}</div>
-                                    <div class="time">${time}</div>
+                                    <div class="username">${name}</div>
+                                    <div class="time">${timeAgo}</div>
                                 </div>
                             </div>
                             <div class="menu-wrap">
@@ -316,7 +430,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="post-text">${this.esc(post.content)}</div>
+                        <div class="post-text">${safeTxt}</div>
                         ${imgHtml}
                         <div class="actions">
                             <div class="act-btn ${liked ? 'liked' : ''}" id="like-${post.id}" onclick="app.like('${post.id}')">
@@ -334,76 +448,68 @@
                 });
             }
 
-            // === FILES ===
-            handleFileSelect(type) {
+            // === UPLOAD ===
+            fileSelect(type) {
                 const file = document.getElementById(`${type}-file`).files[0];
-                const area = document.getElementById(`${type}-preview-area`);
-                const img = document.getElementById(`${type}-preview-img`);
-                const lbl = document.getElementById(`${type}-attach-lbl`);
-                
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        img.src = e.target.result;
-                        area.classList.add('show');
+                const lbl = type === 'post' ? document.getElementById('post-attach-lbl') : null;
+                if(lbl) {
+                    if(file) {
                         lbl.classList.add('has-file');
-                    };
-                    reader.readAsDataURL(file);
+                        document.getElementById('post-file-name').innerText = file.name.slice(0,10);
+                    }
                 }
-            }
-
-            clearFile(type) {
-                document.getElementById(`${type}-file`).value = '';
-                document.getElementById(`${type}-preview-area`).classList.remove('show');
-                document.getElementById(`${type}-attach-lbl`).classList.remove('has-file');
             }
 
             async uploadFile(file) {
                 const ext = file.name.split('.').pop();
                 const path = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${ext}`;
-                const { error } = await this.sb.storage.from(CFG.BUCKET).upload(path, file);
-                if (error) throw error;
-                const { data } = this.sb.storage.from(CFG.BUCKET).getPublicUrl(path);
-                return data.publicUrl;
+                const { data, error } = await this.sb.storage.from(CFG.BUCKET).upload(path, file);
+                if(error) throw error;
+                const { data: { publicUrl } } = this.sb.storage.from(CFG.BUCKET).getPublicUrl(path);
+                return publicUrl;
             }
 
-            // === ACTIONS ===
+            // === SEND POST ===
             async sendPost() {
                 if (!this.me) return this.toast('Войди!', 'err');
                 const inp = document.getElementById('post-input');
-                const file = document.getElementById('post-file').files[0];
+                const fileInp = document.getElementById('post-file');
                 const val = inp.value.trim();
+                const file = fileInp.files[0];
 
                 if (!val && !file) return;
 
-                const icon = document.querySelector('.create-actions .send-icon');
-                icon.style.opacity = 0.5;
+                const btn = document.querySelector('.send-icon');
+                btn.style.opacity = 0.5;
 
                 try {
-                    let url = null;
+                    let imgUrl = null;
                     if(file) {
-                        this.toast('Грузим фото...', 'ok');
-                        url = await this.uploadFile(file);
+                        this.toast('Загрузка фото...', 'ok');
+                        imgUrl = await this.uploadFile(file);
                     }
 
                     const { error } = await this.sb.from('posts').insert([{ 
                         user_id: this.me.id, 
                         content: val || " ", 
-                        image_url: url 
+                        image_url: imgUrl 
                     }]);
                     if (error) throw error;
                     
                     inp.value = '';
-                    this.clearFile('post');
+                    fileInp.value = '';
+                    document.getElementById('post-file-name').innerText = '';
+                    document.getElementById('post-attach-lbl').classList.remove('has-file');
                     this.toast('Опубликовано!', 'ok');
                     this.load('new');
                 } catch (e) {
                     this.toast(e.message, 'err');
                 } finally {
-                    icon.style.opacity = 1;
+                    btn.style.opacity = 1;
                 }
             }
 
+            // === ACTIONS ===
             async like(pid) {
                 if (!this.me) return this.toast('Войди!', 'err');
                 const btn = document.getElementById(`like-${pid}`);
@@ -421,16 +527,40 @@
                 }
             }
 
-            // === COMMENTS ===
+            // === COMMENTS & STICKERS ===
+            toggleStickers() {
+                document.getElementById('stickers').classList.toggle('open');
+            }
+
+            async sendSticker(url) {
+                if (!this.me) return this.toast('Войди!', 'err');
+                this.toast('Отправка стикера...', 'ok');
+                try {
+                    await this.sb.from('comments').insert([{ 
+                        post_id: this.currPost, 
+                        user_id: this.me.id, 
+                        content: "Sticker", 
+                        image_url: url 
+                    }]);
+                    document.getElementById('stickers').classList.remove('open');
+                    this.openComm(this.currPost);
+                } catch(e) { this.toast(e.message, 'err'); }
+            }
+
             async openComm(pid) {
                 this.currPost = pid;
                 document.getElementById('comm-modal').classList.add('open');
                 
-                // Show OP
-                const post = this.cache[pid];
-                const opView = document.getElementById('original-post-view');
-                const opImg = post.image_url ? `<img src="${post.image_url}" style="height:40px; border-radius:4px; margin-left:auto;">` : '';
-                opView.innerHTML = `<div><b>Post:</b> ${this.esc(post.content).slice(0, 50)}...</div>${opImg}`;
+                // Show OP Preview
+                const post = this.postsCache[pid];
+                const preview = document.getElementById('op-preview');
+                if(post) {
+                    const txt = post.content.length > 50 ? post.content.slice(0,50)+'...' : post.content;
+                    preview.innerHTML = `
+                        <div style="font-weight:bold;color:#fff">${this.me?.id === post.user_id ? 'Вы' : 'Автор'}:</div>
+                        <div>${this.esc(txt)}</div>
+                    `;
+                }
 
                 const list = document.getElementById('comm-list');
                 list.innerHTML = '<div style="text-align:center;color:#555">Загрузка...</div>';
@@ -443,25 +573,26 @@
                 }
 
                 const uids = [...new Set(coms.map(c => c.user_id))];
-                const { data: profs } = await this.sb.from('profiles').select('id, username, avatar_url').in('id', uids);
+                const { data: profs } = await this.sb.from('profiles').select('id, username').in('id', uids);
                 const uMap = {};
-                profs?.forEach(p => uMap[p.id] = p);
+                profs?.forEach(p => uMap[p.id] = p.username);
 
                 list.innerHTML = '';
                 coms.forEach(c => {
-                    const u = uMap[c.user_id] || { username: 'Anon' };
-                    let avaHtml = `<div class="avatar" style="width:30px;height:30px;font-size:0.7rem">${u.username[0].toUpperCase()}</div>`;
-                    if(u.avatar_url) avaHtml = `<div class="avatar" style="width:30px;height:30px;"><img src="${u.avatar_url}"></div>`;
-                    
-                    const imgHtml = c.image_url ? `<img src="${c.image_url}" class="comm-img" onclick="app.openLightbox(this.src)">` : '';
+                    const name = uMap[c.user_id] || 'User';
+                    const ava = name[0].toUpperCase();
+                    let contentHtml = this.esc(c.content);
+                    if(c.image_url) {
+                        const isSticker = c.content === 'Sticker';
+                        contentHtml = `<img src="${c.image_url}" class="${isSticker ? 'comm-sticker' : 'comm-img'}" onclick="window.open(this.src)">`;
+                    }
                     
                     list.innerHTML += `
                         <div class="comment">
-                            ${avaHtml}
+                            <div class="avatar" style="width:30px;height:30px;font-size:0.7rem">${ava}</div>
                             <div class="comm-bubble">
-                                <div class="comm-author">${u.username}</div>
-                                <div>${this.esc(c.content)}</div>
-                                ${imgHtml}
+                                <div class="comm-author">${name}</div>
+                                <div>${contentHtml}</div>
                             </div>
                         </div>`;
                 });
@@ -470,81 +601,48 @@
             async sendComm() {
                 if (!this.me) return this.toast('Войди!', 'err');
                 const inp = document.getElementById('comm-input');
-                const file = document.getElementById('comm-file').files[0];
+                const fileInp = document.getElementById('comm-file');
                 const val = inp.value.trim();
+                const file = fileInp.files[0];
 
                 if (!val && !file) return;
 
                 try {
-                    let url = null;
-                    if(file) {
-                        this.toast('Фото...', 'ok');
-                        url = await this.uploadFile(file);
-                    }
+                    let imgUrl = null;
+                    if(file) imgUrl = await this.uploadFile(file);
+
                     await this.sb.from('comments').insert([{ 
-                        post_id: this.currPost, user_id: this.me.id, content: val || " ", image_url: url 
+                        post_id: this.currPost, 
+                        user_id: this.me.id, 
+                        content: val || " ", 
+                        image_url: imgUrl 
                     }]);
+
                     inp.value = '';
-                    this.clearFile('comm');
+                    fileInp.value = '';
                     this.openComm(this.currPost);
                 } catch (e) {
                     this.toast(e.message, 'err');
                 }
             }
 
-            closeComm() { document.getElementById('comm-modal').classList.remove('open'); }
+            closeComm() { document.getElementById('comm-modal').classList.remove('open'); document.getElementById('stickers').classList.remove('open'); }
 
-            // === PROFILE & AVATAR ===
-            openProfile() { document.getElementById('profile-modal').classList.add('open'); }
-            closeProfile() { document.getElementById('profile-modal').classList.remove('open'); }
-            
-            async updateAvatar(input) {
-                const file = input.files[0];
-                if (!file) return;
-                try {
-                    this.toast('Обновляем аватар...', 'ok');
-                    const url = await this.uploadFile(file);
-                    await this.sb.from('profiles').update({ avatar_url: url }).eq('id', this.me.id);
-                    this.loadProfile();
-                    this.toast('Готово!', 'ok');
-                } catch(e) {
-                    this.toast('Ошибка аватара', 'err');
-                }
-            }
-
-            // === HELPERS ===
             menu(pid) {
                 document.querySelectorAll('.menu-pop').forEach(e => e.classList.remove('show'));
                 document.getElementById(`menu-${pid}`).classList.add('show');
             }
+
             async del(pid) {
-                if (confirm('Удалить?')) {
-                    await this.sb.from('posts').delete().eq('id', pid);
+                if (confirm('Удалить пост?')) {
+                    const { error } = await this.sb.from('posts').delete().eq('id', pid);
+                    if(error) return this.toast(error.message, 'err');
                     document.getElementById(`post-${pid}`).remove();
                     this.toast('Удалено', 'ok');
                 }
             }
+
             rep(pid) { this.toast('Жалоба отправлена', 'ok'); document.getElementById(`menu-${pid}`).classList.remove('show'); }
-            
-            openLightbox(src) {
-                const lb = document.getElementById('lightbox');
-                document.getElementById('lightbox-img').src = src;
-                lb.classList.add('active');
-            }
-
-            renderAvatar(elId, name, url) {
-                const el = document.getElementById(elId);
-                if(url) el.innerHTML = `<img src="${url}">`;
-                else el.innerText = name[0].toUpperCase();
-            }
-
-            timeAgo(dateStr) {
-                const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
-                if (diff < 60) return 'Только что';
-                if (diff < 3600) return `${Math.floor(diff/60)} мин. назад`;
-                if (diff < 86400) return `${Math.floor(diff/3600)} ч. назад`;
-                return new Date(dateStr).toLocaleDateString();
-            }
 
             toast(msg, type) {
                 const box = document.getElementById('toasts');
@@ -554,7 +652,16 @@
                 box.appendChild(t);
                 setTimeout(() => t.remove(), 3000);
             }
+
             esc(t) { return t ? t.replace(/</g, "&lt;") : ""; }
+            
+            timeAgo(dateStr) {
+                const sec = Math.floor((new Date() - new Date(dateStr)) / 1000);
+                if(sec < 60) return "только что";
+                if(sec < 3600) return `${Math.floor(sec/60)} мин.`;
+                if(sec < 86400) return `${Math.floor(sec/3600)} ч.`;
+                return new Date(dateStr).toLocaleDateString();
+            }
         }
 
         const app = new App();
