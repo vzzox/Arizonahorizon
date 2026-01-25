@@ -8,18 +8,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
+    
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <style>
         /* =========================================
-           1. CORE STYLES & VARIABLES
+           1. CORE SYSTEM
            ========================================= */
         :root {
             --bg-body: #0a0a0c;
             --bg-card: #141416;
-            --bg-nav: rgba(15, 15, 17, 0.96);
+            --bg-nav: rgba(15, 15, 17, 0.98);
             --bg-input: #000000;
             --text-main: #ffffff;
             --text-muted: #888890;
@@ -39,35 +40,37 @@
             font-family: 'Manrope', sans-serif;
             height: 100vh;
             overflow-y: scroll;
-            padding-top: 60px; /* Header space */
-            padding-bottom: 80px; /* Nav space */
+            padding-top: 60px;
+            padding-bottom: 80px;
             scroll-behavior: smooth;
+            overscroll-behavior-y: contain; /* Pull refresh effect prevent */
         }
 
-        /* Street Noise Texture */
+        /* Texture */
         body::before {
             content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
             opacity: 0.5; pointer-events: none; z-index: -1;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 0px; } 
+        ::-webkit-scrollbar { width: 0px; }
 
         /* =========================================
-           2. HEADER & TABS
+           2. HEADER
            ========================================= */
         .header-fixed {
             position: fixed; top: 0; left: 0; width: 100%; height: 60px;
             background: rgba(10, 10, 12, 0.9); backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border); z-index: 100;
             display: flex; flex-direction: column; justify-content: flex-end;
+            transition: transform 0.3s;
         }
+        .header-fixed.hidden { transform: translateY(-100%); }
 
         .header-brand {
             text-align: center; font-family: 'Unbounded'; font-weight: 800;
             font-size: 0.85rem; letter-spacing: 2px; color: #fff; margin-bottom: 4px;
-            text-shadow: 0 0 15px rgba(255, 94, 0, 0.4);
+            text-shadow: 0 0 15px rgba(255, 94, 0, 0.4); cursor: pointer;
         }
 
         .tabs-wrapper { display: flex; width: 100%; height: 34px; }
@@ -86,19 +89,18 @@
         }
 
         /* =========================================
-           3. MAIN CONTAINER & CREATE POST
+           3. MAIN LAYOUT
            ========================================= */
         .feed-container { max-width: 600px; margin: 0 auto; padding: 15px; }
 
+        /* Create Post Widget */
         .create-widget {
             background: var(--bg-card); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 14px; margin-bottom: 20px;
             display: flex; flex-direction: column; gap: 12px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.4);
         }
-
         .create-top-row { display: flex; gap: 12px; align-items: center; }
-        
         .user-avatar-sm {
             width: 44px; height: 44px; border-radius: 50%;
             background: #1a1a1d; border: 2px solid #333;
@@ -106,27 +108,21 @@
             font-family: 'Unbounded'; font-weight: 700; color: #fff;
             flex-shrink: 0; object-fit: cover; font-size: 1rem; overflow: hidden;
         }
-        .user-avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
-
         .create-input {
             flex: 1; background: #000; border: 1px solid var(--border);
             border-radius: 12px; padding: 12px 16px; color: #fff;
             font-family: 'Manrope'; font-size: 0.95rem; transition: 0.2s;
         }
         .create-input:focus { border-color: var(--accent); }
-
         .create-actions-row {
             display: flex; justify-content: space-between; align-items: center;
-            padding-left: 56px; /* Align with input */
+            padding-left: 56px; 
         }
-
         .attach-icon {
             color: var(--text-muted); font-size: 1.3rem; cursor: pointer;
             transition: 0.2s; display: flex; align-items: center; gap: 8px;
         }
         .attach-icon.has-file { color: var(--accent); }
-        .attach-icon:active { transform: scale(0.9); }
-
         .publish-btn {
             background: var(--accent); border: none; width: 38px; height: 38px;
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -136,30 +132,20 @@
         .publish-btn:active { transform: scale(0.9); }
 
         /* =========================================
-           4. POST CARD DESIGN
+           4. POST CARD
            ========================================= */
         .post-card {
             background: var(--bg-card); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 16px; margin-bottom: 16px;
             position: relative; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        .post-header {
-            display: flex; justify-content: space-between; align-items: flex-start;
-            margin-bottom: 12px;
-        }
-
+        .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
         .post-author-block { display: flex; gap: 10px; align-items: center; }
-        
-        .author-name {
-            font-weight: 700; font-size: 0.95rem; color: #fff;
-            line-height: 1.2; letter-spacing: 0.3px;
-        }
+        .author-name { font-weight: 700; font-size: 0.95rem; color: #fff; line-height: 1.2; }
         .post-timestamp { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
-
-        .post-menu-btn { padding: 4px; color: var(--text-muted); cursor: pointer; }
-
+        
         .post-content-text {
             font-size: 1rem; line-height: 1.55; color: #ececec;
             margin-bottom: 12px; white-space: pre-wrap; word-break: break-word;
@@ -168,32 +154,39 @@
         .post-image-container {
             width: 100%; border-radius: 12px; overflow: hidden;
             margin-bottom: 12px; border: 1px solid #222;
-            max-height: 500px; display: flex; justify-content: center; background: #000;
+            max-height: 500px; display: flex; justify-content: center; 
+            background: #000; position: relative;
         }
-        .post-image {
-            width: 100%; height: auto; object-fit: cover; cursor: pointer;
+        .post-image { width: 100%; height: auto; object-fit: cover; }
+        
+        /* Burst Heart Animation */
+        .burst-heart {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            color: #fff; font-size: 5rem; text-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            pointer-events: none; z-index: 10;
+        }
+        .burst-heart.active { animation: burst 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes burst { 
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
         }
 
         .post-actions-bar {
             display: flex; gap: 24px; padding-top: 12px;
             border-top: 1px solid rgba(255,255,255,0.06);
         }
-
         .action-pill {
             display: flex; align-items: center; gap: 6px;
             color: var(--text-muted); cursor: pointer; transition: 0.2s;
             font-size: 0.9rem; font-weight: 600;
         }
-        .action-pill i { font-size: 1.3rem; transition: 0.2s; }
-        .action-pill:active i { transform: scale(1.3); }
-        
         .action-pill.liked { color: var(--danger); }
-        .action-pill.liked i { font-weight: 900; } /* Filled heart */
+        .action-pill.liked i { font-weight: 900; }
 
         /* =========================================
            5. MENUS & MODALS
            ========================================= */
-        /* Dropdown Menu */
         .dropdown-menu {
             position: absolute; top: 35px; right: 10px;
             background: #222; border: 1px solid var(--border);
@@ -203,26 +196,9 @@
         .dropdown-menu.show { display: block; animation: fadeIn 0.2s; }
         .dropdown-item {
             padding: 12px 16px; font-size: 0.85rem; color: #ddd;
-            border-bottom: 1px solid #333; cursor: pointer; transition: 0.2s;
+            border-bottom: 1px solid #333; cursor: pointer;
         }
-        .dropdown-item:hover { background: #2a2a2e; }
         .dropdown-item.danger { color: var(--danger); }
-        .dropdown-item:last-child { border-bottom: none; }
-
-        /* Fullscreen Image (Lightbox) */
-        .lightbox {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 5000; display: none;
-            justify-content: center; align-items: center;
-        }
-        .lightbox.active { display: flex; animation: fadeIn 0.3s; }
-        .lightbox-img { max-width: 100%; max-height: 100%; }
-        .lightbox-close {
-            position: absolute; top: 20px; right: 20px;
-            color: #fff; font-size: 2rem; cursor: pointer;
-            background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center;
-        }
 
         /* Comments Modal */
         .modal-overlay {
@@ -231,7 +207,6 @@
             display: none; align-items: flex-end; backdrop-filter: blur(4px);
         }
         .modal-overlay.active { display: flex; }
-        
         .modal-sheet {
             background: #141416; width: 100%; height: 85vh;
             border-radius: 24px 24px 0 0; border-top: 1px solid var(--border);
@@ -250,7 +225,6 @@
             background: none; border: none; cursor: pointer;
         }
 
-        /* Original Post Preview in Comments */
         .op-preview-box {
             background: #0f0f11; padding: 12px 16px; border-bottom: 1px solid var(--border);
             display: flex; gap: 12px; align-items: center; opacity: 0.8;
@@ -262,23 +236,25 @@
             flex: 1; overflow-y: auto; padding: 16px; 
             display: flex; flex-direction: column; gap: 16px;
         }
-
-        .comment-row { display: flex; gap: 10px; }
+        .comment-row { display: flex; gap: 10px; position: relative; }
         .comment-bubble {
             background: #1f1f22; padding: 10px 14px; border-radius: 4px 16px 16px 16px;
-            color: #ddd; max-width: 85%; border: 1px solid #2a2a2e;
+            color: #ddd; max-width: 85%; border: 1px solid #2a2a2e; position: relative;
         }
         .comment-author { font-weight: 700; font-size: 0.75rem; color: var(--accent); margin-bottom: 4px; }
-        .comment-text { font-size: 0.9rem; line-height: 1.4; }
+        .comment-text { font-size: 0.9rem; line-height: 1.4; word-break: break-word; }
         .comment-img { max-width: 150px; border-radius: 8px; margin-top: 8px; display: block; }
         .sticker-img-sm { width: 80px; height: 80px; object-fit: contain; margin-top: 5px; }
+        .del-comment-btn {
+            position: absolute; top: 50%; right: -30px; transform: translateY(-50%);
+            color: #444; font-size: 1.2rem; cursor: pointer;
+        }
 
-        /* Input Area & Stickers */
+        /* Stickers & Input */
         .sheet-footer {
             border-top: 1px solid var(--border); background: #141416;
-            padding-bottom: env(safe-area-inset-bottom); position: relative;
+            padding-bottom: env(safe-area-inset-bottom);
         }
-        
         .sticker-drawer {
             height: 0; overflow-y: auto; transition: 0.3s;
             background: #1a1a1d; display: grid; grid-template-columns: repeat(4, 1fr);
@@ -288,25 +264,35 @@
         .sticker-btn { width: 100%; aspect-ratio: 1; cursor: pointer; transition: 0.2s; }
         .sticker-btn:active { transform: scale(0.9); }
 
-        .input-bar-wrapper {
-            display: flex; gap: 10px; align-items: center; padding: 12px 16px;
-        }
+        .input-bar-wrapper { display: flex; gap: 10px; align-items: center; padding: 12px 16px; }
         .modal-icon { font-size: 1.5rem; color: var(--text-muted); cursor: pointer; }
-        .modal-icon:active { color: #fff; }
+
+        /* Lightbox */
+        .lightbox {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 5000; display: none;
+            justify-content: center; align-items: center;
+        }
+        .lightbox.active { display: flex; animation: fadeIn 0.3s; }
+        .lightbox-img { max-width: 100%; max-height: 100%; }
+        .lightbox-close {
+            position: absolute; top: 20px; right: 20px;
+            color: #fff; font-size: 2rem; cursor: pointer;
+            background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+        }
 
         /* =========================================
-           6. BOTTOM NAVIGATION
+           6. NAVIGATION
            ========================================= */
         .nav-bar {
             position: fixed; bottom: 0; left: 0; width: 100%; height: 75px;
             background: var(--bg-nav); border-top: 1px solid var(--border);
             display: flex; justify-content: space-around; align-items: center;
-            z-index: 99; backdrop-filter: blur(12px);
-            padding-bottom: 10px;
+            z-index: 99; backdrop-filter: blur(12px); padding-bottom: 10px;
         }
         .nav-item { font-size: 1.6rem; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
         .nav-item.active { color: #fff; transform: translateY(-2px); }
-        
         .nav-fab-center {
             width: 54px; height: 54px; background: var(--accent);
             border-radius: 50%; display: flex; justify-content: center; align-items: center;
@@ -316,10 +302,9 @@
         }
 
         /* =========================================
-           7. UTILS & TOASTS
+           7. TOASTS & UTILS
            ========================================= */
         .hidden-input { display: none; }
-        
         #toast-container {
             position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
             z-index: 6000; display: flex; flex-direction: column; gap: 10px; width: 90%;
@@ -336,6 +321,9 @@
         
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Load More Trigger */
+        #load-more-trigger { height: 50px; display: flex; justify-content: center; align-items: center; color: #666; }
 
     </style>
 </head>
@@ -346,16 +334,15 @@
         <img src="" class="lightbox-img" id="lightbox-img">
     </div>
 
-    <header class="header-fixed">
-        <div class="header-brand">MEMASIK 2.0</div>
+    <header class="header-fixed" id="main-header">
+        <div class="header-brand" onclick="app.refresh()">MEMASIK 2.0</div>
         <div class="tabs-wrapper">
-            <button class="tab-btn active" onclick="app.loadFeed('new')">НОВЫЕ</button>
-            <button class="tab-btn" onclick="app.loadFeed('top')">ТОП</button>
+            <button class="tab-btn active" onclick="app.switchTab('new')">НОВЫЕ</button>
+            <button class="tab-btn" onclick="app.switchTab('top')">ТОП</button>
         </div>
     </header>
 
     <div class="feed-container">
-        
         <div class="create-widget">
             <div class="create-top-row">
                 <div class="user-avatar-sm" id="my-avatar-sm">?</div>
@@ -375,11 +362,12 @@
                 <i class="ri-loader-4-line ri-spin" style="font-size:2rem"></i>
             </div>
         </div>
-
+        
+        <div id="load-more-trigger"></div>
     </div>
 
     <nav class="nav-bar">
-        <div class="nav-item active"><i class="ri-home-5-fill"></i></div>
+        <div class="nav-item active" onclick="app.refresh()"><i class="ri-home-5-fill"></i></div>
         <div class="nav-item"><i class="ri-search-2-line"></i></div>
         <div class="nav-fab-center" onclick="document.getElementById('post-input').focus()"><i class="ri-add-line"></i></div>
         <div class="nav-item"><i class="ri-heart-3-line"></i></div>
@@ -394,7 +382,6 @@
             </div>
             
             <div id="op-preview" class="op-preview-box" style="display:none"></div>
-
             <div class="comments-list" id="comments-list"></div>
 
             <div class="sheet-footer">
@@ -416,26 +403,21 @@
 
     <script>
         /**
-         * MEMASIK 2.0 - ULTIMATE FEED ENGINE
-         * Powered by Supabase Service Role (Admin) Key for 100% Reliability.
+         * MEMASIK 2.0 - ULTIMATE FEED ENGINE (V6.0)
+         * Features: Infinite Scroll, Double-Tap Like, Haptics, Robust Comments
          */
 
         const CONFIG = {
             URL: 'https://hrrzpftxpafnavlljhum.supabase.co',
-            // ADMIN KEY: Bypasses all RLS policies. Guaranteed access.
             KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTI3NzU3NiwiZXhwIjoyMDg0ODUzNTc2fQ.5Dt7zXjEF_lVc5Komkg11A4Jy97rxI94PF3UE40X1RE',
             BUCKET: 'memasik_files'
         };
 
         const STICKERS = [
-            'https://cdn-icons-png.flaticon.com/128/742/742751.png', 
-            'https://cdn-icons-png.flaticon.com/128/742/742752.png',
-            'https://cdn-icons-png.flaticon.com/128/742/742921.png',
-            'https://cdn-icons-png.flaticon.com/128/1933/1933691.png',
-            'https://cdn-icons-png.flaticon.com/128/616/616430.png',
-            'https://cdn-icons-png.flaticon.com/128/742/742824.png',
-            'https://cdn-icons-png.flaticon.com/128/478/478544.png',
-            'https://cdn-icons-png.flaticon.com/128/1077/1077035.png'
+            'https://cdn-icons-png.flaticon.com/128/742/742751.png', 'https://cdn-icons-png.flaticon.com/128/742/742752.png',
+            'https://cdn-icons-png.flaticon.com/128/742/742921.png', 'https://cdn-icons-png.flaticon.com/128/1933/1933691.png',
+            'https://cdn-icons-png.flaticon.com/128/616/616430.png', 'https://cdn-icons-png.flaticon.com/128/742/742824.png',
+            'https://cdn-icons-png.flaticon.com/128/478/478544.png', 'https://cdn-icons-png.flaticon.com/128/1077/1077035.png'
         ];
 
         class FeedApp {
@@ -443,20 +425,28 @@
                 this.sb = window.supabase.createClient(CONFIG.URL, CONFIG.KEY);
                 this.user = null;
                 this.currentPostId = null;
-                this.postsCache = {}; // Local cache for instant previews
-                
-                // Close menus on outside click
+                this.postsCache = {};
+                this.page = 0;
+                this.isLoading = false;
+                this.currentTab = 'new';
+                this.hasMore = true;
+
+                // Event Listeners
                 document.addEventListener('click', e => {
-                    if (!e.target.closest('.menu-wrap')) {
-                        document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.remove('show'));
-                    }
+                    if (!e.target.closest('.menu-wrap')) document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.remove('show'));
                 });
+                
+                // Infinite Scroll Observer
+                this.observer = new IntersectionObserver((entries) => {
+                    if (entries[0].isIntersecting && !this.isLoading && this.hasMore) {
+                        this.loadFeed(this.currentTab, true);
+                    }
+                }, { threshold: 0.5 });
 
                 this.initStickers();
                 this.init();
             }
 
-            // --- 1. INITIALIZATION ---
             initStickers() {
                 const drawer = document.getElementById('sticker-drawer');
                 STICKERS.forEach(url => {
@@ -469,21 +459,14 @@
             }
 
             async init() {
-                // Auto-create bucket if missing
-                try {
-                    const { data } = await this.sb.storage.listBuckets();
-                    if (!data.find(b => b.name === CONFIG.BUCKET)) {
-                        await this.sb.storage.createBucket(CONFIG.BUCKET, { public: true });
-                    }
-                } catch(e) {}
-
-                // Auth
+                // Auth Check
                 const { data: { user } } = await this.sb.auth.getUser();
                 if (user) {
                     this.user = user;
                     this.loadMyAvatar();
                 }
                 
+                this.observer.observe(document.getElementById('load-more-trigger'));
                 this.loadFeed('new');
             }
 
@@ -491,43 +474,53 @@
                 const { data } = await this.sb.from('profiles').select('username, avatar_url').eq('id', this.user.id).single();
                 if (data) {
                     const el = document.getElementById('my-avatar-sm');
-                    if(data.avatar_url) {
-                        el.innerHTML = `<img src="${data.avatar_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
-                    } else {
-                        el.innerText = (data.username || "U")[0].toUpperCase();
-                    }
+                    if(data.avatar_url) el.innerHTML = `<img src="${data.avatar_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+                    else el.innerText = (data.username || "U")[0].toUpperCase();
                 }
             }
 
-            // --- 2. FEED LOADING (The Heavy Lifter) ---
-            async loadFeed(type) {
-                // UI Toggle
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                event && event.target.classList.add('active');
+            // === CORE FEED LOGIC ===
+            async loadFeed(type, append = false) {
+                if (this.isLoading) return;
+                this.isLoading = true;
                 
-                const list = document.getElementById('feed-list');
-                list.innerHTML = `<div style="text-align:center; margin-top:50px; color:var(--text-muted)"><i class="ri-loader-4-line ri-spin" style="font-size:2rem"></i></div>`;
+                if (!append) {
+                    this.page = 0;
+                    this.hasMore = true;
+                    this.currentTab = type;
+                    document.getElementById('feed-list').innerHTML = ''; // Reset
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    event && event.target.classList.add('active');
+                }
 
+                const list = document.getElementById('feed-list');
+                if (!append) list.innerHTML = `<div style="text-align:center; margin-top:50px; color:var(--text-muted)"><i class="ri-loader-4-line ri-spin" style="font-size:2rem"></i></div>`;
+
+                const limit = 10;
+                const from = this.page * limit;
+                const to = from + limit - 1;
                 const isNew = type === 'new';
-                
+
                 try {
                     // 1. Fetch Posts
                     const { data: posts, error } = await this.sb
                         .from('posts')
                         .select('*')
                         .order('created_at', { ascending: !isNew })
-                        .limit(50);
+                        .range(from, to);
 
                     if (error) throw error;
 
-                    if (!posts || posts.length === 0) {
+                    if (posts.length < limit) this.hasMore = false;
+                    if (!append && posts.length === 0) {
                         list.innerHTML = `<div style="text-align:center; margin-top:50px; color:var(--text-muted)">Пусто...</div>`;
+                        this.isLoading = false;
                         return;
                     }
+                    if (!append) list.innerHTML = ''; // Clear loader
 
-                    // 2. Fetch Metadata (Profiles, Likes, Comments) in PARALLEL
+                    // 2. Fetch Metadata (Parallel)
                     const uids = [...new Set(posts.map(p => p.user_id))];
-                    
                     const [profilesReq, likesReq, commentsReq, myLikesReq] = await Promise.all([
                         this.sb.from('profiles').select('*').in('id', uids),
                         this.sb.from('likes').select('post_id'),
@@ -535,32 +528,35 @@
                         this.user ? this.sb.from('likes').select('post_id').eq('user_id', this.user.id) : { data: [] }
                     ]);
 
-                    // 3. Process Data maps
+                    // 3. Process Data
                     const userMap = {};
                     profilesReq.data?.forEach(p => userMap[p.id] = p);
-
+                    
                     const likeCounts = {};
                     likesReq.data?.forEach(l => likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1);
-
+                    
                     const commCounts = {};
                     commentsReq.data?.forEach(c => commCounts[c.post_id] = (commCounts[c.post_id] || 0) + 1);
-
+                    
                     const myLikedSet = new Set(myLikesReq.data?.map(l => l.post_id));
 
                     // 4. Render
-                    list.innerHTML = '';
                     posts.forEach(post => {
-                        this.postsCache[post.id] = post; // Cache for modal
+                        this.postsCache[post.id] = post;
                         this.renderPost(post, userMap[post.user_id], likeCounts[post.id], commCounts[post.id], myLikedSet.has(post.id), list);
                     });
 
+                    this.page++;
+
                 } catch (e) {
-                    this.toast("Ошибка загрузки: " + e.message, 'error');
+                    if(!append) list.innerHTML = `<div style="text-align:center; color:red">Ошибка</div>`;
+                    this.toast("Ошибка: " + e.message, 'error');
+                } finally {
+                    this.isLoading = false;
                 }
             }
 
             renderPost(post, profile, likes = 0, comms = 0, isLiked, container) {
-                // Name Fallback
                 const name = profile?.display_name || profile?.username || 'User';
                 const avatarUrl = profile?.avatar_url;
                 const avatarHtml = avatarUrl 
@@ -571,14 +567,15 @@
                 const timeAgo = this.getTimeAgo(post.created_at);
                 const safeText = this.escapeHtml(post.content);
                 
-                // Image Logic
                 let mediaHtml = '';
                 if (post.image_url) {
                     mediaHtml = `
-                    <div class="post-image-container">
-                        <img src="${post.image_url}" class="post-image" loading="lazy" 
-                             onclick="app.openLightbox('${post.image_url}')"
-                             ondblclick="app.toggleLike('${post.id}')">
+                    <div class="post-image-container" ondblclick="app.doubleTapLike('${post.id}')">
+                        <i class="ri-heart-3-fill burst-heart" id="burst-${post.id}"></i>
+                        <img src="${post.image_url}" class="post-image" loading="lazy">
+                        <div style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.5); padding:5px; border-radius:50%; cursor:pointer;" onclick="app.openLightbox('${post.image_url}')">
+                            <i class="ri-fullscreen-line" style="color:#fff"></i>
+                        </div>
                     </div>`;
                 }
 
@@ -605,7 +602,7 @@
                         </div>
                     </div>
                     
-                    <div class="post-content-text">${safeText}</div>
+                    <div class="post-content-text" ondblclick="app.doubleTapLike('${post.id}')">${safeText}</div>
                     ${mediaHtml}
 
                     <div class="post-actions-bar">
@@ -625,18 +622,17 @@
                 container.appendChild(card);
             }
 
-            // --- 3. INTERACTIONS ---
+            // === 3. INTERACTIONS ===
             async toggleLike(pid) {
                 if (!this.user) return this.toast("Войдите в аккаунт", 'error');
+                this.vibrate();
                 
                 const btn = document.getElementById(`like-btn-${pid}`);
                 const countSpan = document.getElementById(`like-count-${pid}`);
                 const icon = btn.querySelector('i');
                 let count = parseInt(countSpan.innerText);
-                
                 const isLiked = btn.classList.contains('liked');
 
-                // Optimistic UI update
                 if (isLiked) {
                     btn.classList.remove('liked');
                     icon.className = 'ri-heart-3-line';
@@ -650,7 +646,21 @@
                 }
             }
 
-            // --- 4. COMMENTS SYSTEM (FIXED "ETERNAL LOADING") ---
+            doubleTapLike(pid) {
+                const burst = document.getElementById(`burst-${pid}`);
+                if(burst) {
+                    burst.classList.add('active');
+                    setTimeout(() => burst.classList.remove('active'), 1000);
+                }
+                const btn = document.getElementById(`like-btn-${pid}`);
+                if (!btn.classList.contains('liked')) {
+                    this.toggleLike(pid);
+                } else {
+                    this.vibrate();
+                }
+            }
+
+            // === 4. COMMENTS SYSTEM (FIXED) ===
             async openComments(pid) {
                 this.currentPostId = pid;
                 const modal = document.getElementById('comments-modal');
@@ -661,35 +671,29 @@
                 list.innerHTML = '<div style="text-align:center;margin-top:20px;color:#666">Загрузка...</div>';
 
                 try {
-                    // 1. Render Preview
                     const post = this.postsCache[pid];
                     if (post) {
                         preview.style.display = 'flex';
-                        preview.innerHTML = `
-                            <div class="op-preview-line"></div>
-                            <div class="op-content"><b>Автор:</b> ${this.escapeHtml(post.content)}</div>
-                        `;
+                        preview.innerHTML = `<div class="op-preview-line"></div><div class="op-content"><b>Пост:</b> ${this.escapeHtml(post.content)}</div>`;
                     }
 
-                    // 2. Fetch Comments
-                    const { data: comms, error } = await this.sb.from('comments').select('*').eq('post_id', pid).order('created_at');
-                    
-                    if (error) throw error; // If error, go to catch
+                    // FIXED VARIABLE SCOPE: Defined 'commsData' explicitly
+                    const { data: commsData, error } = await this.sb.from('comments').select('*').eq('post_id', pid).order('created_at');
+                    if (error) throw error;
 
-                    if (!comms || comms.length === 0) {
+                    if (!commsData || commsData.length === 0) {
                         list.innerHTML = '<div style="text-align:center;margin-top:20px;color:#555">Нет комментариев</div>';
                         return;
                     }
 
-                    // 3. Fetch Authors
-                    const uids = [...new Set(coms.map(c => c.user_id))];
+                    // Fetch Authors
+                    const uids = [...new Set(comsData.map(c => c.user_id))];
                     const { data: profs } = await this.sb.from('profiles').select('id, username, display_name, avatar_url').in('id', uids);
                     const userMap = {};
                     profs?.forEach(p => userMap[p.id] = p);
 
-                    // 4. Render List
                     list.innerHTML = '';
-                    coms.forEach(c => {
+                    comsData.forEach(c => {
                         const p = userMap[c.user_id];
                         const name = p?.display_name || p?.username || 'User';
                         const avatar = p?.avatar_url 
@@ -702,19 +706,23 @@
                             contentHtml += `<img src="${c.image_url}" class="${cssClass}" onclick="app.openLightbox(this.src)">`;
                         }
 
+                        const isMine = this.user && this.user.id === c.user_id;
+                        const deleteBtn = isMine ? `<i class="ri-close-circle-line del-comment-btn" onclick="app.deleteComment('${c.id}')"></i>` : '';
+
                         const row = document.createElement('div');
                         row.className = 'comment-row';
+                        row.id = `comment-${c.id}`;
                         row.innerHTML = `
                             <div class="user-avatar-sm" style="width:32px;height:32px;font-size:0.7rem">${avatar}</div>
                             <div class="comment-bubble">
                                 <div class="comment-author">${name}</div>
                                 <div class="comment-text">${contentHtml}</div>
+                                ${deleteBtn}
                             </div>
                         `;
                         list.appendChild(row);
                     });
                     
-                    // Scroll to bottom
                     list.scrollTop = list.scrollHeight;
 
                 } catch (e) {
@@ -724,7 +732,6 @@
 
             async sendComment() {
                 if (!this.user) return this.toast("Войдите!", 'error');
-                
                 const inp = document.getElementById('comm-input');
                 const fileInp = document.getElementById('comm-file');
                 const val = inp.value.trim();
@@ -748,7 +755,7 @@
 
                     inp.value = '';
                     fileInp.value = '';
-                    this.openComments(this.currentPostId); // Refresh
+                    this.openComments(this.currentPostId); 
 
                 } catch (e) {
                     this.toast(e.message, 'error');
@@ -769,10 +776,16 @@
                 } catch(e) { this.toast(e.message, 'error'); }
             }
 
+            async deleteComment(cid) {
+                if(!confirm("Удалить?")) return;
+                await this.sb.from('comments').delete().eq('id', cid);
+                document.getElementById(`comment-${cid}`).remove();
+                this.vibrate();
+            }
+
             // === 5. POST CREATION ===
             async sendPost() {
                 if (!this.user) return this.toast("Войдите в аккаунт", 'error');
-                
                 const inp = document.getElementById('post-input');
                 const fileInp = document.getElementById('post-file');
                 const val = inp.value.trim();
@@ -790,13 +803,11 @@
                         url = await this.uploadFile(file);
                     }
 
-                    const { error } = await this.sb.from('posts').insert([{
+                    await this.sb.from('posts').insert([{
                         user_id: this.user.id,
                         content: val || " ",
                         image_url: url
                     }]);
-
-                    if (error) throw error;
 
                     inp.value = '';
                     fileInp.value = '';
@@ -813,7 +824,7 @@
                 }
             }
 
-            // === 6. HELPERS ===
+            // === 6. UTILS ===
             async uploadFile(file) {
                 const ext = file.name.split('.').pop();
                 const path = `${Date.now()}_${Math.random().toString(36).substr(2,9)}.${ext}`;
@@ -840,10 +851,10 @@
                 await this.sb.from('posts').delete().eq('id', pid);
                 document.getElementById(`post-${pid}`).remove();
                 this.toast("Удалено", "success");
+                this.vibrate();
             }
 
             reportPost() { this.toast("Жалоба отправлена", "success"); }
-
             toggleStickers() { document.getElementById('sticker-drawer').classList.toggle('open'); }
             closeComments() { document.getElementById('comments-modal').classList.remove('active'); }
             
@@ -859,9 +870,13 @@
                 t.className = `toast ${type}`;
                 t.innerText = msg;
                 box.appendChild(t);
+                this.vibrate();
                 setTimeout(() => t.remove(), 3000);
             }
 
+            vibrate() { if(navigator.vibrate) navigator.vibrate(10); }
+            refresh() { this.loadFeed(this.currentTab); }
+            switchTab(t) { this.loadFeed(t); }
             escapeHtml(text) { return text ? text.replace(/</g, "&lt;") : ""; }
             
             getTimeAgo(dateStr) {
