@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>MEMASIK 2.0 | SEARCH</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* =========================================
+           1. SYSTEM VARIABLES & RESET
+           ========================================= */
+        :root {
+            /* Colors */
+            --bg-root: #0a0a0c;
+            --bg-surface: #141416;
+            --bg-nav: rgba(15, 15, 17, 0.96);
+            --bg-input: #000000;
+            --bg-highlight: #1f1f22;
+            
+            /* Text */
+            --txt-primary: #ffffff;
+            --txt-secondary: #9999a1;
+            --txt-tertiary: #55555e;
+            
+            /* Brand */
+            --accent: #ff5e00;
+            --accent-dim: rgba(255, 94, 0, 0.15);
+            --accent-glow: rgba(255, 94, 0, 0.4);
+            
+            /* Status */
+            --danger: #ff3333;
+            --success: #00ff88;
+            --warning: #ffcc00;
+            
+            /* UI */
+            --border: #2a2a2e;
+            --radius-xl: 24px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            
+            /* Dimensions */
+            --header-h: 120px;
+            --nav-h: 75px;
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; outline: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-root);
+            color: var(--txt-primary);
+            font-family: 'Manrope', sans-serif;
+            height: 100vh;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            padding-bottom: calc(var(--nav-h) + 20px);
+        }
+
+        /* Cinematic Noise Overlay */
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            opacity: 0.5; pointer-events: none; z-index: -1;
+        }
+
+        /* Scrollbar Hide */
+        ::-webkit-scrollbar { width: 0px; display: none; }
+
+        /* =========================================
+           2. ANIMATION KEYFRAMES
+           ========================================= */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(255, 94, 0, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 94, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 94, 0, 0); }
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* =========================================
+           3. STICKY HEADER & SEARCH BAR
+           ========================================= */
+        .search-header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(10, 10, 12, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 15px 0 15px;
+            display: flex; flex-direction: column; gap: 15px;
+        }
+
+        .search-wrapper {
+            position: relative; width: 100%;
+            max-width: 600px; margin: 0 auto;
+        }
+
+        .search-icon-box {
+            position: absolute; left: 15px; top: 50%;
+            transform: translateY(-50%); color: var(--txt-secondary);
+            font-size: 1.2rem; pointer-events: none;
+            transition: 0.3s;
+        }
+
+        .search-input {
+            width: 100%; height: 50px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 0 45px;
+            color: #fff; font-family: 'Manrope'; font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-dim);
+        }
+        .search-input:focus + .search-icon-box { color: var(--accent); }
+
+        .search-clear {
+            position: absolute; right: 15px; top: 50%;
+            transform: translateY(-50%); color: var(--txt-tertiary);
+            font-size: 1.2rem; cursor: pointer; display: none;
+        }
+        .search-clear.visible { display: block; animation: scaleIn 0.2s; }
+
+        /* Filters / Tabs */
+        .filter-scroller {
+            display: flex; gap: 10px; overflow-x: auto;
+            padding-bottom: 15px; width: 100%; max-width: 600px; margin: 0 auto;
+        }
+        
+        .filter-chip {
+            padding: 8px 16px; border-radius: 30px;
+            background: var(--bg-highlight); border: 1px solid var(--border);
+            color: var(--txt-secondary); font-size: 0.85rem; font-weight: 600;
+            white-space: nowrap; cursor: pointer; transition: 0.3s;
+            font-family: 'Unbounded';
+        }
+        .filter-chip.active {
+            background: var(--accent); color: #000; border-color: var(--accent);
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        /* =========================================
+           4. CONTENT AREAS
+           ========================================= */
+        .content-container {
+            max-width: 600px; margin: 0 auto; padding: 20px 15px;
+            min-height: 500px;
+        }
+
+        /* --- STATE: IDLE (History & Trends) --- */
+        .idle-section { display: block; animation: fadeIn 0.4s; }
+        .idle-section.hidden { display: none; }
+
+        .section-title {
+            font-family: 'Unbounded'; font-size: 0.9rem; color: var(--txt-tertiary);
+            margin-bottom: 15px; display: flex; justify-content: space-between;
+        }
+        .clear-history { color: var(--danger); font-size: 0.75rem; cursor: pointer; }
+
+        .history-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 30px; }
+        .history-item {
+            display: flex; align-items: center; gap: 15px; padding: 12px;
+            background: rgba(255,255,255,0.02); border-radius: var(--radius-md);
+            cursor: pointer; transition: 0.2s;
+        }
+        .history-item:active { background: rgba(255,255,255,0.05); }
+        .h-icon { color: var(--txt-tertiary); font-size: 1.2rem; }
+        .h-text { flex: 1; font-size: 0.95rem; }
+        .h-remove { color: var(--txt-tertiary); padding: 5px; }
+
+        .trends-cloud { display: flex; flex-wrap: wrap; gap: 10px; }
+        .trend-tag {
+            padding: 8px 14px; background: rgba(255, 94, 0, 0.05);
+            border: 1px solid rgba(255, 94, 0, 0.15); border-radius: 8px;
+            color: var(--accent); font-size: 0.85rem; font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* --- STATE: RESULTS (Users & Posts) --- */
+        .results-section { display: none; }
+        .results-section.active { display: block; }
+
+        /* Masonry Grid for Posts */
+        .masonry-grid {
+            column-count: 2; column-gap: 10px;
+        }
+        .grid-card {
+            break-inside: avoid; margin-bottom: 10px;
+            background: var(--bg-surface); border-radius: var(--radius-lg);
+            overflow: hidden; border: 1px solid var(--border);
+            position: relative; cursor: pointer;
+            animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .grid-img { width: 100%; display: block; }
+        .grid-caption {
+            padding: 10px; font-size: 0.8rem; color: #ddd;
+            background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            position: absolute; bottom: 0; left: 0; width: 100%;
+        }
+        .grid-text-only {
+            padding: 20px; font-size: 0.9rem; line-height: 1.5; color: #fff;
+            min-height: 120px; display: flex; align-items: center; justify-content: center;
+            text-align: center; background: radial-gradient(circle at center, #1a1a1d 0%, #111 100%);
+        }
+
+        /* User List Layout */
+        .users-list { display: flex; flex-direction: column; gap: 12px; }
+        .user-card {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px; background: var(--bg-surface);
+            border: 1px solid var(--border); border-radius: var(--radius-lg);
+            animation: slideUp 0.3s;
+        }
+        .uc-avatar {
+            width: 50px; height: 50px; border-radius: 50%;
+            background: #222; border: 2px solid var(--border);
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'Unbounded'; font-weight: 700; font-size: 1.2rem;
+            color: #fff; flex-shrink: 0; object-fit: cover;
+        }
+        .uc-info { flex: 1; overflow: hidden; }
+        .uc-name { font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 2px; }
+        .uc-handle { color: var(--txt-secondary); font-size: 0.8rem; }
+        .uc-btn {
+            padding: 8px 16px; background: #fff; color: #000;
+            border-radius: 20px; font-size: 0.8rem; font-weight: 700;
+            cursor: pointer; transition: 0.2s; font-family: 'Unbounded';
+        }
+        .uc-btn:active { transform: scale(0.95); }
+
+        /* Loader */
+        .loader-box {
+            display: none; text-align: center; padding: 40px; color: var(--txt-secondary);
+        }
+        .loader-box.active { display: block; }
+        .spinner { font-size: 2rem; animation: spin 1s linear infinite; display: inline-block; }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center; padding: 50px 20px; color: var(--txt-tertiary); display: none;
+        }
+        .empty-icon { font-size: 4rem; margin-bottom: 10px; opacity: 0.3; }
+
+        /* =========================================
+           5. MODALS & PREVIEWS
+           ========================================= */
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 5000;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(10px); opacity: 0; transition: 0.3s;
+        }
+        .modal-backdrop.open { display: flex; opacity: 1; }
+
+        .post-preview-card {
+            width: 90%; max-width: 400px; background: var(--bg-surface);
+            border-radius: var(--radius-xl); overflow: hidden;
+            border: 1px solid var(--border); position: relative;
+            transform: scale(0.9); transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .modal-backdrop.open .post-preview-card { transform: scale(1); }
+
+        .pp-img { width: 100%; max-height: 60vh; object-fit: contain; background: #000; }
+        .pp-body { padding: 20px; }
+        .pp-text { font-size: 1rem; margin-bottom: 15px; color: #ddd; }
+        .pp-meta { display: flex; justify-content: space-between; color: var(--txt-secondary); font-size: 0.85rem; }
+        .pp-close {
+            position: absolute; top: 15px; right: 15px;
+            background: rgba(0,0,0,0.5); width: 36px; height: 36px;
+            border-radius: 50%; color: #fff; display: flex;
+            justify-content: center; align-items: center; cursor: pointer;
+            font-size: 1.5rem; backdrop-filter: blur(4px);
+        }
+
+        /* =========================================
+           6. NAVIGATION BAR
+           ========================================= */
+        .nav-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-h);
+            background: var(--bg-nav); border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 900; backdrop-filter: blur(12px);
+            padding-bottom: 10px;
+        }
+        .nav-item { 
+            font-size: 1.6rem; color: var(--txt-secondary); 
+            cursor: pointer; transition: 0.2s; position: relative;
+        }
+        .nav-item.active { color: #fff; transform: translateY(-2px); text-shadow: 0 0 15px rgba(255,255,255,0.3); }
+        
+        .nav-fab {
+            width: 54px; height: 54px; background: var(--accent);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            color: #000; font-size: 1.8rem; transform: translateY(-25%);
+            border: 4px solid var(--bg-root); box-shadow: 0 8px 30px var(--accent-glow);
+            cursor: pointer;
+        }
+
+        /* =========================================
+           7. TOAST NOTIFICATIONS
+           ========================================= */
+        #toast-wrapper {
+            position: fixed; top: 90px; left: 50%; transform: translateX(-50%);
+            z-index: 9999; display: flex; flex-direction: column; gap: 10px;
+            width: 90%; max-width: 400px; pointer-events: none;
+        }
+        .toast {
+            pointer-events: auto; background: #222; color: #fff; padding: 14px 18px;
+            border-radius: 12px; border-left: 4px solid #fff;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 12px;
+            animation: slideDownToast 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            font-size: 0.9rem; font-weight: 600;
+        }
+        @keyframes slideDownToast { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        .toast.error { border-color: var(--danger); }
+        .toast.success { border-color: var(--success); }
+
+    </style>
+</head>
+<body>
+
+    <div class="search-header">
+        <div class="search-wrapper">
+            <input type="text" id="search-inp" class="search-input" placeholder="Поиск мемов и людей..." autocomplete="off">
+            <i class="ri-search-2-line search-icon-box"></i>
+            <i class="ri-close-circle-fill search-clear" id="search-clear" onclick="app.clearSearch()"></i>
+        </div>
+
+        <div class="filter-scroller">
+            <div class="filter-chip active" onclick="app.setFilter('all', this)">ВСЕ</div>
+            <div class="filter-chip" onclick="app.setFilter('posts', this)">МЕМЫ</div>
+            <div class="filter-chip" onclick="app.setFilter('users', this)">ЛЮДИ</div>
+            <div class="filter-chip" onclick="app.setFilter('tags', this)">ТЕГИ</div>
+        </div>
+    </div>
+
+    <div class="content-container">
+        
+        <div id="idle-view" class="idle-section">
+            <div class="section-title">
+                <span>НЕДАВНЕЕ</span>
+                <span class="clear-history" onclick="app.clearHistory()">Очистить</span>
+            </div>
+            <div class="history-list" id="history-list">
+                </div>
+
+            <div class="section-title"><span>ПОПУЛЯРНОЕ СЕЙЧАС</span></div>
+            <div class="trends-cloud" id="trends-cloud">
+                <div class="trend-tag">#memasik2026</div>
+                <div class="trend-tag">#cyberpunk</div>
+                <div class="trend-tag">#code</div>
+                <div class="trend-tag">#relax</div>
+                <div class="trend-tag">#music</div>
+            </div>
+        </div>
+
+        <div id="results-view" class="results-section">
+            <div class="loader-box" id="loader">
+                <i class="ri-loader-2-line spinner"></i>
+            </div>
+            
+            <div class="empty-state" id="empty-state">
+                <i class="ri-ghost-line empty-icon"></i>
+                <p>Ничего не найдено...</p>
+            </div>
+
+            <div class="masonry-grid" id="posts-grid"></div>
+            
+            <div class="users-list" id="users-list"></div>
+        </div>
+
+    </div>
+
+    <div class="modal-backdrop" id="preview-modal" onclick="app.closePreview(event)">
+        <div class="post-preview-card">
+            <div class="pp-close" onclick="app.closePreview(null, true)">&times;</div>
+            <div id="pp-content"></div>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="nav-item" onclick="window.location.href='feed.html'"><i class="ri-home-5-line"></i></div>
+        <div class="nav-item active"><i class="ri-search-2-fill"></i></div>
+        <div class="nav-fab" onclick="window.location.href='feed.html'"><i class="ri-add-line"></i></div>
+        <div class="nav-item"><i class="ri-heart-3-line"></i></div>
+        <div class="nav-item" onclick="window.location.href='profile.html'"><i class="ri-user-3-line"></i></div>
+    </nav>
+
+    <div id="toast-wrapper"></div>
+
+    <script>
+        /**
+         * MEMASIK 2.0 SEARCH ENGINE
+         * High-Performance, Debounced, Multi-Table Search.
+         */
+
+        const CONFIG = {
+            URL: 'https://hrrzpftxpafnavlljhum.supabase.co',
+            // ADMIN KEY (Service Role) - Для полного доступа к поиску по всем юзерам
+            KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTI3NzU3NiwiZXhwIjoyMDg0ODUzNTc2fQ.5Dt7zXjEF_lVc5Komkg11A4Jy97rxI94PF3UE40X1RE'
+        };
+
+        class SearchApp {
+            constructor() {
+                this.sb = window.supabase.createClient(CONFIG.URL, CONFIG.KEY);
+                this.filter = 'all';
+                this.timer = null;
+                this.history = JSON.parse(localStorage.getItem('mem_search_hist') || '[]');
+                
+                this.bindEvents();
+                this.renderHistory();
+            }
+
+            // --- 1. EVENT BINDING ---
+            bindEvents() {
+                const inp = document.getElementById('search-inp');
+                const clear = document.getElementById('search-clear');
+
+                inp.addEventListener('input', (e) => {
+                    const val = e.target.value.trim();
+                    
+                    // UI Toggle
+                    if (val.length > 0) clear.classList.add('visible');
+                    else clear.classList.remove('visible');
+
+                    // Debounce Search
+                    clearTimeout(this.timer);
+                    this.timer = setTimeout(() => this.performSearch(val), 400); // 400ms delay
+                });
+
+                inp.addEventListener('focus', () => {
+                    if (inp.value === '') this.showIdleState();
+                });
+            }
+
+            // --- 2. SEARCH LOGIC ---
+            async performSearch(query) {
+                if (!query) {
+                    this.showIdleState();
+                    return;
+                }
+
+                this.showLoader();
+                this.addToHistory(query);
+
+                try {
+                    const results = { posts: [], users: [] };
+
+                    // PARALLEL SEARCH EXECUTION
+                    const promises = [];
+
+                    // A. Search Posts (Content)
+                    if (this.filter === 'all' || this.filter === 'posts' || this.filter === 'tags') {
+                        promises.push(
+                            this.sb.from('posts')
+                                .select('*')
+                                .ilike('content', `%${query}%`)
+                                .limit(20)
+                                .then(res => results.posts = res.data || [])
+                        );
+                    }
+
+                    // B. Search Users (Username or Display Name)
+                    if (this.filter === 'all' || this.filter === 'users') {
+                        promises.push(
+                            this.sb.from('profiles')
+                                .select('*')
+                                .or(`username.ilike.%${query}%,display_name.ilike.%${query}%`)
+                                .limit(10)
+                                .then(res => results.users = res.data || [])
+                        );
+                    }
+
+                    await Promise.all(promises);
+                    this.renderResults(results, query);
+
+                } catch (e) {
+                    console.error(e);
+                    this.toast("Ошибка поиска", "error");
+                }
+            }
+
+            // --- 3. RENDERERS ---
+            renderResults(data, query) {
+                this.hideLoader();
+                const grid = document.getElementById('posts-grid');
+                const list = document.getElementById('users-list');
+                const empty = document.getElementById('empty-state');
+
+                grid.innerHTML = '';
+                list.innerHTML = '';
+                
+                const hasPosts = data.posts.length > 0;
+                const hasUsers = data.users.length > 0;
+
+                if (!hasPosts && !hasUsers) {
+                    empty.style.display = 'block';
+                    return;
+                } else {
+                    empty.style.display = 'none';
+                }
+
+                // Render Posts (Masonry)
+                if (hasPosts && this.filter !== 'users') {
+                    data.posts.forEach(post => {
+                        const div = document.createElement('div');
+                        div.className = 'grid-card';
+                        div.onclick = () => this.openPreview(post);
+                        
+                        if (post.image_url) {
+                            div.innerHTML = `
+                                <img src="${post.image_url}" class="grid-img">
+                                <div class="grid-caption">${this.highlight(post.content, query)}</div>
+                            `;
+                        } else {
+                            div.innerHTML = `<div class="grid-text-only">${this.highlight(post.content, query)}</div>`;
+                        }
+                        grid.appendChild(div);
+                    });
+                }
+
+                // Render Users (List)
+                if (hasUsers && this.filter !== 'posts' && this.filter !== 'tags') {
+                    data.users.forEach(user => {
+                        const name = user.display_name || user.username || 'User';
+                        const tag = user.username ? `@${user.username}` : '';
+                        const ava = user.avatar_url 
+                            ? `<img src="${user.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+                            : (name[0].toUpperCase());
+
+                        const div = document.createElement('div');
+                        div.className = 'user-card';
+                        div.innerHTML = `
+                            <div class="uc-avatar">${ava}</div>
+                            <div class="uc-info">
+                                <div class="uc-name">${this.highlight(name, query)}</div>
+                                <div class="uc-handle">${this.highlight(tag, query)}</div>
+                            </div>
+                            <div class="uc-btn">View</div>
+                        `;
+                        // Mock navigation (would go to profile view)
+                        div.onclick = () => this.toast("Профиль пользователя: " + name, "success");
+                        list.appendChild(div);
+                    });
+                }
+            }
+
+            // --- 4. HISTORY MANAGEMENT ---
+            addToHistory(q) {
+                if (this.history.includes(q)) return;
+                this.history.unshift(q);
+                if (this.history.length > 5) this.history.pop();
+                localStorage.setItem('mem_search_hist', JSON.stringify(this.history));
+                this.renderHistory();
+            }
+
+            renderHistory() {
+                const list = document.getElementById('history-list');
+                list.innerHTML = '';
+                if (this.history.length === 0) {
+                    list.innerHTML = '<div style="color:#555;font-size:0.8rem;padding:10px">История пуста</div>';
+                    return;
+                }
+                this.history.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+                    div.innerHTML = `
+                        <i class="ri-time-line h-icon"></i>
+                        <span class="h-text">${item}</span>
+                        <i class="ri-close-line h-remove" onclick="event.stopPropagation(); app.remHist('${item}')"></i>
+                    `;
+                    div.onclick = () => {
+                        document.getElementById('search-inp').value = item;
+                        this.performSearch(item);
+                        document.getElementById('search-clear').classList.add('visible');
+                    };
+                    list.appendChild(div);
+                });
+            }
+
+            remHist(item) {
+                this.history = this.history.filter(i => i !== item);
+                localStorage.setItem('mem_search_hist', JSON.stringify(this.history));
+                this.renderHistory();
+            }
+
+            clearHistory() {
+                this.history = [];
+                localStorage.removeItem('mem_search_hist');
+                this.renderHistory();
+                this.vibrate();
+            }
+
+            // --- 5. UI ACTIONS ---
+            setFilter(type, el) {
+                this.filter = type;
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                el.classList.add('active');
+                
+                // Re-trigger search if input has value
+                const val = document.getElementById('search-inp').value;
+                if (val) this.performSearch(val);
+                this.vibrate();
+            }
+
+            clearSearch() {
+                const inp = document.getElementById('search-inp');
+                inp.value = '';
+                inp.focus();
+                document.getElementById('search-clear').classList.remove('visible');
+                this.showIdleState();
+            }
+
+            showIdleState() {
+                document.getElementById('idle-view').classList.remove('hidden');
+                document.getElementById('results-view').classList.remove('active');
+            }
+
+            showLoader() {
+                document.getElementById('idle-view').classList.add('hidden');
+                document.getElementById('results-view').classList.add('active');
+                document.getElementById('loader').classList.add('active');
+                document.getElementById('posts-grid').innerHTML = '';
+                document.getElementById('users-list').innerHTML = '';
+                document.getElementById('empty-state').style.display = 'none';
+            }
+
+            hideLoader() {
+                document.getElementById('loader').classList.remove('active');
+            }
+
+            // --- 6. PREVIEW MODAL ---
+            openPreview(post) {
+                const modal = document.getElementById('preview-modal');
+                const content = document.getElementById('pp-content');
+                
+                let media = post.image_url 
+                    ? `<img src="${post.image_url}" class="pp-img">`
+                    : '<div style="height:100px;background:#111"></div>';
+
+                content.innerHTML = `
+                    ${media}
+                    <div class="pp-body">
+                        <div class="pp-text">${this.escapeHtml(post.content)}</div>
+                        <div class="pp-meta">
+                            <span>${new Date(post.created_at).toLocaleDateString()}</span>
+                            <span>ID: ${post.id.slice(0,6)}</span>
+                        </div>
+                    </div>
+                `;
+                modal.classList.add('open');
+            }
+
+            closePreview(e, force = false) {
+                if (force || e.target.id === 'preview-modal') {
+                    document.getElementById('preview-modal').classList.remove('open');
+                }
+            }
+
+            // --- UTILS ---
+            highlight(text, query) {
+                if (!text) return "";
+                const regex = new RegExp(`(${query})`, 'gi');
+                return this.escapeHtml(text).replace(regex, '<span style="color:var(--accent)">$1</span>');
+            }
+
+            escapeHtml(text) {
+                return text ? text.replace(/</g, "&lt;") : "";
+            }
+
+            toast(msg, type) {
+                const box = document.getElementById('toast-wrapper');
+                const t = document.createElement('div');
+                t.className = `toast ${type}`;
+                t.innerText = msg;
+                box.appendChild(t);
+                this.vibrate();
+                setTimeout(() => t.remove(), 3000);
+            }
+
+            vibrate() {
+                if (navigator.vibrate) navigator.vibrate(10);
+            }
+        }
+
+        const app = new SearchApp();
+    </script>
+</body>
+</html>
