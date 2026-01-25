@@ -104,8 +104,9 @@
             background: #1a1a1d; border: 2px solid #333;
             display: flex; justify-content: center; align-items: center;
             font-family: 'Unbounded'; font-weight: 700; color: #fff;
-            flex-shrink: 0; object-fit: cover; font-size: 1rem;
+            flex-shrink: 0; object-fit: cover; font-size: 1rem; overflow: hidden;
         }
+        .user-avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
 
         .create-input {
             flex: 1; background: #000; border: 1px solid var(--border);
@@ -649,7 +650,7 @@
                 }
             }
 
-            // --- 4. COMMENTS SYSTEM ---
+            // --- 4. COMMENTS SYSTEM (FIXED "ETERNAL LOADING") ---
             async openComments(pid) {
                 this.currentPostId = pid;
                 const modal = document.getElementById('comments-modal');
@@ -659,59 +660,66 @@
                 modal.classList.add('active');
                 list.innerHTML = '<div style="text-align:center;margin-top:20px;color:#666">Загрузка...</div>';
 
-                // 1. Render Preview
-                const post = this.postsCache[pid];
-                if (post) {
-                    preview.style.display = 'flex';
-                    preview.innerHTML = `
-                        <div class="op-preview-line"></div>
-                        <div class="op-content"><b>Автор:</b> ${this.escapeHtml(post.content)}</div>
-                    `;
-                }
-
-                // 2. Fetch Comments
-                const { data: comms } = await this.sb.from('comments').select('*').eq('post_id', pid).order('created_at');
-                
-                if (!comms || comms.length === 0) {
-                    list.innerHTML = '<div style="text-align:center;margin-top:20px;color:#555">Нет комментариев</div>';
-                    return;
-                }
-
-                // 3. Fetch Authors
-                const uids = [...new Set(coms.map(c => c.user_id))];
-                const { data: profs } = await this.sb.from('profiles').select('id, username, display_name, avatar_url').in('id', uids);
-                const userMap = {};
-                profs?.forEach(p => userMap[p.id] = p);
-
-                // 4. Render List
-                list.innerHTML = '';
-                coms.forEach(c => {
-                    const p = userMap[c.user_id];
-                    const name = p?.display_name || p?.username || 'User';
-                    const avatar = p?.avatar_url 
-                        ? `<img src="${p.avatar_url}" style="width:100%;height:100%;border-radius:50%">`
-                        : (name[0].toUpperCase());
-                    
-                    let contentHtml = this.escapeHtml(c.content);
-                    if (c.image_url) {
-                        const cssClass = c.content === 'Sticker' ? 'sticker-img-sm' : 'comment-img';
-                        contentHtml += `<img src="${c.image_url}" class="${cssClass}" onclick="app.openLightbox(this.src)">`;
+                try {
+                    // 1. Render Preview
+                    const post = this.postsCache[pid];
+                    if (post) {
+                        preview.style.display = 'flex';
+                        preview.innerHTML = `
+                            <div class="op-preview-line"></div>
+                            <div class="op-content"><b>Автор:</b> ${this.escapeHtml(post.content)}</div>
+                        `;
                     }
 
-                    const row = document.createElement('div');
-                    row.className = 'comment-row';
-                    row.innerHTML = `
-                        <div class="user-avatar-sm" style="width:32px;height:32px;font-size:0.7rem">${avatar}</div>
-                        <div class="comment-bubble">
-                            <div class="comment-author">${name}</div>
-                            <div class="comment-text">${contentHtml}</div>
-                        </div>
-                    `;
-                    list.appendChild(row);
-                });
-                
-                // Scroll to bottom
-                list.scrollTop = list.scrollHeight;
+                    // 2. Fetch Comments
+                    const { data: comms, error } = await this.sb.from('comments').select('*').eq('post_id', pid).order('created_at');
+                    
+                    if (error) throw error; // If error, go to catch
+
+                    if (!comms || comms.length === 0) {
+                        list.innerHTML = '<div style="text-align:center;margin-top:20px;color:#555">Нет комментариев</div>';
+                        return;
+                    }
+
+                    // 3. Fetch Authors
+                    const uids = [...new Set(coms.map(c => c.user_id))];
+                    const { data: profs } = await this.sb.from('profiles').select('id, username, display_name, avatar_url').in('id', uids);
+                    const userMap = {};
+                    profs?.forEach(p => userMap[p.id] = p);
+
+                    // 4. Render List
+                    list.innerHTML = '';
+                    coms.forEach(c => {
+                        const p = userMap[c.user_id];
+                        const name = p?.display_name || p?.username || 'User';
+                        const avatar = p?.avatar_url 
+                            ? `<img src="${p.avatar_url}" style="width:100%;height:100%;border-radius:50%">`
+                            : (name[0].toUpperCase());
+                        
+                        let contentHtml = this.escapeHtml(c.content);
+                        if (c.image_url) {
+                            const cssClass = c.content === 'Sticker' ? 'sticker-img-sm' : 'comment-img';
+                            contentHtml += `<img src="${c.image_url}" class="${cssClass}" onclick="app.openLightbox(this.src)">`;
+                        }
+
+                        const row = document.createElement('div');
+                        row.className = 'comment-row';
+                        row.innerHTML = `
+                            <div class="user-avatar-sm" style="width:32px;height:32px;font-size:0.7rem">${avatar}</div>
+                            <div class="comment-bubble">
+                                <div class="comment-author">${name}</div>
+                                <div class="comment-text">${contentHtml}</div>
+                            </div>
+                        `;
+                        list.appendChild(row);
+                    });
+                    
+                    // Scroll to bottom
+                    list.scrollTop = list.scrollHeight;
+
+                } catch (e) {
+                    list.innerHTML = `<div style="color:#ff3333;text-align:center;margin-top:20px">Ошибка: ${e.message}</div>`;
+                }
             }
 
             async sendComment() {
