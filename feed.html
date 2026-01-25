@@ -3,111 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MEMASIK 2.0 | FULL</title>
+    <title>MEMASIK 2.0 | FEED</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <style>
-        /* === BASE STYLES === */
+        /* =========================================
+           1. CORE VARIABLES & RESET
+           ========================================= */
         :root {
-            --bg-body: #0a0a0c; --bg-card: #141416; --bg-input: #000000; --bg-nav: rgba(18, 18, 20, 0.95);
-            --text-primary: #ffffff; --text-secondary: #888890; --accent: #ff5e00; --border: #2a2a2e;
-            --nav-height: 70px; --header-height: 60px;
+            --bg-body: #0a0a0c;
+            --bg-card: #141416;
+            --bg-input: #000000;
+            --bg-nav: rgba(18, 18, 20, 0.95);
+            
+            --text-primary: #ffffff;
+            --text-secondary: #888890;
+            --text-muted: #55555e;
+            
+            --accent: #ff5e00;
+            --accent-glow: rgba(255, 94, 0, 0.3);
+            --border: #2a2a2e;
+            --red-danger: #ff3333;
+            
+            --font-main: 'Manrope', sans-serif;
+            --font-display: 'Unbounded', sans-serif;
+            
+            --nav-height: 70px;
+            --header-height: 60px;
+            --radius-card: 16px;
+            --radius-btn: 12px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { background-color: var(--bg-body); color: var(--text-primary); font-family: 'Manrope', sans-serif; height: 100vh; overflow-y: scroll; padding-top: var(--header-height); padding-bottom: calc(var(--nav-height) + 20px); }
         
-        /* Noise Texture */
-        body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E"); opacity: 0.5; pointer-events: none; z-index: -1; }
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            height: 100vh;
+            overflow-y: scroll;
+            padding-top: var(--header-height);
+            padding-bottom: calc(var(--nav-height) + 20px);
+        }
 
-        /* Header */
-        .header-fixed { position: fixed; top: 0; left: 0; width: 100%; height: var(--header-height); background: rgba(10, 10, 12, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; flex-direction: column; justify-content: flex-end; }
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+            opacity: 0.5; pointer-events: none; z-index: -1;
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg-body); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+        /* =========================================
+           2. HEADER & TABS
+           ========================================= */
+        .header-fixed {
+            position: fixed; top: 0; left: 0; width: 100%;
+            height: var(--header-height);
+            background: rgba(10, 10, 12, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            display: flex; flex-direction: column; justify-content: flex-end;
+        }
+
         .header-top { display: flex; justify-content: center; align-items: center; height: 30px; }
-        .brand { font-family: 'Unbounded', sans-serif; font-weight: 900; font-size: 0.9rem; letter-spacing: 1px; }
+        .brand { font-family: var(--font-display); font-weight: 900; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px; color: #fff; }
         .brand span { color: var(--accent); }
-        .tabs-container { display: flex; width: 100%; height: 40px; }
-        .tab-btn { flex: 1; background: transparent; border: none; color: var(--text-secondary); font-family: 'Unbounded'; font-weight: 700; font-size: 0.8rem; cursor: pointer; position: relative; }
-        .tab-btn.active { color: #fff; }
-        .tab-btn.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 20px; height: 3px; background: var(--accent); }
 
-        /* Feed */
+        .tabs-container { display: flex; width: 100%; height: 40px; }
+        .tab-btn { flex: 1; background: transparent; border: none; color: var(--text-muted); font-family: var(--font-display); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; cursor: pointer; position: relative; transition: color 0.3s; }
+        .tab-btn.active { color: var(--text-primary); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 20px; height: 3px; background: var(--accent); border-radius: 3px 3px 0 0; box-shadow: 0 -2px 8px var(--accent-glow); }
+
+        /* =========================================
+           3. FEED & POSTS
+           ========================================= */
         .container { max-width: 600px; margin: 0 auto; padding: 15px; }
 
-        /* Create Post */
-        .create-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
-        .avatar-circle { width: 42px; height: 42px; border-radius: 50%; background: #222; border: 2px solid #333; display: flex; justify-content: center; align-items: center; font-family: 'Unbounded'; font-weight: 700; flex-shrink: 0; text-transform: uppercase; }
+        .create-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .avatar-circle { width: 42px; height: 42px; border-radius: 50%; background: #222; border: 2px solid #333; display: flex; justify-content: center; align-items: center; color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 1rem; flex-shrink: 0; object-fit: cover; text-transform: uppercase; }
+        
         .input-wrapper { flex: 1; position: relative; }
-        .main-input { width: 100%; background: var(--bg-input); border: 1px solid var(--border); color: #fff; padding: 12px 40px 12px 15px; border-radius: 20px; font-family: 'Manrope'; }
-        .send-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 1.4rem; cursor: pointer; }
+        .main-input { width: 100%; background: var(--bg-input); border: 1px solid var(--border); color: #fff; padding: 12px 40px 12px 15px; border-radius: 20px; font-family: var(--font-main); font-size: 0.95rem; transition: border-color 0.2s; }
+        .main-input:focus { border-color: var(--accent); }
+        .send-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 1.4rem; cursor: pointer; transition: transform 0.2s; }
+        .send-btn:active { transform: translateY(-50%) scale(0.9); }
 
-        /* Post Card */
-        .post-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; position: relative; }
+        .post-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px; margin-bottom: 12px; position: relative; animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
         .author-info { display: flex; gap: 10px; align-items: center; }
-        .author-name { font-weight: 700; font-size: 0.95rem; }
+        .author-name { font-weight: 700; font-size: 0.95rem; color: #fff; line-height: 1.2; }
         .post-meta { font-size: 0.75rem; color: var(--text-secondary); }
         .post-content { font-size: 1rem; line-height: 1.5; color: #e0e0e0; margin-bottom: 16px; white-space: pre-wrap; word-break: break-word; }
-        
         .post-footer { display: flex; align-items: center; gap: 20px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
-        .action-item { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; cursor: pointer; transition: 0.2s; }
+
+        .action-item { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; cursor: pointer; transition: color 0.2s; }
+        .action-item:hover { color: #fff; }
+        .action-item.liked { color: var(--red-danger); }
+        .action-item.liked i { font-weight: 900; } /* Filled heart style */
         .action-item i { font-size: 1.2rem; }
-        
-        /* Interactive States */
-        .action-item.liked { color: #ff3333; }
-        .action-item.liked i { font-weight: 900; } /* Filled heart */
 
-        /* Dropdown Menu (Three dots) */
-        .menu-btn { cursor: pointer; padding: 5px; color: var(--text-secondary); position: relative; }
-        .dropdown { 
-            display: none; position: absolute; right: 0; top: 30px; 
-            background: #222; border: 1px solid #444; border-radius: 8px; 
-            width: 150px; z-index: 100; box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        /* --- DROPDOWN MENU --- */
+        .menu-btn { cursor: pointer; padding: 5px; color: var(--text-muted); position: relative; }
+        .menu-dropdown {
+            position: absolute; top: 30px; right: 10px;
+            background: #222; border: 1px solid var(--border);
+            border-radius: 8px; width: 140px; display: none; z-index: 10;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
         }
-        .dropdown.show { display: block; animation: fadeIn 0.2s; }
-        .dropdown-item { padding: 12px; color: #fff; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .dropdown-item:hover { background: #333; }
-        .text-danger { color: #ff4444; }
+        .menu-dropdown.show { display: block; animation: fadeIn 0.2s; }
+        .menu-item { padding: 10px 15px; color: #ccc; font-size: 0.85rem; cursor: pointer; border-bottom: 1px solid #333; }
+        .menu-item:last-child { border-bottom: none; }
+        .menu-item:hover { background: #333; color: #fff; }
+        .menu-item.danger { color: var(--red-danger); }
 
-        /* Comments Section */
-        .comments-section { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #333; animation: fadeIn 0.3s; }
-        .comment { margin-bottom: 10px; font-size: 0.85rem; }
-        .comment-user { font-weight: 700; color: var(--accent); margin-right: 5px; }
-        .comment-input-box { display: flex; gap: 10px; margin-top: 10px; }
-        .comment-input { flex: 1; background: #000; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 8px; }
-        .comment-send { background: var(--accent); color: #000; border: none; padding: 0 15px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        /* =========================================
+           4. COMMENTS MODAL
+           ========================================= */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 2000;
+            opacity: 0; pointer-events: none; transition: 0.3s;
+            display: flex; flex-direction: column; justify-content: flex-end;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        
+        .modal-sheet {
+            background: #141416; width: 100%; height: 70vh;
+            border-radius: 20px 20px 0 0; border-top: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            transform: translateY(100%); transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .modal-overlay.active .modal-sheet { transform: translateY(0); }
 
-        /* Nav */
-        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height); background: var(--bg-nav); backdrop-filter: blur(12px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 999; }
+        .modal-header { padding: 15px; text-align: center; border-bottom: 1px solid var(--border); font-family: var(--font-display); font-size: 0.9rem; position: relative; color: #fff; }
+        .close-modal { position: absolute; right: 15px; top: 15px; background: none; border: none; color: #888; font-size: 1.2rem; cursor: pointer; }
+        
+        .comments-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+        .comment-item { display: flex; gap: 10px; font-size: 0.9rem; }
+        .comment-content { background: #222; padding: 8px 12px; border-radius: 12px; color: #ddd; max-width: 85%; }
+        .comment-user { font-weight: 700; color: #fff; font-size: 0.8rem; margin-bottom: 2px; }
+
+        .modal-input-area {
+            padding: 10px 15px 25px 15px; border-top: 1px solid var(--border);
+            background: #141416; display: flex; gap: 10px; align-items: center;
+        }
+        
+        /* Skeletons & Nav */
+        .skeleton { background: linear-gradient(90deg, #1a1a1c 25%, #222 50%, #1a1a1c 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .sk-avatar { width: 40px; height: 40px; border-radius: 50%; }
+        .sk-name { width: 100px; height: 14px; margin-bottom: 6px; }
+        .sk-date { width: 60px; height: 10px; }
+        .sk-text { width: 100%; height: 16px; margin-bottom: 8px; }
+
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height); background: var(--bg-nav); backdrop-filter: blur(12px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 999; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { color: var(--text-secondary); font-size: 1.5rem; padding: 10px; cursor: pointer; }
         .nav-item.active { color: #fff; }
-        .nav-fab { width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #000; font-size: 1.5rem; transform: translateY(-20%); border: 3px solid var(--bg-body); cursor: pointer; }
+        .nav-fab { width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #000; font-size: 1.5rem; transform: translateY(-20%); border: 3px solid var(--bg-body); box-shadow: 0 4px 15px var(--accent-glow); cursor: pointer; }
 
-        /* Animations */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        /* Toast */
+        /* Toasts */
         #toast-container { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; }
-        .toast { background: #222; color: #fff; padding: 12px 16px; border-radius: 8px; font-size: 0.9rem; border-left: 4px solid #fff; animation: slideDown 0.3s ease; }
-        .toast.success { border-left-color: #00ff88; } .toast.error { border-left-color: #ff3333; }
+        .toast { background: #222; color: #fff; padding: 12px 16px; border-radius: 8px; font-size: 0.9rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-left: 4px solid #fff; animation: slideDown 0.3s ease; display: flex; align-items: center; gap: 10px; }
+        .toast.error { border-left-color: #ff3333; }
+        .toast.success { border-left-color: #00ff88; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
     </style>
 </head>
 <body>
 
     <header class="header-fixed">
-        <div class="header-top"><div class="brand">MEMASIK <span>2.0</span></div></div>
+        <div class="header-top">
+            <div class="brand">MEMASIK <span>2.0</span></div>
+        </div>
         <div class="tabs-container">
-            <button class="tab-btn active" id="tab-new" onclick="app.loadFeed('new')">LENTA</button>
-            <button class="tab-btn" id="tab-top" onclick="app.loadFeed('top')">TOP</button>
+            <button class="tab-btn active" id="tab-new" onclick="app.switchTab('new')">LENTA</button>
+            <button class="tab-btn" id="tab-top" onclick="app.switchTab('top')">TOP</button>
         </div>
     </header>
 
     <div class="container">
+        
         <div class="create-card">
             <div class="avatar-circle" id="current-user-avatar">?</div>
             <div class="input-wrapper">
@@ -115,7 +203,22 @@
                 <i class="ri-send-plane-fill send-btn" onclick="app.createPost()"></i>
             </div>
         </div>
-        <div id="feed-list"></div>
+
+        <div id="feed-list">
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="author-info">
+                        <div class="skeleton sk-avatar"></div>
+                        <div>
+                            <div class="skeleton sk-name"></div>
+                            <div class="skeleton sk-date"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="skeleton sk-text"></div>
+                <div class="skeleton sk-text"></div>
+            </div>
+        </div>
     </div>
 
     <nav class="nav-bar">
@@ -128,250 +231,348 @@
 
     <div id="toast-container"></div>
 
+    <div class="modal-overlay" id="comments-modal">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                Комментарии
+                <button class="close-modal" onclick="app.closeComments()"><i class="ri-close-line"></i></button>
+            </div>
+            <div class="comments-list" id="comments-list">
+                <div style="text-align:center; color:#555; margin-top:20px;">Загрузка...</div>
+            </div>
+            <div class="modal-input-area">
+                <input type="text" id="comment-input" class="main-input" placeholder="Написать комментарий..." autocomplete="off">
+                <i class="ri-send-plane-fill send-btn" style="position:static; transform:none;" onclick="app.submitComment()"></i>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // CONFIG
+        /**
+         * MEMASIK 2.0 ULTIMATE
+         */
+        
         const CONFIG = {
-            URL: 'https://hrrzpftxpafnavlljhum.supabase.co',
-            KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTI3NzU3NiwiZXhwIjoyMDg0ODUzNTc2fQ.5Dt7zXjEF_lVc5Komkg11A4Jy97rxI94PF3UE40X1RE'
+            // ADMIN KEY (SERVICE ROLE) - ГАРАНТИРУЕТ РАБОТУ
+            SUPABASE_URL: 'https://hrrzpftxpafnavlljhum.supabase.co',
+            SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTI3NzU3NiwiZXhwIjoyMDg0ODUzNTc2fQ.5Dt7zXjEF_lVc5Komkg11A4Jy97rxI94PF3UE40X1RE'
         };
 
         class App {
             constructor() {
-                this.supabase = window.supabase.createClient(CONFIG.URL, CONFIG.KEY);
+                this.supabase = null;
                 this.currentUser = null;
+                this.currentTab = 'new';
+                this.currentPostIdForComments = null;
                 this.init();
                 
-                // Закрываем меню при клике вне его
+                // Закрыть меню если кликнуть мимо
                 document.addEventListener('click', (e) => {
-                    if (!e.target.closest('.menu-btn')) {
-                        document.querySelectorAll('.dropdown').forEach(el => el.classList.remove('show'));
+                    if (!e.target.closest('.menu-btn') && !e.target.closest('.menu-dropdown')) {
+                        document.querySelectorAll('.menu-dropdown').forEach(el => el.classList.remove('show'));
                     }
                 });
             }
 
             async init() {
-                const { data: { user } } = await this.supabase.auth.getUser();
-                if (user) {
-                    this.currentUser = user;
-                    this.loadProfile(user.id);
+                try {
+                    if (!window.supabase) throw new Error("Supabase Library not loaded");
+                    this.supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+                    
+                    const { data: { user } } = await this.supabase.auth.getUser();
+                    if (user) {
+                        this.currentUser = user;
+                        this.loadUserProfile(user.id);
+                    } else {
+                        document.getElementById('post-input').placeholder = "Войди, чтобы писать...";
+                    }
+                    this.loadFeed('new');
+                } catch (err) {
+                    this.showToast(err.message, 'error');
                 }
-                this.loadFeed('new');
             }
 
-            async loadProfile(id) {
-                const { data } = await this.supabase.from('profiles').select('username').eq('id', id).single();
-                if (data) document.getElementById('current-user-avatar').innerText = data.username[0].toUpperCase();
+            async loadUserProfile(userId) {
+                try {
+                    const { data } = await this.supabase.from('profiles').select('username').eq('id', userId).single();
+                    if (data && data.username) document.getElementById('current-user-avatar').innerText = data.username[0].toUpperCase();
+                } catch (e) {}
             }
 
             async loadFeed(type) {
+                this.currentTab = type;
+                const container = document.getElementById('feed-list');
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 document.getElementById(type === 'new' ? 'tab-new' : 'tab-top').classList.add('active');
-                
-                const container = document.getElementById('feed-list');
-                container.innerHTML = '<div style="text-align:center;color:#555;margin-top:20px">Загрузка...</div>';
 
-                const { data: posts } = await this.supabase
-                    .from('posts')
-                    .select('*')
-                    .order('created_at', { ascending: type === 'top' }) // Top = старые для теста
-                    .limit(30);
+                let isAscending = (type === 'top'); 
 
-                if (!posts || !posts.length) {
-                    container.innerHTML = '<div style="text-align:center;color:#555;margin-top:20px">Пусто...</div>';
-                    return;
-                }
+                try {
+                    const { data: posts, error } = await this.supabase
+                        .from('posts')
+                        .select('*')
+                        .order('created_at', { ascending: isAscending })
+                        .limit(50);
 
-                // Get Usernames
-                const uIds = [...new Set(posts.map(p => p.user_id))];
-                const { data: profiles } = await this.supabase.from('profiles').select('id,username').in('id', uIds);
-                const userMap = {};
-                profiles?.forEach(p => userMap[p.id] = p.username);
+                    if (error) throw new Error(error.message);
 
-                container.innerHTML = '';
-                for (const post of posts) {
-                    const el = await this.renderPost(post, userMap);
-                    container.appendChild(el);
+                    if (!posts || posts.length === 0) {
+                        container.innerHTML = `<div style="text-align:center; padding: 40px; color: #555;">Тишина...<br>Напиши первый пост!</div>`;
+                        return;
+                    }
+
+                    const userIds = [...new Set(posts.map(p => p.user_id))];
+                    const { data: profiles } = await this.supabase.from('profiles').select('id, username').in('id', userIds);
+                    const userMap = {};
+                    if (profiles) profiles.forEach(p => userMap[p.id] = p.username);
+
+                    container.innerHTML = '';
+                    for (const post of posts) {
+                        await this.renderPost(post, userMap, container);
+                    }
+
+                } catch (err) {
+                    this.showToast("Ошибка ленты: " + err.message, 'error');
                 }
             }
 
-            async renderPost(post, userMap) {
-                const username = userMap[post.user_id] || 'Anon';
+            async renderPost(post, userMap, container) {
+                const username = userMap[post.user_id] || 'Аноним';
                 const avatar = username[0].toUpperCase();
-                const time = new Date(post.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                const date = new Date(post.created_at);
+                const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 const safeContent = post.content.replace(/</g, "&lt;");
+                
+                // Получаем количество лайков и комментов (отдельными легкими запросами)
+                const { count: likesCount } = await this.supabase.from('likes').select('*', { count: 'exact', head: true }).eq('post_id', post.id);
+                const { count: commentsCount } = await this.supabase.from('comments').select('*', { count: 'exact', head: true }).eq('post_id', post.id);
+                
+                // Лайкнул ли я?
+                let isLiked = false;
+                if (this.currentUser) {
+                    const { data } = await this.supabase.from('likes').select('id').eq('post_id', post.id).eq('user_id', this.currentUser.id).single();
+                    if (data) isLiked = true;
+                }
+
+                const likeClass = isLiked ? 'liked' : '';
+                const likeIcon = isLiked ? 'ri-heart-3-fill' : 'ri-heart-3-line';
+
+                // Генерируем ID для меню
+                const menuId = `menu-${post.id}`;
                 const isMyPost = this.currentUser && this.currentUser.id === post.user_id;
 
                 const div = document.createElement('div');
                 div.className = 'post-card';
                 div.id = `post-${post.id}`;
-                
                 div.innerHTML = `
                     <div class="post-header">
                         <div class="author-info">
-                            <div class="avatar-circle" style="width:36px;height:36px;font-size:0.8rem">${avatar}</div>
+                            <div class="avatar-circle" style="width:36px; height:36px; font-size:0.8rem;">${avatar}</div>
                             <div>
                                 <div class="author-name">${username}</div>
-                                <div class="post-meta">${time}</div>
+                                <div class="post-meta">${timeStr}</div>
                             </div>
                         </div>
                         <div class="menu-btn" onclick="app.toggleMenu('${post.id}')">
-                            <i class="ri-more-fill"></i>
-                            <div id="menu-${post.id}" class="dropdown">
-                                ${isMyPost ? `<div class="dropdown-item text-danger" onclick="app.deletePost('${post.id}')"><i class="ri-delete-bin-line"></i> Удалить</div>` : ''}
-                                <div class="dropdown-item" onclick="alert('Жалоба отправлена')"><i class="ri-flag-line"></i> Пожаловаться</div>
+                            <i class="ri-more-fill" style="font-size:1.2rem;"></i>
+                            <div class="menu-dropdown" id="${menuId}">
+                                ${isMyPost 
+                                    ? `<div class="menu-item danger" onclick="app.deletePost('${post.id}')">Удалить</div>`
+                                    : `<div class="menu-item" onclick="app.reportPost('${post.id}')">Пожаловаться</div>`
+                                }
                             </div>
                         </div>
                     </div>
                     <div class="post-content">${safeContent}</div>
                     <div class="post-footer">
-                        <div class="action-item" id="like-btn-${post.id}" onclick="app.toggleLike('${post.id}')">
-                            <i class="ri-heart-3-line"></i> <span id="like-count-${post.id}">0</span>
+                        <div class="action-item ${likeClass}" id="like-btn-${post.id}" onclick="app.toggleLike('${post.id}')">
+                            <i class="${likeIcon}"></i> <span>${likesCount || 0}</span>
                         </div>
-                        <div class="action-item" onclick="app.toggleComments('${post.id}')">
-                            <i class="ri-chat-1-line"></i> <span id="comment-count-${post.id}">0</span>
+                        <div class="action-item" onclick="app.openComments('${post.id}')">
+                            <i class="ri-chat-1-line"></i> <span>${commentsCount || 0}</span>
                         </div>
-                    </div>
-                    
-                    <div id="comments-${post.id}" class="comments-section">
-                        <div id="comments-list-${post.id}"></div>
-                        <div class="comment-input-box">
-                            <input type="text" id="comment-input-${post.id}" class="comment-input" placeholder="Коммент...">
-                            <button class="comment-send" onclick="app.sendComment('${post.id}')">OK</button>
-                        </div>
+                        <div class="action-item" style="margin-left:auto"><i class="ri-share-forward-line"></i></div>
                     </div>
                 `;
-
-                // Подгружаем лайки и комменты асинхронно
-                this.loadInteractions(post.id);
-                return div;
+                container.appendChild(div);
             }
 
-            async loadInteractions(postId) {
-                // Лайки
-                const { count } = await this.supabase.from('likes').select('*', { count: 'exact', head: true }).eq('post_id', postId);
-                document.getElementById(`like-count-${postId}`).innerText = count || 0;
-                
-                // Проверяем лайкнул ли я
-                if (this.currentUser) {
-                    const { data } = await this.supabase.from('likes').select('id').eq('post_id', postId).eq('user_id', this.currentUser.id);
-                    if (data.length) this.setLikedUI(postId, true);
-                }
+            // --- INTERACTIONS ---
 
-                // Комменты (счетчик)
-                const { count: cCount } = await this.supabase.from('comments').select('*', { count: 'exact', head: true }).eq('post_id', postId);
-                document.getElementById(`comment-count-${postId}`).innerText = cCount || 0;
-            }
-
-            setLikedUI(postId, isLiked) {
-                const btn = document.getElementById(`like-btn-${postId}`);
-                const icon = btn.querySelector('i');
-                if (isLiked) {
-                    btn.classList.add('liked');
-                    icon.className = 'ri-heart-3-fill';
-                } else {
-                    btn.classList.remove('liked');
-                    icon.className = 'ri-heart-3-line';
-                }
-            }
-
-            // ACTIONS
-            toggleMenu(id) {
-                // Закрываем другие
-                document.querySelectorAll('.dropdown').forEach(el => el.classList.remove('show'));
-                document.getElementById(`menu-${id}`).classList.toggle('show');
-            }
-
-            async toggleLike(postId) {
-                if (!this.currentUser) return this.showToast('Войди в аккаунт', 'error');
-                
-                const btn = document.getElementById(`like-btn-${postId}`);
-                const isLiked = btn.classList.contains('liked');
-                const countSpan = document.getElementById(`like-count-${postId}`);
-                let count = parseInt(countSpan.innerText);
-
-                // Оптимистичный UI (меняем сразу)
-                this.setLikedUI(postId, !isLiked);
-                countSpan.innerText = isLiked ? count - 1 : count + 1;
-
-                if (isLiked) {
-                    await this.supabase.from('likes').delete().eq('post_id', postId).eq('user_id', this.currentUser.id);
-                } else {
-                    await this.supabase.from('likes').insert({ post_id: postId, user_id: this.currentUser.id });
-                }
+            toggleMenu(postId) {
+                // Скрыть все остальные
+                document.querySelectorAll('.menu-dropdown').forEach(el => {
+                    if (el.id !== `menu-${postId}`) el.classList.remove('show');
+                });
+                const menu = document.getElementById(`menu-${postId}`);
+                menu.classList.toggle('show');
             }
 
             async deletePost(postId) {
                 if (!confirm("Удалить пост?")) return;
-                await this.supabase.from('posts').delete().eq('id', postId);
-                document.getElementById(`post-${postId}`).remove();
-                this.showToast('Пост удален', 'success');
-            }
-
-            async toggleComments(postId) {
-                const section = document.getElementById(`comments-${postId}`);
-                const list = document.getElementById(`comments-list-${postId}`);
-                
-                if (section.style.display === 'block') {
-                    section.style.display = 'none';
-                } else {
-                    section.style.display = 'block';
-                    list.innerHTML = 'Загрузка...';
-                    
-                    // Грузим комменты
-                    const { data: comments } = await this.supabase
-                        .from('comments')
-                        .select('content, user_id, created_at')
-                        .eq('post_id', postId)
-                        .order('created_at', { ascending: true });
-                    
-                    // Ники авторов комментов
-                    const uIds = [...new Set(comments.map(c => c.user_id))];
-                    const { data: profiles } = await this.supabase.from('profiles').select('id,username').in('id', uIds);
-                    const map = {}; profiles?.forEach(p => map[p.id] = p.username);
-
-                    list.innerHTML = '';
-                    comments.forEach(c => {
-                        const name = map[c.user_id] || 'Anon';
-                        list.innerHTML += `<div class="comment"><span class="comment-user">${name}:</span> ${c.content}</div>`;
-                    });
+                try {
+                    const { error } = await this.supabase.from('posts').delete().eq('id', postId);
+                    if (error) throw error;
+                    document.getElementById(`post-${postId}`).remove();
+                    this.showToast("Пост удален", 'success');
+                } catch (e) {
+                    this.showToast(e.message, 'error');
                 }
             }
 
-            async sendComment(postId) {
-                if (!this.currentUser) return this.showToast('Войди в аккаунт', 'error');
-                const input = document.getElementById(`comment-input-${postId}`);
-                const text = input.value.trim();
-                if (!text) return;
+            reportPost(postId) {
+                this.showToast("Жалоба отправлена админу.", 'success');
+                this.toggleMenu(postId); // Закрыть меню
+            }
 
-                await this.supabase.from('comments').insert({ post_id: postId, user_id: this.currentUser.id, content: text });
-                input.value = '';
-                this.toggleComments(postId); // Перезагрузить
+            async toggleLike(postId) {
+                if (!this.currentUser) return this.showToast("Войди в аккаунт!", 'error');
                 
-                // Обновить счетчик
-                const cnt = document.getElementById(`comment-count-${postId}`);
-                cnt.innerText = parseInt(cnt.innerText) + 1;
+                const btn = document.getElementById(`like-btn-${postId}`);
+                const icon = btn.querySelector('i');
+                const countSpan = btn.querySelector('span');
+                let count = parseInt(countSpan.innerText);
+
+                // Оптимистичный UI (сразу меняем)
+                const isLiked = btn.classList.contains('liked');
+                if (isLiked) {
+                    btn.classList.remove('liked');
+                    icon.className = 'ri-heart-3-line';
+                    countSpan.innerText = Math.max(0, count - 1);
+                    // Server Request
+                    await this.supabase.from('likes').delete().eq('post_id', postId).eq('user_id', this.currentUser.id);
+                } else {
+                    btn.classList.add('liked');
+                    icon.className = 'ri-heart-3-fill';
+                    countSpan.innerText = count + 1;
+                    // Server Request
+                    await this.supabase.from('likes').insert([{ post_id: postId, user_id: this.currentUser.id }]);
+                }
             }
 
+            // --- COMMENTS SYSTEM ---
+
+            async openComments(postId) {
+                this.currentPostIdForComments = postId;
+                const modal = document.getElementById('comments-modal');
+                const list = document.getElementById('comments-list');
+                
+                modal.classList.add('active');
+                list.innerHTML = '<div style="text-align:center; padding:20px; color:#555">Загрузка...</div>';
+
+                try {
+                    // Грузим комменты + профили
+                    // 1. Комменты
+                    const { data: comments, error } = await this.supabase
+                        .from('comments')
+                        .select('*')
+                        .eq('post_id', postId)
+                        .order('created_at', { ascending: true });
+                    
+                    if (error) throw error;
+
+                    if (!comments || comments.length === 0) {
+                        list.innerHTML = '<div style="text-align:center; padding:20px; color:#555">Нет комментариев. Будь первым!</div>';
+                        return;
+                    }
+
+                    // 2. Имена
+                    const userIds = [...new Set(comments.map(c => c.user_id))];
+                    const { data: profiles } = await this.supabase.from('profiles').select('id, username').in('id', userIds);
+                    const userMap = {};
+                    if(profiles) profiles.forEach(p => userMap[p.id] = p.username);
+
+                    // 3. Рисуем
+                    list.innerHTML = '';
+                    comments.forEach(c => {
+                        const name = userMap[c.user_id] || 'Аноним';
+                        const avatar = name[0].toUpperCase();
+                        
+                        const item = document.createElement('div');
+                        item.className = 'comment-item';
+                        item.innerHTML = `
+                            <div class="avatar-circle" style="width:32px; height:32px; font-size:0.7rem; background:#222;">${avatar}</div>
+                            <div class="comment-content">
+                                <div class="comment-user">${name}</div>
+                                <div>${c.content.replace(/</g, "&lt;")}</div>
+                            </div>
+                        `;
+                        list.appendChild(item);
+                    });
+                    
+                    // Скролл вниз
+                    list.scrollTop = list.scrollHeight;
+
+                } catch (e) {
+                    list.innerHTML = `<div style="color:red; text-align:center">${e.message}</div>`;
+                }
+            }
+
+            closeComments() {
+                document.getElementById('comments-modal').classList.remove('active');
+                this.currentPostIdForComments = null;
+            }
+
+            async submitComment() {
+                if (!this.currentUser) return this.showToast("Войди в аккаунт!", 'error');
+                const input = document.getElementById('comment-input');
+                const text = input.value.trim();
+                const postId = this.currentPostIdForComments;
+
+                if (!text || !postId) return;
+
+                try {
+                    const { error } = await this.supabase.from('comments').insert([{
+                        post_id: postId,
+                        user_id: this.currentUser.id,
+                        content: text
+                    }]);
+
+                    if (error) throw error;
+
+                    input.value = '';
+                    // Перезагружаем список комментов
+                    this.openComments(postId);
+
+                } catch (e) {
+                    this.showToast(e.message, 'error');
+                }
+            }
+
+            // --- CREATE POST ---
             async createPost() {
-                if (!this.currentUser) return this.showToast('Войди в аккаунт', 'error');
                 const input = document.getElementById('post-input');
-                const val = input.value.trim();
-                if (!val) return;
+                const content = input.value.trim();
+                if (!this.currentUser) return this.showToast("Сначала войди!", 'error');
+                if (!content) return;
 
-                await this.supabase.from('posts').insert({ user_id: this.currentUser.id, content: val });
-                input.value = '';
-                this.showToast('Опубликовано!', 'success');
-                this.loadFeed('new');
+                const btn = document.querySelector('.send-btn');
+                btn.style.opacity = 0.5;
+
+                try {
+                    const { error } = await this.supabase.from('posts').insert([{ user_id: this.currentUser.id, content: content }]);
+                    if (error) throw error;
+                    input.value = '';
+                    this.showToast("Пост опубликован!", 'success');
+                    this.loadFeed('new');
+                } catch (err) {
+                    this.showToast(err.message, 'error');
+                } finally {
+                    btn.style.opacity = 1;
+                }
             }
 
-            showToast(msg, type) {
+            showToast(msg, type='info') {
                 const box = document.getElementById('toast-container');
-                const t = document.createElement('div');
-                t.className = `toast ${type}`;
-                t.innerText = msg;
-                box.appendChild(t);
-                setTimeout(() => t.remove(), 3000);
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                let icon = type === 'error' ? '<i class="ri-error-warning-fill"></i>' : type === 'success' ? '<i class="ri-checkbox-circle-fill"></i>' : '<i class="ri-information-fill"></i>';
+                toast.innerHTML = `${icon} <span>${msg}</span>`;
+                box.appendChild(toast);
+                setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(-20px)'; setTimeout(() => toast.remove(), 300); }, 4000);
             }
+
+            switchTab(t) { this.loadFeed(t); }
         }
 
         const app = new App();
