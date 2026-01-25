@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MEMASIK 2.0 | PROFILE</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* === CORE STYLE === */
+        :root {
+            --bg-body: #0a0a0c; --bg-card: #141416; --bg-nav: rgba(18, 18, 20, 0.95);
+            --text-main: #ffffff; --text-gray: #888890; 
+            --accent: #ff5e00; --danger: #ff3333; --border: #2a2a2e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
+        body {
+            background: var(--bg-body); color: var(--text-main);
+            font-family: 'Manrope', sans-serif; min-height: 100vh;
+            padding-bottom: 90px; overflow-y: scroll;
+        }
+        
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+            opacity: 0.6; pointer-events: none; z-index: -1;
+        }
+
+        /* HEADER */
+        .profile-header {
+            padding: 20px; display: flex; justify-content: space-between; align-items: center;
+            background: linear-gradient(180deg, rgba(20,20,22,1) 0%, rgba(10,10,12,0) 100%);
+        }
+        .header-title { font-family: 'Unbounded'; font-size: 1.2rem; letter-spacing: 1px; }
+        .settings-btn { font-size: 1.5rem; color: #fff; cursor: pointer; transition: 0.3s; }
+        .settings-btn:active { transform: rotate(90deg); }
+
+        /* INFO SECTION */
+        .profile-info { padding: 0 20px; text-align: center; }
+        .avatar-xl {
+            width: 100px; height: 100px; border-radius: 50%; background: #222;
+            margin: 0 auto 15px; border: 3px solid var(--accent);
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'Unbounded'; font-size: 2.5rem; color: #fff;
+            box-shadow: 0 0 30px rgba(255, 94, 0, 0.2); text-transform: uppercase;
+        }
+        .user-handle { font-family: 'Unbounded'; font-size: 1.2rem; margin-bottom: 5px; }
+        .user-bio { font-size: 0.9rem; color: var(--text-gray); max-width: 80%; margin: 0 auto; }
+
+        /* STATS */
+        .stats-row {
+            display: flex; justify-content: center; gap: 40px; margin: 25px 0;
+            padding: 15px; background: rgba(255,255,255,0.03); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+        }
+        .stat-item { text-align: center; }
+        .stat-val { font-family: 'Unbounded'; font-size: 1.2rem; display: block; }
+        .stat-lbl { font-size: 0.75rem; color: var(--text-gray); text-transform: uppercase; }
+
+        /* POSTS GRID */
+        .grid-title { padding: 0 20px; font-family: 'Unbounded'; font-size: 0.9rem; margin-bottom: 15px; color: var(--text-gray); }
+        .posts-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 10px;
+        }
+        .grid-item {
+            background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border);
+            aspect-ratio: 1; overflow: hidden; position: relative; cursor: pointer;
+        }
+        .grid-img { width: 100%; height: 100%; object-fit: cover; }
+        .grid-text {
+            padding: 15px; font-size: 0.8rem; color: #ccc; height: 100%;
+            display: flex; align-items: center; justify-content: center; text-align: center;
+            background: #1a1a1d;
+        }
+        .delete-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center;
+            opacity: 0; transition: 0.2s; color: var(--danger); font-size: 2rem;
+        }
+        .grid-item:hover .delete-overlay { opacity: 1; }
+
+        /* SETTINGS MODAL */
+        .modal-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 2000; display: none;
+            justify-content: center; align-items: center; backdrop-filter: blur(5px);
+        }
+        .modal-bg.open { display: flex; }
+        
+        .settings-card {
+            background: #141416; width: 90%; max-width: 400px; padding: 25px;
+            border-radius: 20px; border: 1px solid var(--border);
+            animation: popUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .set-title { font-family: 'Unbounded'; font-size: 1.2rem; margin-bottom: 20px; text-align: center; }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-lbl { display: block; font-size: 0.75rem; color: var(--text-gray); margin-bottom: 5px; }
+        .set-input {
+            width: 100%; background: #000; border: 1px solid var(--border);
+            padding: 12px; border-radius: 8px; color: #fff; font-family: 'Manrope';
+        }
+        .set-input:focus { border-color: var(--accent); }
+
+        .btn-save {
+            width: 100%; padding: 12px; background: #fff; color: #000;
+            border: none; border-radius: 8px; font-weight: 700; margin-top: 10px; cursor: pointer;
+        }
+        .btn-logout {
+            width: 100%; padding: 12px; background: transparent; color: var(--danger);
+            border: 1px solid var(--danger); border-radius: 8px; font-weight: 700; 
+            margin-top: 10px; cursor: pointer;
+        }
+        .btn-close { position: absolute; top: 20px; right: 20px; background: none; border: none; color: #fff; font-size: 1.5rem; }
+
+        /* NAV */
+        .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--bg-nav); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 99; backdrop-filter: blur(10px); }
+        .nav-icon { color: var(--text-gray); font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
+        .nav-icon.active { color: #fff; }
+        .fab { width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #000; font-size: 1.5rem; transform: translateY(-20%); border: 3px solid #0a0a0c; box-shadow: 0 5px 15px rgba(255,94,0,0.4); cursor: pointer; }
+
+        /* Toast */
+        .toast-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 3000; width: 90%; pointer-events: none; }
+        .toast { pointer-events: auto; background: #222; color: #fff; padding: 12px 16px; border-radius: 8px; border-left: 4px solid #fff; box-shadow: 0 10px 40px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .toast.ok { border-left-color: #00ff88; }
+    </style>
+</head>
+<body>
+
+    <div class="profile-header">
+        <div class="header-title">ПРОФИЛЬ</div>
+        <i class="ri-settings-4-line settings-btn" onclick="app.openSettings()"></i>
+    </div>
+
+    <div class="profile-info">
+        <div class="avatar-xl" id="p-ava">?</div>
+        <div class="user-handle" id="p-name">Загрузка...</div>
+        <div class="user-bio" id="p-bio">Нет описания</div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-item">
+            <span class="stat-val" id="stat-posts">0</span>
+            <span class="stat-lbl">Постов</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-val" id="stat-likes">0</span>
+            <span class="stat-lbl">Лайков</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-val">0</span>
+            <span class="stat-lbl">Подписок</span>
+        </div>
+    </div>
+
+    <div class="grid-title">ТВОИ ПУБЛИКАЦИИ</div>
+    <div class="posts-grid" id="my-grid">
+        <div style="grid-column: 1/-1; text-align: center; color: #555; padding: 30px;">
+            Загрузка постов...
+        </div>
+    </div>
+
+    <div class="nav">
+        <i class="ri-home-5-line nav-icon" onclick="window.location.href='feed.html'"></i>
+        <i class="ri-search-2-line nav-icon"></i>
+        <div class="fab" onclick="window.location.href='feed.html'"><i class="ri-add-line"></i></div>
+        <i class="ri-heart-3-line nav-icon"></i>
+        <i class="ri-user-3-fill nav-icon active"></i>
+    </div>
+
+    <div class="modal-bg" id="settings-modal">
+        <div class="settings-card">
+            <div class="set-title">Настройки</div>
+            
+            <div class="input-group">
+                <label class="input-lbl">Отображаемое имя</label>
+                <input type="text" id="set-name" class="set-input" placeholder="Твое имя">
+            </div>
+            
+            <div class="input-group">
+                <label class="input-lbl">О себе (Био)</label>
+                <input type="text" id="set-bio" class="set-input" placeholder="Пару слов...">
+            </div>
+
+            <button class="btn-save" onclick="app.saveProfile()">Сохранить</button>
+            <button class="btn-logout" onclick="app.logout()">Выйти из аккаунта</button>
+            <button class="btn-close" style="position: absolute; top:10px; right:10px; color:#555;" onclick="app.closeSettings()">&times;</button>
+        </div>
+    </div>
+
+    <div class="toast-box" id="toasts"></div>
+
+    <script>
+        const CFG = {
+            URL: 'https://hrrzpftxpafnavlljhum.supabase.co',
+            // ADMIN KEY для надежности
+            KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTI3NzU3NiwiZXhwIjoyMDg0ODUzNTc2fQ.5Dt7zXjEF_lVc5Komkg11A4Jy97rxI94PF3UE40X1RE'
+        };
+
+        class App {
+            constructor() {
+                this.sb = window.supabase.createClient(CFG.URL, CFG.KEY);
+                this.me = null;
+                this.init();
+            }
+
+            async init() {
+                // 1. Check Auth
+                const { data: { user } } = await this.sb.auth.getUser();
+                if (!user) {
+                    window.location.href = 'index.html'; // Redirect to login
+                    return;
+                }
+                this.me = user;
+
+                // 2. Load Profile
+                this.loadProfile();
+                this.loadStats();
+                this.loadMyPosts();
+            }
+
+            async loadProfile() {
+                const { data } = await this.sb.from('profiles').select('*').eq('id', this.me.id).single();
+                if (data) {
+                    document.getElementById('p-name').innerText = data.display_name || data.username || "User";
+                    document.getElementById('p-bio').innerText = data.bio || "Напиши что-нибудь о себе в настройках";
+                    document.getElementById('p-ava').innerText = (data.username || "U")[0].toUpperCase();
+                    
+                    // Fill settings inputs
+                    document.getElementById('set-name').value = data.display_name || "";
+                    document.getElementById('set-bio').value = data.bio || "";
+                }
+            }
+
+            async loadStats() {
+                // Count posts
+                const { count: postsCount } = await this.sb.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', this.me.id);
+                document.getElementById('stat-posts').innerText = postsCount || 0;
+
+                // Count received likes (complex query simplified)
+                // Пока просто считаем сколько лайков Я поставил (как заглушка), 
+                // т.к. считать полученные лайки требует JOIN posts.id
+                const { count: likesCount } = await this.sb.from('likes').select('*', { count: 'exact', head: true }).eq('user_id', this.me.id);
+                document.getElementById('stat-likes').innerText = likesCount || 0;
+            }
+
+            async loadMyPosts() {
+                const grid = document.getElementById('my-grid');
+                
+                const { data: posts } = await this.sb
+                    .from('posts')
+                    .select('*')
+                    .eq('user_id', this.me.id)
+                    .order('created_at', { ascending: false });
+
+                if (!posts || posts.length === 0) {
+                    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#555;padding:40px;">Нет постов</div>';
+                    return;
+                }
+
+                grid.innerHTML = '';
+                posts.forEach(post => {
+                    const contentHtml = post.image_url 
+                        ? `<img src="${post.image_url}" class="grid-img">`
+                        : `<div class="grid-text">${this.esc(post.content).slice(0, 50)}...</div>`;
+
+                    const div = document.createElement('div');
+                    div.className = 'grid-item';
+                    div.innerHTML = `
+                        ${contentHtml}
+                        <div class="delete-overlay" onclick="app.deletePost('${post.id}')">
+                            <i class="ri-delete-bin-line"></i>
+                        </div>
+                    `;
+                    grid.appendChild(div);
+                });
+            }
+
+            // === SETTINGS ===
+            openSettings() { document.getElementById('settings-modal').classList.add('open'); }
+            closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+
+            async saveProfile() {
+                const name = document.getElementById('set-name').value.trim();
+                const bio = document.getElementById('set-bio').value.trim();
+
+                const { error } = await this.sb.from('profiles').update({
+                    display_name: name,
+                    bio: bio
+                }).eq('id', this.me.id);
+
+                if (error) {
+                    this.toast("Ошибка сохранения", "err");
+                } else {
+                    this.toast("Профиль обновлен!", "ok");
+                    this.loadProfile();
+                    this.closeSettings();
+                }
+            }
+
+            async logout() {
+                await this.sb.auth.signOut();
+                window.location.href = 'index.html';
+            }
+
+            async deletePost(pid) {
+                if(!confirm("Удалить этот пост навсегда?")) return;
+                
+                const { error } = await this.sb.from('posts').delete().eq('id', pid);
+                if(error) return this.toast("Ошибка", "err");
+                
+                this.toast("Пост удален", "ok");
+                this.loadMyPosts(); // Refresh grid
+                this.loadStats();   // Refresh stats
+            }
+
+            toast(msg, type) {
+                const box = document.getElementById('toasts');
+                const t = document.createElement('div');
+                t.className = `toast ${type}`;
+                t.innerHTML = `<span>${msg}</span>`;
+                box.appendChild(t);
+                setTimeout(() => t.remove(), 3000);
+            }
+
+            esc(t) { return t ? t.replace(/</g, "&lt;") : ""; }
+        }
+
+        const app = new App();
+    </script>
+</body>
+</html>
