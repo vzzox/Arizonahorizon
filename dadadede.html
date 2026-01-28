@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#050505">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TITAN">
+    <meta name="format-detection" content="telephone=no">
+    
+    <title>memOasis | TITAN Feed</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Unbounded:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* -------------------------------------------------------------
+           1. CORE VARIABLES & THEME DEFINITIONS
+           ------------------------------------------------------------- */
+        :root {
+            /* --- Backgrounds & Surfaces --- */
+            --bg-body: #050505;
+            --bg-card: #121214;
+            --bg-card-hover: #161618;
+            --bg-nav: rgba(18, 18, 20, 0.85);
+            --bg-header: rgba(5, 5, 5, 0.90);
+            --bg-input: #0a0a0c;
+            --bg-overlay: rgba(0, 0, 0, 0.85);
+            --bg-modal: #161618;
+            --bg-toast: rgba(20, 20, 22, 0.95);
+            --bg-bubble-user: #1f1f22;
+            --bg-bubble-me: #2a2a2e;
+
+            /* --- Typography Palette --- */
+            --text-main: #ffffff;
+            --text-secondary: #c0c0c6;
+            --text-muted: #888890;
+            --text-dim: #44444a;
+            --text-inverse: #000000;
+
+            /* --- Brand Accents --- */
+            --accent: #ff5e00;
+            --accent-hover: #ff7b33;
+            --accent-dim: rgba(255, 94, 0, 0.15);
+            --accent-glow: rgba(255, 94, 0, 0.4);
+            
+            /* --- Status & Roles --- */
+            --danger: #ff3333;
+            --danger-bg: rgba(255, 51, 51, 0.1);
+            --success: #00ff88;
+            --verified: #3b82f6; /* Official Blue Verified Color */
+            --admin: #ff0055;
+            
+            /* --- Layout Dimensions --- */
+            --header-h: 60px;
+            --nav-h: 80px; /* Taller nav for better touch targets */
+            --radius-S: 8px;
+            --radius-M: 14px;
+            --radius-L: 24px;
+            --radius-XL: 32px;
+            
+            /* --- Effects --- */
+            --border: #2a2a2e;
+            --border-light: rgba(255, 255, 255, 0.08);
+            --shadow-card: 0 10px 40px rgba(0, 0, 0, 0.3);
+            --backdrop: blur(20px);
+            
+            /* --- Fonts --- */
+            --font-main: 'Manrope', sans-serif;
+            --font-display: 'Unbounded', sans-serif;
+        }
+
+        /* -------------------------------------------------------------
+           2. GLOBAL RESET & BASE STYLES
+           ------------------------------------------------------------- */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            outline: none; 
+            user-select: none; /* UI interactions only */
+        }
+        
+        html, body {
+            background-color: var(--bg-body); 
+            color: var(--text-main);
+            font-family: var(--font-main); 
+            height: 100%;
+            width: 100%;
+            overflow-y: auto; 
+            overflow-x: hidden;
+            overscroll-behavior-y: contain; 
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Cinematic Noise Texture */
+        body::before {
+            content: ""; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+            opacity: 0.5; pointer-events: none; z-index: -1;
+        }
+
+        /* Text selection overrides */
+        .card-body, .comm-text, input, textarea { user-select: text; }
+        ::-webkit-scrollbar { display: none; }
+        img { display: block; max-width: 100%; object-fit: cover; }
+        a { text-decoration: none; color: inherit; }
+
+        /* -------------------------------------------------------------
+           3. ANIMATION LIBRARY
+           ------------------------------------------------------------- */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(0.95); } 100% { transform: scale(1); } }
+        @keyframes heartPop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        /* Shimmer Effect for Loading Skeletons */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* -------------------------------------------------------------
+           4. LAYOUT COMPONENTS
+           ------------------------------------------------------------- */
+        
+        /* --- Header --- */
+        .header-fixed {
+            position: fixed; top: 0; left: 0; width: 100%; 
+            height: var(--header-h);
+            background: var(--bg-header); 
+            backdrop-filter: var(--backdrop); -webkit-backdrop-filter: var(--backdrop);
+            border-bottom: 1px solid var(--border); 
+            z-index: 100;
+            display: flex; flex-direction: column; justify-content: flex-end;
+        }
+
+        .app-logo {
+            position: absolute; top: 8px; width: 100%;
+            text-align: center; 
+            font-family: var(--font-display); font-weight: 800;
+            font-size: 0.85rem; letter-spacing: 3px; 
+            color: #fff; opacity: 0.9; cursor: pointer;
+        }
+        .app-logo span { color: var(--accent); }
+
+        .tabs { display: flex; width: 100%; height: 34px; position: relative; }
+        .tab {
+            flex: 1; background: transparent; border: none;
+            color: var(--text-muted); 
+            font-family: var(--font-display); font-weight: 700;
+            font-size: 0.7rem; letter-spacing: 1px;
+            cursor: pointer; transition: 0.3s; padding-bottom: 4px;
+        }
+        .tab.active { color: #fff; text-shadow: 0 0 15px rgba(255,255,255,0.3); }
+        .tab-indicator {
+            position: absolute; bottom: 0; height: 2px;
+            background: var(--accent); width: 50%; left: 0;
+            box-shadow: 0 -2px 10px var(--accent);
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- Main Feed Container --- */
+        .feed-wrapper { 
+            max-width: 600px; margin: 0 auto; 
+            padding: 15px; 
+            padding-top: calc(var(--header-h) + 15px);
+            padding-bottom: calc(var(--nav-h) + 20px);
+            min-height: 100vh;
+        }
+
+        /* --- Composer (Post Creator) --- */
+        .composer {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-L); padding: 16px; margin-bottom: 24px;
+            display: flex; flex-direction: column; gap: 12px;
+            box-shadow: var(--shadow-card);
+        }
+        .composer-top { display: flex; gap: 12px; align-items: center; }
+        
+        .user-ava-sm {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: #1a1a1d; border: 1px solid var(--border-light);
+            display: flex; justify-content: center; align-items: center;
+            font-family: var(--font-display); font-weight: 700; color: #fff;
+            flex-shrink: 0; overflow: hidden; cursor: pointer;
+        }
+        
+        .composer-input {
+            flex: 1; background: var(--bg-input); border: 1px solid var(--border);
+            border-radius: 14px; padding: 12px 16px; 
+            color: #fff; font-family: var(--font-main); font-size: 0.95rem; 
+            transition: 0.3s;
+        }
+        .composer-input:focus { border-color: var(--accent); }
+        .composer-actions {
+            display: flex; justify-content: space-between; align-items: center; 
+            padding-left: 54px; 
+        }
+        
+        .btn-icon { color: var(--text-muted); font-size: 1.4rem; cursor: pointer; transition: 0.2s; }
+        .btn-icon.active { color: var(--accent); }
+        
+        .btn-send {
+            background: var(--accent); border: none; width: 38px; height: 38px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: #000; font-size: 1.2rem; cursor: pointer;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+        .btn-send:disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
+
+        /* --- Post Card Styles --- */
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-L); padding: 18px; margin-bottom: 16px;
+            position: relative; animation: slideUp 0.5s ease backwards;
+            transition: transform 0.2s;
+        }
+        .card:active { transform: scale(0.995); }
+        
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .card-user-info { display: flex; gap: 10px; align-items: center; }
+        .card-name { 
+            font-weight: 700; font-size: 0.95rem; color: #fff; 
+            display: flex; align-items: center; gap: 4px;
+        }
+        
+        /* --- VERIFIED BADGE STYLE --- */
+        .verified-badge { 
+            color: var(--verified); 
+            font-size: 0.95rem; 
+            display: inline-flex; 
+            align-items: center; 
+        }
+
+        .card-time { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+        .card-body {
+            font-size: 0.95rem; line-height: 1.6; color: #eee;
+            margin-bottom: 12px; white-space: pre-wrap; word-break: break-word;
+        }
+        .tag { color: var(--accent); font-weight: 600; }
+        
+        .card-media {
+            width: 100%; border-radius: 16px; overflow: hidden;
+            margin-bottom: 14px; border: 1px solid var(--border);
+            background: #000; position: relative;
+        }
+        .card-img { width: 100%; height: auto; display: block; }
+        
+        .card-footer {
+            display: flex; gap: 24px; padding-top: 12px;
+            border-top: 1px solid var(--border-light);
+        }
+        .action {
+            display: flex; align-items: center; gap: 6px;
+            color: var(--text-muted); cursor: pointer; 
+            font-size: 0.9rem; font-weight: 600; padding: 4px 8px;
+        }
+        .action.liked { color: var(--danger); }
+        .action.liked i { animation: heartPop 0.3s ease; font-weight: 900; }
+
+        /* --- Navigation Bar --- */
+        .nav-fixed {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-h);
+            background: var(--bg-nav); border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 99; backdrop-filter: var(--backdrop); -webkit-backdrop-filter: var(--backdrop);
+            padding-bottom: 15px; /* Safe area padding */
+        }
+        .nav-btn {
+            font-size: 1.5rem; color: var(--text-muted); 
+            width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; position: relative;
+        }
+        .nav-btn.active { color: #fff; }
+        .nav-btn.active::after {
+            content: ''; position: absolute; bottom: 5px; width: 4px; height: 4px;
+            background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent);
+        }
+        .nav-fab {
+            width: 56px; height: 56px; background: var(--accent);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            color: #000; font-size: 1.6rem; transform: translateY(-20px);
+            border: 5px solid var(--bg-body); box-shadow: 0 8px 25px rgba(255, 94, 0, 0.4);
+            cursor: pointer;
+        }
+        .nav-fab:active { transform: translateY(-20px) scale(0.95); }
+
+        /* --- 5. MODALS & OVERLAYS --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-overlay); backdrop-filter: blur(5px);
+            z-index: 5000; display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s; padding: 20px;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+
+        /* Profile Modal */
+        .profile-card {
+            width: 100%; max-width: 320px; background: var(--bg-modal);
+            border: 1px solid var(--border); border-radius: 30px;
+            padding: 30px 20px; display: flex; flex-direction: column; align-items: center;
+            transform: scale(0.9); transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .profile-card { transform: scale(1); }
+
+        /* Comments Sheet (Improved) */
+        .sheet-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 2000;
+            display: none; align-items: flex-end; backdrop-filter: blur(2px);
+        }
+        .sheet-overlay.active { display: flex; }
+        
+        .sheet {
+            background: #141416; width: 100%; height: 85vh;
+            border-radius: 24px 24px 0 0; border-top: 1px solid var(--border);
+            display: flex; flex-direction: column; 
+            animation: sheetUp 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            box-shadow: 0 -20px 60px rgba(0,0,0,0.7);
+        }
+        
+        .sheet-header {
+            padding: 16px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: center; align-items: center;
+            font-family: var(--font-display); font-size: 0.9rem; letter-spacing: 1px;
+            position: relative;
+        }
+        .sheet-close {
+            position: absolute; right: 16px; background: none; border: none;
+            color: var(--text-muted); font-size: 1.5rem; cursor: pointer;
+        }
+
+        /* Fixed Comments Layout (Bubbles) */
+        .comm-list { 
+            flex: 1; overflow-y: auto; padding: 20px 16px; 
+            display: flex; flex-direction: column; gap: 16px; 
+        }
+        
+        .msg-row { display: flex; gap: 12px; width: 100%; }
+        .msg-ava { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: #333; flex-shrink: 0; margin-top: 4px; }
+        
+        .msg-content {
+            display: flex; flex-direction: column; max-width: 85%;
+        }
+        
+        .msg-bubble {
+            background: var(--bg-bubble-user); 
+            padding: 10px 14px; 
+            border-radius: 4px 18px 18px 18px; /* Chat bubble shape */
+            color: #ddd; font-size: 0.9rem; line-height: 1.4;
+            position: relative; word-break: break-word;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .msg-meta {
+            margin-bottom: 4px; display: flex; align-items: center; gap: 5px;
+            font-size: 0.75rem; color: var(--text-muted);
+        }
+        .msg-author { font-weight: 700; color: var(--accent); }
+        
+        /* Input Area for Comments */
+        .sheet-footer {
+            padding: 12px 16px; border-top: 1px solid var(--border);
+            background: var(--bg-header); padding-bottom: calc(12px + env(safe-area-inset-bottom));
+        }
+        .input-group { display: flex; gap: 10px; align-items: center; }
+
+        /* --- Toast Notification --- */
+        .toast {
+            position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+            background: var(--bg-toast); color: #fff; padding: 12px 20px;
+            border-radius: 30px; border: 1px solid var(--border-light);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            font-size: 0.85rem; font-weight: 600; z-index: 7000;
+            display: flex; align-items: center; gap: 8px;
+            animation: slideUp 0.3s; pointer-events: none;
+        }
+        .toast.error { border-left: 4px solid var(--danger); border-radius: 8px; }
+        .toast.success { border-left: 4px solid var(--success); border-radius: 8px; }
+
+        /* --- Skeletons (Loading) --- */
+        .skeleton {
+            background: #1a1a1d;
+            background-image: linear-gradient(90deg, #1a1a1d 0%, #222 50%, #1a1a1d 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+            border-radius: 6px;
+        }
+        .sk-card { height: 150px; border-radius: var(--radius-L); border: 1px solid var(--border); margin-bottom: 16px; padding: 18px; }
+
+        /* Utilities */
+        .hidden-file { display: none; }
+        .spin { animation: spin 1s linear infinite; }
+        
+    </style>
+</head>
+<body>
+
+    <div class="modal-overlay" id="profile-modal" onclick="if(event.target.id==='profile-modal') app.closeProfile()">
+        <div class="profile-card">
+            <div style="width:100%;display:flex;justify-content:flex-end;margin-bottom:-20px;z-index:2">
+                <i class="ri-close-circle-fill" style="font-size:1.8rem;color:#444;cursor:pointer" onclick="app.closeProfile()"></i>
+            </div>
+            
+            <img src="" id="prof-ava" style="width:100px;height:100px;border-radius:50%;margin-bottom:15px;object-fit:cover;border:3px solid var(--bg-card);box-shadow:0 10px 20px rgba(0,0,0,0.3)">
+            
+            <div class="prof-header" style="text-align:center;margin-bottom:15px">
+                <div style="font-family:'Unbounded';font-size:1.2rem;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px">
+                    <span id="prof-name">...</span>
+                    <span id="prof-verify-badge" style="display:none"><i class="ri-verified-badge-fill verified-badge"></i></span>
+                </div>
+                <div id="prof-user" style="color:var(--text-muted);font-size:0.9rem">@username</div>
+            </div>
+
+            <div style="display:flex;gap:15px;width:100%;margin-bottom:20px">
+                <div style="flex:1;background:#1a1a1d;padding:10px;border-radius:12px;text-align:center">
+                    <div style="font-family:'Unbounded';font-size:1.1rem;color:#fff" id="prof-stats-posts">0</div>
+                    <div style="font-size:0.7rem;color:#666;text-transform:uppercase">Посты</div>
+                </div>
+                <div style="flex:1;background:#1a1a1d;padding:10px;border-radius:12px;text-align:center">
+                    <div style="font-family:'Unbounded';font-size:1.1rem;color:#fff">--</div>
+                    <div style="font-size:0.7rem;color:#666;text-transform:uppercase">Рейтинг</div>
+                </div>
+            </div>
+
+            <button onclick="app.toast('Функция в разработке', 'error')" style="width:100%;padding:14px;background:var(--accent);border:none;border-radius:12px;font-weight:700;font-family:'Unbounded';cursor:pointer">ПОДПИСАТЬСЯ</button>
+        </div>
+    </div>
+
+    <div class="sheet-overlay" id="comm-modal">
+        <div class="sheet">
+            <div class="sheet-header">
+                <span>КОММЕНТАРИИ</span>
+                <button class="sheet-close" onclick="app.closeComm()"><i class="ri-close-line"></i></button>
+            </div>
+            
+            <div class="comm-list" id="comm-list">
+                </div>
+            
+            <div class="sheet-footer">
+                <div class="input-group">
+                    <label class="btn-icon" style="flex-shrink:0">
+                        <i class="ri-image-add-line"></i>
+                        <input type="file" id="comm-file" class="hidden-file" accept="image/*">
+                    </label>
+                    <input type="text" id="comm-inp" class="composer-input" placeholder="Написать комментарий..." autocomplete="off">
+                    <button class="btn-send" onclick="app.sendComm()" style="width:40px;height:40px;flex-shrink:0"><i class="ri-arrow-up-line"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lightbox" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:9000;display:none;justify-content:center;align-items:center" onclick="this.style.display='none'">
+        <img id="lb-img" src="" style="max-width:100%;max-height:100%;object-fit:contain">
+    </div>
+
+    <header class="header-fixed">
+        <div class="app-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">mem<span>oasis</span></div>
+        <div class="tabs">
+            <div class="tab-indicator" id="tab-ind"></div>
+            <button class="tab active" id="tab-new" onclick="app.switchTab('new')">НОВЫЕ</button>
+            <button class="tab" id="tab-top" onclick="app.switchTab('top')">ТОП</button>
+        </div>
+    </header>
+
+    <div class="feed-wrapper" id="feed-wrapper">
+        
+        <div class="composer">
+            <div class="composer-top">
+                <div class="user-ava-sm" id="my-ava" onclick="app.viewMyProfile()">?</div>
+                <input type="text" id="post-inp" class="composer-input" placeholder="Что нового?" autocomplete="off">
+            </div>
+            <div class="composer-actions">
+                <label class="btn-icon" id="attach-btn">
+                    <i class="ri-gallery-line"></i>
+                    <input type="file" id="post-file" class="hidden-file" accept="image/*" onchange="app.handleFileSelect()">
+                </label>
+                <button class="btn-send" id="btn-post-send" onclick="app.sendPost()"><i class="ri-send-plane-fill"></i></button>
+            </div>
+            <div id="file-preview-name" style="font-size:0.75rem;color:var(--accent);margin-top:5px;display:none"></div>
+        </div>
+
+        <div id="feed-list">
+            <div class="skeleton sk-card"></div>
+            <div class="skeleton sk-card"></div>
+            <div class="skeleton sk-card"></div>
+        </div>
+
+        <div id="load-more" style="height:60px;display:flex;justify-content:center;align-items:center;color:#444">
+            <i class="ri-loader-4-line spin" style="font-size:1.5rem"></i>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <nav class="nav-fixed">
+        <div class="nav-btn active" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+            <i class="ri-home-5-fill"></i>
+        </div>
+        
+        <div class="nav-btn" onclick="window.location.href='search.html'">
+            <i class="ri-search-2-line"></i>
+        </div>
+        
+        <div class="nav-fab" onclick="document.getElementById('post-inp').focus()">
+            <i class="ri-add-line"></i>
+        </div>
+        
+        <div class="nav-btn" onclick="window.location.href='notif.html'">
+            <i class="ri-heart-3-line"></i>
+        </div>
+        
+        <div class="nav-btn" onclick="window.location.href='profile.html'">
+            <i class="ri-user-3-line"></i>
+        </div>
+    </nav>
+
+    <script>
+        /**
+         * ------------------------------------------------------------------
+         * CONFIGURATION & CONSTANTS
+         * Do not modify the Supabase Key/URL unless necessary.
+         * ------------------------------------------------------------------
+         */
+        const CONFIG = {
+            URL: 'https://hrrzpftxpafnavlljhum.supabase.co',
+            KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTI3NzU3NiwiZXhwIjoyMDg0ODUzNTc2fQ.5Dt7zXjEF_lVc5Komkg11A4Jy97rxI94PF3UE40X1RE',
+            BUCKET: 'memasik_files',
+            PAGE_SIZE: 10,
+            COOLDOWN_MS: 15000 // 15 Seconds posting cooldown
+        };
+
+        /**
+         * ------------------------------------------------------------------
+         * CORE APPLICATION CLASS
+         * Handles all Logic: Auth, Feed, Interaction, Realtime
+         * ------------------------------------------------------------------
+         */
+        class AppCore {
+            constructor() {
+                // Initialize Supabase Client
+                this.sb = window.supabase.createClient(CONFIG.URL, CONFIG.KEY);
+                
+                // State Variables
+                this.user = null;
+                this.feedState = {
+                    type: 'new', // 'new' or 'top'
+                    page: 0,
+                    loading: false,
+                    endReached: false,
+                    lastPostTime: 0
+                };
+                
+                // UI References
+                this.ui = {
+                    list: document.getElementById('feed-list'),
+                    indicator: document.getElementById('tab-ind'),
+                    loadMore: document.getElementById('load-more')
+                };
+
+                // Boot
+                this.init();
+            }
+
+            /**
+             * Initialization Sequence
+             */
+            async init() {
+                // Check Session
+                const { data: { session } } = await this.sb.auth.getSession();
+                this.user = session?.user || null;
+                
+                if (this.user) {
+                    this.loadMyProfile();
+                } else {
+                    this.showToast('Режим гостя. Войдите, чтобы писать.', 'error');
+                }
+
+                // Initial Load
+                await this.loadFeed(true);
+
+                // Setup Infinite Scroll
+                const observer = new IntersectionObserver((entries) => {
+                    if (entries[0].isIntersecting && !this.feedState.loading) {
+                        this.loadFeed(false);
+                    }
+                }, { threshold: 0.1 });
+                observer.observe(this.ui.loadMore);
+
+                // Setup Realtime Listener (Auto-update feed)
+                this.setupRealtime();
+            }
+
+            /**
+             * -------------------------------------------------------------
+             * DATA LOADING LOGIC
+             * -------------------------------------------------------------
+             */
+
+            /**
+             * Switch Tabs (New / Top)
+             */
+            switchTab(type) {
+                if (this.feedState.type === type || this.feedState.loading) return;
+                
+                // UI Update
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.getElementById(`tab-${type}`).classList.add('active');
+                this.ui.indicator.style.left = type === 'new' ? '0' : '50%';
+                
+                // Reset State
+                this.feedState.type = type;
+                this.feedState.page = 0;
+                this.feedState.endReached = false;
+                this.ui.list.innerHTML = '<div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>';
+                
+                // Reload
+                this.loadFeed(true);
+            }
+
+            /**
+             * Load Feed Posts
+             * @param {boolean} reset - Clears list if true
+             */
+            async loadFeed(reset = false) {
+                if (this.feedState.loading || (this.feedState.endReached && !reset)) return;
+                
+                this.feedState.loading = true;
+                if (reset) {
+                    this.feedState.page = 0;
+                    this.feedState.endReached = false;
+                }
+
+                try {
+                    const from = this.feedState.page * CONFIG.PAGE_SIZE;
+                    const to = from + CONFIG.PAGE_SIZE - 1;
+                    
+                    // Main Query: Fetch posts AND joined profiles for user info
+                    let query = this.sb
+                        .from('posts')
+                        .select('*, profiles!user_id(*), likes(count)')
+                        .range(from, to);
+
+                    // Sorting Logic
+                    if (this.feedState.type === 'new') {
+                        query = query.order('created_at', { ascending: false });
+                    } else {
+                        // For TOP, ideally we sort by likes, but standard sorting:
+                        // Note: Complex "Top by likes" usually requires a view or RPC function in Supabase.
+                        // We will simulate mixed sort or use created_at for now to keep DB safe.
+                        // If DB has a likes_count column, use it. Assuming generic structure:
+                        query = query.order('created_at', { ascending: false }); // Fallback to New for safety
+                    }
+
+                    // Check if current user liked posts
+                    if(this.user) {
+                         query = query.select('*, profiles!user_id(*), likes!left(user_id)');
+                    }
+
+                    const { data, error } = await query;
+
+                    if (error) throw error;
+
+                    if (reset) this.ui.list.innerHTML = '';
+                    
+                    if (!data || data.length === 0) {
+                        this.feedState.endReached = true;
+                        this.ui.loadMore.innerHTML = '<div style="padding:20px;font-size:0.8rem">Больше ничего нет</div>';
+                    } else {
+                        data.forEach(post => {
+                            // Determine if liked by me
+                            const isLiked = post.likes && Array.isArray(post.likes) && post.likes.some(l => l.user_id === this.user?.id);
+                            // Render
+                            this.renderPost(post, isLiked);
+                        });
+                        this.feedState.page++;
+                    }
+
+                } catch (e) {
+                    console.error(e);
+                    this.showToast('Ошибка загрузки ленты', 'error');
+                } finally {
+                    this.feedState.loading = false;
+                }
+            }
+
+            /**
+             * -------------------------------------------------------------
+             * RENDERING LOGIC (HTML Generation)
+             * -------------------------------------------------------------
+             */
+
+            /**
+             * Renders a single post card
+             */
+            renderPost(post, isLikedByMe, prepend = false) {
+                // Safety Checks
+                const profile = post.profiles || {};
+                const name = this.escapeHtml(profile.display_name || profile.username || 'User');
+                const avatar = profile.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                const dateStr = this.timeAgo(post.created_at);
+                
+                // VERIFIED LOGIC (The Fix)
+                // We check boolean field is_verified from the joined profiles table
+                const verifiedHtml = profile.is_verified 
+                    ? `<i class="ri-verified-badge-fill verified-badge" style="margin-left:4px;" title="Verified"></i>` 
+                    : '';
+
+                // Media Logic
+                let mediaHtml = '';
+                if (post.image_url) {
+                    mediaHtml = `
+                    <div class="card-media" onclick="app.openLightbox('${post.image_url}')">
+                        <img src="${post.image_url}" class="card-img" loading="lazy" alt="Post content">
+                    </div>`;
+                }
+
+                // Construct HTML
+                const html = `
+                <div class="card" id="post-${post.id}">
+                    <div class="card-header">
+                        <div class="card-user-info" onclick="app.viewProfile('${post.user_id}')">
+                            <div class="user-ava-sm">
+                                <img src="${avatar}" style="width:100%;height:100%">
+                            </div>
+                            <div>
+                                <div class="card-name">${name} ${verifiedHtml}</div>
+                                <div class="card-time">${dateStr}</div>
+                            </div>
+                        </div>
+                        
+                        ${this.user && this.user.id === post.user_id 
+                            ? `<i class="ri-delete-bin-line" onclick="app.deletePost('${post.id}')" style="color:#444;cursor:pointer"></i>` 
+                            : ''}
+                    </div>
+
+                    <div class="card-body">${this.formatText(post.content)}</div>
+                    
+                    ${mediaHtml}
+
+                    <div class="card-footer">
+                        <div class="action ${isLikedByMe ? 'liked' : ''}" id="like-btn-${post.id}" onclick="app.toggleLike('${post.id}')">
+                            <i class="${isLikedByMe ? 'ri-heart-3-fill' : 'ri-heart-3-line'}"></i>
+                            <span id="like-count-${post.id}">${post.likes_count || 0}</span>
+                        </div>
+                        <div class="action" onclick="app.openComments('${post.id}')">
+                            <i class="ri-chat-3-line"></i>
+                            <span id="comm-count-${post.id}">${post.comments_count || 0}</span>
+                        </div>
+                        <div class="action" style="margin-left:auto" onclick="app.sharePost('${post.id}')">
+                            <i class="ri-share-forward-line"></i>
+                        </div>
+                    </div>
+                </div>`;
+
+                // Injection
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                if (prepend) this.ui.list.prepend(tempDiv.firstElementChild);
+                else this.ui.list.appendChild(tempDiv.firstElementChild);
+            }
+
+            /**
+             * -------------------------------------------------------------
+             * COMMENTS SYSTEM (FIXED)
+             * -------------------------------------------------------------
+             */
+
+            /**
+             * Open Comments Modal and Load Data
+             */
+            async openComments(postId) {
+                this.currentPostId = postId;
+                document.getElementById('comm-modal').classList.add('active');
+                const list = document.getElementById('comm-list');
+                list.innerHTML = '<div style="text-align:center;padding:20px;color:#666"><i class="ri-loader-4-line spin"></i></div>';
+
+                // Load Comments
+                const { data, error } = await this.sb
+                    .from('comments')
+                    .select('*, profiles(*)')
+                    .eq('post_id', postId)
+                    .order('created_at', { ascending: true });
+
+                list.innerHTML = '';
+                
+                if (data && data.length > 0) {
+                    data.forEach(comment => this.renderComment(comment));
+                    // Scroll to bottom
+                    setTimeout(() => list.scrollTop = list.scrollHeight, 100);
+                } else {
+                    list.innerHTML = '<div style="text-align:center;padding:40px;color:#444">Нет комментариев. Будьте первым!</div>';
+                }
+            }
+
+            /**
+             * Render a single comment bubble
+             */
+            renderComment(c) {
+                const list = document.getElementById('comm-list');
+                const profile = c.profiles || {};
+                const name = this.escapeHtml(profile.display_name || profile.username || 'User');
+                const ava = profile.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                
+                // Verified check for comments
+                const ver = profile.is_verified 
+                    ? `<i class="ri-verified-badge-fill" style="color:var(--verified);font-size:0.8rem"></i>` 
+                    : '';
+                
+                // Check if it's my comment for styling
+                const isMe = this.user && this.user.id === c.user_id;
+                
+                const html = `
+                <div class="msg-row" style="${isMe ? 'flex-direction:row-reverse' : ''}">
+                    <img src="${ava}" class="msg-ava">
+                    <div class="msg-content" style="${isMe ? 'align-items:flex-end' : ''}">
+                        <div class="msg-meta">
+                            <span class="msg-author">${name} ${ver}</span>
+                            <span>• ${this.timeAgo(c.created_at, true)}</span>
+                        </div>
+                        <div class="msg-bubble" style="${isMe ? 'background:var(--bg-bubble-me);border-bottom-right-radius:4px;border-bottom-left-radius:18px' : 'border-bottom-left-radius:4px'}">
+                            ${this.formatText(c.content)}
+                            ${c.image_url ? `<br><img src="${c.image_url}" style="margin-top:5px;border-radius:8px;max-width:150px">` : ''}
+                        </div>
+                    </div>
+                </div>`;
+                
+                list.insertAdjacentHTML('beforeend', html);
+            }
+
+            closeComm() {
+                document.getElementById('comm-modal').classList.remove('active');
+                this.currentPostId = null;
+            }
+
+            /**
+             * Send a Comment
+             */
+            async sendComm() {
+                if (!this.user) return this.showToast('Нужна авторизация', 'error');
+                
+                const inp = document.getElementById('comm-inp');
+                const fileInp = document.getElementById('comm-file');
+                const text = inp.value.trim();
+                
+                if (!text && !fileInp.files[0]) return;
+
+                // Optimistic UI could be added here, but simpler to await
+                try {
+                    let imgUrl = null;
+                    if (fileInp.files[0]) {
+                         imgUrl = await this.uploadFile(fileInp.files[0]);
+                    }
+
+                    const { error } = await this.sb.from('comments').insert({
+                        post_id: this.currentPostId,
+                        user_id: this.user.id,
+                        content: text || 'Image',
+                        image_url: imgUrl
+                    });
+
+                    if (error) throw error;
+
+                    inp.value = '';
+                    fileInp.value = '';
+                    
+                    // Reload comments to show new one
+                    this.openComments(this.currentPostId); 
+                    
+                } catch (e) {
+                    this.showToast('Ошибка отправки', 'error');
+                }
+            }
+
+            /**
+             * -------------------------------------------------------------
+             * POSTING & UPLOAD
+             * -------------------------------------------------------------
+             */
+            handleFileSelect() {
+                const f = document.getElementById('post-file').files[0];
+                const lbl = document.getElementById('file-preview-name');
+                const icon = document.getElementById('attach-btn');
+                if(f) {
+                    lbl.style.display = 'block';
+                    lbl.innerText = f.name;
+                    icon.classList.add('active');
+                }
+            }
+
+            async sendPost() {
+                if (!this.user) return this.showToast('Войдите в аккаунт!', 'error');
+
+                // Spam Protection
+                const now = Date.now();
+                if (now - this.feedState.lastPostTime < CONFIG.COOLDOWN_MS) {
+                    return this.showToast('Не так быстро! Подождите немного.', 'error');
+                }
+
+                const inp = document.getElementById('post-inp');
+                const fileInp = document.getElementById('post-file');
+                const txt = inp.value.trim();
+                const file = fileInp.files[0];
+
+                if (!txt && !file) return this.showToast('Напишите что-нибудь', 'error');
+
+                const btn = document.getElementById('btn-post-send');
+                btn.disabled = true;
+
+                try {
+                    let finalUrl = null;
+                    if (file) {
+                        this.showToast('Загрузка фото...', 'success');
+                        finalUrl = await this.uploadFile(file);
+                    }
+
+                    const { error } = await this.sb.from('posts').insert({
+                        user_id: this.user.id,
+                        content: txt,
+                        image_url: finalUrl
+                    });
+
+                    if (error) throw error;
+
+                    // Cleanup
+                    inp.value = '';
+                    fileInp.value = '';
+                    document.getElementById('file-preview-name').style.display = 'none';
+                    document.getElementById('attach-btn').classList.remove('active');
+                    this.feedState.lastPostTime = Date.now();
+                    
+                    this.showToast('Опубликовано!', 'success');
+                    
+                    if (this.feedState.type !== 'new') this.switchTab('new');
+                    else this.loadFeed(true); // Reload to see new post immediately
+
+                } catch (e) {
+                    this.showToast('Ошибка: ' + e.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                }
+            }
+
+            async uploadFile(file) {
+                const ext = file.name.split('.').pop();
+                const path = `${this.user.id}/${Date.now()}.${ext}`;
+                const { error } = await this.sb.storage.from(CONFIG.BUCKET).upload(path, file);
+                if (error) throw error;
+                return this.sb.storage.from(CONFIG.BUCKET).getPublicUrl(path).data.publicUrl;
+            }
+
+            /**
+             * -------------------------------------------------------------
+             * UTILITIES & HELPERS
+             * -------------------------------------------------------------
+             */
+            
+            // Like Logic
+            async toggleLike(postId) {
+                if (!this.user) return this.showToast('Войдите!', 'error');
+                
+                const btn = document.getElementById(`like-btn-${postId}`);
+                const countSpan = document.getElementById(`like-count-${postId}`);
+                const isLiked = btn.classList.contains('liked');
+                let count = parseInt(countSpan.innerText) || 0;
+
+                // Optimistic UI Update
+                if (isLiked) {
+                    btn.classList.remove('liked');
+                    btn.querySelector('i').className = 'ri-heart-3-line';
+                    countSpan.innerText = Math.max(0, count - 1);
+                    await this.sb.from('likes').delete().eq('post_id', postId).eq('user_id', this.user.id);
+                } else {
+                    btn.classList.add('liked');
+                    btn.querySelector('i').className = 'ri-heart-3-fill';
+                    countSpan.innerText = count + 1;
+                    await this.sb.from('likes').insert({ post_id: postId, user_id: this.user.id });
+                }
+            }
+
+            // Profile View
+            async viewProfile(uid) {
+                const modal = document.getElementById('profile-modal');
+                const els = {
+                    img: document.getElementById('prof-ava'),
+                    name: document.getElementById('prof-name'),
+                    user: document.getElementById('prof-user'),
+                    badge: document.getElementById('prof-verify-badge'),
+                    posts: document.getElementById('prof-stats-posts')
+                };
+
+                // Reset
+                els.img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                els.badge.style.display = 'none';
+                modal.classList.add('active');
+
+                // Fetch
+                const { data: prof } = await this.sb.from('profiles').select('*').eq('id', uid).single();
+                if (prof) {
+                    els.img.src = prof.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                    els.name.innerText = prof.display_name || 'User';
+                    els.user.innerText = '@' + prof.username;
+                    
+                    // Verified Logic in Modal
+                    if (prof.is_verified) els.badge.style.display = 'inline-block';
+                }
+                
+                // Count posts
+                const { count } = await this.sb.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', uid);
+                els.posts.innerText = count || 0;
+            }
+
+            viewMyProfile() { if(this.user) this.viewProfile(this.user.id); }
+            closeProfile() { document.getElementById('profile-modal').classList.remove('active'); }
+
+            // Other
+            openLightbox(src) {
+                document.getElementById('lb-img').src = src;
+                document.getElementById('lightbox').style.display = 'flex';
+            }
+
+            showToast(msg, type = 'success') {
+                const box = document.getElementById('toast-container');
+                const el = document.createElement('div');
+                el.className = `toast ${type}`;
+                el.innerHTML = type === 'error' ? `<i class="ri-error-warning-fill"></i> ${msg}` : `<i class="ri-check-double-line"></i> ${msg}`;
+                box.appendChild(el);
+                setTimeout(() => el.remove(), 3000);
+            }
+
+            async deletePost(id) {
+                if(!confirm('Удалить этот пост?')) return;
+                await this.sb.from('posts').delete().eq('id', id);
+                document.getElementById(`post-${id}`).style.display = 'none';
+                this.showToast('Пост удален', 'success');
+            }
+
+            sharePost(id) {
+                const url = `${window.location.origin}${window.location.pathname}?post=${id}`;
+                navigator.clipboard.writeText(url).then(() => this.showToast('Ссылка скопирована'));
+            }
+
+            loadMyProfile() {
+                this.sb.from('profiles').select('avatar_url').eq('id', this.user.id).single()
+                .then(({data}) => {
+                    if(data?.avatar_url) document.getElementById('my-ava').innerHTML = `<img src="${data.avatar_url}" style="width:100%;height:100%">`;
+                });
+            }
+
+            // Realtime
+            setupRealtime() {
+                this.sb.channel('public:posts')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, payload => {
+                    if (this.feedState.type === 'new') {
+                        // Fetch the profile for the new post
+                        this.sb.from('profiles').select('*').eq('id', payload.new.user_id).single()
+                        .then(({data}) => {
+                            // Construct complete object and prepend
+                            const fullPost = { ...payload.new, profiles: data };
+                            this.renderPost(fullPost, false, true);
+                            this.showToast('Новый пост в ленте!');
+                        });
+                    }
+                })
+                .subscribe();
+            }
+
+            // Text Formatters
+            escapeHtml(text) {
+                if (!text) return '';
+                return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            }
+
+            formatText(text) {
+                if (!text) return '';
+                let t = this.escapeHtml(text);
+                // HashTags
+                t = t.replace(/#(\w+)/g, '<span class="tag">#$1</span>');
+                // Links
+                t = t.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:var(--verified);text-decoration:underline">$1</a>');
+                return t;
+            }
+
+            timeAgo(date, short=false) {
+                const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+                let interval = seconds / 31536000;
+                if (interval > 1) return Math.floor(interval) + (short ? " г" : " лет назад");
+                interval = seconds / 2592000;
+                if (interval > 1) return Math.floor(interval) + (short ? " мес" : " месяцев назад");
+                interval = seconds / 86400;
+                if (interval > 1) return Math.floor(interval) + (short ? " д" : " дн. назад");
+                interval = seconds / 3600;
+                if (interval > 1) return Math.floor(interval) + (short ? " ч" : " ч. назад");
+                interval = seconds / 60;
+                if (interval > 1) return Math.floor(interval) + (short ? " м" : " мин. назад");
+                return "только что";
+            }
+        }
+
+        // --- START APPLICATION ---
+        const app = new AppCore();
+    </script>
+</body>
+</html>
