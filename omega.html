@@ -1,777 +1,732 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#090909">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>OMEGA | Raw Web</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <title>omega | v.1.0.0</title>
+    <style>
+        /* =========================================
+           CORE ARCHITECTURE & DESIGN SYSTEM
+           Code Name: STREET OBSIDIAN
+           ========================================= */
+        :root {
+            --c-void: #000000;
+            --c-concrete: #111111;
+            --c-armor: #1a1a1a;
+            --c-steel: #333333;
+            --c-text-primary: #e0e0e0;
+            --c-text-muted: #666666;
+            --c-accent: #ffffff;
+            --c-danger: #800000;
+            
+            --f-mono: 'Courier New', monospace;
+            --f-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            
+            --s-dock-height: 70px;
+            --s-radius: 4px;
+            --z-back: -1;
+            --z-workspace: 10;
+            --z-dock: 100;
+            --z-overlay: 200;
+            --z-toast: 999;
+        }
 
-<style>
-    :root {
-        /* --- PALETTE: STREET DARK --- */
-        --color-void:       #000000;
-        --color-main:       #0a0a0a;
-        --color-panel:      #111111;
-        --color-surface:    #1a1a1a;
-        --color-border:     #2a2a2a;
-        --color-border-hi:  #444444;
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
-        /* --- TYPOGRAPHY COLORS --- */
-        --text-primary:     #e5e5e5;
-        --text-secondary:   #888888;
-        --text-disabled:    #444444;
-        --text-invert:      #000000;
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: var(--c-void);
+            color: var(--c-text-primary);
+            font-family: var(--f-sans);
+            overflow: hidden; /* App-like feel */
+        }
+
+        /* --- BACKGROUND FX --- */
+        #static-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: var(--z-back); opacity: 0.08; pointer-events: none;
+        }
+
+        /* --- LAYOUT STRUCTURE --- */
+        #monolith-root {
+            display: flex; flex-direction: column; height: 100vh;
+            position: relative;
+        }
+
+        #workspace {
+            flex: 1; position: relative; overflow: hidden;
+            background: var(--c-void);
+        }
+
+        /* --- IFRAME CONTAINER (VIRTUAL PROCESS) --- */
+        .process-view {
+            width: 100%; height: 100%; border: none;
+            position: absolute; top: 0; left: 0;
+            background: #fff; /* Browser content needs white usually */
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .process-view.hidden { transform: scale(0.95); opacity: 0; pointer-events: none; z-index: -1; }
+        .process-view.active { transform: scale(1); opacity: 1; z-index: 10; }
+
+        /* --- INTERNAL APP CONTAINER --- */
+        .internal-app {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--c-void); color: var(--c-text-primary);
+            padding: 20px; z-index: 20; display: none;
+            overflow-y: auto;
+        }
+        .internal-app.active { display: block; }
+
+        /* --- OMEGA DOCK --- */
+        #omega-bar {
+            height: var(--s-dock-height);
+            background: var(--c-concrete);
+            border-top: 1px solid var(--c-steel);
+            display: grid;
+            grid-template-columns: 50px 1fr 50px 50px;
+            gap: 10px;
+            padding: 10px;
+            z-index: var(--z-dock);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.8);
+        }
+
+        .dock-btn {
+            background: var(--c-armor); border: 1px solid var(--c-steel);
+            color: var(--c-text-primary); border-radius: var(--s-radius);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; cursor: pointer; transition: all 0.2s;
+        }
+        .dock-btn:active { background: var(--c-text-primary); color: var(--c-void); }
+
+        .omnibox-wrapper { position: relative; display: flex; align-items: center; }
+        #omnibox-input {
+            width: 100%; height: 100%;
+            background: var(--c-void); border: 1px solid var(--c-steel);
+            color: var(--c-text-primary); font-family: var(--f-mono);
+            padding: 0 15px; font-size: 14px; border-radius: var(--s-radius);
+        }
+        #omnibox-input:focus { border-color: var(--c-text-muted); }
+
+        .tab-counter { 
+            position: absolute; top: -5px; right: -5px; 
+            background: var(--c-text-primary); color: var(--c-void); 
+            font-size: 10px; padding: 2px 5px; border-radius: 2px; font-weight: bold;
+        }
+
+        /* --- OVERLAYS (Launcher / Tabs) --- */
+        .overlay {
+            position: fixed; bottom: var(--s-dock-height); left: 0; width: 100%;
+            height: calc(100vh - var(--s-dock-height));
+            background: rgba(10,10,10, 0.95);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            z-index: var(--z-overlay);
+            transform: translateY(110%); transition: transform 0.3s ease;
+            display: flex; flex-direction: column;
+            border-top: 1px solid var(--c-steel);
+        }
+        .overlay.open { transform: translateY(0); }
         
-        /* --- SYSTEM --- */
-        --accent-error:     #cf6679;
-        --accent-success:   #00ff00;
-        --accent-active:    #ffffff;
-        
-        /* --- METRICS --- */
-        --space-xs:         4px;
-        --space-sm:         8px;
-        --space-md:         16px;
-        --space-lg:         24px;
-        --space-xl:         32px;
-        
-        --bar-height:       64px;
-        --radius-sm:        4px;
-        --radius-md:        12px;
-        --radius-pill:      100px;
-        
-        /* --- ANIMATIONS --- */
-        --ease-mechanical:  cubic-bezier(0.2, 0.0, 0.2, 1);
-        --ease-snappy:      cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        --duration-fast:    0.2s;
-        --duration-norm:    0.35s;
-        
-        /* --- LAYERS --- */
-        --z-ground:         0;
-        --z-view:           10;
-        --z-ui-base:        100;
-        --z-overlay:        500;
-        --z-modal:          1000;
-        --z-toast:          9999;
-    }
+        .overlay-header {
+            padding: 20px; border-bottom: 1px solid var(--c-steel);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .overlay-title { font-family: var(--f-mono); font-size: 18px; text-transform: uppercase; letter-spacing: 2px;}
 
-    /* --- RESET --- */
-    *, *::before, *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        -webkit-tap-highlight-color: transparent;
-        -webkit-touch-callout: none;
-        user-select: none;
-        outline: none;
-    }
+        /* --- TAB MANAGER UI --- */
+        .tab-grid {
+            padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+            overflow-y: auto;
+        }
+        .tab-card {
+            background: var(--c-concrete); border: 1px solid var(--c-steel);
+            height: 150px; border-radius: var(--s-radius); position: relative;
+            display: flex; flex-direction: column; padding: 10px;
+        }
+        .tab-card.active { border-color: var(--c-text-primary); }
+        .tab-card-preview { flex: 1; background: #000; opacity: 0.5; margin-bottom: 10px; }
+        .tab-card-title { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tab-close { position: absolute; top: 5px; right: 5px; color: var(--c-danger); }
 
-    /* --- GLOBAL --- */
-    html, body {
-        width: 100%;
-        height: 100%;
-        background-color: var(--color-void);
-        color: var(--text-primary);
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        font-size: 16px;
-        line-height: 1.5;
-        overflow: hidden;
-        position: fixed; /* Prevent rubber banding */
-    }
+        /* --- LAUNCHER UI --- */
+        .app-grid {
+            padding: 30px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+        }
+        .app-icon {
+            aspect-ratio: 1; background: var(--c-armor); border: 1px solid var(--c-steel);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; cursor: pointer;
+        }
+        .app-label { text-align: center; font-size: 11px; margin-top: 5px; color: var(--c-text-muted); }
 
-    /* --- UTILITIES --- */
-    .hidden { display: none !important; }
-    .flex { display: flex; }
-    .flex-col { flex-direction: column; }
-    .flex-center { align-items: center; justify-content: center; }
-    .w-full { width: 100%; }
-    .h-full { height: 100%; }
-    .text-mono { font-family: "Courier New", monospace; letter-spacing: -0.5px; }
-    .text-uc { text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        /* --- INTERNAL APPS --- */
+        /* Terminal */
+        .terminal-screen { font-family: var(--f-mono); height: 100%; display: flex; flex-direction: column; }
+        .terminal-output { flex: 1; overflow-y: auto; white-space: pre-wrap; color: #ccc; font-size: 13px; line-height: 1.4; padding-bottom: 10px;}
+        .terminal-input-line { display: flex; border-top: 1px solid #333; padding-top: 10px; }
+        .terminal-prompt { color: #666; margin-right: 10px; }
+        .cmd-input { background: transparent; border: none; color: #fff; flex: 1; font-family: var(--f-mono); }
 
-    /* --- APP SHELL --- */
-    #omega-os {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        width: 100%;
-        position: relative;
-        background: var(--color-main);
-    }
+        /* Snake */
+        #snake-canvas { background: var(--c-concrete); border: 1px solid var(--c-steel); display: block; margin: 0 auto; }
+        .snake-controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; max-width: 200px; margin: 20px auto; }
+        .dpad-btn { height: 50px; background: var(--c-armor); border: 1px solid var(--c-steel); color: #fff; }
 
-    /* --- VIEWPORT (IFRAME CONTAINER) --- */
-    #viewport-manager {
-        flex: 1;
-        position: relative;
-        overflow: hidden;
-        background: var(--color-surface);
-        z-index: var(--z-view);
-    }
+        /* --- TOAST --- */
+        #toast-container {
+            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+            z-index: var(--z-toast); display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+        }
+        .toast {
+            background: var(--c-concrete); border: 1px solid var(--c-text-muted);
+            color: var(--c-text-primary); padding: 10px 20px; border-radius: 20px;
+            font-size: 12px; font-family: var(--f-mono); box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            animation: slideUp 0.3s ease;
+        }
 
-    .browser-view {
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: #fff;
-        display: none;
-        flex-direction: column;
-        opacity: 0;
-        transform: scale(0.98);
-        transition: opacity var(--duration-fast), transform var(--duration-fast);
-    }
-
-    .browser-view.active {
-        display: flex;
-        opacity: 1;
-        transform: scale(1);
-    }
-
-    iframe.engine-frame {
-        flex: 1;
-        border: none;
-        width: 100%;
-        height: 100%;
-        background: #ffffff;
-    }
-
-    /* --- CUSTOM SCROLLBARS --- */
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: var(--color-main); }
-    ::-webkit-scrollbar-thumb { background: var(--color-border-hi); border-radius: 4px; }
-
-    /* --- START PAGE UI --- */
-    .start-screen {
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: var(--color-main);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: var(--space-xl);
-        z-index: 50;
-    }
-
-    .brand-logo {
-        font-size: 4rem;
-        font-weight: 900;
-        color: var(--text-primary);
-        margin-bottom: var(--space-lg);
-        border: 4px solid var(--text-primary);
-        padding: 10px 30px;
-        background: transparent;
-        text-transform: uppercase;
-        letter-spacing: -2px;
-    }
-
-    .search-mock {
-        width: 100%;
-        max-width: 400px;
-        height: 56px;
-        background: var(--color-surface);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-md);
-        display: flex;
-        align-items: center;
-        padding: 0 20px;
-        color: var(--text-secondary);
-        font-size: 18px;
-        margin-bottom: 40px;
-    }
-
-    .quick-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
-        width: 100%;
-        max-width: 400px;
-    }
-
-    .quick-tile {
-        aspect-ratio: 1;
-        background: var(--color-surface);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-md);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--text-secondary);
-        transition: 0.2s;
-    }
-    .quick-tile:active { background: var(--color-border); color: var(--text-primary); }
-
-    /* --- OMEGA BAR (BOTTOM) --- */
-    #omega-bar {
-        height: calc(var(--bar-height) + env(safe-area-inset-bottom));
-        background: rgba(10, 10, 10, 0.9);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-top: 1px solid var(--color-border);
-        display: flex;
-        align-items: flex-start;
-        padding: 10px 10px 0 10px;
-        z-index: var(--z-ui-base);
-        gap: 8px;
-    }
-
-    .nav-btn {
-        width: 44px;
-        height: 44px;
-        background: transparent;
-        border: none;
-        border-radius: var(--radius-sm);
-        color: var(--text-primary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background 0.2s;
-    }
-    .nav-btn:active { background: var(--color-surface); }
-    .nav-btn svg { width: 22px; height: 22px; fill: currentColor; }
-
-    .omnibox {
-        flex: 1;
-        height: 44px;
-        background: var(--color-surface);
-        border-radius: var(--radius-md);
-        border: 1px solid var(--color-border);
-        display: flex;
-        align-items: center;
-        padding: 0 12px;
-        position: relative;
-        transition: border-color 0.2s;
-    }
-    .omnibox:focus-within { border-color: var(--text-secondary); }
-
-    .secure-indicator {
-        width: 8px; height: 8px; background: var(--text-disabled); border-radius: 50%;
-        margin-right: 10px; flex-shrink: 0;
-    }
-    .secure-indicator.on { background: #00ff00; box-shadow: 0 0 8px #00ff00; }
-
-    #url-input {
-        flex: 1;
-        background: transparent;
-        border: none;
-        color: var(--text-primary);
-        font-size: 15px;
-        font-weight: 500;
-        font-family: var(--text-mono);
-    }
-
-    /* --- OVERLAYS (TABS, MENU) --- */
-    .overlay-container {
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: var(--color-main);
-        z-index: var(--z-modal);
-        transform: translateY(100%);
-        transition: transform var(--duration-norm) var(--ease-snappy);
-        display: flex;
-        flex-direction: column;
-    }
-    .overlay-container.open { transform: translateY(0); }
-
-    .overlay-header {
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 20px;
-        border-bottom: 1px solid var(--color-border);
-        background: var(--color-panel);
-    }
-    .overlay-title { font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
-
-    /* TAB MANAGER STYLES */
-    .tabs-grid {
-        flex: 1;
-        padding: 20px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        overflow-y: auto;
-        align-content: flex-start;
-    }
-
-    .tab-card {
-        height: 160px;
-        background: var(--color-surface);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-md);
-        display: flex;
-        flex-direction: column;
-        position: relative;
-        overflow: hidden;
-        transition: transform 0.2s, border-color 0.2s;
-    }
-    .tab-card.active { border-color: var(--text-primary); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-    .tab-card:active { transform: scale(0.98); }
-
-    .tab-close-btn {
-        position: absolute;
-        top: 8px; right: 8px;
-        width: 28px; height: 28px;
-        background: rgba(0,0,0,0.6);
-        border-radius: 50%;
-        display: flex; flex-center;
-        color: #fff;
-        z-index: 5;
-    }
-
-    .tab-content-preview {
-        flex: 1;
-        background: #000;
-        display: flex; flex-center;
-        color: #333; font-weight: 900; font-size: 48px;
-    }
-    
-    .tab-footer {
-        height: 36px;
-        background: var(--color-panel);
-        border-top: 1px solid var(--color-border);
-        display: flex; align-items: center;
-        padding: 0 10px;
-        font-size: 11px;
-        color: var(--text-secondary);
-    }
-
-    /* TOAST NOTIFICATIONS */
-    .toast-box {
-        position: fixed;
-        bottom: 100px;
-        left: 50%;
-        transform: translateX(-50%) translateY(50px);
-        background: var(--color-panel);
-        border: 1px solid var(--color-border);
-        padding: 12px 24px;
-        border-radius: 100px;
-        font-size: 13px;
-        font-weight: 600;
-        opacity: 0;
-        transition: 0.3s var(--ease-snappy);
-        z-index: var(--z-toast);
-        pointer-events: none;
-        white-space: nowrap;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-    }
-    .toast-box.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    /* MENU LIST */
-    .menu-scroll { flex: 1; overflow-y: auto; padding-bottom: 50px; }
-    .menu-item {
-        padding: 20px;
-        border-bottom: 1px solid var(--color-border);
-        display: flex; align-items: center;
-        font-size: 16px;
-        color: var(--text-primary);
-    }
-    .menu-item svg { margin-right: 15px; fill: var(--text-secondary); }
-    .menu-item:active { background: var(--color-surface); }
-    .menu-divider { padding: 30px 20px 10px; font-size: 10px; color: #444; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
-
-</style>
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
 </head>
 <body>
 
-<div id="omega-os">
-    
-    <div id="viewport-manager">
+<div id="monolith-root">
+    <canvas id="static-canvas"></canvas>
+
+    <div id="workspace">
+        <div id="app-terminal" class="internal-app">
+            <div class="terminal-screen">
+                <div class="terminal-output" id="term-out">omega [v1.0.0]<br>System mounted.<br>Type 'help' for commands.</div>
+                <div class="terminal-input-line">
+                    <span class="terminal-prompt">root@omega:~#</span>
+                    <input type="text" class="cmd-input" id="term-in" autocomplete="off" autocorrect="off">
+                </div>
+            </div>
         </div>
+        
+        <div id="app-snake" class="internal-app">
+            <h2 style="text-align:center; font-family:var(--f-mono); margin-bottom:20px;">SNAKE.EXE</h2>
+            <canvas id="snake-canvas" width="300" height="300"></canvas>
+            <div class="snake-controls">
+                <div></div><button class="dpad-btn" id="s-up">▲</button><div></div>
+                <button class="dpad-btn" id="s-left">◀</button><button class="dpad-btn" id="s-down">▼</button><button class="dpad-btn" id="s-right">▶</button>
+            </div>
+            <p style="text-align:center; color: #666; margin-top:20px;">Score: <span id="snake-score">0</span></p>
+        </div>
+    </div>
 
     <div id="omega-bar">
-        <button class="nav-btn" onclick="Core.nav.back()">
-            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-        </button>
-        
-        <div class="omnibox">
-            <div class="secure-indicator" id="ui-secure"></div>
-            <form onsubmit="Core.nav.submit(event)" class="w-full flex">
-                <input type="text" id="url-input" placeholder="Введите запрос..." autocomplete="off" autocapitalize="off" spellcheck="false">
-            </form>
+        <button class="dock-btn" id="btn-back">←</button>
+        <div class="omnibox-wrapper">
+            <input type="text" id="omnibox-input" placeholder="Enter URL or Command...">
         </div>
-
-        <button class="nav-btn" onclick="Core.ui.toggleTabs()">
-            <div style="border: 2px solid currentColor; width: 20px; height: 20px; border-radius: 5px; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center;">
-                <span id="ui-tab-count">1</span>
-            </div>
+        <button class="dock-btn" id="btn-tabs">
+            <span style="border: 2px solid #ccc; width: 14px; height: 14px; border-radius: 2px;"></span>
+            <div class="tab-counter" id="tab-count-badge">1</div>
         </button>
-        
-        <button class="nav-btn" onclick="Core.ui.toggleMenu()">
-            <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        <button class="dock-btn" id="btn-launcher">
+            <span style="font-size: 20px;">⋮⋮</span>
         </button>
     </div>
-
 </div>
 
-<div id="overlay-tabs" class="overlay-container">
+<div id="overlay-tabs" class="overlay">
     <div class="overlay-header">
-        <div class="overlay-title">Процессы</div>
-        <button class="nav-btn" onclick="Core.ui.toggleTabs()">✕</button>
+        <span class="overlay-title">Processes</span>
+        <button class="dock-btn" id="btn-new-tab" style="width: 40px; height: 30px;">+</button>
     </div>
-    <div class="tabs-grid" id="ui-tabs-grid"></div>
-    <div style="padding: 20px; background: var(--color-main); border-top: 1px solid var(--color-border); padding-bottom: max(20px, env(safe-area-inset-bottom));">
-        <button onclick="Core.tabs.create()" style="width: 100%; height: 50px; background: var(--text-primary); color: #000; border: none; border-radius: 50px; font-weight: 700; font-size: 16px; text-transform: uppercase;">
-            + Новый процесс
-        </button>
-    </div>
+    <div class="tab-grid" id="tab-list-container"></div>
 </div>
 
-<div id="overlay-menu" class="overlay-container">
+<div id="overlay-launcher" class="overlay">
     <div class="overlay-header">
-        <div class="overlay-title">Omega OS</div>
-        <button class="nav-btn" onclick="Core.ui.toggleMenu()">✕</button>
+        <span class="overlay-title">Modules</span>
     </div>
-    <div class="menu-scroll">
-        <div class="menu-divider">Действия</div>
-        <div class="menu-item" onclick="location.reload()">
-            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
-            Перезагрузить ядро
+    <div class="app-grid">
+        <div onclick="Monolith.System.openInternal('terminal')">
+            <div class="app-icon">_</div><div class="app-label">Terminal</div>
         </div>
-        <div class="menu-item" onclick="Core.data.nuke()">
-            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M15 16h4v2h-4zm0-8h7v2h-7zm0 4h6v2h-6zM3 18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8H3v10zM14 5h-3l-1-1H6L5 5H2v2h12z"/></svg>
-            Уничтожить данные
-        </div>
-        
-        <div class="menu-divider">Инструменты</div>
-        <div class="menu-item" onclick="Core.ui.toast('Source Code View Locked')">
-            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
-            Исходный код
-        </div>
-        <div class="menu-item" onclick="Core.ui.toast('VPN Disabled in Region')">
-            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-            VPN (Street Proxy)
-        </div>
-        
-        <div class="menu-divider">Информация</div>
-        <div style="padding: 20px; font-size: 12px; color: #666; font-family: monospace;">
-            BUILD: 2026.02.05-STREET<br>
-            RENDERER: OMEGA-KIT<br>
-            LINES: MAXIMIZED
+        <div onclick="Monolith.System.openInternal('snake')">
+            <div class="app-icon">S</div><div class="app-label">Snake</div>
         </div>
     </div>
 </div>
 
-<div id="toast" class="toast-box">Notification</div>
+<div id="toast-container"></div>
 
 <script>
-    /**
-     * OMEGA KERNEL
-     * Manages virtual processes, navigation state, and UI.
-     */
-    
-    const CONFIG = {
-        home: 'omega://start',
-        searchEngine: 'https://www.bing.com/search?q=', // Iframe friendly
-        maxTabs: 15
-    };
+/**
+ * MONOLITH OS - Core Architecture
+ * Senior Frontend Architect Implementation
+ * * Includes: State Store, Event Bus, Virtual Process Manager, 
+ * Internal App Engines, and DOM Reconciler.
+ */
 
-    const Core = {
-        // --- STATE STORE ---
-        state: {
+// --- UTILS ---
+const Utils = {
+    uuid: () => '_' + Math.random().toString(36).substr(2, 9),
+    now: () => new Date().toLocaleTimeString(),
+    el: (id) => document.getElementById(id),
+    create: (tag, cls) => {
+        const e = document.createElement(tag);
+        if(cls) e.className = cls;
+        return e;
+    }
+};
+
+// --- EVENT BUS (Pub/Sub) ---
+class EventBus {
+    constructor() { this.events = {}; }
+    on(event, listener) {
+        if (!this.events[event]) this.events[event] = [];
+        this.events[event].push(listener);
+    }
+    emit(event, data) {
+        if (this.events[event]) this.events[event].forEach(l => l(data));
+    }
+}
+const sysBus = new EventBus();
+
+// --- STATE MANAGEMENT (Store) ---
+class Store {
+    constructor() {
+        this.state = {
             tabs: [],
             activeTabId: null,
-            history: [], // Global history stack for simulation
-            isMenuOpen: false,
-            isTabsOpen: false
-        },
+            activeInternalApp: null, // 'terminal', 'snake' or null
+            overlays: { tabs: false, launcher: false },
+            omniboxVal: ''
+        };
+    }
 
-        // --- DOM ELEMENTS CACHE ---
-        dom: {
-            viewport: document.getElementById('viewport-manager'),
-            urlInput: document.getElementById('url-input'),
-            tabCount: document.getElementById('ui-tab-count'),
-            tabsGrid: document.getElementById('ui-tabs-grid'),
-            secureIcon: document.getElementById('ui-secure'),
-            toast: document.getElementById('toast'),
-            overlayTabs: document.getElementById('overlay-tabs'),
-            overlayMenu: document.getElementById('overlay-menu')
-        },
+    // Actions
+    addTab(url = 'about:blank') {
+        const newTab = {
+            id: Utils.uuid(),
+            url: url,
+            title: 'New Process',
+            timestamp: Date.now()
+        };
+        this.state.tabs.push(newTab);
+        this.setActiveTab(newTab.id);
+        sysBus.emit('tabs:updated', this.state.tabs);
+    }
 
-        // --- INIT SEQUENCE ---
-        init: () => {
-            console.log("OMEGA: Boot sequence initiated.");
-            
-            // Try load session
-            const saved = localStorage.getItem('omega_session');
-            if (saved) {
-                try {
-                    // Simulation of session restore
-                    Core.tabs.create(CONFIG.home);
-                } catch(e) { Core.tabs.create(CONFIG.home); }
-            } else {
-                Core.tabs.create(CONFIG.home);
+    closeTab(id) {
+        if (this.state.tabs.length <= 1) return; // Prevent closing last
+        this.state.tabs = this.state.tabs.filter(t => t.id !== id);
+        if (this.state.activeTabId === id) {
+            this.setActiveTab(this.state.tabs[this.state.tabs.length - 1].id);
+        }
+        sysBus.emit('tabs:updated', this.state.tabs);
+    }
+
+    setActiveTab(id) {
+        this.state.activeTabId = id;
+        this.state.activeInternalApp = null;
+        this.updateUrlFromTab(id);
+        sysBus.emit('view:changed');
+    }
+
+    setInternalApp(appName) {
+        this.state.activeInternalApp = appName;
+        this.closeOverlays();
+        Utils.el('omnibox-input').value = `omega://${appName}`;
+        sysBus.emit('view:changed');
+    }
+
+    toggleOverlay(name) {
+        // Close others
+        Object.keys(this.state.overlays).forEach(k => {
+            if(k !== name) this.state.overlays[k] = false;
+        });
+        this.state.overlays[name] = !this.state.overlays[name];
+        sysBus.emit('overlay:changed', this.state.overlays);
+    }
+
+    closeOverlays() {
+        Object.keys(this.state.overlays).forEach(k => this.state.overlays[k] = false);
+        sysBus.emit('overlay:changed', this.state.overlays);
+    }
+
+    updateUrlFromTab(id) {
+        const tab = this.state.tabs.find(t => t.id === id);
+        if (tab) Utils.el('omnibox-input').value = tab.url === 'about:blank' ? '' : tab.url;
+    }
+
+    updateTabMeta(id, data) {
+        const t = this.state.tabs.find(x => x.id === id);
+        if(t) {
+            if(data.url) t.url = data.url;
+            if(data.title) t.title = data.title;
+            if(id === this.state.activeTabId) Utils.el('omnibox-input').value = t.url;
+            sysBus.emit('tabs:updated', this.state.tabs);
+        }
+    }
+}
+
+const State = new Store();
+
+// --- UI MANAGERS ---
+
+class DOMManager {
+    constructor() {
+        this.workspace = Utils.el('workspace');
+        this.tabContainer = Utils.el('tab-list-container');
+        this.iframeMap = new Map(); // Keep DOM elements in memory
+        
+        // Bind Events
+        sysBus.on('tabs:updated', (tabs) => {
+            this.renderTabs(tabs);
+            this.syncIframes(tabs);
+            Utils.el('tab-count-badge').innerText = tabs.length;
+        });
+
+        sysBus.on('view:changed', () => this.updateView());
+        sysBus.on('overlay:changed', (overlays) => this.updateOverlays(overlays));
+    }
+
+    syncIframes(tabs) {
+        // Remove dead iframes
+        const activeIds = new Set(tabs.map(t => t.id));
+        this.iframeMap.forEach((iframe, id) => {
+            if (!activeIds.has(id)) {
+                iframe.remove();
+                this.iframeMap.delete(id);
             }
+        });
 
-            // Bind global events
-            Core.dom.urlInput.addEventListener('focus', () => Core.dom.urlInput.select());
-            
-            Core.ui.toast("Система готова. Street Mode.");
-        },
-
-        // --- TAB SYSTEM (PROCESS MANAGER) ---
-        tabs: {
-            create: (url = CONFIG.home) => {
-                if (Core.state.tabs.length >= CONFIG.maxTabs) {
-                    Core.ui.toast("Лимит памяти (Max Tabs)");
-                    return;
-                }
-
-                const tabId = 'proc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        // Create new iframes
+        tabs.forEach(tab => {
+            if (!this.iframeMap.has(tab.id)) {
+                const iframe = Utils.create('iframe', 'process-view hidden');
+                iframe.sandbox = "allow-scripts allow-forms allow-same-origin";
+                iframe.src = tab.url === 'about:blank' ? '' : tab.url;
                 
-                const tab = {
-                    id: tabId,
-                    url: url,
-                    title: 'Загрузка...',
-                    historyStack: [url],
-                    historyIndex: 0,
-                    domElement: null
+                // Mocking load event to update title
+                iframe.onload = () => {
+                    try { 
+                        // Cross-origin restriction will block this usually, 
+                        // but simulating internal logic
+                        State.updateTabMeta(tab.id, { title: "External Site" }); 
+                    } catch(e) {}
                 };
 
-                // Create DOM Structure for Tab
-                const view = document.createElement('div');
-                view.className = 'browser-view';
-                view.id = tabId;
+                this.workspace.appendChild(iframe);
+                this.iframeMap.set(tab.id, iframe);
+            }
+        });
+    }
 
-                // Determine content
-                if (url === CONFIG.home) {
-                    view.innerHTML = Core.templates.startPage();
-                } else {
-                    const iframe = document.createElement('iframe');
-                    iframe.className = 'engine-frame';
-                    iframe.src = url;
-                    iframe.sandbox = "allow-forms allow-scripts allow-same-origin allow-popups allow-modals";
-                    // Handle load events
-                    iframe.onload = () => Core.tabs.onLoad(tabId);
-                    view.appendChild(iframe);
-                }
+    updateView() {
+        // Hide all apps
+        document.querySelectorAll('.internal-app').forEach(el => el.classList.remove('active'));
+        
+        // Hide all iframes
+        this.iframeMap.forEach(el => {
+            el.classList.remove('active');
+            el.classList.add('hidden');
+        });
 
-                Core.dom.viewport.appendChild(view);
-                tab.domElement = view;
-                
-                Core.state.tabs.push(tab);
-                Core.tabs.activate(tabId);
-                
-                // Close overlays
-                if(Core.state.isTabsOpen) Core.ui.toggleTabs();
-            },
+        if (State.state.activeInternalApp) {
+            const appEl = Utils.el(`app-${State.state.activeInternalApp}`);
+            if (appEl) {
+                appEl.classList.add('active');
+                if(State.state.activeInternalApp === 'snake') SnakeGame.start();
+                if(State.state.activeInternalApp === 'terminal') Terminal.focus();
+            }
+        } else if (State.state.activeTabId) {
+            const iframe = this.iframeMap.get(State.state.activeTabId);
+            if (iframe) {
+                iframe.classList.remove('hidden');
+                iframe.classList.add('active');
+            }
+            SnakeGame.pause();
+        }
+    }
 
-            activate: (id) => {
-                // Deactivate current
-                if (Core.state.activeTabId) {
-                    const curr = Core.state.tabs.find(t => t.id === Core.state.activeTabId);
-                    if(curr) curr.domElement.classList.remove('active');
-                }
+    updateOverlays(overlays) {
+        Utils.el('overlay-tabs').classList.toggle('open', overlays.tabs);
+        Utils.el('overlay-launcher').classList.toggle('open', overlays.launcher);
+    }
 
-                Core.state.activeTabId = id;
-                const next = Core.state.tabs.find(t => t.id === id);
-                
-                if (next) {
-                    next.domElement.classList.add('active');
-                    Core.ui.updateOmnibox(next.url);
-                    Core.ui.updateTabCount();
-                }
-            },
-
-            close: (e, id) => {
+    renderTabs(tabs) {
+        this.tabContainer.innerHTML = '';
+        tabs.forEach(tab => {
+            const card = Utils.create('div', `tab-card ${tab.id === State.state.activeTabId ? 'active' : ''}`);
+            
+            const preview = Utils.create('div', 'tab-card-preview');
+            const title = Utils.create('div', 'tab-card-title');
+            title.innerText = tab.url || "Empty";
+            
+            const closeBtn = Utils.create('div', 'tab-close');
+            closeBtn.innerHTML = '×';
+            closeBtn.onclick = (e) => {
                 e.stopPropagation();
-                if (Core.state.tabs.length <= 1) {
-                    // Reset last tab instead of closing
-                    const t = Core.state.tabs[0];
-                    Core.nav.load(CONFIG.home);
+                State.closeTab(tab.id);
+            };
+
+            card.onclick = () => {
+                State.setActiveTab(tab.id);
+                State.toggleOverlay('tabs');
+            };
+
+            card.appendChild(closeBtn);
+            card.appendChild(preview);
+            card.appendChild(title);
+            this.tabContainer.appendChild(card);
+        });
+    }
+}
+
+// --- INTERNAL APPS ---
+
+// 1. Terminal Module
+const Terminal = {
+    el: Utils.el('term-out'),
+    input: Utils.el('term-in'),
+    history: [],
+    init() {
+        this.input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                this.exec(this.input.value);
+                this.input.value = '';
+            }
+        });
+    },
+    log(msg) {
+        this.el.innerHTML += `<div>${msg}</div>`;
+        this.el.scrollTop = this.el.scrollHeight;
+    },
+    focus() { setTimeout(() => this.input.focus(), 100); },
+    exec(cmd) {
+        this.log(`<span style="color:#666">root@omega:~#</span> ${cmd}`);
+        const args = cmd.trim().split(' ');
+        const c = args[0].toLowerCase();
+
+        switch(c) {
+            case 'help':
+                this.log(`COMMANDS: help, clear, date, reboot, exit, open [url]`);
+                break;
+            case 'clear':
+                this.el.innerHTML = '';
+                break;
+            case 'date':
+                this.log(new Date().toString());
+                break;
+            case 'reboot':
+                location.reload();
+                break;
+            case 'exit':
+                State.setActiveTab(State.state.activeTabId);
+                break;
+            case 'open':
+                if(args[1]) Monolith.System.navigate(args[1]);
+                else this.log("Usage: open <url>");
+                break;
+            default:
+                this.log(`Unknown command: ${c}`);
+        }
+    }
+};
+
+// 2. Snake Game Module (Complex Logic)
+const SnakeGame = {
+    canvas: Utils.el('snake-canvas'),
+    ctx: Utils.el('snake-canvas').getContext('2d'),
+    running: false,
+    timer: null,
+    grid: 15,
+    snake: {x: 160, y: 160, dx: 15, dy: 0, cells: [], maxCells: 4},
+    apple: {x: 320, y: 320},
+    score: 0,
+    
+    start() {
+        if(this.running) return;
+        this.running = true;
+        this.score = 0;
+        this.snake = {x: 160, y: 160, dx: this.grid, dy: 0, cells: [], maxCells: 4};
+        this.placeApple();
+        this.loop();
+        Utils.el('snake-score').innerText = 0;
+    },
+    pause() {
+        this.running = false;
+        cancelAnimationFrame(this.timer);
+    },
+    placeApple() {
+        this.apple.x = Math.floor(Math.random() * 20) * this.grid;
+        this.apple.y = Math.floor(Math.random() * 20) * this.grid;
+    },
+    loop() {
+        if(!this.running) return;
+        this.timer = requestAnimationFrame(() => this.loop());
+        
+        // Slow down loop
+        if (++this.frameCount < 4) return; 
+        this.frameCount = 0;
+
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Move
+        this.snake.x += this.snake.snakeDx || this.snake.dx;
+        this.snake.y += this.snake.snakeDy || this.snake.dy;
+
+        // Wrap
+        if (this.snake.x < 0) this.snake.x = this.canvas.width - this.grid;
+        else if (this.snake.x >= this.canvas.width) this.snake.x = 0;
+        if (this.snake.y < 0) this.snake.y = this.canvas.height - this.grid;
+        else if (this.snake.y >= this.canvas.height) this.snake.y = 0;
+
+        // Keep track of cells
+        this.snake.cells.unshift({x: this.snake.x, y: this.snake.y});
+        if (this.snake.cells.length > this.snake.maxCells) this.snake.cells.pop();
+
+        // Draw Apple
+        this.ctx.fillStyle = 'red';
+        this.ctx.fillRect(this.apple.x, this.apple.y, this.grid-1, this.grid-1);
+
+        // Draw Snake
+        this.ctx.fillStyle = '#fff';
+        this.snake.cells.forEach((cell, index) => {
+            this.ctx.fillRect(cell.x, cell.y, this.grid-1, this.grid-1);
+            
+            // Eat Apple
+            if (cell.x === this.apple.x && cell.y === this.apple.y) {
+                this.snake.maxCells++;
+                this.score += 10;
+                Utils.el('snake-score').innerText = this.score;
+                this.placeApple();
+            }
+
+            // Collision self
+            for (let i = index + 1; i < this.snake.cells.length; i++) {
+                if (cell.x === this.snake.cells[i].x && cell.y === this.snake.cells[i].y) {
+                    this.score = 0;
+                    this.snake.maxCells = 4;
+                    this.snake.x = 160; this.snake.y = 160;
+                    Monolith.System.toast("GAME OVER");
+                }
+            }
+        });
+    },
+    input(dir) {
+        if (dir === 'up' && this.snake.dy === 0) { this.snake.dy = -this.grid; this.snake.dx = 0; }
+        if (dir === 'down' && this.snake.dy === 0) { this.snake.dy = this.grid; this.snake.dx = 0; }
+        if (dir === 'left' && this.snake.dx === 0) { this.snake.dx = -this.grid; this.snake.dy = 0; }
+        if (dir === 'right' && this.snake.dx === 0) { this.snake.dx = this.grid; this.snake.dy = 0; }
+    }
+};
+// Bind Snake Controls
+['up','down','left','right'].forEach(d => {
+    Utils.el(`s-${d}`).addEventListener('click', (e) => { e.preventDefault(); SnakeGame.input(d); });
+});
+
+
+// --- SYSTEM KERNEL ---
+
+const Monolith = {
+    System: {
+        boot() {
+            // Visual Noise Effect
+            this.initCanvas();
+            
+            // UI bindings
+            Utils.el('btn-tabs').onclick = () => State.toggleOverlay('tabs');
+            Utils.el('btn-launcher').onclick = () => State.toggleOverlay('launcher');
+            Utils.el('btn-new-tab').onclick = () => { State.addTab(); State.toggleOverlay('tabs'); };
+            Utils.el('btn-back').onclick = () => this.goBack();
+            
+            // Omnibox
+            const omni = Utils.el('omnibox-input');
+            omni.addEventListener('keydown', (e) => {
+                if(e.key === 'Enter') this.navigate(omni.value);
+            });
+            omni.addEventListener('focus', () => State.closeOverlays());
+
+            // Init Components
+            const domMan = new DOMManager();
+            Terminal.init();
+            SnakeGame.frameCount = 0;
+
+            // Start Session
+            State.addTab('https://bing.com'); // Default
+            this.toast("omega Loaded");
+        },
+
+        navigate(val) {
+            val = val.trim();
+            
+            // 1. Internal Commands
+            if (val.startsWith('omega://')) {
+                const app = val.replace('omega://', '');
+                if (['terminal', 'snake'].includes(app)) {
+                    State.setInternalApp(app);
                     return;
                 }
+            }
 
-                const index = Core.state.tabs.findIndex(t => t.id === id);
-                const tab = Core.state.tabs[index];
-                
-                // Destroy DOM
-                tab.domElement.remove();
-                Core.state.tabs.splice(index, 1);
+            // 2. Search vs URL
+            let url = val;
+            if (!val.includes('.') && !val.includes('://')) {
+                url = `https://www.bing.com/search?q=${encodeURIComponent(val)}`;
+            } else if (!val.startsWith('http')) {
+                url = `https://${val}`;
+            }
 
-                // Switch if active was closed
-                if (Core.state.activeTabId === id) {
-                    const newIndex = Math.max(0, index - 1);
-                    Core.tabs.activate(Core.state.tabs[newIndex].id);
-                }
-
-                Core.ui.renderTabsGrid();
-                Core.ui.updateTabCount();
-            },
-
-            onLoad: (id) => {
-                const tab = Core.state.tabs.find(t => t.id === id);
-                if (tab) {
-                    // Update title logic (limited due to cross-origin)
-                    try {
-                        const urlObj = new URL(tab.url);
-                        tab.title = urlObj.hostname;
-                    } catch(e) { tab.title = "Веб-страница"; }
-                    
-                    if (Core.state.isTabsOpen) Core.ui.renderTabsGrid();
-                }
+            // Update State
+            const currentTab = State.state.tabs.find(t => t.id === State.state.activeTabId);
+            if (currentTab) {
+                State.updateTabMeta(currentTab.id, { url: url });
+                // Force iframe reload
+                const iframe = document.querySelector(`iframe.active`);
+                if(iframe) iframe.src = url;
             }
         },
 
-        // --- NAVIGATION ENGINE ---
-        nav: {
-            submit: (e) => {
-                e.preventDefault();
-                Core.dom.urlInput.blur();
-                const input = Core.dom.urlInput.value.trim();
-                if (!input) return;
+        openInternal(app) {
+            State.setInternalApp(app);
+        },
 
-                // URL Logic
-                let destination = '';
-                const isUrl = input.includes('.') && !input.includes(' ');
-                
-                if (isUrl) {
-                    destination = input.startsWith('http') ? input : 'https://' + input;
-                } else {
-                    destination = CONFIG.searchEngine + encodeURIComponent(input);
-                }
-
-                Core.nav.load(destination);
-            },
-
-            load: (url) => {
-                const activeTab = Core.state.tabs.find(t => t.id === Core.state.activeTabId);
-                if (!activeTab) return;
-
-                // Update Data
-                activeTab.url = url;
-                activeTab.title = url;
-                activeTab.historyStack.push(url);
-                activeTab.historyIndex++;
-
-                // Update DOM
-                activeTab.domElement.innerHTML = ''; // Clear old
-                
-                if (url === CONFIG.home) {
-                    activeTab.domElement.innerHTML = Core.templates.startPage();
-                } else {
-                    const iframe = document.createElement('iframe');
-                    iframe.className = 'engine-frame';
-                    iframe.src = url;
-                    iframe.sandbox = "allow-forms allow-scripts allow-same-origin allow-popups";
-                    activeTab.domElement.appendChild(iframe);
-                }
-
-                Core.ui.updateOmnibox(url);
-            },
-
-            back: () => {
-                Core.ui.toast("История пуста (Mock)");
+        goBack() {
+            if (State.state.activeInternalApp) {
+                State.setActiveTab(State.state.activeTabId);
+            } else {
+                // Iframe history back hack
+                const iframe = document.querySelector(`iframe.active`);
+                if(iframe) iframe.contentWindow.history.back();
             }
         },
 
-        // --- UI MANAGERS ---
-        ui: {
-            toggleTabs: () => {
-                Core.state.isTabsOpen = !Core.state.isTabsOpen;
-                Core.dom.overlayTabs.classList.toggle('open', Core.state.isTabsOpen);
-                Core.dom.overlayMenu.classList.remove('open');
-                
-                if (Core.state.isTabsOpen) {
-                    Core.ui.renderTabsGrid();
-                }
-            },
-
-            toggleMenu: () => {
-                Core.state.isMenuOpen = !Core.state.isMenuOpen;
-                Core.dom.overlayMenu.classList.toggle('open', Core.state.isMenuOpen);
-                Core.dom.overlayTabs.classList.remove('open');
-                Core.state.isTabsOpen = false;
-            },
-
-            updateOmnibox: (url) => {
-                if (url === CONFIG.home) {
-                    Core.dom.urlInput.value = '';
-                    Core.dom.secureIcon.classList.remove('on');
-                } else {
-                    Core.dom.urlInput.value = url;
-                    if (url.startsWith('https')) Core.dom.secureIcon.classList.add('on');
-                    else Core.dom.secureIcon.classList.remove('on');
-                }
-            },
-
-            updateTabCount: () => {
-                Core.dom.tabCount.innerText = Core.state.tabs.length;
-            },
-
-            renderTabsGrid: () => {
-                const container = Core.dom.tabsGrid;
-                container.innerHTML = '';
-
-                Core.state.tabs.forEach(tab => {
-                    const card = document.createElement('div');
-                    const isActive = tab.id === Core.state.activeTabId;
-                    card.className = `tab-card ${isActive ? 'active' : ''}`;
-                    card.onclick = () => Core.tabs.activate(tab.id);
-
-                    // Extract Domain
-                    let domain = 'Start';
-                    try {
-                        if (tab.url !== CONFIG.home) domain = new URL(tab.url).hostname;
-                    } catch(e) {}
-
-                    card.innerHTML = `
-                        <div class="tab-close-btn" onclick="Core.tabs.close(event, '${tab.id}')">✕</div>
-                        <div class="tab-content-preview">
-                            ${tab.url === CONFIG.home ? 'Ω' : domain.charAt(0).toUpperCase()}
-                        </div>
-                        <div class="tab-footer">
-                            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${domain}</span>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            },
-
-            toast: (msg) => {
-                const t = Core.dom.toast;
-                t.innerText = msg;
-                t.classList.add('visible');
-                setTimeout(() => t.classList.remove('visible'), 3000);
-            }
+        toast(msg) {
+            const c = Utils.el('toast-container');
+            const t = Utils.create('div', 'toast');
+            t.innerText = msg;
+            c.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
         },
 
-        // --- DATA UTILS ---
-        data: {
-            nuke: () => {
-                localStorage.clear();
-                Core.ui.toast("Система очищена.");
-                setTimeout(() => location.reload(), 1000);
-            }
-        },
+        initCanvas() {
+            const cvs = Utils.el('static-canvas');
+            const ctx = cvs.getContext('2d');
+            const resize = () => { cvs.width = window.innerWidth; cvs.height = window.innerHeight; };
+            window.onresize = resize; resize();
 
-        // --- HTML TEMPLATES ---
-        templates: {
-            startPage: () => `
-                <div class="start-screen">
-                    <div class="brand-logo">OMEGA</div>
-                    <div class="search-mock" onclick="document.getElementById('url-input').focus()">
-                        Поиск или URL...
-                    </div>
-                    <div class="quick-grid">
-                        <div class="quick-tile" onclick="Core.nav.load('https://bing.com')">BING</div>
-                        <div class="quick-tile" onclick="Core.nav.load('https://duckduckgo.com')">DDG</div>
-                        <div class="quick-tile" onclick="Core.nav.load('https://reddit.com')">RED</div>
-                        <div class="quick-tile" onclick="Core.nav.load('https://wikipedia.org')">WIKI</div>
-                    </div>
-                    <div style="margin-top:40px; color:#444; font-size:10px; font-family:monospace;">
-                        SECURE CONTEXT: ACTIVE<br>
-                        TRACKING: DISABLED
-                    </div>
-                </div>
-            `
+            const draw = () => {
+                const w = cvs.width, h = cvs.height;
+                ctx.clearRect(0,0,w,h);
+                ctx.fillStyle = "rgba(255,255,255,0.03)";
+                for(let i=0; i<100; i++) {
+                    ctx.fillRect(Math.random()*w, Math.random()*h, 2, 2);
+                }
+                requestAnimationFrame(draw);
+            };
+            draw();
         }
-    };
+    }
+};
 
-    // --- SYSTEM BOOTSTRAP ---
-    window.addEventListener('DOMContentLoaded', Core.init);
+// --- BOOT SEQUENCE ---
+window.onload = () => Monolith.System.boot();
 
 </script>
 </body>
