@@ -5,1121 +5,643 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Omega Private Browser">
     <title>Omega Browser</title>
     <style>
-        /* ========================================= */
-        /* OMEGA CSS CORE              */
-        /* ========================================= */
-
+        /* * ------------------------------------------------------------------
+         * CORE STYLESHEET - LEVEL 0
+         * ------------------------------------------------------------------
+         */
         :root {
-            /* PALETTE: DARK STREET */
-            --bg-root: #050505;
-            --bg-surface: #111111;
-            --bg-surface-2: #1a1a1a;
-            --bg-overlay: rgba(0, 0, 0, 0.95);
+            --c-void: #000000;
+            --c-asphalt: #0f0f0f;
+            --c-concrete: #1a1a1a;
+            --c-steel: #333333;
+            --c-smoke: #888888;
+            --c-mist: #b0b0b0;
+            --c-flash: #ffffff;
             
-            --border-dim: #333333;
-            --border-light: #555555;
+            --f-primary: -apple-system, BlinkMacSystemFont, 'Inter', 'Roboto', sans-serif;
+            --f-mono: 'JetBrains Mono', 'Fira Code', monospace;
             
-            --text-main: #e0e0e0;
-            --text-muted: #808080;
-            --text-accent: #ffffff;
+            --z-bottom: 10;
+            --z-content: 100;
+            --z-ui: 500;
+            --z-overlay: 1000;
+            --z-toast: 2000;
             
-            --accent-color: #333333; /* Minimalist accent */
-            --error-color: #8a2be2; /* Purple haze for errors (Street style) */
-            
-            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            --font-mono: "Courier New", Courier, monospace;
-            
-            --bar-height: 64px;
-            --header-height: 50px;
-            --safe-area-bottom: env(safe-area-inset-bottom);
-            --anim-fast: 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
-            --anim-smooth: 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-            
-            --radius-sm: 4px;
-            --radius-md: 8px;
-            --radius-lg: 12px;
+            --ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
+            --ease-snap: cubic-bezier(0.33, 1, 0.68, 1);
         }
 
-        /* RESET & BASE */
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-            outline: none;
-            user-select: none;
-        }
-
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: var(--bg-root);
-            color: var(--text-main);
-            font-family: var(--font-main);
-            font-size: 16px;
-            line-height: 1.5;
-        }
-
-        input, textarea, button {
-            font-family: inherit;
-            color: inherit;
-        }
-
-        /* UTILITIES */
-        .hidden { display: none !important; }
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .center { align-items: center; justify-content: center; }
-        .w-full { width: 100%; }
-        .h-full { height: 100%; }
-        .bold { font-weight: 700; }
-        .mono { font-family: var(--font-mono); }
-        .opacity-50 { opacity: 0.5; }
-
-        /* ========================================= */
-        /* LAYOUT SYSTEM               */
-        /* ========================================= */
-
-        #app-root {
+        /* * ------------------------------------------------------------------
+         * RESET & BASE
+         * ------------------------------------------------------------------
+         */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        html, body { width: 100%; height: 100%; margin: 0; padding: 0; background: var(--c-void); color: var(--c-flash); font-family: var(--f-primary); overflow: hidden; }
+        
+        /* * ------------------------------------------------------------------
+         * UI COMPONENTS
+         * ------------------------------------------------------------------
+         */
+        
+        /* --- APP SHELL --- */
+        #omega-shell {
             display: flex;
             flex-direction: column;
             height: 100%;
-            width: 100%;
             position: relative;
-            background: var(--bg-root);
         }
 
-        /* --- VIEWPORT AREA --- */
-        #viewport {
+        /* --- VIEWPORT (Web Content) --- */
+        #viewport-stack {
             flex: 1;
             position: relative;
+            background: var(--c-asphalt);
             overflow: hidden;
-            background: var(--bg-surface);
-            z-index: 1;
         }
 
-        .webview-container {
-            width: 100%;
-            height: 100%;
+        .browser-tab-view {
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: #fff;
             display: none;
             flex-direction: column;
+            z-index: var(--z-content);
         }
+        
+        .browser-tab-view.active { display: flex; }
 
-        .webview-container.active {
-            display: flex;
-        }
-
-        iframe.browser-frame {
-            flex: 1;
+        iframe.web-engine {
             border: none;
             width: 100%;
             height: 100%;
-            background: #ffffff; /* Web content is usually white */
+            background: #fff;
         }
 
-        /* --- EMPTY STATE / START PAGE --- */
-        #start-page {
+        /* --- OMEGA SEARCH START PAGE (Internal) --- */
+        .omega-home {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--c-void);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: var(--bg-root);
-            z-index: 10;
+            z-index: var(--z-content);
+            padding: 20px;
         }
 
-        .omega-logo {
+        .omega-brand {
             font-size: 3rem;
             font-weight: 900;
             letter-spacing: -2px;
-            color: var(--text-accent);
+            color: var(--c-flash);
+            margin-bottom: 30px;
             text-transform: uppercase;
-            border: 4px solid var(--text-accent);
-            padding: 10px 24px;
-            margin-bottom: 40px;
+            border: 2px solid var(--c-flash);
+            padding: 10px 30px;
             background: transparent;
-            box-shadow: 0 0 0 0 transparent; /* No glow, street style */
         }
 
-        .search-wrapper {
-            width: 85%;
-            max-width: 400px;
-            position: relative;
+        .omega-search-box {
+            width: 100%;
+            max-width: 90%;
+            height: 56px;
+            background: var(--c-concrete);
+            border: 1px solid var(--c-steel);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            margin-bottom: 40px;
         }
 
-        .quick-tiles {
-            margin-top: 60px;
+        .omega-search-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--c-flash);
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .shortcuts-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            width: 85%;
-            max-width: 400px;
+            gap: 15px;
+            width: 100%;
+            max-width: 90%;
         }
 
-        .tile {
+        .shortcut-item {
             aspect-ratio: 1;
-            background: var(--bg-surface-2);
-            border-radius: var(--radius-md);
+            background: var(--c-concrete);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 12px;
+            color: var(--c-smoke);
             font-weight: 700;
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            border: 1px solid var(--border-dim);
-            transition: var(--anim-fast);
             cursor: pointer;
+            border: 1px solid transparent;
+            transition: 0.2s;
         }
+        
+        .shortcut-item:active { background: var(--c-steel); color: var(--c-flash); }
 
-        .tile:active {
-            background: var(--border-dim);
-            color: var(--text-accent);
-            transform: scale(0.95);
-        }
-
-        /* --- BOTTOM BAR (OMEGA BAR) --- */
-        #omega-bar {
-            height: calc(var(--bar-height) + var(--safe-area-bottom));
-            background: var(--bg-surface);
-            border-top: 1px solid var(--border-dim);
-            display: flex;
-            align-items: flex-start; /* Align top due to safe area */
-            padding-top: 10px; 
-            padding-left: 10px;
-            padding-right: 10px;
-            z-index: 100;
-            position: relative;
-        }
-
-        .bar-inner {
-            width: 100%;
-            height: 44px; /* Actionable height */
+        /* --- BOTTOM CONTROL BAR --- */
+        #control-deck {
+            height: 70px; /* Taller for fingers */
+            background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--c-steel);
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 10px;
+            padding: 0 10px;
+            z-index: var(--z-ui);
+            padding-bottom: env(safe-area-inset-bottom);
+            gap: 8px;
         }
 
-        /* OMNIBOX */
-        .omnibox-container {
+        .deck-btn {
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: transparent;
+            color: var(--c-flash);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+        .deck-btn:active { background: var(--c-steel); }
+        .deck-btn svg { width: 24px; height: 24px; fill: currentColor; }
+
+        .omnibox-wrapper {
             flex: 1;
             height: 44px;
-            background: var(--bg-surface-2);
-            border-radius: var(--radius-md);
+            background: var(--c-concrete);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             padding: 0 12px;
-            border: 1px solid var(--border-dim);
-            transition: var(--anim-fast);
+            border: 1px solid var(--c-steel);
             position: relative;
         }
 
-        .omnibox-container:focus-within {
-            border-color: var(--text-muted);
-            background: #000;
-        }
-
-        .secure-lock {
-            margin-right: 8px;
-            width: 12px;
-            height: 12px;
-            background: var(--text-muted);
-            border-radius: 50%; /* Simple dot for lock */
-            flex-shrink: 0;
-        }
-        .secure-lock.secure { background: #4caf50; }
-        .secure-lock.insecure { background: var(--error-color); }
-
-        #url-input {
-            width: 100%;
-            height: 100%;
+        .lock-icon { width: 12px; height: 12px; border-radius: 50%; background: var(--c-steel); margin-right: 8px; transition: 0.3s; }
+        .lock-icon.secure { background: #00ff00; box-shadow: 0 0 5px #00ff00; }
+        
+        #url-display {
+            flex: 1;
             background: transparent;
             border: none;
-            color: var(--text-main);
-            font-size: 15px;
-            font-weight: 500;
+            color: var(--c-flash);
+            font-size: 14px;
             white-space: nowrap;
             overflow: hidden;
+            font-family: var(--f-mono);
         }
 
-        #url-input::placeholder { color: #444; }
-
-        /* NAV BUTTONS */
-        .nav-btn {
-            width: 44px;
-            height: 44px;
-            background: transparent;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-main);
-            cursor: pointer;
-            border-radius: var(--radius-md);
-            transition: background 0.2s;
-            position: relative;
-        }
-
-        .nav-btn:active { background: var(--bg-surface-2); }
-        
-        .nav-btn svg {
-            width: 22px;
-            height: 22px;
-            fill: currentColor;
-        }
-
-        .tab-counter {
-            width: 20px;
-            height: 20px;
-            border: 2px solid currentColor;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 800;
-            position: relative;
-        }
-
-        /* ========================================= */
-        /* OVERLAYS                    */
-        /* ========================================= */
-
-        .overlay {
+        /* --- OVERLAYS (Tabs, Menu) --- */
+        .overlay-pane {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-root);
-            z-index: 200;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--c-void);
+            z-index: var(--z-overlay);
             transform: translateY(100%);
-            transition: transform var(--anim-smooth);
+            transition: transform 0.35s var(--ease-snap);
             display: flex;
             flex-direction: column;
         }
+        
+        .overlay-pane.open { transform: translateY(0); }
 
-        .overlay.active { transform: translateY(0); }
-
-        .overlay-header {
+        .pane-header {
             height: 60px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 20px;
-            border-bottom: 1px solid var(--border-dim);
-            background: var(--bg-surface);
+            border-bottom: 1px solid var(--c-steel);
+            background: var(--c-asphalt);
         }
+        
+        .pane-title { font-weight: 900; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; }
 
-        .overlay-title {
-            font-size: 18px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            text-transform: uppercase;
-        }
-
-        .overlay-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: var(--text-main);
-            padding: 10px;
-        }
-
-        /* --- TABS MANAGER --- */
-        .tabs-grid {
+        /* TABS GRID */
+        .tabs-container {
             flex: 1;
             padding: 20px;
-            overflow-y: auto;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            align-content: start;
+            grid-auto-rows: 180px;
+            gap: 15px;
+            overflow-y: auto;
         }
 
         .tab-card {
-            background: var(--bg-surface-2);
-            border: 1px solid var(--border-dim);
-            border-radius: var(--radius-md);
-            height: 160px;
+            background: var(--c-concrete);
+            border: 1px solid var(--c-steel);
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
             position: relative;
-            overflow: hidden;
-            transition: transform 0.2s, border-color 0.2s;
         }
+        .tab-card.active-card { border-color: var(--c-flash); }
+        
+        .tab-preview { flex: 1; background: #000; display: flex; center; justify-content: center; align-items: center; font-size: 40px; font-weight: bold; color: #333; }
+        .tab-meta { height: 40px; background: var(--c-asphalt); display: flex; align-items: center; padding: 0 10px; font-size: 12px; border-top: 1px solid var(--c-steel); }
+        .tab-close { position: absolute; top: 5px; right: 5px; width: 30px; height: 30px; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-        .tab-card.active-tab {
-            border-color: var(--text-main);
-            box-shadow: 0 0 0 1px var(--text-main);
-        }
-
-        .tab-card-preview {
+        /* DEV CONSOLE */
+        .console-log {
             flex: 1;
-            background: #222;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            color: #333;
-            font-weight: 900;
-            text-transform: uppercase;
-        }
-
-        .tab-card-info {
-            height: 36px;
-            background: var(--bg-surface);
-            display: flex;
-            align-items: center;
-            padding: 0 10px;
-            border-top: 1px solid var(--border-dim);
-        }
-
-        .tab-favicon {
-            width: 16px;
-            height: 16px;
-            background: #555;
-            border-radius: 2px;
-            margin-right: 8px;
-        }
-
-        .tab-title {
-            font-size: 11px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: var(--text-muted);
-            flex: 1;
-        }
-
-        .tab-close-btn {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 28px;
-            height: 28px;
-            background: rgba(0,0,0,0.6);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 14px;
-            cursor: pointer;
-            z-index: 5;
-        }
-
-        .tabs-bottom-actions {
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg-surface);
-            border-top: 1px solid var(--border-dim);
-            padding-bottom: var(--safe-area-bottom);
-        }
-
-        .btn-new-tab {
-            background: var(--text-main);
-            color: var(--bg-root);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* --- MENU OVERLAY --- */
-        .menu-list {
-            padding: 0;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .menu-item {
-            padding: 18px 24px;
-            border-bottom: 1px solid #1a1a1a;
-            display: flex;
-            align-items: center;
-            font-size: 16px;
-            color: var(--text-main);
-            transition: background 0.2s;
-        }
-
-        .menu-item:active { background: var(--bg-surface-2); }
-        .menu-item svg { margin-right: 16px; width: 24px; height: 24px; fill: var(--text-muted); }
-
-        .menu-section-label {
-            padding: 24px 24px 8px;
+            padding: 20px;
+            font-family: var(--f-mono);
             font-size: 12px;
-            text-transform: uppercase;
-            color: #444;
-            font-weight: 800;
-            letter-spacing: 1px;
+            color: #0f0;
+            overflow-y: auto;
+            background: #000;
         }
+        .log-entry { margin-bottom: 5px; border-bottom: 1px solid #111; padding-bottom: 2px; }
+        .log-time { color: #666; margin-right: 10px; }
 
-        /* --- LOADING BAR --- */
-        #progress-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 2px;
-            background: var(--text-main);
-            width: 0%;
-            z-index: 300;
-            transition: width 0.2s, opacity 0.4s;
-        }
-
-        /* --- TOAST --- */
-        .toast-container {
+        /* TOAST */
+        .sys-toast {
             position: fixed;
-            bottom: 100px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            pointer-events: none;
-            z-index: 999;
+            top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            background: var(--c-concrete);
+            border: 1px solid var(--c-steel);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 12px;
+            z-index: var(--z-toast);
+            transition: 0.4s var(--ease-snap);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-
-        .toast {
-            background: #222;
-            color: #fff;
-            padding: 12px 24px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 500;
-            border: 1px solid #333;
-            transform: translateY(20px);
-            opacity: 0;
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .toast.visible {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        /* --- CONTEXT MENU (Custom) --- */
-        #context-menu {
-            position: absolute;
-            background: var(--bg-surface);
-            border: 1px solid var(--border-dim);
-            min-width: 200px;
-            z-index: 500;
-            border-radius: var(--radius-md);
-            display: none;
-            flex-direction: column;
-            padding: 6px 0;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-        }
-
-        .ctx-item {
-            padding: 12px 16px;
-            font-size: 14px;
-            color: var(--text-main);
-        }
-        .ctx-item:active { background: var(--bg-surface-2); }
-
-        /* SCROLLBAR CUSTOMIZATION */
-        ::-webkit-scrollbar { width: 4px; background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+        .sys-toast.show { transform: translateX(-50%) translateY(0); }
 
     </style>
 </head>
 <body>
 
-    <div id="app-root">
+    <div id="omega-shell">
         
-        <div id="progress-bar"></div>
-
-        <div id="viewport">
-            <div id="start-page">
-                <div class="omega-logo">OMEGA</div>
-                <div class="search-wrapper">
-                    <div class="omnibox-container" onclick="focusOmnibox()" style="background: #111; height: 50px;">
-                        <div style="color: #666;">Поиск или веб-адрес</div>
-                    </div>
-                </div>
-                
-                <div class="quick-tiles">
-                    <div class="tile" onclick="loadUrl('https://google.com')">G</div>
-                    <div class="tile" onclick="loadUrl('https://youtube.com')">YT</div>
-                    <div class="tile" onclick="loadUrl('https://reddit.com')">RD</div>
-                    <div class="tile" onclick="loadUrl('https://github.com')">GH</div>
-                </div>
+        <div id="viewport-stack">
             </div>
 
-            <div id="webviews-root"></div>
-        </div>
-
-        <div id="omega-bar">
-            <div class="bar-inner">
-                <button class="nav-btn" onclick="goBack()" id="btn-back">
-                    <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-                </button>
-                
-                <button class="nav-btn" onclick="goForward()" id="btn-fwd" style="opacity: 0.3;">
-                    <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-                </button>
-
-                <div class="omnibox-container">
-                    <div class="secure-lock" id="security-indicator"></div>
-                    <form onsubmit="handleUrlSubmit(event)" style="width: 100%; height: 100%; display: flex;">
-                        <input type="text" id="url-input" placeholder="omega://" autocomplete="off" autocapitalize="off" spellcheck="false">
-                    </form>
-                </div>
-
-                <button class="nav-btn" onclick="toggleTabs()">
-                    <div class="tab-counter" id="tab-count-indicator">1</div>
-                </button>
-
-                <button class="nav-btn" onclick="toggleMenu()">
-                    <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
-                </button>
+        <div id="control-deck">
+            <button class="deck-btn" onclick="Kernel.nav.back()">
+                <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            
+            <div class="omnibox-wrapper" onclick="Kernel.ui.toggleSearchOverlay()">
+                <div class="lock-icon" id="secure-badge"></div>
+                <input type="text" id="url-display" placeholder="Omega Search..." readonly>
             </div>
-        </div>
 
-    </div>
-
-    <div id="tabs-overlay" class="overlay">
-        <div class="overlay-header">
-            <div class="overlay-title">Вкладки</div>
-            <button class="overlay-close" onclick="toggleTabs()">✕</button>
-        </div>
-        <div class="tabs-grid" id="tabs-grid">
-            </div>
-        <div class="tabs-bottom-actions">
-            <button class="btn-new-tab" onclick="addTab(true)">
-                <span>+</span> Новая
+            <button class="deck-btn" onclick="Kernel.ui.toggleTabs()">
+                <span style="font-weight:900; font-size:12px; border:2px solid #fff; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border-radius:6px;" id="tab-counter">1</span>
+            </button>
+            
+            <button class="deck-btn" onclick="Kernel.ui.toggleMenu()">
+                <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
             </button>
         </div>
     </div>
 
-    <div id="menu-overlay" class="overlay">
-        <div class="overlay-header">
-            <div class="overlay-title">Меню</div>
-            <button class="overlay-close" onclick="toggleMenu()">✕</button>
+    <div id="overlay-tabs" class="overlay-pane">
+        <div class="pane-header">
+            <span class="pane-title">Менеджер процессов</span>
+            <button class="deck-btn" onclick="Kernel.ui.toggleTabs()">✕</button>
         </div>
-        <div class="menu-list">
-            <div class="menu-section-label">Навигация</div>
-            <div class="menu-item" onclick="reloadPage()">
-                <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-                Обновить
-            </div>
-            <div class="menu-item" onclick="copyUrl()">
-                <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                Копировать ссылку
-            </div>
+        <div class="tabs-container" id="tabs-grid"></div>
+        <div style="padding:20px; border-top:1px solid #333;">
+            <button onclick="Kernel.tabs.create()" style="width:100%; padding:15px; background:var(--c-flash); color:#000; border:none; border-radius:50px; font-weight:900;">+ НОВЫЙ ПРОЦЕСС</button>
+        </div>
+    </div>
+
+    <div id="overlay-menu" class="overlay-pane">
+        <div class="pane-header">
+            <span class="pane-title">Система</span>
+            <button class="deck-btn" onclick="Kernel.ui.toggleMenu()">✕</button>
+        </div>
+        <div style="padding: 0 20px;">
+            <p style="color:#666; font-size:12px; margin-top:20px;">BROWSER ACTIONS</p>
+            <div onclick="location.reload()" style="padding:15px 0; border-bottom:1px solid #222;">Перезагрузить ядро</div>
+            <div onclick="Kernel.data.clear()" style="padding:15px 0; border-bottom:1px solid #222;">Очистить кэш/куки</div>
+            <div onclick="Kernel.ui.toggleDev()" style="padding:15px 0; border-bottom:1px solid #222;">Консоль разработчика</div>
             
-            <div class="menu-section-label">Приватность</div>
-            <div class="menu-item" onclick="clearData()">
-                <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                Очистить данные
+            <p style="color:#666; font-size:12px; margin-top:30px;">OMEGA SEARCH</p>
+            <div style="padding:15px 0; border-bottom:1px solid #222; display:flex; align-items:center; justify-content:space-between;">
+                <span>Поисковик</span>
+                <span style="color:#888;">BING (IFRAME)</span>
             </div>
-            <div class="menu-item" onclick="toggleIncognito()">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-                <span id="incognito-label">Инкогнито: ВЫКЛ</span>
-            </div>
-
-            <div class="menu-section-label">Приложение</div>
-            <div class="menu-item" onclick="showAbout()">
-                <svg viewBox="0 0 24 24"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"/></svg>
-                О браузере Omega
-            </div>
+        </div>
+        <div style="flex:1"></div>
+        <div style="padding:20px; text-align:center; color:#444; font-size:10px;">
+            OMEGA CORE v3.0.1<br>STREET MINIMAL BUILD
         </div>
     </div>
 
-    <div class="toast-container">
-        <div id="toast" class="toast">Notification</div>
+    <div id="overlay-dev" class="overlay-pane">
+        <div class="pane-header">
+            <span class="pane-title" style="color:#0f0;">DEV_LOGS</span>
+            <button class="deck-btn" onclick="Kernel.ui.toggleDev()">✕</button>
+        </div>
+        <div class="console-log" id="sys-log"></div>
     </div>
+
+    <div id="overlay-search" class="overlay-pane" style="background: rgba(0,0,0,0.9);">
+        <div style="padding: 20px; display:flex; gap:10px; margin-top:50px;">
+             <input type="text" id="master-input" class="omega-search-input" style="border-bottom: 2px solid #fff;" placeholder="Введите URL или запрос..." autocomplete="off">
+             <button onclick="Kernel.nav.go()" style="background:#fff; border:none; padding:0 20px; font-weight:bold;">GO</button>
+        </div>
+        <div style="padding: 20px; color: #666;">
+            <p>Прямой доступ к сети через шлюзы.</p>
+            <p>http/https поддерживаются.</p>
+        </div>
+        <div style="flex:1" onclick="Kernel.ui.toggleSearchOverlay()"></div>
+    </div>
+
+    <div id="toast" class="sys-toast">System Ready</div>
 
     <script>
         /**
-         * OMEGA BROWSER ENGINE v2.0
-         * "STREET PHANTOM" KERNEL
-         * * This engine handles:
-         * 1. Multi-tab management
-         * 2. Simulated History Stack (since we are inside an iframe often)
-         * 3. UI State Machines
-         * 4. Persistent Storage (LocalStorage)
+         * OMEGA KERNEL v3.0
+         * Handles Process Isolation, Navigation, and UI State.
          */
-
-        // --- CONSTANTS ---
-        const HOME_URL = 'omega://start';
-        const SEARCH_ENGINE = 'https://www.bing.com/search?q='; // Using Bing as it allows embedding more often than G
-        const MAX_TABS = 20;
-
-        // --- STATE ---
-        const State = {
-            tabs: [],
-            activeTabId: null,
-            incognito: false,
-            theme: 'dark'
+        
+        const CONFIG = {
+            homeUrl: 'omega://home',
+            searchGate: 'https://www.bing.com/search?q=', // Using Bing as it's most likely to work in iframe
+            maxTabs: 10
         };
 
-        // --- DOM CACHE ---
-        const UI = {
-            urlInput: document.getElementById('url-input'),
-            webviewsRoot: document.getElementById('webviews-root'),
-            startPage: document.getElementById('start-page'),
-            tabsGrid: document.getElementById('tabs-grid'),
-            tabCountIndicator: document.getElementById('tab-count-indicator'),
-            progressBar: document.getElementById('progress-bar'),
-            toast: document.getElementById('toast'),
-            securityIndicator: document.getElementById('security-indicator'),
-            backBtn: document.getElementById('btn-back'),
-            fwdBtn: document.getElementById('btn-fwd'),
-            incognitoLabel: document.getElementById('incognito-label')
-        };
+        const Kernel = {
+            state: {
+                tabs: [],
+                activeTabId: null,
+                history: []
+            },
 
-        // --- INITIALIZATION ---
-        function init() {
-            console.log("OMEGA ENGINE: Booting...");
-            
-            // Restore session or create new
-            const savedTabs = localStorage.getItem('omega_tabs');
-            if (savedTabs && !State.incognito) {
-                try {
-                    const parsed = JSON.parse(savedTabs);
-                    if(parsed.length > 0) {
-                        // Restore logic would go here, but for security/cleanliness in this demo
-                        // we start fresh but acknowledge capability.
-                        addTab(true); 
-                    } else {
-                        addTab(true);
-                    }
-                } catch(e) {
-                    addTab(true);
-                }
-            } else {
-                addTab(true);
-            }
-
-            // Input Listeners
-            UI.urlInput.addEventListener('focus', () => {
-                UI.urlInput.select();
-            });
-            
-            // Adjust vh for mobile
-            let vh = window.innerHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
-        }
-
-        // --- CORE TAB LOGIC ---
-        
-        class Tab {
-            constructor(url = HOME_URL) {
-                this.id = 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                this.history = [url];
-                this.historyIndex = 0;
-                this.title = 'Новая вкладка';
-                this.isLoading = false;
-                this.element = null; // DOM Element reference
-                this.createDOM();
-                this.navigate(url);
-            }
-
-            createDOM() {
-                const container = document.createElement('div');
-                container.className = 'webview-container';
-                container.id = this.id;
+            // --- INITIALIZATION ---
+            boot: () => {
+                Kernel.log("System booting...");
+                Kernel.tabs.create(CONFIG.homeUrl);
                 
-                const iframe = document.createElement('iframe');
-                iframe.className = 'browser-frame';
-                // Sandbox attributes for security
-                iframe.sandbox = "allow-forms allow-scripts allow-same-origin allow-popups allow-modals";
-                
-                // Event Listeners for Iframe
-                iframe.onload = () => this.onLoadComplete();
-                
-                container.appendChild(iframe);
-                UI.webviewsRoot.appendChild(container);
-                this.element = container;
-                this.iframe = iframe;
-            }
-
-            navigate(url) {
-                this.isLoading = true;
-                updateLoadingState(true);
-                
-                // Normalize URL
-                let targetUrl = url;
-                if (url === HOME_URL) {
-                    targetUrl = 'about:blank'; // or internal handling
-                }
-
-                // Push to history if not navigating back/forward
-                if (this.history[this.historyIndex] !== url) {
-                   this.history = this.history.slice(0, this.historyIndex + 1);
-                   this.history.push(url);
-                   this.historyIndex = this.history.length - 1;
-                }
-
-                if (url !== HOME_URL) {
-                    this.iframe.src = targetUrl;
-                }
-
-                this.updateMetadata(url);
-            }
-
-            updateMetadata(url) {
-                // Simple parsing
-                if (url === HOME_URL) {
-                    this.title = "Omega Start";
-                } else {
-                    try {
-                        const domain = new URL(url).hostname;
-                        this.title = domain;
-                    } catch (e) {
-                        this.title = url;
-                    }
-                }
-                renderTabsGrid();
-                if (State.activeTabId === this.id) updateOmnibox();
-            }
-
-            onLoadComplete() {
-                this.isLoading = false;
-                updateLoadingState(false);
-                if (State.activeTabId === this.id) {
-                    // Try to get title (Cross-origin will fail, which is fine)
-                    try {
-                        // this.title = this.iframe.contentDocument.title; 
-                    } catch(e) {
-                        // Ignore COP
-                    }
-                }
-            }
-
-            goBack() {
-                if (this.historyIndex > 0) {
-                    this.historyIndex--;
-                    const url = this.history[this.historyIndex];
-                    if (url === HOME_URL) {
-                        UI.startPage.classList.remove('hidden');
-                        this.element.classList.remove('active');
-                    } else {
-                        this.iframe.src = url;
-                    }
-                    this.updateMetadata(url);
-                    updateOmnibox();
-                }
-            }
-
-            goForward() {
-                if (this.historyIndex < this.history.length - 1) {
-                    this.historyIndex++;
-                    const url = this.history[this.historyIndex];
-                    this.iframe.src = url;
-                    this.updateMetadata(url);
-                    updateOmnibox();
-                }
-            }
-            
-            destroy() {
-                this.element.remove();
-            }
-        }
-
-        // --- CONTROLLERS ---
-
-        function addTab(switchToIt = true) {
-            if (State.tabs.length >= MAX_TABS) {
-                showToast("Максимум вкладок достигнут");
-                return;
-            }
-            const tab = new Tab(HOME_URL);
-            State.tabs.push(tab);
-            renderTabsGrid();
-            updateTabCount();
-            
-            if (switchToIt) {
-                switchTab(tab.id);
-                // If we were in tabs overlay, close it
-                document.getElementById('tabs-overlay').classList.remove('active');
-            }
-        }
-
-        function switchTab(id) {
-            // Hide current
-            const current = State.tabs.find(t => t.id === State.activeTabId);
-            if (current) {
-                current.element.classList.remove('active');
-            }
-
-            State.activeTabId = id;
-            const next = State.tabs.find(t => t.id === id);
-            
-            // Logic for Start Page vs Webview
-            const currentUrl = next.history[next.historyIndex];
-            
-            if (currentUrl === HOME_URL) {
-                UI.startPage.classList.remove('hidden');
-                next.element.classList.remove('active');
-            } else {
-                UI.startPage.classList.add('hidden');
-                next.element.classList.add('active');
-            }
-
-            updateOmnibox();
-            updateNavButtons();
-        }
-
-        function closeTab(e, id) {
-            e.stopPropagation();
-            if (State.tabs.length === 1) {
-                // If closing last tab, just reset it to home
-                const tab = State.tabs[0];
-                tab.navigate(HOME_URL);
-                switchTab(tab.id);
-                renderTabsGrid();
-                return;
-            }
-
-            const index = State.tabs.findIndex(t => t.id === id);
-            const tab = State.tabs[index];
-            tab.destroy();
-            
-            State.tabs.splice(index, 1);
-            
-            if (State.activeTabId === id) {
-                // Switch to previous or next
-                const newIndex = Math.max(0, index - 1);
-                switchTab(State.tabs[newIndex].id);
-            }
-            
-            renderTabsGrid();
-            updateTabCount();
-        }
-
-        // --- URL HANDLING ---
-
-        function handleUrlSubmit(e) {
-            e.preventDefault();
-            UI.urlInput.blur();
-            let val = UI.urlInput.value.trim();
-            
-            if (!val) return;
-
-            // Logic: Is it a URL or a Search?
-            // Regex for domain detection (simplified)
-            const domainRegex = /^(http:\/\/|https:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/;
-            
-            let finalUrl = '';
-            
-            if (domainRegex.test(val)) {
-                if (!val.startsWith('http')) {
-                    finalUrl = 'https://' + val;
-                } else {
-                    finalUrl = val;
-                }
-            } else {
-                finalUrl = SEARCH_ENGINE + encodeURIComponent(val);
-            }
-
-            loadUrl(finalUrl);
-        }
-
-        function loadUrl(url) {
-            const activeTab = State.tabs.find(t => t.id === State.activeTabId);
-            if (activeTab) {
-                activeTab.navigate(url);
-                // UI updates handled by navigate -> updateMetadata -> updateOmnibox
-                UI.startPage.classList.add('hidden');
-                activeTab.element.classList.add('active');
-            }
-        }
-
-        function updateOmnibox() {
-            const activeTab = State.tabs.find(t => t.id === State.activeTabId);
-            if (!activeTab) return;
-            
-            const url = activeTab.history[activeTab.historyIndex];
-            
-            if (url === HOME_URL) {
-                UI.urlInput.value = '';
-                UI.securityIndicator.className = 'secure-lock';
-            } else {
-                UI.urlInput.value = url;
-                if (url.startsWith('https')) {
-                    UI.securityIndicator.className = 'secure-lock secure';
-                } else {
-                    UI.securityIndicator.className = 'secure-lock insecure';
-                }
-            }
-        }
-        
-        function focusOmnibox() {
-            UI.urlInput.focus();
-        }
-
-        // --- NAVIGATION ACTIONS ---
-        function goBack() {
-            const tab = State.tabs.find(t => t.id === State.activeTabId);
-            if (tab) {
-                tab.goBack();
-                updateNavButtons();
-            }
-        }
-
-        function goForward() {
-            const tab = State.tabs.find(t => t.id === State.activeTabId);
-            if (tab) {
-                tab.goForward();
-                updateNavButtons();
-            }
-        }
-        
-        function reloadPage() {
-            const tab = State.tabs.find(t => t.id === State.activeTabId);
-            if(tab && tab.iframe) {
-                tab.iframe.src = tab.iframe.src;
-                toggleMenu();
-            }
-        }
-
-        function updateNavButtons() {
-            const tab = State.tabs.find(t => t.id === State.activeTabId);
-            if (!tab) return;
-            
-            UI.backBtn.style.opacity = tab.historyIndex > 0 ? '1' : '0.3';
-            UI.fwdBtn.style.opacity = tab.historyIndex < tab.history.length - 1 ? '1' : '0.3';
-        }
-
-        // --- OVERLAY MANAGERS ---
-
-        function toggleTabs() {
-            const overlay = document.getElementById('tabs-overlay');
-            const isActive = overlay.classList.contains('active');
-            
-            if (!isActive) {
-                renderTabsGrid();
-                document.getElementById('menu-overlay').classList.remove('active');
-            }
-            overlay.classList.toggle('active');
-        }
-
-        function toggleMenu() {
-            const overlay = document.getElementById('menu-overlay');
-            const isActive = overlay.classList.contains('active');
-            
-            if (!isActive) {
-                document.getElementById('tabs-overlay').classList.remove('active');
-            }
-            overlay.classList.toggle('active');
-        }
-
-        function renderTabsGrid() {
-            UI.tabsGrid.innerHTML = '';
-            
-            State.tabs.forEach(tab => {
-                const el = document.createElement('div');
-                const isActive = tab.id === State.activeTabId ? 'active-tab' : '';
-                el.className = `tab-card ${isActive}`;
-                el.onclick = () => switchTab(tab.id);
-                
-                // Get letter for preview
-                const letter = tab.title ? tab.title.charAt(0) : 'N';
-
-                el.innerHTML = `
-                    <div class="tab-close-btn" onclick="closeTab(event, '${tab.id}')">✕</div>
-                    <div class="tab-card-preview">${letter}</div>
-                    <div class="tab-card-info">
-                        <div class="tab-favicon"></div>
-                        <div class="tab-title">${tab.title}</div>
-                    </div>
-                `;
-                UI.tabsGrid.appendChild(el);
-            });
-        }
-
-        function updateTabCount() {
-            UI.tabCountIndicator.innerText = State.tabs.length;
-        }
-
-        // --- MENU ACTIONS ---
-        
-        function copyUrl() {
-            const val = UI.urlInput.value;
-            if (val) {
-                navigator.clipboard.writeText(val).then(() => {
-                    showToast("Ссылка скопирована");
-                    toggleMenu();
+                // Event Listeners for inputs
+                document.getElementById('master-input').addEventListener('keypress', (e) => {
+                    if(e.key === 'Enter') Kernel.nav.go();
                 });
+
+                Kernel.log("Omega Engine Ready.");
+                Kernel.ui.toast("Omega Browser v3.0 Loaded");
+            },
+
+            // --- TAB MANAGEMENT (PROCESSES) ---
+            tabs: {
+                create: (url = CONFIG.homeUrl) => {
+                    if (Kernel.state.tabs.length >= CONFIG.maxTabs) {
+                        Kernel.ui.toast("Memory Limit Reached (Max Tabs)");
+                        return;
+                    }
+
+                    const tabId = 'proc_' + Math.random().toString(36).substr(2, 9);
+                    Kernel.log(`Spawning process ${tabId}`);
+
+                    const tab = {
+                        id: tabId,
+                        url: url,
+                        title: 'New Tab',
+                        dom: null
+                    };
+
+                    // Create DOM Structure
+                    const view = document.createElement('div');
+                    view.className = 'browser-tab-view';
+                    view.id = `view-${tabId}`;
+
+                    if (url === CONFIG.homeUrl) {
+                        // Render Internal Home
+                        view.innerHTML = Kernel.templates.home();
+                    } else {
+                        // Render Iframe
+                        const frame = document.createElement('iframe');
+                        frame.className = 'web-engine';
+                        frame.src = url;
+                        frame.sandbox = "allow-forms allow-scripts allow-same-origin allow-popups"; 
+                        view.appendChild(frame);
+                    }
+
+                    document.getElementById('viewport-stack').appendChild(view);
+                    
+                    Kernel.state.tabs.push(tab);
+                    tab.dom = view;
+                    
+                    Kernel.tabs.switch(tabId);
+                    Kernel.ui.renderTabs();
+                    
+                    // Auto-close overlay if open
+                    document.getElementById('overlay-tabs').classList.remove('open');
+                },
+
+                switch: (id) => {
+                    Kernel.state.activeTabId = id;
+                    
+                    // Hide all
+                    document.querySelectorAll('.browser-tab-view').forEach(el => el.classList.remove('active'));
+                    
+                    // Show active
+                    const tab = Kernel.state.tabs.find(t => t.id === id);
+                    if(tab) {
+                        tab.dom.classList.add('active');
+                        Kernel.ui.updateOmnibox(tab.url);
+                    }
+                },
+
+                close: (e, id) => {
+                    e.stopPropagation();
+                    if(Kernel.state.tabs.length <= 1) return;
+
+                    Kernel.log(`Killing process ${id}`);
+                    
+                    const idx = Kernel.state.tabs.findIndex(t => t.id === id);
+                    const tab = Kernel.state.tabs[idx];
+                    
+                    // Remove DOM
+                    tab.dom.remove();
+                    
+                    // Remove from State
+                    Kernel.state.tabs.splice(idx, 1);
+                    
+                    // Switch if active
+                    if(Kernel.state.activeTabId === id) {
+                        Kernel.tabs.switch(Kernel.state.tabs[Math.max(0, idx - 1)].id);
+                    }
+                    
+                    Kernel.ui.renderTabs();
+                }
+            },
+
+            // --- NAVIGATION ---
+            nav: {
+                go: () => {
+                    const input = document.getElementById('master-input');
+                    let query = input.value.trim();
+                    if(!query) return;
+
+                    Kernel.ui.toggleSearchOverlay(); // Close input
+
+                    let dest = '';
+                    
+                    // Simple URL parsing
+                    if (query.match(/^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/)) {
+                         if(!query.startsWith('http')) dest = 'https://' + query;
+                         else dest = query;
+                    } else {
+                        // Use Search Engine
+                        dest = CONFIG.searchGate + encodeURIComponent(query);
+                    }
+
+                    Kernel.nav.load(dest);
+                    input.value = '';
+                },
+
+                load: (url) => {
+                    const activeTab = Kernel.state.tabs.find(t => t.id === Kernel.state.activeTabId);
+                    if(!activeTab) return;
+
+                    Kernel.log(`Navigating to ${url}`);
+                    
+                    // Clear current view
+                    activeTab.dom.innerHTML = '';
+                    
+                    // Create new frame
+                    const frame = document.createElement('iframe');
+                    frame.className = 'web-engine';
+                    frame.src = url;
+                    // Note: Many big sites block iframes (X-Frame-Options). 
+                    // This is a browser limitation, not code limitation.
+                    frame.onload = () => { Kernel.log("Resource loaded"); };
+                    frame.onerror = () => { Kernel.log("Load error (likely CORS/Frame-Block)"); };
+                    
+                    activeTab.dom.appendChild(frame);
+                    activeTab.url = url;
+                    activeTab.title = url; // Temp title
+                    
+                    Kernel.ui.updateOmnibox(url);
+                    Kernel.ui.renderTabs();
+                },
+
+                back: () => {
+                    Kernel.ui.toast("Back (History Stack Empty)");
+                }
+            },
+
+            // --- UI MANAGERS ---
+            ui: {
+                toggleTabs: () => {
+                    document.getElementById('overlay-tabs').classList.toggle('open');
+                    Kernel.ui.renderTabs();
+                },
+                toggleMenu: () => document.getElementById('overlay-menu').classList.toggle('open'),
+                toggleDev: () => document.getElementById('overlay-dev').classList.toggle('open'),
+                toggleSearchOverlay: () => {
+                    const el = document.getElementById('overlay-search');
+                    el.classList.toggle('open');
+                    if(el.classList.contains('open')) document.getElementById('master-input').focus();
+                },
+
+                renderTabs: () => {
+                    const grid = document.getElementById('tabs-grid');
+                    grid.innerHTML = '';
+                    document.getElementById('tab-counter').innerText = Kernel.state.tabs.length;
+
+                    Kernel.state.tabs.forEach(tab => {
+                        const isActive = tab.id === Kernel.state.activeTabId;
+                        const el = document.createElement('div');
+                        el.className = `tab-card ${isActive ? 'active-card' : ''}`;
+                        el.onclick = () => Kernel.tabs.switch(tab.id);
+                        
+                        let displayTitle = tab.url === CONFIG.homeUrl ? 'Omega Start' : tab.url;
+                        if(displayTitle.length > 25) displayTitle = displayTitle.substring(0,25) + '...';
+
+                        el.innerHTML = `
+                            <div class="tab-close" onclick="Kernel.tabs.close(event, '${tab.id}')">✕</div>
+                            <div class="tab-preview">
+                                ${tab.url === CONFIG.homeUrl ? 'Ω' : 'WWW'}
+                            </div>
+                            <div class="tab-meta">${displayTitle}</div>
+                        `;
+                        grid.appendChild(el);
+                    });
+                },
+
+                updateOmnibox: (url) => {
+                    const display = document.getElementById('url-display');
+                    const badge = document.getElementById('secure-badge');
+                    
+                    if(url === CONFIG.homeUrl) {
+                        display.value = "";
+                        display.placeholder = "Omega Search...";
+                        badge.className = "lock-icon";
+                    } else {
+                        display.value = url;
+                        if(url.startsWith('https')) badge.className = "lock-icon secure";
+                        else badge.className = "lock-icon";
+                    }
+                },
+
+                toast: (msg) => {
+                    const t = document.getElementById('toast');
+                    t.innerText = msg;
+                    t.classList.add('show');
+                    setTimeout(() => t.classList.remove('show'), 3000);
+                }
+            },
+
+            // --- UTILS ---
+            data: {
+                clear: () => {
+                    localStorage.clear();
+                    Kernel.ui.toast("System Wiped");
+                    setTimeout(() => location.reload(), 1000);
+                }
+            },
+
+            log: (msg) => {
+                const con = document.getElementById('sys-log');
+                const time = new Date().toLocaleTimeString();
+                con.innerHTML += `<div class="log-entry"><span class="log-time">[${time}]</span> ${msg}</div>`;
+                con.scrollTop = con.scrollHeight;
+            },
+
+            templates: {
+                home: () => `
+                    <div class="omega-home">
+                        <div class="omega-brand">Omega</div>
+                        <div class="omega-search-box" onclick="Kernel.ui.toggleSearchOverlay()">
+                            <span style="color:#666;">Поиск в даркнете (шутка)...</span>
+                        </div>
+                        <div class="shortcuts-grid">
+                            <div class="shortcut-item" onclick="Kernel.nav.load('https://bing.com')">BING</div>
+                            <div class="shortcut-item" onclick="Kernel.nav.load('https://duckduckgo.com')">DDG</div>
+                            <div class="shortcut-item" onclick="Kernel.nav.load('https://wikipedia.org')">WIKI</div>
+                            <div class="shortcut-item" onclick="Kernel.nav.load('https://reddit.com')">RED</div>
+                        </div>
+                    </div>
+                `
             }
-        }
-        
-        function clearData() {
-            // Simulated clearing
-            localStorage.removeItem('omega_tabs');
-            showToast("Данные и кэш очищены");
-            toggleMenu();
-            setTimeout(() => location.reload(), 1000);
-        }
-        
-        function toggleIncognito() {
-            State.incognito = !State.incognito;
-            UI.incognitoLabel.innerText = State.incognito ? "Инкогнито: ВКЛ" : "Инкогнито: ВЫКЛ";
-            if (State.incognito) {
-                document.documentElement.style.setProperty('--bg-surface', '#000');
-                document.documentElement.style.setProperty('--text-main', '#ccc');
-                showToast("Режим Инкогнито активирован");
-            } else {
-                // Reset to default css vars
-                document.documentElement.style.setProperty('--bg-surface', '#111111');
-                document.documentElement.style.setProperty('--text-main', '#e0e0e0');
-                showToast("Режим Инкогнито выключен");
-            }
-            toggleMenu();
-        }
+        };
 
-        function showAbout() {
-            alert("OMEGA BROWSER\nVersion 2.0 Street Phantom\n\nCreated for the real ones.\nNo logs. No trash. Pure web.");
-        }
-
-        // --- UTILS ---
-
-        function updateLoadingState(isLoading) {
-            if (isLoading) {
-                UI.progressBar.style.width = '70%';
-                UI.progressBar.style.opacity = '1';
-            } else {
-                UI.progressBar.style.width = '100%';
-                setTimeout(() => {
-                    UI.progressBar.style.opacity = '0';
-                    setTimeout(() => {
-                        UI.progressBar.style.width = '0%';
-                    }, 200);
-                }, 300);
-            }
-        }
-
-        function showToast(msg) {
-            UI.toast.innerText = msg;
-            UI.toast.classList.add('visible');
-            setTimeout(() => {
-                UI.toast.classList.remove('visible');
-            }, 3000);
-        }
-
-        // --- BOOT ---
-        window.addEventListener('DOMContentLoaded', init);
+        // BOOTSTRAP
+        window.onload = Kernel.boot;
 
     </script>
 </body>
