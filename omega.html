@@ -1,648 +1,778 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#000000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="description" content="Omega Private Browser">
-    <title>Omega Browser</title>
-    <style>
-        /* * ------------------------------------------------------------------
-         * CORE STYLESHEET - LEVEL 0
-         * ------------------------------------------------------------------
-         */
-        :root {
-            --c-void: #000000;
-            --c-asphalt: #0f0f0f;
-            --c-concrete: #1a1a1a;
-            --c-steel: #333333;
-            --c-smoke: #888888;
-            --c-mist: #b0b0b0;
-            --c-flash: #ffffff;
-            
-            --f-primary: -apple-system, BlinkMacSystemFont, 'Inter', 'Roboto', sans-serif;
-            --f-mono: 'JetBrains Mono', 'Fira Code', monospace;
-            
-            --z-bottom: 10;
-            --z-content: 100;
-            --z-ui: 500;
-            --z-overlay: 1000;
-            --z-toast: 2000;
-            
-            --ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
-            --ease-snap: cubic-bezier(0.33, 1, 0.68, 1);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#090909">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>OMEGA | Raw Web</title>
 
-        /* * ------------------------------------------------------------------
-         * RESET & BASE
-         * ------------------------------------------------------------------
-         */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        html, body { width: 100%; height: 100%; margin: 0; padding: 0; background: var(--c-void); color: var(--c-flash); font-family: var(--f-primary); overflow: hidden; }
+<style>
+    :root {
+        /* --- PALETTE: STREET DARK --- */
+        --color-void:       #000000;
+        --color-main:       #0a0a0a;
+        --color-panel:      #111111;
+        --color-surface:    #1a1a1a;
+        --color-border:     #2a2a2a;
+        --color-border-hi:  #444444;
         
-        /* * ------------------------------------------------------------------
-         * UI COMPONENTS
-         * ------------------------------------------------------------------
-         */
+        /* --- TYPOGRAPHY COLORS --- */
+        --text-primary:     #e5e5e5;
+        --text-secondary:   #888888;
+        --text-disabled:    #444444;
+        --text-invert:      #000000;
         
-        /* --- APP SHELL --- */
-        #omega-shell {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            position: relative;
-        }
-
-        /* --- VIEWPORT (Web Content) --- */
-        #viewport-stack {
-            flex: 1;
-            position: relative;
-            background: var(--c-asphalt);
-            overflow: hidden;
-        }
-
-        .browser-tab-view {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: #fff;
-            display: none;
-            flex-direction: column;
-            z-index: var(--z-content);
-        }
+        /* --- SYSTEM --- */
+        --accent-error:     #cf6679;
+        --accent-success:   #00ff00;
+        --accent-active:    #ffffff;
         
-        .browser-tab-view.active { display: flex; }
-
-        iframe.web-engine {
-            border: none;
-            width: 100%;
-            height: 100%;
-            background: #fff;
-        }
-
-        /* --- OMEGA SEARCH START PAGE (Internal) --- */
-        .omega-home {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--c-void);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: var(--z-content);
-            padding: 20px;
-        }
-
-        .omega-brand {
-            font-size: 3rem;
-            font-weight: 900;
-            letter-spacing: -2px;
-            color: var(--c-flash);
-            margin-bottom: 30px;
-            text-transform: uppercase;
-            border: 2px solid var(--c-flash);
-            padding: 10px 30px;
-            background: transparent;
-        }
-
-        .omega-search-box {
-            width: 100%;
-            max-width: 90%;
-            height: 56px;
-            background: var(--c-concrete);
-            border: 1px solid var(--c-steel);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            margin-bottom: 40px;
-        }
-
-        .omega-search-input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: var(--c-flash);
-            font-size: 18px;
-            font-weight: 500;
-        }
-
-        .shortcuts-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            width: 100%;
-            max-width: 90%;
-        }
-
-        .shortcut-item {
-            aspect-ratio: 1;
-            background: var(--c-concrete);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            color: var(--c-smoke);
-            font-weight: 700;
-            cursor: pointer;
-            border: 1px solid transparent;
-            transition: 0.2s;
-        }
+        /* --- METRICS --- */
+        --space-xs:         4px;
+        --space-sm:         8px;
+        --space-md:         16px;
+        --space-lg:         24px;
+        --space-xl:         32px;
         
-        .shortcut-item:active { background: var(--c-steel); color: var(--c-flash); }
-
-        /* --- BOTTOM CONTROL BAR --- */
-        #control-deck {
-            height: 70px; /* Taller for fingers */
-            background: rgba(15, 15, 15, 0.95);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid var(--c-steel);
-            display: flex;
-            align-items: center;
-            padding: 0 10px;
-            z-index: var(--z-ui);
-            padding-bottom: env(safe-area-inset-bottom);
-            gap: 8px;
-        }
-
-        .deck-btn {
-            width: 44px;
-            height: 44px;
-            border: none;
-            background: transparent;
-            color: var(--c-flash);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-        }
-        .deck-btn:active { background: var(--c-steel); }
-        .deck-btn svg { width: 24px; height: 24px; fill: currentColor; }
-
-        .omnibox-wrapper {
-            flex: 1;
-            height: 44px;
-            background: var(--c-concrete);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            padding: 0 12px;
-            border: 1px solid var(--c-steel);
-            position: relative;
-        }
-
-        .lock-icon { width: 12px; height: 12px; border-radius: 50%; background: var(--c-steel); margin-right: 8px; transition: 0.3s; }
-        .lock-icon.secure { background: #00ff00; box-shadow: 0 0 5px #00ff00; }
+        --bar-height:       64px;
+        --radius-sm:        4px;
+        --radius-md:        12px;
+        --radius-pill:      100px;
         
-        #url-display {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--c-flash);
-            font-size: 14px;
-            white-space: nowrap;
-            overflow: hidden;
-            font-family: var(--f-mono);
-        }
-
-        /* --- OVERLAYS (Tabs, Menu) --- */
-        .overlay-pane {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--c-void);
-            z-index: var(--z-overlay);
-            transform: translateY(100%);
-            transition: transform 0.35s var(--ease-snap);
-            display: flex;
-            flex-direction: column;
-        }
+        /* --- ANIMATIONS --- */
+        --ease-mechanical:  cubic-bezier(0.2, 0.0, 0.2, 1);
+        --ease-snappy:      cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        --duration-fast:    0.2s;
+        --duration-norm:    0.35s;
         
-        .overlay-pane.open { transform: translateY(0); }
+        /* --- LAYERS --- */
+        --z-ground:         0;
+        --z-view:           10;
+        --z-ui-base:        100;
+        --z-overlay:        500;
+        --z-modal:          1000;
+        --z-toast:          9999;
+    }
 
-        .pane-header {
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            border-bottom: 1px solid var(--c-steel);
-            background: var(--c-asphalt);
-        }
-        
-        .pane-title { font-weight: 900; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; }
+    /* --- RESET --- */
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        user-select: none;
+        outline: none;
+    }
 
-        /* TABS GRID */
-        .tabs-container {
-            flex: 1;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-auto-rows: 180px;
-            gap: 15px;
-            overflow-y: auto;
-        }
+    /* --- GLOBAL --- */
+    html, body {
+        width: 100%;
+        height: 100%;
+        background-color: var(--color-void);
+        color: var(--text-primary);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        overflow: hidden;
+        position: fixed; /* Prevent rubber banding */
+    }
 
-        .tab-card {
-            background: var(--c-concrete);
-            border: 1px solid var(--c-steel);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-        .tab-card.active-card { border-color: var(--c-flash); }
-        
-        .tab-preview { flex: 1; background: #000; display: flex; center; justify-content: center; align-items: center; font-size: 40px; font-weight: bold; color: #333; }
-        .tab-meta { height: 40px; background: var(--c-asphalt); display: flex; align-items: center; padding: 0 10px; font-size: 12px; border-top: 1px solid var(--c-steel); }
-        .tab-close { position: absolute; top: 5px; right: 5px; width: 30px; height: 30px; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    /* --- UTILITIES --- */
+    .hidden { display: none !important; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .flex-center { align-items: center; justify-content: center; }
+    .w-full { width: 100%; }
+    .h-full { height: 100%; }
+    .text-mono { font-family: "Courier New", monospace; letter-spacing: -0.5px; }
+    .text-uc { text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
 
-        /* DEV CONSOLE */
-        .console-log {
-            flex: 1;
-            padding: 20px;
-            font-family: var(--f-mono);
-            font-size: 12px;
-            color: #0f0;
-            overflow-y: auto;
-            background: #000;
-        }
-        .log-entry { margin-bottom: 5px; border-bottom: 1px solid #111; padding-bottom: 2px; }
-        .log-time { color: #666; margin-right: 10px; }
+    /* --- APP SHELL --- */
+    #omega-os {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+        position: relative;
+        background: var(--color-main);
+    }
 
-        /* TOAST */
-        .sys-toast {
-            position: fixed;
-            top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
-            background: var(--c-concrete);
-            border: 1px solid var(--c-steel);
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-size: 12px;
-            z-index: var(--z-toast);
-            transition: 0.4s var(--ease-snap);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .sys-toast.show { transform: translateX(-50%) translateY(0); }
+    /* --- VIEWPORT (IFRAME CONTAINER) --- */
+    #viewport-manager {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        background: var(--color-surface);
+        z-index: var(--z-view);
+    }
 
-    </style>
+    .browser-view {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: #fff;
+        display: none;
+        flex-direction: column;
+        opacity: 0;
+        transform: scale(0.98);
+        transition: opacity var(--duration-fast), transform var(--duration-fast);
+    }
+
+    .browser-view.active {
+        display: flex;
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    iframe.engine-frame {
+        flex: 1;
+        border: none;
+        width: 100%;
+        height: 100%;
+        background: #ffffff;
+    }
+
+    /* --- CUSTOM SCROLLBARS --- */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--color-main); }
+    ::-webkit-scrollbar-thumb { background: var(--color-border-hi); border-radius: 4px; }
+
+    /* --- START PAGE UI --- */
+    .start-screen {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: var(--color-main);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-xl);
+        z-index: 50;
+    }
+
+    .brand-logo {
+        font-size: 4rem;
+        font-weight: 900;
+        color: var(--text-primary);
+        margin-bottom: var(--space-lg);
+        border: 4px solid var(--text-primary);
+        padding: 10px 30px;
+        background: transparent;
+        text-transform: uppercase;
+        letter-spacing: -2px;
+    }
+
+    .search-mock {
+        width: 100%;
+        max-width: 400px;
+        height: 56px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        color: var(--text-secondary);
+        font-size: 18px;
+        margin-bottom: 40px;
+    }
+
+    .quick-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .quick-tile {
+        aspect-ratio: 1;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-secondary);
+        transition: 0.2s;
+    }
+    .quick-tile:active { background: var(--color-border); color: var(--text-primary); }
+
+    /* --- OMEGA BAR (BOTTOM) --- */
+    #omega-bar {
+        height: calc(var(--bar-height) + env(safe-area-inset-bottom));
+        background: rgba(10, 10, 10, 0.9);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid var(--color-border);
+        display: flex;
+        align-items: flex-start;
+        padding: 10px 10px 0 10px;
+        z-index: var(--z-ui-base);
+        gap: 8px;
+    }
+
+    .nav-btn {
+        width: 44px;
+        height: 44px;
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+    }
+    .nav-btn:active { background: var(--color-surface); }
+    .nav-btn svg { width: 22px; height: 22px; fill: currentColor; }
+
+    .omnibox {
+        flex: 1;
+        height: 44px;
+        background: var(--color-surface);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border);
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        position: relative;
+        transition: border-color 0.2s;
+    }
+    .omnibox:focus-within { border-color: var(--text-secondary); }
+
+    .secure-indicator {
+        width: 8px; height: 8px; background: var(--text-disabled); border-radius: 50%;
+        margin-right: 10px; flex-shrink: 0;
+    }
+    .secure-indicator.on { background: #00ff00; box-shadow: 0 0 8px #00ff00; }
+
+    #url-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: var(--text-primary);
+        font-size: 15px;
+        font-weight: 500;
+        font-family: var(--text-mono);
+    }
+
+    /* --- OVERLAYS (TABS, MENU) --- */
+    .overlay-container {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: var(--color-main);
+        z-index: var(--z-modal);
+        transform: translateY(100%);
+        transition: transform var(--duration-norm) var(--ease-snappy);
+        display: flex;
+        flex-direction: column;
+    }
+    .overlay-container.open { transform: translateY(0); }
+
+    .overlay-header {
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        border-bottom: 1px solid var(--color-border);
+        background: var(--color-panel);
+    }
+    .overlay-title { font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
+
+    /* TAB MANAGER STYLES */
+    .tabs-grid {
+        flex: 1;
+        padding: 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        overflow-y: auto;
+        align-content: flex-start;
+    }
+
+    .tab-card {
+        height: 160px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s, border-color 0.2s;
+    }
+    .tab-card.active { border-color: var(--text-primary); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    .tab-card:active { transform: scale(0.98); }
+
+    .tab-close-btn {
+        position: absolute;
+        top: 8px; right: 8px;
+        width: 28px; height: 28px;
+        background: rgba(0,0,0,0.6);
+        border-radius: 50%;
+        display: flex; flex-center;
+        color: #fff;
+        z-index: 5;
+    }
+
+    .tab-content-preview {
+        flex: 1;
+        background: #000;
+        display: flex; flex-center;
+        color: #333; font-weight: 900; font-size: 48px;
+    }
+    
+    .tab-footer {
+        height: 36px;
+        background: var(--color-panel);
+        border-top: 1px solid var(--color-border);
+        display: flex; align-items: center;
+        padding: 0 10px;
+        font-size: 11px;
+        color: var(--text-secondary);
+    }
+
+    /* TOAST NOTIFICATIONS */
+    .toast-box {
+        position: fixed;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%) translateY(50px);
+        background: var(--color-panel);
+        border: 1px solid var(--color-border);
+        padding: 12px 24px;
+        border-radius: 100px;
+        font-size: 13px;
+        font-weight: 600;
+        opacity: 0;
+        transition: 0.3s var(--ease-snappy);
+        z-index: var(--z-toast);
+        pointer-events: none;
+        white-space: nowrap;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    }
+    .toast-box.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* MENU LIST */
+    .menu-scroll { flex: 1; overflow-y: auto; padding-bottom: 50px; }
+    .menu-item {
+        padding: 20px;
+        border-bottom: 1px solid var(--color-border);
+        display: flex; align-items: center;
+        font-size: 16px;
+        color: var(--text-primary);
+    }
+    .menu-item svg { margin-right: 15px; fill: var(--text-secondary); }
+    .menu-item:active { background: var(--color-surface); }
+    .menu-divider { padding: 30px 20px 10px; font-size: 10px; color: #444; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+
+</style>
 </head>
 <body>
 
-    <div id="omega-shell">
+<div id="omega-os">
+    
+    <div id="viewport-manager">
+        </div>
+
+    <div id="omega-bar">
+        <button class="nav-btn" onclick="Core.nav.back()">
+            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        </button>
         
-        <div id="viewport-stack">
+        <div class="omnibox">
+            <div class="secure-indicator" id="ui-secure"></div>
+            <form onsubmit="Core.nav.submit(event)" class="w-full flex">
+                <input type="text" id="url-input" placeholder="Введите запрос..." autocomplete="off" autocapitalize="off" spellcheck="false">
+            </form>
+        </div>
+
+        <button class="nav-btn" onclick="Core.ui.toggleTabs()">
+            <div style="border: 2px solid currentColor; width: 20px; height: 20px; border-radius: 5px; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center;">
+                <span id="ui-tab-count">1</span>
             </div>
-
-        <div id="control-deck">
-            <button class="deck-btn" onclick="Kernel.nav.back()">
-                <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-            </button>
-            
-            <div class="omnibox-wrapper" onclick="Kernel.ui.toggleSearchOverlay()">
-                <div class="lock-icon" id="secure-badge"></div>
-                <input type="text" id="url-display" placeholder="Omega Search..." readonly>
-            </div>
-
-            <button class="deck-btn" onclick="Kernel.ui.toggleTabs()">
-                <span style="font-weight:900; font-size:12px; border:2px solid #fff; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border-radius:6px;" id="tab-counter">1</span>
-            </button>
-            
-            <button class="deck-btn" onclick="Kernel.ui.toggleMenu()">
-                <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
-            </button>
-        </div>
-    </div>
-
-    <div id="overlay-tabs" class="overlay-pane">
-        <div class="pane-header">
-            <span class="pane-title">Менеджер процессов</span>
-            <button class="deck-btn" onclick="Kernel.ui.toggleTabs()">✕</button>
-        </div>
-        <div class="tabs-container" id="tabs-grid"></div>
-        <div style="padding:20px; border-top:1px solid #333;">
-            <button onclick="Kernel.tabs.create()" style="width:100%; padding:15px; background:var(--c-flash); color:#000; border:none; border-radius:50px; font-weight:900;">+ НОВЫЙ ПРОЦЕСС</button>
-        </div>
-    </div>
-
-    <div id="overlay-menu" class="overlay-pane">
-        <div class="pane-header">
-            <span class="pane-title">Система</span>
-            <button class="deck-btn" onclick="Kernel.ui.toggleMenu()">✕</button>
-        </div>
-        <div style="padding: 0 20px;">
-            <p style="color:#666; font-size:12px; margin-top:20px;">BROWSER ACTIONS</p>
-            <div onclick="location.reload()" style="padding:15px 0; border-bottom:1px solid #222;">Перезагрузить ядро</div>
-            <div onclick="Kernel.data.clear()" style="padding:15px 0; border-bottom:1px solid #222;">Очистить кэш/куки</div>
-            <div onclick="Kernel.ui.toggleDev()" style="padding:15px 0; border-bottom:1px solid #222;">Консоль разработчика</div>
-            
-            <p style="color:#666; font-size:12px; margin-top:30px;">OMEGA SEARCH</p>
-            <div style="padding:15px 0; border-bottom:1px solid #222; display:flex; align-items:center; justify-content:space-between;">
-                <span>Поисковик</span>
-                <span style="color:#888;">BING (IFRAME)</span>
-            </div>
-        </div>
-        <div style="flex:1"></div>
-        <div style="padding:20px; text-align:center; color:#444; font-size:10px;">
-            OMEGA CORE v3.0.1<br>STREET MINIMAL BUILD
-        </div>
-    </div>
-
-    <div id="overlay-dev" class="overlay-pane">
-        <div class="pane-header">
-            <span class="pane-title" style="color:#0f0;">DEV_LOGS</span>
-            <button class="deck-btn" onclick="Kernel.ui.toggleDev()">✕</button>
-        </div>
-        <div class="console-log" id="sys-log"></div>
-    </div>
-
-    <div id="overlay-search" class="overlay-pane" style="background: rgba(0,0,0,0.9);">
-        <div style="padding: 20px; display:flex; gap:10px; margin-top:50px;">
-             <input type="text" id="master-input" class="omega-search-input" style="border-bottom: 2px solid #fff;" placeholder="Введите URL или запрос..." autocomplete="off">
-             <button onclick="Kernel.nav.go()" style="background:#fff; border:none; padding:0 20px; font-weight:bold;">GO</button>
-        </div>
-        <div style="padding: 20px; color: #666;">
-            <p>Прямой доступ к сети через шлюзы.</p>
-            <p>http/https поддерживаются.</p>
-        </div>
-        <div style="flex:1" onclick="Kernel.ui.toggleSearchOverlay()"></div>
-    </div>
-
-    <div id="toast" class="sys-toast">System Ready</div>
-
-    <script>
-        /**
-         * OMEGA KERNEL v3.0
-         * Handles Process Isolation, Navigation, and UI State.
-         */
+        </button>
         
-        const CONFIG = {
-            homeUrl: 'omega://home',
-            searchGate: 'https://www.bing.com/search?q=', // Using Bing as it's most likely to work in iframe
-            maxTabs: 10
-        };
+        <button class="nav-btn" onclick="Core.ui.toggleMenu()">
+            <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        </button>
+    </div>
 
-        const Kernel = {
-            state: {
-                tabs: [],
-                activeTabId: null,
-                history: []
-            },
+</div>
 
-            // --- INITIALIZATION ---
-            boot: () => {
-                Kernel.log("System booting...");
-                Kernel.tabs.create(CONFIG.homeUrl);
-                
-                // Event Listeners for inputs
-                document.getElementById('master-input').addEventListener('keypress', (e) => {
-                    if(e.key === 'Enter') Kernel.nav.go();
-                });
+<div id="overlay-tabs" class="overlay-container">
+    <div class="overlay-header">
+        <div class="overlay-title">Процессы</div>
+        <button class="nav-btn" onclick="Core.ui.toggleTabs()">✕</button>
+    </div>
+    <div class="tabs-grid" id="ui-tabs-grid"></div>
+    <div style="padding: 20px; background: var(--color-main); border-top: 1px solid var(--color-border); padding-bottom: max(20px, env(safe-area-inset-bottom));">
+        <button onclick="Core.tabs.create()" style="width: 100%; height: 50px; background: var(--text-primary); color: #000; border: none; border-radius: 50px; font-weight: 700; font-size: 16px; text-transform: uppercase;">
+            + Новый процесс
+        </button>
+    </div>
+</div>
 
-                Kernel.log("Omega Engine Ready.");
-                Kernel.ui.toast("Omega Browser v3.0 Loaded");
-            },
+<div id="overlay-menu" class="overlay-container">
+    <div class="overlay-header">
+        <div class="overlay-title">Omega OS</div>
+        <button class="nav-btn" onclick="Core.ui.toggleMenu()">✕</button>
+    </div>
+    <div class="menu-scroll">
+        <div class="menu-divider">Действия</div>
+        <div class="menu-item" onclick="location.reload()">
+            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+            Перезагрузить ядро
+        </div>
+        <div class="menu-item" onclick="Core.data.nuke()">
+            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M15 16h4v2h-4zm0-8h7v2h-7zm0 4h6v2h-6zM3 18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8H3v10zM14 5h-3l-1-1H6L5 5H2v2h12z"/></svg>
+            Уничтожить данные
+        </div>
+        
+        <div class="menu-divider">Инструменты</div>
+        <div class="menu-item" onclick="Core.ui.toast('Source Code View Locked')">
+            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+            Исходный код
+        </div>
+        <div class="menu-item" onclick="Core.ui.toast('VPN Disabled in Region')">
+            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            VPN (Street Proxy)
+        </div>
+        
+        <div class="menu-divider">Информация</div>
+        <div style="padding: 20px; font-size: 12px; color: #666; font-family: monospace;">
+            BUILD: 2026.02.05-STREET<br>
+            RENDERER: OMEGA-KIT<br>
+            LINES: MAXIMIZED
+        </div>
+    </div>
+</div>
 
-            // --- TAB MANAGEMENT (PROCESSES) ---
-            tabs: {
-                create: (url = CONFIG.homeUrl) => {
-                    if (Kernel.state.tabs.length >= CONFIG.maxTabs) {
-                        Kernel.ui.toast("Memory Limit Reached (Max Tabs)");
-                        return;
-                    }
+<div id="toast" class="toast-box">Notification</div>
 
-                    const tabId = 'proc_' + Math.random().toString(36).substr(2, 9);
-                    Kernel.log(`Spawning process ${tabId}`);
+<script>
+    /**
+     * OMEGA KERNEL
+     * Manages virtual processes, navigation state, and UI.
+     */
+    
+    const CONFIG = {
+        home: 'omega://start',
+        searchEngine: 'https://www.bing.com/search?q=', // Iframe friendly
+        maxTabs: 15
+    };
 
-                    const tab = {
-                        id: tabId,
-                        url: url,
-                        title: 'New Tab',
-                        dom: null
-                    };
+    const Core = {
+        // --- STATE STORE ---
+        state: {
+            tabs: [],
+            activeTabId: null,
+            history: [], // Global history stack for simulation
+            isMenuOpen: false,
+            isTabsOpen: false
+        },
 
-                    // Create DOM Structure
-                    const view = document.createElement('div');
-                    view.className = 'browser-tab-view';
-                    view.id = `view-${tabId}`;
+        // --- DOM ELEMENTS CACHE ---
+        dom: {
+            viewport: document.getElementById('viewport-manager'),
+            urlInput: document.getElementById('url-input'),
+            tabCount: document.getElementById('ui-tab-count'),
+            tabsGrid: document.getElementById('ui-tabs-grid'),
+            secureIcon: document.getElementById('ui-secure'),
+            toast: document.getElementById('toast'),
+            overlayTabs: document.getElementById('overlay-tabs'),
+            overlayMenu: document.getElementById('overlay-menu')
+        },
 
-                    if (url === CONFIG.homeUrl) {
-                        // Render Internal Home
-                        view.innerHTML = Kernel.templates.home();
-                    } else {
-                        // Render Iframe
-                        const frame = document.createElement('iframe');
-                        frame.className = 'web-engine';
-                        frame.src = url;
-                        frame.sandbox = "allow-forms allow-scripts allow-same-origin allow-popups"; 
-                        view.appendChild(frame);
-                    }
-
-                    document.getElementById('viewport-stack').appendChild(view);
-                    
-                    Kernel.state.tabs.push(tab);
-                    tab.dom = view;
-                    
-                    Kernel.tabs.switch(tabId);
-                    Kernel.ui.renderTabs();
-                    
-                    // Auto-close overlay if open
-                    document.getElementById('overlay-tabs').classList.remove('open');
-                },
-
-                switch: (id) => {
-                    Kernel.state.activeTabId = id;
-                    
-                    // Hide all
-                    document.querySelectorAll('.browser-tab-view').forEach(el => el.classList.remove('active'));
-                    
-                    // Show active
-                    const tab = Kernel.state.tabs.find(t => t.id === id);
-                    if(tab) {
-                        tab.dom.classList.add('active');
-                        Kernel.ui.updateOmnibox(tab.url);
-                    }
-                },
-
-                close: (e, id) => {
-                    e.stopPropagation();
-                    if(Kernel.state.tabs.length <= 1) return;
-
-                    Kernel.log(`Killing process ${id}`);
-                    
-                    const idx = Kernel.state.tabs.findIndex(t => t.id === id);
-                    const tab = Kernel.state.tabs[idx];
-                    
-                    // Remove DOM
-                    tab.dom.remove();
-                    
-                    // Remove from State
-                    Kernel.state.tabs.splice(idx, 1);
-                    
-                    // Switch if active
-                    if(Kernel.state.activeTabId === id) {
-                        Kernel.tabs.switch(Kernel.state.tabs[Math.max(0, idx - 1)].id);
-                    }
-                    
-                    Kernel.ui.renderTabs();
-                }
-            },
-
-            // --- NAVIGATION ---
-            nav: {
-                go: () => {
-                    const input = document.getElementById('master-input');
-                    let query = input.value.trim();
-                    if(!query) return;
-
-                    Kernel.ui.toggleSearchOverlay(); // Close input
-
-                    let dest = '';
-                    
-                    // Simple URL parsing
-                    if (query.match(/^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/)) {
-                         if(!query.startsWith('http')) dest = 'https://' + query;
-                         else dest = query;
-                    } else {
-                        // Use Search Engine
-                        dest = CONFIG.searchGate + encodeURIComponent(query);
-                    }
-
-                    Kernel.nav.load(dest);
-                    input.value = '';
-                },
-
-                load: (url) => {
-                    const activeTab = Kernel.state.tabs.find(t => t.id === Kernel.state.activeTabId);
-                    if(!activeTab) return;
-
-                    Kernel.log(`Navigating to ${url}`);
-                    
-                    // Clear current view
-                    activeTab.dom.innerHTML = '';
-                    
-                    // Create new frame
-                    const frame = document.createElement('iframe');
-                    frame.className = 'web-engine';
-                    frame.src = url;
-                    // Note: Many big sites block iframes (X-Frame-Options). 
-                    // This is a browser limitation, not code limitation.
-                    frame.onload = () => { Kernel.log("Resource loaded"); };
-                    frame.onerror = () => { Kernel.log("Load error (likely CORS/Frame-Block)"); };
-                    
-                    activeTab.dom.appendChild(frame);
-                    activeTab.url = url;
-                    activeTab.title = url; // Temp title
-                    
-                    Kernel.ui.updateOmnibox(url);
-                    Kernel.ui.renderTabs();
-                },
-
-                back: () => {
-                    Kernel.ui.toast("Back (History Stack Empty)");
-                }
-            },
-
-            // --- UI MANAGERS ---
-            ui: {
-                toggleTabs: () => {
-                    document.getElementById('overlay-tabs').classList.toggle('open');
-                    Kernel.ui.renderTabs();
-                },
-                toggleMenu: () => document.getElementById('overlay-menu').classList.toggle('open'),
-                toggleDev: () => document.getElementById('overlay-dev').classList.toggle('open'),
-                toggleSearchOverlay: () => {
-                    const el = document.getElementById('overlay-search');
-                    el.classList.toggle('open');
-                    if(el.classList.contains('open')) document.getElementById('master-input').focus();
-                },
-
-                renderTabs: () => {
-                    const grid = document.getElementById('tabs-grid');
-                    grid.innerHTML = '';
-                    document.getElementById('tab-counter').innerText = Kernel.state.tabs.length;
-
-                    Kernel.state.tabs.forEach(tab => {
-                        const isActive = tab.id === Kernel.state.activeTabId;
-                        const el = document.createElement('div');
-                        el.className = `tab-card ${isActive ? 'active-card' : ''}`;
-                        el.onclick = () => Kernel.tabs.switch(tab.id);
-                        
-                        let displayTitle = tab.url === CONFIG.homeUrl ? 'Omega Start' : tab.url;
-                        if(displayTitle.length > 25) displayTitle = displayTitle.substring(0,25) + '...';
-
-                        el.innerHTML = `
-                            <div class="tab-close" onclick="Kernel.tabs.close(event, '${tab.id}')">✕</div>
-                            <div class="tab-preview">
-                                ${tab.url === CONFIG.homeUrl ? 'Ω' : 'WWW'}
-                            </div>
-                            <div class="tab-meta">${displayTitle}</div>
-                        `;
-                        grid.appendChild(el);
-                    });
-                },
-
-                updateOmnibox: (url) => {
-                    const display = document.getElementById('url-display');
-                    const badge = document.getElementById('secure-badge');
-                    
-                    if(url === CONFIG.homeUrl) {
-                        display.value = "";
-                        display.placeholder = "Omega Search...";
-                        badge.className = "lock-icon";
-                    } else {
-                        display.value = url;
-                        if(url.startsWith('https')) badge.className = "lock-icon secure";
-                        else badge.className = "lock-icon";
-                    }
-                },
-
-                toast: (msg) => {
-                    const t = document.getElementById('toast');
-                    t.innerText = msg;
-                    t.classList.add('show');
-                    setTimeout(() => t.classList.remove('show'), 3000);
-                }
-            },
-
-            // --- UTILS ---
-            data: {
-                clear: () => {
-                    localStorage.clear();
-                    Kernel.ui.toast("System Wiped");
-                    setTimeout(() => location.reload(), 1000);
-                }
-            },
-
-            log: (msg) => {
-                const con = document.getElementById('sys-log');
-                const time = new Date().toLocaleTimeString();
-                con.innerHTML += `<div class="log-entry"><span class="log-time">[${time}]</span> ${msg}</div>`;
-                con.scrollTop = con.scrollHeight;
-            },
-
-            templates: {
-                home: () => `
-                    <div class="omega-home">
-                        <div class="omega-brand">Omega</div>
-                        <div class="omega-search-box" onclick="Kernel.ui.toggleSearchOverlay()">
-                            <span style="color:#666;">Поиск в даркнете (шутка)...</span>
-                        </div>
-                        <div class="shortcuts-grid">
-                            <div class="shortcut-item" onclick="Kernel.nav.load('https://bing.com')">BING</div>
-                            <div class="shortcut-item" onclick="Kernel.nav.load('https://duckduckgo.com')">DDG</div>
-                            <div class="shortcut-item" onclick="Kernel.nav.load('https://wikipedia.org')">WIKI</div>
-                            <div class="shortcut-item" onclick="Kernel.nav.load('https://reddit.com')">RED</div>
-                        </div>
-                    </div>
-                `
+        // --- INIT SEQUENCE ---
+        init: () => {
+            console.log("OMEGA: Boot sequence initiated.");
+            
+            // Try load session
+            const saved = localStorage.getItem('omega_session');
+            if (saved) {
+                try {
+                    // Simulation of session restore
+                    Core.tabs.create(CONFIG.home);
+                } catch(e) { Core.tabs.create(CONFIG.home); }
+            } else {
+                Core.tabs.create(CONFIG.home);
             }
-        };
 
-        // BOOTSTRAP
-        window.onload = Kernel.boot;
+            // Bind global events
+            Core.dom.urlInput.addEventListener('focus', () => Core.dom.urlInput.select());
+            
+            Core.ui.toast("Система готова. Street Mode.");
+        },
 
-    </script>
+        // --- TAB SYSTEM (PROCESS MANAGER) ---
+        tabs: {
+            create: (url = CONFIG.home) => {
+                if (Core.state.tabs.length >= CONFIG.maxTabs) {
+                    Core.ui.toast("Лимит памяти (Max Tabs)");
+                    return;
+                }
+
+                const tabId = 'proc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                
+                const tab = {
+                    id: tabId,
+                    url: url,
+                    title: 'Загрузка...',
+                    historyStack: [url],
+                    historyIndex: 0,
+                    domElement: null
+                };
+
+                // Create DOM Structure for Tab
+                const view = document.createElement('div');
+                view.className = 'browser-view';
+                view.id = tabId;
+
+                // Determine content
+                if (url === CONFIG.home) {
+                    view.innerHTML = Core.templates.startPage();
+                } else {
+                    const iframe = document.createElement('iframe');
+                    iframe.className = 'engine-frame';
+                    iframe.src = url;
+                    iframe.sandbox = "allow-forms allow-scripts allow-same-origin allow-popups allow-modals";
+                    // Handle load events
+                    iframe.onload = () => Core.tabs.onLoad(tabId);
+                    view.appendChild(iframe);
+                }
+
+                Core.dom.viewport.appendChild(view);
+                tab.domElement = view;
+                
+                Core.state.tabs.push(tab);
+                Core.tabs.activate(tabId);
+                
+                // Close overlays
+                if(Core.state.isTabsOpen) Core.ui.toggleTabs();
+            },
+
+            activate: (id) => {
+                // Deactivate current
+                if (Core.state.activeTabId) {
+                    const curr = Core.state.tabs.find(t => t.id === Core.state.activeTabId);
+                    if(curr) curr.domElement.classList.remove('active');
+                }
+
+                Core.state.activeTabId = id;
+                const next = Core.state.tabs.find(t => t.id === id);
+                
+                if (next) {
+                    next.domElement.classList.add('active');
+                    Core.ui.updateOmnibox(next.url);
+                    Core.ui.updateTabCount();
+                }
+            },
+
+            close: (e, id) => {
+                e.stopPropagation();
+                if (Core.state.tabs.length <= 1) {
+                    // Reset last tab instead of closing
+                    const t = Core.state.tabs[0];
+                    Core.nav.load(CONFIG.home);
+                    return;
+                }
+
+                const index = Core.state.tabs.findIndex(t => t.id === id);
+                const tab = Core.state.tabs[index];
+                
+                // Destroy DOM
+                tab.domElement.remove();
+                Core.state.tabs.splice(index, 1);
+
+                // Switch if active was closed
+                if (Core.state.activeTabId === id) {
+                    const newIndex = Math.max(0, index - 1);
+                    Core.tabs.activate(Core.state.tabs[newIndex].id);
+                }
+
+                Core.ui.renderTabsGrid();
+                Core.ui.updateTabCount();
+            },
+
+            onLoad: (id) => {
+                const tab = Core.state.tabs.find(t => t.id === id);
+                if (tab) {
+                    // Update title logic (limited due to cross-origin)
+                    try {
+                        const urlObj = new URL(tab.url);
+                        tab.title = urlObj.hostname;
+                    } catch(e) { tab.title = "Веб-страница"; }
+                    
+                    if (Core.state.isTabsOpen) Core.ui.renderTabsGrid();
+                }
+            }
+        },
+
+        // --- NAVIGATION ENGINE ---
+        nav: {
+            submit: (e) => {
+                e.preventDefault();
+                Core.dom.urlInput.blur();
+                const input = Core.dom.urlInput.value.trim();
+                if (!input) return;
+
+                // URL Logic
+                let destination = '';
+                const isUrl = input.includes('.') && !input.includes(' ');
+                
+                if (isUrl) {
+                    destination = input.startsWith('http') ? input : 'https://' + input;
+                } else {
+                    destination = CONFIG.searchEngine + encodeURIComponent(input);
+                }
+
+                Core.nav.load(destination);
+            },
+
+            load: (url) => {
+                const activeTab = Core.state.tabs.find(t => t.id === Core.state.activeTabId);
+                if (!activeTab) return;
+
+                // Update Data
+                activeTab.url = url;
+                activeTab.title = url;
+                activeTab.historyStack.push(url);
+                activeTab.historyIndex++;
+
+                // Update DOM
+                activeTab.domElement.innerHTML = ''; // Clear old
+                
+                if (url === CONFIG.home) {
+                    activeTab.domElement.innerHTML = Core.templates.startPage();
+                } else {
+                    const iframe = document.createElement('iframe');
+                    iframe.className = 'engine-frame';
+                    iframe.src = url;
+                    iframe.sandbox = "allow-forms allow-scripts allow-same-origin allow-popups";
+                    activeTab.domElement.appendChild(iframe);
+                }
+
+                Core.ui.updateOmnibox(url);
+            },
+
+            back: () => {
+                Core.ui.toast("История пуста (Mock)");
+            }
+        },
+
+        // --- UI MANAGERS ---
+        ui: {
+            toggleTabs: () => {
+                Core.state.isTabsOpen = !Core.state.isTabsOpen;
+                Core.dom.overlayTabs.classList.toggle('open', Core.state.isTabsOpen);
+                Core.dom.overlayMenu.classList.remove('open');
+                
+                if (Core.state.isTabsOpen) {
+                    Core.ui.renderTabsGrid();
+                }
+            },
+
+            toggleMenu: () => {
+                Core.state.isMenuOpen = !Core.state.isMenuOpen;
+                Core.dom.overlayMenu.classList.toggle('open', Core.state.isMenuOpen);
+                Core.dom.overlayTabs.classList.remove('open');
+                Core.state.isTabsOpen = false;
+            },
+
+            updateOmnibox: (url) => {
+                if (url === CONFIG.home) {
+                    Core.dom.urlInput.value = '';
+                    Core.dom.secureIcon.classList.remove('on');
+                } else {
+                    Core.dom.urlInput.value = url;
+                    if (url.startsWith('https')) Core.dom.secureIcon.classList.add('on');
+                    else Core.dom.secureIcon.classList.remove('on');
+                }
+            },
+
+            updateTabCount: () => {
+                Core.dom.tabCount.innerText = Core.state.tabs.length;
+            },
+
+            renderTabsGrid: () => {
+                const container = Core.dom.tabsGrid;
+                container.innerHTML = '';
+
+                Core.state.tabs.forEach(tab => {
+                    const card = document.createElement('div');
+                    const isActive = tab.id === Core.state.activeTabId;
+                    card.className = `tab-card ${isActive ? 'active' : ''}`;
+                    card.onclick = () => Core.tabs.activate(tab.id);
+
+                    // Extract Domain
+                    let domain = 'Start';
+                    try {
+                        if (tab.url !== CONFIG.home) domain = new URL(tab.url).hostname;
+                    } catch(e) {}
+
+                    card.innerHTML = `
+                        <div class="tab-close-btn" onclick="Core.tabs.close(event, '${tab.id}')">✕</div>
+                        <div class="tab-content-preview">
+                            ${tab.url === CONFIG.home ? 'Ω' : domain.charAt(0).toUpperCase()}
+                        </div>
+                        <div class="tab-footer">
+                            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${domain}</span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            },
+
+            toast: (msg) => {
+                const t = Core.dom.toast;
+                t.innerText = msg;
+                t.classList.add('visible');
+                setTimeout(() => t.classList.remove('visible'), 3000);
+            }
+        },
+
+        // --- DATA UTILS ---
+        data: {
+            nuke: () => {
+                localStorage.clear();
+                Core.ui.toast("Система очищена.");
+                setTimeout(() => location.reload(), 1000);
+            }
+        },
+
+        // --- HTML TEMPLATES ---
+        templates: {
+            startPage: () => `
+                <div class="start-screen">
+                    <div class="brand-logo">OMEGA</div>
+                    <div class="search-mock" onclick="document.getElementById('url-input').focus()">
+                        Поиск или URL...
+                    </div>
+                    <div class="quick-grid">
+                        <div class="quick-tile" onclick="Core.nav.load('https://bing.com')">BING</div>
+                        <div class="quick-tile" onclick="Core.nav.load('https://duckduckgo.com')">DDG</div>
+                        <div class="quick-tile" onclick="Core.nav.load('https://reddit.com')">RED</div>
+                        <div class="quick-tile" onclick="Core.nav.load('https://wikipedia.org')">WIKI</div>
+                    </div>
+                    <div style="margin-top:40px; color:#444; font-size:10px; font-family:monospace;">
+                        SECURE CONTEXT: ACTIVE<br>
+                        TRACKING: DISABLED
+                    </div>
+                </div>
+            `
+        }
+    };
+
+    // --- SYSTEM BOOTSTRAP ---
+    window.addEventListener('DOMContentLoaded', Core.init);
+
+</script>
 </body>
 </html>
