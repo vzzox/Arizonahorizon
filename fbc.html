@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stavok.net — Точные прогнозы на футбол | AI Аналитика</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* =========================================
+           1. CORE VARIABLES & RESET (Основа)
+           ========================================= */
+        :root {
+            /* Colors */
+            --bg-color: #030303;
+            --surface-color: #0a0a0a;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary-glow: rgba(255, 255, 255, 0.15);
+            --accent-silver: #e0e0e0;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --success: #00ff88;
+            --loss: #ff3333;
+            
+            /* Spacing */
+            --container-width: 1200px;
+            --header-height: 80px;
+            
+            /* Effects */
+            --glass-blur: blur(20px);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            /* Фоновая сетка как на референсе */
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        /* Убираем скроллбар для эстетики, но оставляем функционал */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        a { text-decoration: none; color: inherit; transition: var(--transition); }
+        ul { list-style: none; }
+        img { max-width: 100%; display: block; }
+
+        /* =========================================
+           2. UI COMPONENTS (Кнопки, Элементы)
+           ========================================= */
+        .container {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Кнопки */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: #fff;
+            color: #000;
+            border: 1px solid #fff;
+        }
+
+        .btn-primary:hover {
+            background: #e6e6e6;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Типографика */
+        h1, h2, h3 {
+            color: var(--text-main);
+            letter-spacing: -0.03em;
+        }
+
+        .section-title {
+            font-size: 48px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(180deg, #fff 0%, #888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto 60px auto;
+        }
+
+        /* Декоративные звезды (как на картинке) */
+        .star-decoration {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #fff 0%, transparent 70%);
+            filter: blur(2px);
+            animation: pulse 3s infinite;
+        }
+
+        .star-shape {
+            position: absolute;
+            color: white;
+            font-size: 2rem;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            color: var(--accent-silver);
+        }
+
+        /* =========================================
+           3. HEADER & NAVIGATION
+           ========================================= */
+        header {
+            height: var(--header-height);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            background: rgba(3, 3, 3, 0.7);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: #fff;
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.5));
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .login-link {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* =========================================
+           4. HERO SECTION
+           ========================================= */
+        .hero {
+            padding-top: 160px;
+            padding-bottom: 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Фоновые пятна света */
+        .glow-spot {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .glow-1 { top: -200px; left: 50%; transform: translateX(-50%); }
+        .glow-2 { bottom: 0; right: -100px; width: 800px; height: 800px; background: radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 60%); }
+
+        .hero h1 {
+            font-size: 80px;
+            line-height: 1.1;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #ffffff 0%, #a5a5a5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero h1 span {
+            display: block; /* Перенос строки как на макете */
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 40px auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 80px;
+        }
+
+        /* Имитация интерфейса дашборда (картинка снизу хиро) */
+        .hero-dashboard-mockup {
+            width: 100%;
+            max-width: 1000px;
+            height: 500px;
+            margin: 0 auto;
+            background: linear-gradient(180deg, rgba(20,20,20,0.8) 0%, rgba(10,10,10,0.9) 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            box-shadow: 0 -20px 80px rgba(255,255,255,0.05);
+            position: relative;
+            backdrop-filter: blur(10px);
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            overflow: hidden;
+        }
+
+        .mock-sidebar {
+            border-right: 1px solid var(--card-border);
+            padding: 20px;
+        }
+        
+        .mock-item {
+            height: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .mock-item.w-50 { width: 50%; }
+        .mock-item.w-70 { width: 70%; }
+
+        .mock-content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .mock-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .mock-chart-line {
+            width: 100%;
+            height: 80px;
+            margin-top: 20px;
+            position: relative;
+        }
+        
+        .mock-chart-line::after {
+            content: '';
+            position: absolute;
+            left: 0; bottom: 0;
+            width: 100%; height: 2px;
+            background: #333;
+        }
+        
+        .mock-graph {
+            width: 100%; height: 100%;
+            stroke: #fff;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        /* Логотипы партнеров */
+        .partners {
+            padding: 40px 0;
+            border-top: 1px solid var(--card-border);
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            opacity: 0.5;
+            filter: grayscale(100%);
+        }
+        
+        .partners i { font-size: 24px; }
+
+        /* =========================================
+           5. FEATURES / STATS SECTION (Bento Grid)
+           ========================================= */
+        .features {
+            padding: 120px 0;
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 300px);
+            gap: 24px;
+        }
+
+        .bento-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .bento-card:hover {
+            border-color: rgba(255,255,255,0.2);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        .bento-card.large {
+            grid-column: span 2;
+        }
+
+        .bento-card h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .bento-card p {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        /* Визуализация статистики внутри карточек */
+        .stat-display {
+            margin-top: 30px;
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+        }
+        
+        .stat-number {
+            font-size: 56px;
+            font-weight: 700;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            color: var(--success);
+            padding-bottom: 8px;
+            font-weight: 600;
+        }
+
+        /* График побед */
+        .win-bars {
+            display: flex;
+            gap: 8px;
+            margin-top: 40px;
+            height: 100px;
+            align-items: flex-end;
+        }
+        
+        .bar {
+            flex: 1;
+            background: #333;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bar-fill {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            background: #fff;
+            transition: height 1s ease;
+        }
+
+        /* =========================================
+           6. LIVE MATCHES SECTION (Прогнозы)
+           ========================================= */
+        .matches-section {
+            padding: 100px 0;
+            background: radial-gradient(circle at 50% 50%, #0f0f0f 0%, #030303 100%);
+        }
+
+        .match-filters {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+        
+        .filter-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            background: transparent;
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .filter-btn.active, .filter-btn:hover {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        .matches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .match-card {
+            background: #080808;
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+        }
+
+        .league-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .league-icon {
+            width: 20px; height: 20px; background: #222; border-radius: 50%;
+        }
+
+        .teams-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .team {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 35%;
+        }
+
+        .team-logo {
+            width: 50px;
+            height: 50px;
+            background: #151515;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            border: 1px solid var(--card-border);
+        }
+
+        .team-name {
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .match-time {
+            color: var(--text-muted);
+            font-size: 12px;
+            background: #111;
+            padding: 4px 10px;
+            border-radius: 10px;
+        }
+
+        .prediction-box {
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pred-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .pred-value {
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .coefficient {
+            background: #fff;
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        /* AI Probability bar */
+        .probability-bar {
+            margin-top: 15px;
+            height: 4px;
+            background: #222;
+            border-radius: 2px;
+            position: relative;
+        }
+        
+        .prob-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(0,255,136,0.3);
+        }
+
+        /* =========================================
+           7. PRICING SECTION
+           ========================================= */
+        .pricing {
+            padding: 120px 0;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 60px;
+            align-items: center;
+        }
+
+        .price-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        .price-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .price-card.featured {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            padding: 50px 40px;
+            position: relative;
+        }
+        
+        .price-card.featured::before {
+            content: 'Популярный';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            color: #000;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .plan-name {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--text-muted);
+        }
+
+        .plan-price {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .plan-price span {
+            font-size: 20px;
+            margin-top: 5px;
+            margin-right: 5px;
+        }
+        
+        .plan-period {
+            font-size: 14px;
+            color: var(--text-muted);
+            align-self: flex-end;
+            margin-bottom: 10px;
+            margin-left: 5px;
+        }
+
+        .plan-features {
+            margin-bottom: 40px;
+            flex-grow: 1;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .feature-item i {
+            color: #fff;
+            font-size: 12px;
+        }
+        
+        .feature-item.disabled {
+            color: #444;
+            text-decoration: line-through;
+        }
+
+        /* =========================================
+           8. REVIEWS & FOOTER
+           ========================================= */
+        .reviews {
+            padding: 80px 0;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .review-scroller {
+            display: flex;
+            gap: 20px;
+            overflow: hidden;
+            mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+        }
+
+        .review-card {
+            min-width: 300px;
+            background: #080808;
+            border: 1px solid var(--card-border);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        footer {
+            padding: 80px 0 40px 0;
+            border-top: 1px solid var(--card-border);
+            background: #000;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .footer-logo {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .footer-desc {
+            color: var(--text-muted);
+            font-size: 14px;
+            max-width: 300px;
+        }
+
+        .footer-col h4 {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 12px;
+        }
+
+        .footer-col ul li a {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        .footer-col ul li a:hover {
+            color: #fff;
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 40px;
+            border-top: 1px solid #111;
+            font-size: 12px;
+            color: #444;
+        }
+
+        /* =========================================
+           9. RESPONSIVE MEDIA QUERIES
+           ========================================= */
+        @media (max-width: 1024px) {
+            .hero h1 { font-size: 60px; }
+            .bento-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
+            .bento-card.large { grid-column: span 1; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 500px; margin: 40px auto; }
+            .hero-dashboard-mockup { grid-template-columns: 1fr; height: auto; }
+            .mock-sidebar { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero h1 { font-size: 40px; }
+            .hero p { font-size: 16px; }
+            .footer-grid { grid-template-columns: 1fr; gap: 30px; }
+            .hero-buttons { flex-direction: column; align-items: center; }
+            .btn { width: 100%; max-width: 300px; }
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.5; }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="star-shape" style="top: 15%; right: 10%;"><i class="fa-solid fa-star-of-life"></i></div>
+    <div class="star-shape" style="top: 25%; right: 8%; font-size: 1rem; animation-delay: 1s;"><i class="fa-solid fa-star"></i></div>
+    <div class="star-shape" style="top: 60%; left: 5%; font-size: 1.5rem; animation-delay: 2s; color: #555;"><i class="fa-solid fa-star-of-life"></i></div>
+
+    <header>
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <i class="fa-solid fa-futbol"></i> STAVOK.NET
+            </a>
+            
+            <nav class="nav-links">
+                <a href="#matches">Прогнозы</a>
+                <a href="#stats">Статистика</a>
+                <a href="#pricing">Тарифы</a>
+                <a href="#faq">FAQ</a>
+            </nav>
+
+            <div class="auth-buttons">
+                <a href="#" class="login-link">Войти</a>
+                <a href="#" class="btn btn-primary" style="padding: 8px 20px; font-size: 13px;">Регистрация</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="glow-spot glow-1"></div>
+        
+        <div class="container">
+            <div class="badge">
+                <i class="fa-solid fa-bolt" style="color: #ffcc00; margin-right: 5px;"></i> AI Integration 2.0
+            </div>
+            
+            <h1>
+                Будь на шаг впереди <br>
+                <span>букмекера</span>
+            </h1>
+            
+            <p>
+                Лучшее аналитическое приложение для прогнозов на футбол.
+                Искусственный интеллект анализирует 50+ лиг в реальном времени.
+            </p>
+
+            <div class="hero-buttons">
+                <a href="#pricing" class="btn btn-primary">Получить доступ</a>
+                <a href="#matches" class="btn btn-glass"><i class="fa-solid fa-play" style="margin-right: 8px; font-size: 10px;"></i> Демо режим</a>
+            </div>
+
+            <div class="hero-dashboard-mockup">
+                <div class="mock-sidebar">
+                    <div class="mock-item w-50"></div>
+                    <div class="mock-item w-70"></div>
+                    <div class="mock-item"></div>
+                    <div class="mock-item w-50" style="margin-top: 40px;"></div>
+                </div>
+                <div class="mock-content">
+                    <div class="mock-card">
+                        <div style="font-size: 12px; color: #888;">ROI за месяц</div>
+                        <div style="font-size: 24px; font-weight: 700; margin-top: 5px;">+128%</div>
+                        <div class="mock-chart-line">
+                            <svg class="mock-graph" viewBox="0 0 100 40" preserveAspectRatio="none">
+                                <path d="M0,35 Q20,35 30,20 T60,25 T100,5" stroke="white" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mock-card">
+                        <div style="font-size: 12px; color: #888;">Проходимость</div>
+                        <div style="font-size: 24px; font-weight: 700; margin-top: 5px;">82.4%</div>
+                        <div style="display: flex; gap: 5px; margin-top: 25px;">
+                            <div style="height: 30px; width: 8px; background: #333; border-radius: 2px;"></div>
+                            <div style="height: 45px; width: 8px; background: #fff; border-radius: 2px;"></div>
+                            <div style="height: 35px; width: 8px; background: #333; border-radius: 2px;"></div>
+                            <div style="height: 60px; width: 8px; background: #fff; border-radius: 2px;"></div>
+                            <div style="height: 50px; width: 8px; background: #fff; border-radius: 2px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="partners">
+            <i class="fa-brands fa-google"></i>
+            <i class="fa-brands fa-apple"></i>
+            <i class="fa-brands fa-aws"></i>
+            <i class="fa-brands fa-stripe"></i>
+        </div>
+    </div>
+
+    <section id="stats" class="features">
+        <div class="container">
+            <h2 class="section-title">Статистика, которой доверяют</h2>
+            <p class="section-subtitle">Мы не скрываем минусы. Прозрачная история ставок с 2023 года.</p>
+
+            <div class="bento-grid">
+                <div class="bento-card large">
+                    <h3>Рост банка</h3>
+                    <p>Средний прирост депозита пользователя за 30 дней.</p>
+                    <div class="stat-display">
+                        <div class="stat-number">+200%</div>
+                        <div class="stat-label">при флэте 5%</div>
+                    </div>
+                    <svg viewBox="0 0 400 100" style="width: 100%; height: 100px; margin-top: 20px; overflow: visible;">
+                        <path d="M0,100 C50,100 50,80 100,70 S150,90 200,50 S300,60 400,10" fill="none" stroke="#fff" stroke-width="3" />
+                        <circle cx="400" cy="10" r="5" fill="#fff" />
+                        <path d="M0,100 C50,100 50,80 100,70 S150,90 200,50 S300,60 400,10 V100 H0 Z" fill="url(#gradient)" opacity="0.2" />
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:white;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:white;stop-opacity:0" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+
+                <div class="bento-card">
+                    <h3>Подписчики</h3>
+                    <p>Активных пользователей</p>
+                    <div class="stat-number" style="margin-top: 40px;">50K+</div>
+                    <div class="badge" style="margin-top: 10px; background: #111;">Top Rated</div>
+                </div>
+
+                <div class="bento-card">
+                    <h3>Точность AI</h3>
+                    <p>Проходимость нейросети</p>
+                    <div class="stat-number" style="margin-top: 40px;">78%</div>
+                </div>
+
+                <div class="bento-card large" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <h3>Серия побед</h3>
+                        <p>Рекордная серия без поражений в VIP канале</p>
+                    </div>
+                    <div class="win-bars">
+                        <div class="bar"><div class="bar-fill" style="height: 40%"></div></div>
+                        <div class="bar"><div class="bar-fill" style="height: 60%"></div></div>
+                        <div class="bar"><div class="bar-fill" style="height: 50%"></div></div>
+                        <div class="bar"><div class="bar-fill" style="height: 80%"></div></div>
+                        <div class="bar"><div class="bar-fill" style="height: 70%"></div></div>
+                        <div class="bar"><div class="bar-fill" style="height: 90%"></div></div>
+                        <div class="bar"><div class="bar-fill" style="height: 100%"></div></div> <div class="bar"><div class="bar-fill" style="height: 30%"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="matches" class="matches-section">
+        <div class="container">
+            <h2 class="section-title">Прогнозы на сегодня</h2>
+            
+            <div class="match-filters">
+                <button class="filter-btn active" onclick="filterMatches('all')">Все</button>
+                <button class="filter-btn" onclick="filterMatches('epl')">АПЛ</button>
+                <button class="filter-btn" onclick="filterMatches('laliga')">Ла Лига</button>
+                <button class="filter-btn" onclick="filterMatches('ucl')">ЛЧ</button>
+            </div>
+
+            <div class="matches-grid" id="matchesContainer">
+                </div>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="#" class="btn btn-glass">Показать все матчи</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="pricing" class="pricing">
+        <div class="glow-spot glow-2"></div>
+        <div class="container">
+            <h2 class="section-title">Гибкие тарифы</h2>
+            <p class="section-subtitle">Выберите план, который подходит вашему стилю ставок</p>
+
+            <div class="pricing-grid">
+                <div class="price-card">
+                    <div class="plan-name">Старт</div>
+                    <div class="plan-price"><span>₽</span>0<span class="plan-period">/ навсегда</span></div>
+                    <div class="plan-features">
+                        <div class="feature-item"><i class="fa-solid fa-check"></i> 2 прогноза в день</div>
+                        <div class="feature-item"><i class="fa-solid fa-check"></i> Статистика команд</div>
+                        <div class="feature-item disabled"><i class="fa-solid fa-xmark"></i> AI Аналитика</div>
+                        <div class="feature-item disabled"><i class="fa-solid fa-xmark"></i> Live-боты</div>
+                    </div>
+                    <a href="#" class="btn btn-glass" style="width: 100%;">Попробовать</a>
+                </div>
+
+                <div class="price-card featured">
+                    <div class="plan-name">Профессионал</div>
+                    <div class="plan-price"><span>₽</span>1990<span class="plan-period">/ месяц</span></div>
+                    <div class="plan-features">
+                        <div class="feature-item"><i class="fa-solid fa-check"></i> <strong>15+ прогнозов в день</strong></div>
+                        <div class="feature-item"><i class="fa-solid fa-check"></i> Доступ к AI модели</div>
+                        <div class="feature-item"><i class="fa-solid fa-check"></i> Telegram бот</div>
+                        <div class="feature-item"><i class="fa-solid fa-check"></i> Стратегии на угловые</div>
+                    </div>
+                    <a href="#" class="btn btn-primary" style="width: 100%;">Купить подписку</a>
+                </div>
+
+                <div class="price-card">
+                    <div class="plan-name">Инсайдер</div>
+                    <div class="plan-price"><span>₽</span>4990<span class="plan-period">/ месяц</span></div>
+                    <div class="plan-features">
+                        <div class="feature-item"><i class="fa-solid fa-check"></i> Все функции PRO</div>
+                        <div class="feature-item"><i class="fa-solid fa-check"></i> Личный менеджер</div>
+                        <div class="feature-item"><i class="fa-solid fa-check"></i> Доступ к инсайдам</div>
+                        <div class="feature-item"><i class="fa-solid fa-check"></i> Гарантия возврата</div>
+                    </div>
+                    <a href="#" class="btn btn-glass" style="width: 100%;">Купить подписку</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <a href="#" class="footer-logo">STAVOK.NET</a>
+                    <p class="footer-desc">
+                        Передовая платформа аналитики спортивных событий. Мы используем Big Data и Machine Learning для предсказания исходов матчей.
+                    </p>
+                </div>
+                <div class="footer-col">
+                    <h4>Продукт</h4>
+                    <ul>
+                        <li><a href="#">Функции</a></li>
+                        <li><a href="#">Интеграции</a></li>
+                        <li><a href="#">Тарифы</a></li>
+                        <li><a href="#">API</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Ресурсы</h4>
+                    <ul>
+                        <li><a href="#">Блог</a></li>
+                        <li><a href="#">Обучение</a></li>
+                        <li><a href="#">Стратегии</a></li>
+                        <li><a href="#">Помощь</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Компания</h4>
+                    <ul>
+                        <li><a href="#">О нас</a></li>
+                        <li><a href="#">Контакты</a></li>
+                        <li><a href="#">Политика</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div>© 2024 Stavok.net Inc. Все права защищены.</div>
+                <div style="display: flex; gap: 20px;">
+                    <i class="fa-brands fa-twitter"></i>
+                    <i class="fa-brands fa-telegram"></i>
+                    <i class="fa-brands fa-instagram"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 1. MOCK DATA FOR MATCHES (Данные для матчей)
+        const matchesData = [
+            {
+                league: 'Premier League',
+                teamA: 'Arsenal',
+                teamB: 'Liverpool',
+                time: '22:45',
+                prediction: 'ТБ (2.5)',
+                coef: '1.85',
+                prob: 75,
+                category: 'epl'
+            },
+            {
+                league: 'La Liga',
+                teamA: 'Real Madrid',
+                teamB: 'Getafe',
+                time: '19:00',
+                prediction: 'П1 + ТМ 3.5',
+                coef: '2.10',
+                prob: 82,
+                category: 'laliga'
+            },
+            {
+                league: 'Champions League',
+                teamA: 'Bayern',
+                teamB: 'PSG',
+                time: '23:00',
+                prediction: 'ОЗ - Да',
+                coef: '1.65',
+                prob: 68,
+                category: 'ucl'
+            },
+            {
+                league: 'Serie A',
+                teamA: 'Juventus',
+                teamB: 'Milan',
+                time: '20:45',
+                prediction: '1X',
+                coef: '1.45',
+                prob: 88,
+                category: 'all'
+            },
+             {
+                league: 'Premier League',
+                teamA: 'Chelsea',
+                teamB: 'Man Utd',
+                time: '18:30',
+                prediction: 'П2 (0)',
+                coef: '1.95',
+                prob: 60,
+                category: 'epl'
+            },
+             {
+                league: 'La Liga',
+                teamA: 'Barcelona',
+                teamB: 'Sevilla',
+                time: '23:00',
+                prediction: 'П1',
+                coef: '1.55',
+                prob: 85,
+                category: 'laliga'
+            }
+        ];
+
+        // 2. RENDER FUNCTION
+        function renderMatches(filter = 'all') {
+            const container = document.getElementById('matchesContainer');
+            container.innerHTML = ''; // Clear
+
+            const filtered = filter === 'all' 
+                ? matchesData 
+                : matchesData.filter(m => m.category === filter);
+
+            filtered.forEach(match => {
+                const html = `
+                    <div class="match-card">
+                        <div class="league-info">
+                            <div class="league-icon"></div> ${match.league}
+                        </div>
+                        <div class="teams-container">
+                            <div class="team">
+                                <div class="team-logo">${match.teamA[0]}</div>
+                                <div class="team-name">${match.teamA}</div>
+                            </div>
+                            <div class="match-time">${match.time}</div>
+                            <div class="team">
+                                <div class="team-logo">${match.teamB[0]}</div>
+                                <div class="team-name">${match.teamB}</div>
+                            </div>
+                        </div>
+                        <div class="prediction-box">
+                            <div>
+                                <div class="pred-label">Прогноз AI</div>
+                                <div class="pred-value">${match.prediction}</div>
+                            </div>
+                            <div class="coefficient">K: ${match.coef}</div>
+                        </div>
+                        <div style="margin-top: 15px; font-size: 11px; color: #666; display: flex; justify-content: space-between;">
+                            <span>Вероятность захода</span>
+                            <span>${match.prob}%</span>
+                        </div>
+                        <div class="probability-bar">
+                            <div class="prob-fill" style="width: ${match.prob}%"></div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        // 3. FILTER HANDLER
+        function filterMatches(category) {
+            // Update buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Animation reset
+            const container = document.getElementById('matchesContainer');
+            container.style.opacity = '0';
+            
+            setTimeout(() => {
+                renderMatches(category);
+                container.style.opacity = '1';
+                container.style.transition = 'opacity 0.3s ease';
+            }, 300);
+        }
+
+        // 4. INIT
+        window.addEventListener('DOMContentLoaded', () => {
+            renderMatches();
+            
+            // Scroll Animation for Navbar
+            window.addEventListener('scroll', () => {
+                const header = document.querySelector('header');
+                if (window.scrollY > 50) {
+                    header.style.background = 'rgba(3, 3, 3, 0.9)';
+                    header.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+                } else {
+                    header.style.background = 'rgba(3, 3, 3, 0.7)';
+                    header.style.boxShadow = 'none';
+                }
+            });
+        });
+
+        // 5. ANIMATE ON SCROLL (Simple Intersection Observer)
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Apply fade-in animation to sections
+        document.querySelectorAll('section').forEach(sec => {
+            sec.style.opacity = 0;
+            sec.style.transform = 'translateY(30px)';
+            sec.style.transition = 'all 0.8s ease-out';
+            observer.observe(sec);
+        });
+
+    </script>
+</body>
+</html>
