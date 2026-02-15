@@ -2,346 +2,1072 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Регистрация | STAVOK.NET</title>
+    <meta name="description" content="Регистрация в системе STAVOK.NET. Присоединяйтесь к лучшей платформе аналитики.">
+    <meta name="theme-color" content="#050505">
+    
+    <title>Регистрация | STAVOK.NET Enterprise</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Unbounded:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Unbounded:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
+        /* --- RESET & VARIABLES --- */
         :root {
-            --bg-deep: #050505;
-            --bg-glass: rgba(20, 20, 20, 0.7);
-            --border-glass: rgba(255, 255, 255, 0.15);
-            --input-bg: rgba(255, 255, 255, 0.05);
-            --accent: #FFFFFF;
-            --error: #FF3333;
-            --success: #00FF94;
+            /* Colors */
+            --bg-body: #050505;
+            --bg-card: rgba(18, 18, 18, 0.65);
+            --bg-card-hover: rgba(25, 25, 25, 0.85);
+            --bg-input: rgba(255, 255, 255, 0.03);
+            --bg-input-focus: rgba(255, 255, 255, 0.08);
+            
+            --border-light: rgba(255, 255, 255, 0.08);
+            --border-focus: rgba(255, 255, 255, 0.3);
+            
+            --text-primary: #FFFFFF;
+            --text-secondary: #888888;
+            --text-tertiary: #555555;
+            
+            --brand-white: #FFFFFF;
+            --brand-accent: #FFFFFF;
+            
+            --state-error: #FF4444;
+            --state-success: #00E096;
+            --state-warn: #FFBB00;
+            
+            /* Typography */
+            --font-main: 'Inter', sans-serif;
             --font-display: 'Unbounded', sans-serif;
-            --font-body: 'Inter', sans-serif;
+            
+            /* Spacing & Radius */
+            --radius-sm: 8px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            
+            /* Animations */
+            --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+            --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            background-color: var(--bg-deep); color: white;
-            font-family: var(--font-body); min-height: 100vh;
-            display: flex; justify-content: center; align-items: center;
-            overflow-x: hidden; position: relative;
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* BACKGROUND */
-        #canvas-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.3; }
-        .glow-orb {
-            position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(255,255,255,0.05), transparent 70%);
-            top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: -2;
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            overflow: hidden; /* Prevent scroll on registration page */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
         }
 
-        /* CARD */
+        /* --- BACKGROUND FX --- */
+        .fx-noise {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.05"/%3E%3C/svg%3E');
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        .fx-glow {
+            position: fixed;
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            pointer-events: none;
+            animation: pulseGlow 10s ease-in-out infinite alternate;
+        }
+
+        #canvas-particles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            opacity: 0.4;
+        }
+
+        /* --- AUTH CARD CONTAINER --- */
+        .auth-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            perspective: 1000px;
+        }
+
         .auth-card {
-            width: 100%; max-width: 440px; margin: 20px;
-            background: var(--bg-glass); border: 1px solid var(--border-glass);
-            border-radius: 24px; padding: 40px 30px;
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
-            opacity: 0; transform: translateY(20px);
-            animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-xl);
+            padding: 48px 40px;
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            box-shadow: 
+                0 40px 100px -20px rgba(0,0,0,0.8),
+                inset 0 0 0 1px rgba(255,255,255,0.05);
+            transform-style: preserve-3d;
+            animation: cardEnter 1.2s var(--ease-out-expo) forwards;
+            opacity: 0;
+            transform: translateY(40px) rotateX(10deg);
+            position: relative;
+            overflow: hidden;
         }
-        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
 
-        /* LOGO */
-        .header { text-align: center; margin-bottom: 35px; }
-        .logo-box { display: inline-flex; align-items: center; gap: 14px; text-decoration: none; margin-bottom: 10px; }
-        
+        /* Shine effect on card */
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 200%; height: 100%;
+            background: linear-gradient(
+                115deg, 
+                transparent 0%, 
+                transparent 40%, 
+                rgba(255,255,255,0.04) 45%, 
+                rgba(255,255,255,0.08) 50%, 
+                rgba(255,255,255,0.04) 55%, 
+                transparent 60%, 
+                transparent 100%
+            );
+            transform: skewX(-20deg);
+            animation: cardShine 8s infinite linear;
+            pointer-events: none;
+        }
+
+        /* --- LOGO SECTION (STRICT REQUIREMENTS) --- */
+        .brand-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .brand-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+            text-decoration: none;
+            /* Убираем любые трансформации с контейнера, чтобы текст был прямым */
+            transform: none; 
+        }
+
+        .logo-cube-wrapper {
+            /* Обертка для куба, чтобы изолировать наклон */
+            perspective: 500px;
+        }
+
         .logo-cube {
-            width: 44px; height: 44px; background: white; color: black;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 8px;
-            font-family: var(--font-display); font-weight: 900; font-size: 24px;
-            /* ВАЖНО: Курсив/наклон только у куба */
-            transform: skewX(-12deg); 
+            width: 52px;
+            height: 52px;
+            background: var(--brand-white);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 28px;
+            
+            /* --- ТРЕБОВАНИЕ: КУРСИВНЫЙ КУБ --- */
+            transform: skewX(-12deg);
             font-style: italic;
-            box-shadow: 0 0 20px rgba(255,255,255,0.2);
-            position: relative; overflow: hidden;
+            
+            box-shadow: 0 0 30px rgba(255,255,255,0.25);
+            position: relative;
+            transition: transform 0.3s var(--ease-out-expo);
         }
-        
-        /* Блик на кубе */
-        .logo-cube::after {
-            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
-            transform: skewX(-20deg); animation: shine 3s infinite;
-        }
-        @keyframes shine { 0%, 80% { left: -100%; } 100% { left: 200%; } }
 
-        .logo-text {
-            font-family: var(--font-display); font-size: 22px; font-weight: 800;
-            color: white; text-transform: uppercase; letter-spacing: -0.5px;
-            /* ВАЖНО: Текст прямой */
+        .logo-cube:hover {
+            transform: skewX(-12deg) scale(1.05);
+            box-shadow: 0 0 50px rgba(255,255,255,0.4);
+        }
+
+        .logo-cube span {
+            /* Компенсация, чтобы буква S смотрелась по центру */
+            display: block;
+            margin-right: 2px; 
+            margin-top: 2px;
+        }
+
+        .brand-text {
+            font-family: var(--font-display);
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            
+            /* --- ТРЕБОВАНИЕ: ПРЯМОЙ ТЕКСТ --- */
             font-style: normal;
+            transform: none;
+            
+            text-shadow: 0 0 20px rgba(255,255,255,0.1);
         }
-        .subtitle { color: #888; font-size: 13px; margin-top: 5px; }
 
-        /* INPUTS */
-        .form-group { margin-bottom: 18px; position: relative; }
-        
-        .input-field {
-            width: 100%; height: 56px; background: var(--input-bg);
-            border: 1px solid var(--border-glass); border-radius: 14px;
-            padding: 0 45px 0 18px; color: white; font-size: 15px;
-            transition: 0.3s; font-family: var(--font-body);
+        .brand-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            letter-spacing: 0.2px;
         }
-        .input-field:focus { border-color: white; background: rgba(255,255,255,0.1); }
-        
+
+        /* --- FORM ELEMENTS --- */
+        .form-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            position: relative;
+            width: 100%;
+        }
+
+        .input-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 64px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 0 50px 0 20px;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: var(--font-main);
+            transition: all 0.3s ease;
+            /* Убираем автозаполнение стилей браузера */
+            -webkit-autofill: none;
+        }
+
+        .form-input::placeholder {
+            color: var(--text-tertiary);
+            transition: 0.3s;
+        }
+
+        .form-input:focus {
+            background: var(--bg-input-focus);
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.03);
+            transform: translateY(-1px);
+        }
+
+        .form-input:focus::placeholder {
+            opacity: 0;
+            transform: translateX(10px);
+        }
+
+        /* SVG ICONS */
         .input-icon {
-            position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
-            color: #666; pointer-events: none; transition: 0.3s;
-            display: flex; align-items: center;
+            position: absolute;
+            right: 20px;
+            color: var(--text-secondary);
+            transition: 0.3s;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .input-field:focus ~ .input-icon { color: white; }
-        .input-icon svg { width: 20px; height: 20px; }
 
-        .eye-btn { pointer-events: auto; cursor: pointer; }
-        .eye-btn:hover { color: white; }
-
-        /* BUTTON */
-        .btn-submit {
-            width: 100%; height: 58px; background: white; color: black;
-            border: none; border-radius: 14px;
-            font-family: var(--font-display); font-weight: 800; font-size: 15px;
-            text-transform: uppercase; cursor: pointer;
-            margin-top: 10px; position: relative; overflow: hidden;
-            transform: skewX(-6deg); transition: 0.3s;
+        .input-icon svg {
+            width: 22px;
+            height: 22px;
+            stroke-width: 1.5;
         }
-        .btn-submit span { display: block; transform: skewX(6deg); /* Выпрямляем текст */ }
-        .btn-submit:hover { transform: skewX(-6deg) scale(1.02); box-shadow: 0 0 25px rgba(255,255,255,0.3); }
-        .btn-submit:active { transform: skewX(-6deg) scale(0.98); }
-        .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
 
-        .loader { display: none; width: 20px; height: 20px; border: 2px solid black; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .form-input:focus ~ .input-icon {
+            color: var(--text-primary);
+        }
 
-        /* FOOTER & TERMS */
-        .terms { font-size: 11px; color: #666; text-align: center; margin-top: 15px; }
-        .terms span { color: white; cursor: pointer; text-decoration: underline; }
-        .footer-link { display: block; text-align: center; margin-top: 25px; color: #888; font-size: 14px; text-decoration: none; }
-        .footer-link b { color: white; }
+        .action-icon {
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        
+        .action-icon:hover {
+            color: var(--text-primary);
+        }
 
-        /* TOAST */
+        /* Validation States */
+        .input-group.success .form-input { border-color: var(--state-success); }
+        .input-group.success .input-icon { color: var(--state-success); }
+        
+        .input-group.error .form-input { border-color: var(--state-error); }
+        .input-group.error .input-icon { color: var(--state-error); }
+
+        /* Error Message text */
+        .error-msg {
+            position: absolute;
+            bottom: -18px;
+            left: 5px;
+            font-size: 11px;
+            color: var(--state-error);
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: 0.3s;
+        }
+
+        .input-group.error .error-msg {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Password Strength Meter */
+        .strength-meter-wrap {
+            height: 4px;
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            margin-top: 8px;
+            border-radius: 2px;
+            overflow: hidden;
+            display: flex;
+            opacity: 0;
+            transition: 0.3s;
+        }
+        
+        .input-group:focus-within .strength-meter-wrap { opacity: 1; }
+
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--state-error);
+            border-radius: 2px;
+            transition: width 0.4s var(--ease-out-expo), background-color 0.4s;
+        }
+
+        /* --- TERMS & BUTTONS --- */
+        .terms-wrap {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .terms-link {
+            color: var(--text-primary);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .terms-link:hover { color: var(--brand-white); }
+
+        /* MAIN BUTTON */
+        .btn-primary {
+            width: 100%;
+            height: 68px;
+            background: var(--brand-white);
+            color: #000;
+            border: none;
+            border-radius: var(--radius-md);
+            margin-top: 24px;
+            
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s var(--ease-out-expo);
+            
+            /* SKEW EFFECT FOR SPEED */
+            transform: skewX(-6deg);
+            
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary span {
+            /* UN-SKEW TEXT */
+            display: block;
+            transform: skewX(6deg);
+        }
+
+        .btn-primary:hover {
+            transform: skewX(-6deg) scale(1.02);
+            box-shadow: 0 10px 40px rgba(255,255,255,0.3);
+        }
+
+        .btn-primary:active {
+            transform: skewX(-6deg) scale(0.98);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: skewX(-6deg); /* No scale on disabled */
+        }
+
+        /* LOADER INSIDE BUTTON */
+        .btn-loader {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #000;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            transform: skewX(6deg); /* Keep circle round */
+        }
+
+        /* FOOTER */
+        .auth-footer {
+            margin-top: 32px;
+            text-align: center;
+            border-top: 1px solid var(--border-light);
+            padding-top: 24px;
+        }
+
+        .login-link {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .login-link b {
+            color: var(--text-primary);
+            font-weight: 600;
+            border-bottom: 1px solid transparent;
+            transition: 0.3s;
+        }
+
+        .login-link:hover b {
+            border-bottom-color: var(--text-primary);
+        }
+
+        /* --- TOAST NOTIFICATIONS --- */
+        .toast-container {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+
         .toast {
-            position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-100px);
-            background: #111; border: 1px solid #333; padding: 14px 24px; border-radius: 50px;
-            color: white; font-weight: 600; font-size: 13px; z-index: 1000;
-            display: flex; align-items: center; gap: 10px;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0;
+            background: #111;
+            border: 1px solid #333;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0;
+            transform: translateY(-20px) scale(0.9);
+            transition: all 0.5s var(--ease-elastic);
         }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .toast.success { border-color: var(--success); color: var(--success); }
-        .toast.error { border-color: var(--error); color: var(--error); }
+
+        .toast.show { opacity: 1; transform: translateY(0) scale(1); }
+        .toast.success { border-color: var(--state-success); color: var(--state-success); }
+        .toast.error { border-color: var(--state-error); color: var(--state-error); }
+
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(15px);
+            z-index: 5000;
+            opacity: 0; pointer-events: none; transition: 0.4s;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+        .modal-content {
+            background: #111;
+            border: 1px solid #333;
+            width: 100%; max-width: 500px;
+            border-radius: 24px;
+            padding: 32px;
+            transform: translateY(50px);
+            transition: 0.4s var(--ease-out-expo);
+        }
+        
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+
+        .modal-title { font-family: var(--font-display); font-size: 20px; margin-bottom: 20px; }
+        .modal-body { font-size: 14px; color: #888; line-height: 1.6; max-height: 400px; overflow-y: auto; padding-right: 10px; }
+        
+        /* Custom Scrollbar */
+        .modal-body::-webkit-scrollbar { width: 4px; }
+        .modal-body::-webkit-scrollbar-track { background: #111; }
+        .modal-body::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        
+        .modal-btn {
+            width: 100%; background: white; color: black; font-weight: 700;
+            padding: 14px; border-radius: 12px; margin-top: 24px;
+            cursor: pointer; border: none; text-transform: uppercase;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes pulseGlow {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.8; }
+        }
+
+        @keyframes cardEnter {
+            to { opacity: 1; transform: translateY(0) rotateX(0); }
+        }
+        
+        @keyframes cardShine {
+            0%, 40% { left: -100%; }
+            100% { left: 200%; }
+        }
+        
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .auth-card { padding: 32px 24px; }
+            .brand-logo-container { flex-direction: column; gap: 10px; }
+            .brand-text { font-size: 22px; }
+            .logo-cube { width: 42px; height: 42px; font-size: 22px; }
+        }
 
     </style>
 </head>
 <body>
 
-    <div class="glow-orb"></div>
-    <canvas id="canvas-bg"></canvas>
+    <div class="fx-noise"></div>
+    <div class="fx-glow"></div>
+    <canvas id="canvas-particles"></canvas>
     
-    <div id="toast" class="toast"></div>
+    <div class="toast-container" id="toastContainer"></div>
 
-    <div class="auth-card">
-        <div class="header">
-            <a href="#" class="logo-box">
-                <div class="logo-cube">S</div>
-                <div class="logo-text">STAVOK.NET</div>
-            </a>
-            <div class="subtitle">Присоединяйся к элите</div>
-        </div>
-
-        <form id="regForm">
+    <div class="auth-wrapper">
+        <div class="auth-card">
             
-            <div class="form-group">
-                <input type="text" id="username" class="input-field" placeholder="Никнейм" autocomplete="off">
-                <div class="input-icon">
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <header class="brand-header">
+                <a href="index.html" class="brand-logo-container">
+                    <div class="logo-cube-wrapper">
+                        <div class="logo-cube"><span>S</span></div>
+                    </div>
+                    <span class="brand-text">STAVOK.NET</span>
+                </a>
+                <p class="brand-subtitle">Присоединяйся к элите аналитики</p>
+            </header>
+
+            <div class="form-grid" id="registrationForm">
+                
+                <div class="input-group" id="group-username">
+                    <div class="input-box">
+                        <input 
+                            type="text" 
+                            id="username" 
+                            class="form-input" 
+                            placeholder="Никнейм" 
+                            autocomplete="off" 
+                            name="stavok-user-field-unique"
+                        >
+                        <div class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                    </div>
+                    <span class="error-msg">Никнейм обязателен</span>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <input type="email" id="email" class="input-field" placeholder="Email" autocomplete="off">
-                <div class="input-icon">
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                <div class="input-group" id="group-email">
+                    <div class="input-box">
+                        <input 
+                            type="email" 
+                            id="email" 
+                            class="form-input" 
+                            placeholder="Email адрес" 
+                            autocomplete="email"
+                        >
+                        <div class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        </div>
+                    </div>
+                    <span class="error-msg">Некорректный Email</span>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <input type="password" id="password" class="input-field" placeholder="Пароль">
-                <div class="input-icon eye-btn" onclick="togglePass()">
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                <div class="input-group" id="group-password">
+                    <div class="input-box">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            class="form-input" 
+                            placeholder="Пароль" 
+                            autocomplete="new-password"
+                        >
+                        <div class="input-icon action-icon" id="togglePass">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </div>
+                    </div>
+                    <div class="strength-meter-wrap">
+                        <div class="strength-bar" id="strengthBar"></div>
+                    </div>
+                    <span class="error-msg">Минимум 6 символов</span>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <input type="password" id="confirm" class="input-field" placeholder="Повторите пароль">
-                <div class="input-icon">
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                <div class="input-group" id="group-confirm">
+                    <div class="input-box">
+                        <input 
+                            type="password" 
+                            id="confirm" 
+                            class="form-input" 
+                            placeholder="Повторите пароль"
+                        >
+                        <div class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        </div>
+                    </div>
+                    <span class="error-msg">Пароли не совпадают</span>
                 </div>
+
+                <div class="terms-wrap">
+                    Нажимая кнопку, вы подтверждаете согласие с <br>
+                    <span class="terms-link" onclick="App.ui.openModal()">правилами сервиса</span> и политикой приватности.
+                </div>
+
+                <button type="button" class="btn-primary" id="submitBtn">
+                    <span id="btnText">ЗАРЕГИСТРИРОВАТЬСЯ</span>
+                    <div class="btn-loader" id="btnLoader"></div>
+                </button>
+
             </div>
 
-            <div class="terms">
-                Регистрируясь, вы принимаете <span>правила сервиса</span>.
+            <footer class="auth-footer">
+                <a href="login.html" class="login-link">
+                    Уже есть аккаунт? <b>Войти</b>
+                </a>
+            </footer>
+
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="termsModal">
+        <div class="modal-content">
+            <h2 class="modal-title">Правила STAVOK.NET</h2>
+            <div class="modal-body">
+                <p><strong>1. Введение</strong><br>Добро пожаловать. Используя наш сервис, вы соглашаетесь соблюдать нижеизложенные условия.</p>
+                <br>
+                <p><strong>2. Регистрация</strong><br>Запрещено создание нескольких аккаунтов (мультиаккаунтинг). Данные должны быть достоверными.</p>
+                <br>
+                <p><strong>3. Возрастное ограничение</strong><br>Сервис доступен только для лиц старше 18 лет.</p>
+                <br>
+                <p><strong>4. Виртуальная валюта</strong><br>Баланс на сайте не является реальными деньгами и не подлежит обмену.</p>
+                <br>
+                <p><strong>5. Ответственность</strong><br>Администрация не несет ответственности за ваши прогнозы.</p>
             </div>
-
-            <button type="submit" class="btn-submit" id="submitBtn">
-                <span id="btnText">ЗАРЕГИСТРИРОВАТЬСЯ</span>
-                <div class="loader" id="loader"></div>
-            </button>
-        </form>
-
-        <a href="login.html" class="footer-link">Уже есть аккаунт? <b>Войти</b></a>
+            <button class="modal-btn" onclick="App.ui.closeModal()">Принимаю</button>
+        </div>
     </div>
 
     <script>
-        // 1. КОНФИГУРАЦИЯ SUPABASE
-        const SUPABASE_URL = 'https://cmoeirxugwapvvcdkwjs.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE';
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        /**
+         * STAVOK.NET CLIENT CORE
+         * Enterprise User Registration System
+         * * @version 2.0.0
+         * @author StavokDev
+         */
 
-        // 2. ФРАЗЫ УСПЕХА
-        const SUCCESS_PHRASES = [
-            "Добро пожаловать в элиту!",
-            "Твой аккаунт создан. Врывайся!",
-            "Регистрация успешна. Время побеждать.",
-            "Ты теперь часть STAVOK.NET!",
-            "Успех! Твоя игра начинается."
-        ];
+        // --- CONFIGURATION ---
+        const CONFIG = {
+            supabaseUrl: 'https://cmoeirxugwapvvcdkwjs.supabase.co',
+            supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE',
+            successMessages: [
+                "Добро пожаловать в семью!",
+                "Аккаунт создан. Покажи класс.",
+                "Регистрация успешна. Удачи!",
+                "Ты в игре. Начинай побеждать.",
+                "Доступ разрешен. Врывайся!"
+            ]
+        };
 
-        // 3. ЛОГИКА UI
-        function togglePass() {
-            const p = document.getElementById('password');
-            p.type = p.type === 'password' ? 'text' : 'password';
+        // --- APP CONTROLLER CLASS ---
+        class Application {
+            constructor() {
+                this.supabase = null;
+                this.ui = new UIManager();
+                this.canvas = new ParticleSystem();
+            }
+
+            // Initialization Sequence
+            init() {
+                console.log("System: Booting...");
+                
+                try {
+                    // 1. Initialize Supabase
+                    if (window.supabase) {
+                        this.supabase = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+                        console.log("System: Database connected.");
+                    } else {
+                        throw new Error("Supabase SDK not loaded.");
+                    }
+
+                    // 2. Initialize Visuals
+                    this.canvas.init();
+
+                    // 3. Bind Events
+                    this.bindEvents();
+
+                } catch (err) {
+                    console.error("Critical System Failure:", err);
+                    this.ui.showToast("Ошибка загрузки системы. Обновите страницу.", "error");
+                }
+            }
+
+            // Event Binding
+            bindEvents() {
+                // Submit Button Click (Strictly no form submit)
+                const btn = document.getElementById('submitBtn');
+                if (btn) {
+                    btn.addEventListener('click', (e) => this.handleRegistration(e));
+                }
+
+                // Password Visibility Toggle
+                const toggle = document.getElementById('togglePass');
+                if (toggle) {
+                    toggle.addEventListener('click', () => this.ui.togglePassword());
+                }
+
+                // Real-time Password Strength
+                const passInput = document.getElementById('password');
+                if (passInput) {
+                    passInput.addEventListener('input', (e) => this.ui.updateStrength(e.target.value));
+                }
+
+                // Remove error styling on input
+                document.querySelectorAll('.form-input').forEach(input => {
+                    input.addEventListener('input', function() {
+                        this.closest('.input-group').classList.remove('error');
+                    });
+                });
+            }
+
+            // Registration Logic
+            async handleRegistration(e) {
+                // Prevent Default just in case, though type="button" handles it
+                if(e) e.preventDefault();
+
+                // 1. Collect Data
+                const fields = {
+                    username: document.getElementById('username').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    password: document.getElementById('password').value,
+                    confirm: document.getElementById('confirm').value
+                };
+
+                // 2. Validate
+                if (!this.validate(fields)) return;
+
+                // 3. Set Loading State
+                this.ui.setLoading(true);
+
+                try {
+                    // 4. Supabase Request
+                    // Note: We send username in metadata. The SQL Trigger on server will copy it to 'public.users' table.
+                    const { data, error } = await this.supabase.auth.signUp({
+                        email: fields.email,
+                        password: fields.password,
+                        options: {
+                            data: {
+                                username: fields.username,
+                                display_name: fields.username
+                            }
+                        }
+                    });
+
+                    if (error) throw error;
+
+                    // 5. Success Handling
+                    if (data.user) {
+                        // Double check insert (Optional client-side backup if trigger fails)
+                        await this.supabase.from('users').insert([{
+                            id: data.user.id,
+                            username: fields.username,
+                            email: fields.email,
+                            role: 'user',
+                            balance: 0
+                        }]).then(({ error }) => {
+                            if (error) console.warn("Secondary DB insert info:", error.message);
+                        });
+
+                        const randomMsg = CONFIG.successMessages[Math.floor(Math.random() * CONFIG.successMessages.length)];
+                        this.ui.showToast(randomMsg, "success");
+
+                        // Redirect logic
+                        setTimeout(() => {
+                            if (data.session) {
+                                window.location.href = 'index.html';
+                            } else {
+                                // Email confirmation required case
+                                alert("Проверьте почту для подтверждения!");
+                                window.location.href = 'login.html';
+                            }
+                        }, 2000);
+                    }
+
+                } catch (err) {
+                    // 6. Error Handling
+                    console.error("Auth Error:", err);
+                    let msg = err.message;
+                    if (msg.includes("registered")) msg = "Этот Email уже используется";
+                    if (msg.includes("password")) msg = "Пароль слишком слабый";
+                    if (msg.includes("rate limit")) msg = "Слишком много попыток. Подождите.";
+                    
+                    this.ui.showToast(msg, "error");
+                    this.ui.setLoading(false);
+                }
+            }
+
+            // Validation Logic
+            validate(fields) {
+                let isValid = true;
+
+                // Reset errors
+                document.querySelectorAll('.input-group').forEach(el => el.classList.remove('error'));
+
+                if (!fields.username) {
+                    this.ui.showInputError('group-username');
+                    isValid = false;
+                }
+
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!fields.email || !emailRegex.test(fields.email)) {
+                    this.ui.showInputError('group-email');
+                    isValid = false;
+                }
+
+                if (!fields.password || fields.password.length < 6) {
+                    this.ui.showInputError('group-password');
+                    isValid = false;
+                }
+
+                if (fields.password !== fields.confirm) {
+                    this.ui.showInputError('group-confirm');
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    this.ui.showToast("Проверьте правильность полей", "error");
+                    this.ui.shakeForm();
+                }
+
+                return isValid;
+            }
         }
 
-        function showToast(msg, type = 'error') {
-            const t = document.getElementById('toast');
-            t.className = `toast show ${type}`;
-            t.innerHTML = type === 'error' 
-                ? `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${msg}`
-                : `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg> ${msg}`;
-            
-            setTimeout(() => t.classList.remove('show'), 3000);
+        // --- UI MANAGER CLASS ---
+        class UIManager {
+            constructor() {
+                this.toastContainer = document.getElementById('toastContainer');
+            }
+
+            showInputError(groupId) {
+                document.getElementById(groupId).classList.add('error');
+            }
+
+            shakeForm() {
+                const card = document.querySelector('.auth-card');
+                card.style.animation = 'none';
+                card.offsetHeight; /* trigger reflow */
+                card.style.animation = 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both';
+                // Add keyframes dynamically if not present, but simple visual cue is enough
+                card.style.transform = 'translateX(5px)';
+                setTimeout(() => card.style.transform = 'none', 100);
+            }
+
+            setLoading(isLoading) {
+                const btn = document.getElementById('submitBtn');
+                const text = document.getElementById('btnText');
+                const loader = document.getElementById('btnLoader');
+
+                if (isLoading) {
+                    btn.disabled = true;
+                    text.style.display = 'none';
+                    loader.style.display = 'block';
+                } else {
+                    btn.disabled = false;
+                    text.style.display = 'block';
+                    loader.style.display = 'none';
+                }
+            }
+
+            togglePassword() {
+                const input = document.getElementById('password');
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+            }
+
+            updateStrength(val) {
+                const bar = document.getElementById('strengthBar');
+                let score = 0;
+                if (val.length > 5) score += 25;
+                if (val.length > 8) score += 25;
+                if (/[A-Z]/.test(val)) score += 25;
+                if (/[0-9!@#]/.test(val)) score += 25;
+
+                bar.style.width = score + '%';
+                
+                if (score <= 25) bar.style.backgroundColor = '#FF4444';
+                else if (score <= 50) bar.style.backgroundColor = '#FFBB00';
+                else if (score <= 75) bar.style.backgroundColor = '#00E096';
+                else bar.style.backgroundColor = '#00E096';
+            }
+
+            showToast(msg, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                let iconSVG = type === 'success' 
+                    ? '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
+                    : '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+
+                toast.innerHTML = `${iconSVG}<span>${msg}</span>`;
+                this.toastContainer.appendChild(toast);
+
+                // Animation
+                requestAnimationFrame(() => toast.classList.add('show'));
+
+                // Auto remove
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 500);
+                }, 4000);
+            }
+
+            openModal() {
+                document.getElementById('termsModal').classList.add('active');
+            }
+
+            closeModal() {
+                document.getElementById('termsModal').classList.remove('active');
+            }
         }
 
-        // 4. ЛОГИКА РЕГИСТРАЦИИ
-        document.getElementById('regForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const confirm = document.getElementById('confirm').value;
-            const btn = document.getElementById('submitBtn');
-            const btnText = document.getElementById('btnText');
-            const loader = document.getElementById('loader');
+        // --- PARTICLE SYSTEM CLASS (VISUALS) ---
+        class ParticleSystem {
+            init() {
+                this.canvas = document.getElementById('canvas-particles');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.w = 0;
+                this.h = 0;
 
-            if(!username || !email || !password) return showToast('Заполните все поля');
-            if(password !== confirm) return showToast('Пароли не совпадают');
-            if(password.length < 6) return showToast('Пароль минимум 6 символов');
+                window.addEventListener('resize', () => this.resize());
+                this.resize();
+                this.animate();
+            }
 
-            // Анимация загрузки
-            btn.disabled = true;
-            btnText.style.display = 'none';
-            loader.style.display = 'block';
+            resize() {
+                this.w = window.innerWidth;
+                this.h = window.innerHeight;
+                this.canvas.width = this.w;
+                this.canvas.height = this.h;
+                this.createParticles();
+            }
 
-            try {
-                // Регистрируем в Auth. 
-                // Важно: передаем username в options.data.
-                // Триггер в SQL подхватит это и сам создаст запись в public.users.
-                const { data, error } = await supabase.auth.signUp({
-                    email: email,
-                    password: password,
-                    options: {
-                        data: { 
-                            username: username,
-                            display_name: username 
+            createParticles() {
+                this.particles = [];
+                // Adaptive count based on screen size
+                const count = Math.floor((this.w * this.h) / 15000);
+                
+                for (let i = 0; i < count; i++) {
+                    this.particles.push({
+                        x: Math.random() * this.w,
+                        y: Math.random() * this.h,
+                        vx: (Math.random() - 0.5) * 0.3, // Slow movement
+                        vy: (Math.random() - 0.5) * 0.3,
+                        size: Math.random() * 2 + 0.5,
+                        alpha: Math.random() * 0.5 + 0.1
+                    });
+                }
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.w, this.h);
+                
+                this.particles.forEach((p, index) => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    // Wrap around screen
+                    if (p.x < 0) p.x = this.w;
+                    if (p.x > this.w) p.x = 0;
+                    if (p.y < 0) p.y = this.h;
+                    if (p.y > this.h) p.y = 0;
+
+                    // Draw Particle
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    this.ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+                    this.ctx.fill();
+
+                    // Constellation Effect (Lines)
+                    for (let j = index + 1; j < this.particles.length; j++) {
+                        const p2 = this.particles[j];
+                        const dx = p.x - p2.x;
+                        const dy = p.y - p2.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < 120) {
+                            this.ctx.beginPath();
+                            this.ctx.strokeStyle = `rgba(255, 255, 255, ${0.08 * (1 - dist / 120)})`;
+                            this.ctx.lineWidth = 0.5;
+                            this.ctx.moveTo(p.x, p.y);
+                            this.ctx.lineTo(p2.x, p2.y);
+                            this.ctx.stroke();
                         }
                     }
                 });
 
-                if (error) throw error;
-
-                // Успех!
-                const phrase = SUCCESS_PHRASES[Math.floor(Math.random() * SUCCESS_PHRASES.length)];
-                showToast(phrase, 'success');
-
-                setTimeout(() => {
-                    if (data.session) {
-                        window.location.href = 'index.html';
-                    } else {
-                        alert('Подтвердите Email (ссылка отправлена на почту)!');
-                        window.location.href = 'login.html';
-                    }
-                }, 2000);
-
-            } catch (err) {
-                let msg = err.message;
-                if(msg.includes('already registered')) msg = 'Этот Email уже занят';
-                showToast(msg);
-                
-                // Возвращаем кнопку
-                btn.disabled = false;
-                btnText.style.display = 'block';
-                loader.style.display = 'none';
+                requestAnimationFrame(() => this.animate());
             }
+        }
+
+        // --- STARTUP ---
+        const App = new Application();
+        document.addEventListener('DOMContentLoaded', () => {
+            App.init();
         });
-
-        // 5. FON (CANVAS PARTICLES)
-        const canvas = document.getElementById('canvas-bg');
-        const ctx = canvas.getContext('2d');
-        let w, h, particles = [];
-
-        function resize() { w = window.innerWidth; h = window.innerHeight; canvas.width = w; canvas.height = h; }
-        window.addEventListener('resize', () => { resize(); init(); });
-
-        function init() {
-            particles = [];
-            for(let i=0; i<60; i++) {
-                particles.push({
-                    x: Math.random() * w, y: Math.random() * h,
-                    vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5,
-                    size: Math.random() * 2, alpha: Math.random() * 0.5 + 0.2
-                });
-            }
-        }
-
-        function anim() {
-            ctx.clearRect(0, 0, w, h);
-            particles.forEach(p => {
-                p.x += p.vx; p.y += p.vy;
-                if(p.x < 0) p.x = w; if(p.x > w) p.x = 0;
-                if(p.y < 0) p.y = h; if(p.y > h) p.y = 0;
-                ctx.fillStyle = `rgba(255,255,255,${p.alpha})`;
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
-            });
-            // Линии
-            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-            for(let i=0; i<particles.length; i++) {
-                for(let j=i+1; j<particles.length; j++) {
-                    let dx = particles[i].x - particles[j].x;
-                    let dy = particles[i].y - particles[j].y;
-                    let dist = Math.sqrt(dx*dx + dy*dy);
-                    if(dist < 100) {
-                        ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(anim);
-        }
-
-        resize(); init(); anim();
 
     </script>
 </body>
