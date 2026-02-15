@@ -2,641 +2,618 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MEMASIK 2.0 | PROFILE ULTIMATE</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@300;500;700;900&display=swap" rel="stylesheet">
-    
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <title>STAVOK.NET | Профиль</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Unbounded:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
-        /* =========================================
-           1. CORE VARIABLES & RESET
-           ========================================= */
         :root {
-            --bg-body: #050505;
-            --bg-card: #0f0f11;
-            --bg-overlay: rgba(0,0,0,0.85);
-            --bg-input: #000000;
-            --bg-nav: rgba(10, 10, 12, 0.9);
+            /* --- COLOR PALETTE --- */
+            --bg-void: #000000;
+            --bg-noise: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+CjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0iIzAyMDIwMiI+PC9yZWN0Pgo8ZyBmaWxsLXJ1bGU9ImV2ZW5vZGQiPgo8ZyBmaWxsPSIjMWExYTFhIiBmaWxsLW9wYWNpdHk9IjAuMDUiPgo8cGF0aCBkPSJNMCAwaDUwdjUwSDB6Ii8+CjwvZz4KPC9nPgo8L3N2Zz4=');
             
-            --text-main: #ffffff;
-            --text-secondary: #a0a0a5;
-            --text-muted: #55555e;
+            /* Glass Layers */
+            --glass-base: rgba(18, 18, 18, 0.60);
+            --glass-mid: rgba(30, 30, 30, 0.70);
+            --glass-high: rgba(40, 40, 40, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-border-light: rgba(255, 255, 255, 0.15);
             
-            --accent: #ff5e00;
-            --accent-glow: rgba(255, 94, 0, 0.25);
-            --danger: #ff3333;
-            --success: #00ff88;
+            /* Neon Accents */
+            --neon-green: #00FF94;
+            --neon-green-glow: rgba(0, 255, 148, 0.4);
+            --neon-red: #FF2E2E;
+            --neon-gold: #FFD700;
+            --neon-blue: #00C2FF;
+            --neon-purple: #BD00FF;
             
-            --border: #1f1f22;
-            --radius-L: 24px;
-            --radius-M: 16px;
-            --radius-S: 8px;
+            /* Text */
+            --text-main: #FFFFFF;
+            --text-sec: #AAAAAA;
+            --text-mut: #666666;
             
-            --font-main: 'Manrope', sans-serif;
-            --font-display: 'Unbounded', sans-serif;
+            /* Fonts */
+            --font-h: 'Unbounded', sans-serif;
+            --font-b: 'Inter', sans-serif;
+            
+            /* Metrics */
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+            --nav-height: 90px;
+            --radius-xl: 32px;
+            --radius-lg: 24px;
+            --radius-md: 16px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        
+        /* --- GLOBAL RESET --- */
+        *, *::before, *::after {
+            margin: 0; padding: 0; box-sizing: border-box; outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            font-family: var(--font-main);
-            min-height: 100vh;
-            padding-bottom: 90px;
-            overflow-y: scroll;
-            overscroll-behavior-y: none;
+            background-color: var(--bg-void);
+            background-image: var(--bg-noise), radial-gradient(circle at 50% 0%, rgba(0, 194, 255, 0.05), transparent 60%);
+            color: var(--text-main); font-family: var(--font-b);
+            overflow-x: hidden; min-height: 100vh;
+            padding-bottom: 140px; /* Space for Nav */
         }
 
-        /* TEXTURE OVERLAY */
-        body::before {
-            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-            opacity: 0.8; pointer-events: none; z-index: -1;
+        /* --- CANVAS FX --- */
+        #profile-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 400px;
+            z-index: -1; opacity: 0.6; mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
         }
 
-        ::-webkit-scrollbar { width: 0px; }
+        /* --- GLASS COMPONENTS --- */
+        .glass-panel {
+            background: var(--glass-base);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+            position: relative; overflow: hidden;
+        }
 
-        /* =========================================
-           2. HEADER AREA
-           ========================================= */
-        .profile-header {
-            padding: 15px 20px;
+        /* --- HEADER ACTIONS --- */
+        .top-bar {
+            position: sticky; top: 0; z-index: 100;
+            padding: calc(15px + var(--safe-top)) 20px 15px;
             display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; z-index: 50;
-            background: linear-gradient(180deg, rgba(5,5,5,0.95) 0%, rgba(5,5,5,0) 100%);
-            backdrop-filter: blur(5px);
-        }
-
-        .header-title {
-            font-family: var(--font-display); font-weight: 800; font-size: 1rem;
-            letter-spacing: 2px; color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-
-        .icon-btn {
-            font-size: 1.4rem; color: #fff; cursor: pointer;
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; transition: 0.2s;
-        }
-        .icon-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.1); }
-
-        /* =========================================
-           3. PROFILE CARD
-           ========================================= */
-        .profile-card {
-            padding: 20px; text-align: center;
-            display: flex; flex-direction: column; align-items: center;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .avatar-wrap { position: relative; margin-bottom: 15px; }
-
-        .avatar-xl {
-            width: 100px; height: 100px; border-radius: 50%;
-            background: #141416; border: 2px solid var(--accent);
-            display: flex; justify-content: center; align-items: center;
-            font-family: var(--font-display); font-weight: 800;
-            font-size: 2.5rem; color: #fff; object-fit: cover;
-            box-shadow: 0 0 40px var(--accent-glow);
+            background: linear-gradient(180deg, rgba(0,0,0,0.8), transparent);
         }
         
-        .avatar-edit-btn {
-            position: absolute; bottom: 0; right: 0;
-            width: 30px; height: 30px; background: #fff; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            color: #000; font-size: 1rem; cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        .top-btn {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--glass-mid); border: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; cursor: pointer; transition: 0.2s;
+        }
+        .top-btn:active { transform: scale(0.9); background: var(--glass-high); }
+        .top-btn.danger { color: var(--neon-red); border-color: rgba(255, 46, 46, 0.3); }
+
+        /* --- PROFILE HERO SECTION --- */
+        .hero {
+            padding: 20px; display: flex; flex-direction: column; align-items: center;
+            text-align: center; position: relative; z-index: 1;
         }
 
-        .user-name {
-            font-family: var(--font-display); font-size: 1.2rem;
-            font-weight: 700; margin-bottom: 4px; color: #fff;
-        }
-
-        .user-tag {
-            font-size: 0.8rem; color: var(--accent); font-weight: 600; 
-            margin-bottom: 10px; font-family: monospace;
-        }
-
-        .user-bio {
-            font-size: 0.85rem; color: var(--text-secondary); max-width: 320px;
-            line-height: 1.4; margin-bottom: 20px;
-        }
-
-        /* =========================================
-           4. STATS
-           ========================================= */
-        .stats-row {
-            display: flex; justify-content: space-around;
-            padding: 15px; margin: 0 15px 25px;
-            background: rgba(255,255,255,0.03); border-radius: var(--radius-M);
-            border: 1px solid var(--border);
-        }
-
-        .stat-item { text-align: center; }
-        .stat-val { 
-            font-family: var(--font-display); font-size: 1.1rem; 
-            font-weight: 800; display: block; margin-bottom: 2px; 
-        }
-        .stat-lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
-
-        /* =========================================
-           5. TABS & GRID
-           ========================================= */
-        .grid-tabs {
-            display: flex; justify-content: center; gap: 40px;
-            border-bottom: 1px solid var(--border); margin-bottom: 2px;
-        }
-        .g-tab {
-            padding: 12px 10px; color: var(--text-muted); cursor: pointer;
-            font-size: 1.2rem; position: relative; transition: 0.3s;
-        }
-        .g-tab.active { color: #fff; }
-        .g-tab.active::after {
-            content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; 
-            height: 2px; background: var(--accent); box-shadow: 0 -2px 10px var(--accent);
-        }
-
-        .posts-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 2px; padding-bottom: 20px; min-height: 200px;
-        }
-
-        .grid-item {
-            aspect-ratio: 1; background: #111; position: relative; 
-            overflow: hidden; cursor: pointer; transition: 0.2s;
-        }
-        .grid-item:active { opacity: 0.7; }
-
-        .grid-img { width: 100%; height: 100%; object-fit: cover; }
-        .grid-txt {
-            width: 100%; height: 100%; display: flex; align-items: center; 
-            justify-content: center; padding: 5px; text-align: center;
-            font-size: 0.6rem; color: #888; background: #0e0e10; line-height: 1.2;
-        }
-
-        /* =========================================
-           6. FULLSCREEN POST MODAL (LIGHTBOX)
-           ========================================= */
-        .lightbox {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 5000; display: none;
-            flex-direction: column; opacity: 0; transition: opacity 0.3s;
-        }
-        .lightbox.open { display: flex; opacity: 1; }
-
-        .lb-header {
-            padding: 15px; display: flex; justify-content: space-between; 
-            align-items: center; background: rgba(0,0,0,0.5);
-        }
-        .lb-back { color: #fff; font-size: 1.5rem; cursor: pointer; }
-        .lb-title { font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 1px; }
-        
-        .lb-content {
-            flex: 1; display: flex; align-items: center; justify-content: center;
-            padding: 20px; overflow-y: auto; flex-direction: column;
-        }
-        .lb-img {
-            max-width: 100%; max-height: 60vh; border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5); margin-bottom: 20px;
-        }
-        .lb-caption {
-            width: 100%; font-size: 1rem; line-height: 1.5; color: #ddd;
-            background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333;
+        /* Avatar Container */
+        .avatar-wrap {
+            position: relative; width: 110px; height: 110px; margin-bottom: 20px;
         }
         
-        .lb-footer {
-            padding: 20px; border-top: 1px solid #222;
-            display: flex; justify-content: center;
-        }
-        .btn-delete-post {
-            background: rgba(255, 51, 51, 0.1); color: var(--danger);
-            border: 1px solid var(--danger); padding: 12px 30px;
-            border-radius: 30px; font-weight: 700; cursor: pointer;
-            display: flex; align-items: center; gap: 8px;
-        }
-
-        /* =========================================
-           7. SETTINGS MODAL
-           ========================================= */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 4000; display: none;
-            justify-content: center; align-items: center; backdrop-filter: blur(8px);
-        }
-        .modal-overlay.open { display: flex; animation: zoomIn 0.2s; }
-
-        .settings-card {
-            background: var(--bg-card); width: 85%; max-width: 380px;
-            padding: 30px 20px; border-radius: var(--radius-L);
-            border: 1px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        .avatar {
+            width: 100%; height: 100%; border-radius: 50%;
+            background: linear-gradient(135deg, #222, #111);
+            border: 2px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-h); font-weight: 800; font-size: 32px; color: #fff;
+            overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             position: relative;
         }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
         
-        .set-head { text-align: center; font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 25px; }
-        
-        .inp-g { margin-bottom: 15px; }
-        .inp-l { display: block; font-size: 0.7rem; color: var(--text-gray); margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
-        .inp-f {
-            width: 100%; background: #000; border: 1px solid var(--border);
-            padding: 14px; border-radius: 12px; color: #fff; font-family: var(--font-main);
+        /* Edit Badge */
+        .edit-badge {
+            position: absolute; bottom: 0; right: 0;
+            width: 32px; height: 32px; background: var(--neon-blue);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: #000; border: 3px solid var(--bg-void); cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 194, 255, 0.4);
+            transition: 0.2s;
         }
-        .inp-f:focus { border-color: var(--accent); }
+        .edit-badge:active { transform: scale(0.9); }
 
+        /* User Info */
+        .username { font-family: var(--font-h); font-size: 24px; font-weight: 800; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; justify-content: center; }
+        .role-badge { font-size: 10px; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; vertical-align: middle; }
+        .role-badge.admin { background: #fff; color: #000; font-weight: 800; }
+        .role-badge.user { background: #333; color: #aaa; border: 1px solid #444; }
+
+        .bio { font-size: 13px; color: var(--text-sec); max-width: 300px; line-height: 1.5; margin-bottom: 20px; }
+
+        /* Level Bar */
+        .xp-container { width: 100%; max-width: 200px; margin-bottom: 20px; }
+        .xp-text { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-mut); margin-bottom: 5px; text-transform: uppercase; font-weight: 700; }
+        .xp-track { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+        .xp-fill { height: 100%; background: var(--neon-green); width: 45%; box-shadow: 0 0 10px var(--neon-green-glow); }
+
+        /* --- STATS GRID --- */
+        .stats-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+            width: 100%; max-width: 500px; margin: 0 auto 30px; padding: 0 20px;
+        }
+        
+        .stat-card {
+            background: var(--glass-base); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 15px 10px; text-align: center;
+            display: flex; flex-direction: column; gap: 5px;
+        }
+        
+        .stat-val { font-family: var(--font-h); font-size: 16px; font-weight: 800; color: #fff; }
+        .stat-val.money { color: var(--neon-green); }
+        .stat-lbl { font-size: 10px; color: var(--text-mut); text-transform: uppercase; font-weight: 600; }
+
+        /* --- TABS SYSTEM --- */
+        .tabs-wrap {
+            padding: 0 20px; margin-bottom: 20px;
+            position: sticky; top: 80px; z-index: 90; 
+        }
+        .tabs {
+            background: rgba(10,10,10,0.9); backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 16px;
+            padding: 5px; display: flex;
+        }
+        .tab {
+            flex: 1; text-align: center; padding: 12px; font-size: 12px;
+            font-weight: 600; color: var(--text-sec); cursor: pointer;
+            border-radius: 12px; transition: 0.3s;
+        }
+        .tab.active { background: rgba(255,255,255,0.1); color: #fff; font-weight: 800; }
+
+        /* --- CONTENT SECTIONS --- */
+        .content-area { padding: 0 20px; max-width: 600px; margin: 0 auto; min-height: 300px; }
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* HISTORY LIST */
+        .history-list { display: flex; flex-direction: column; gap: 12px; }
+        .h-item {
+            background: var(--glass-base); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .h-left { display: flex; gap: 12px; align-items: center; }
+        .h-icon {
+            width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.05);
+            display: flex; align-items: center; justify-content: center; font-size: 14px;
+        }
+        .h-info h4 { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+        .h-info p { font-size: 11px; color: var(--text-mut); }
+        
+        .h-right { text-align: right; }
+        .h-amount { font-family: var(--font-h); font-size: 13px; font-weight: 700; }
+        .h-amount.loss { color: var(--text-sec); }
+        .h-amount.win { color: var(--neon-green); text-shadow: 0 0 10px rgba(0,255,148,0.3); }
+        .h-status { font-size: 9px; text-transform: uppercase; font-weight: 700; margin-top: 2px; display: block; }
+        .h-status.pending { color: var(--neon-gold); }
+        .h-status.win { color: var(--neon-green); }
+        .h-status.loss { color: var(--neon-red); }
+
+        /* INVENTORY GRID */
+        .inv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .inv-item {
+            background: var(--glass-base); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 15px; text-align: center; aspect-ratio: 1;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: 0.2s; position: relative;
+        }
+        .inv-item:active { transform: scale(0.95); border-color: var(--neon-blue); }
+        .inv-img { font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
+        .inv-name { font-size: 10px; color: var(--text-sec); font-weight: 600; }
+        .inv-count { 
+            position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.1); 
+            font-size: 9px; padding: 2px 6px; border-radius: 4px; color: #fff;
+        }
+
+        /* SETTINGS LIST */
+        .set-list { display: flex; flex-direction: column; gap: 10px; }
+        .set-item {
+            background: var(--glass-base); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 18px; display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer;
+        }
+        .set-item:active { background: rgba(255,255,255,0.05); }
+        .set-left { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; }
+        .set-icon { color: var(--text-sec); }
+        .set-arrow { color: var(--text-mut); font-size: 12px; }
+
+        /* --- SKELETON LOADER --- */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+            background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .sk-text { height: 14px; width: 60%; margin-bottom: 6px; }
+        .sk-card { height: 70px; border-radius: 16px; }
+
+        /* --- BOTTOM NAV --- */
+        .nav-dock {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px; height: 75px;
+            background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(25px);
+            border-radius: 60px; border: 1px solid var(--glass-border);
+            display: flex; justify-content: space-evenly; align-items: center; z-index: 900;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; text-decoration: none; color: rgba(255,255,255,0.3); width: 60px; transition: 0.3s; }
+        .nav-item i { font-size: 22px; transition: 0.3s; }
+        .nav-item span { font-size: 9px; font-family: var(--font-h); font-weight: 700; text-transform: uppercase; opacity: 0; transform: translateY(10px); transition: 0.3s; }
+        .nav-item.active { color: #fff; }
+        .nav-item.active i { transform: translateY(-4px); text-shadow: 0 0 20px rgba(255,255,255,0.6); }
+        .nav-item.active span { opacity: 1; transform: translateY(0); }
+
+        /* --- MODALS --- */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 2000; display: none;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal {
+            width: 100%; max-width: 400px; background: #0A0A0A; border: 1px solid var(--glass-border);
+            border-radius: 30px; padding: 25px; box-shadow: 0 40px 80px rgba(0,0,0,0.8);
+            transform: translateY(20px); animation: slideUp 0.3s forwards;
+        }
+        @keyframes slideUp { to { transform: translateY(0); } }
+        
+        .m-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .m-title { font-family: var(--font-h); font-size: 18px; color: #fff; }
+        .inp {
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+            padding: 15px; border-radius: 14px; color: #fff; margin-bottom: 12px;
+            font-family: var(--font-b); font-size: 14px;
+        }
         .btn-main {
             width: 100%; padding: 16px; background: #fff; color: #000;
-            border: none; border-radius: 12px; font-weight: 800; text-transform: uppercase;
-            font-family: var(--font-display); cursor: pointer; margin-top: 10px;
-        }
-        
-        .btn-sec {
-            width: 100%; padding: 16px; background: transparent; color: var(--danger);
-            border: 1px solid var(--danger); border-radius: 12px; font-weight: 700;
-            margin-top: 10px; cursor: pointer;
+            border-radius: 14px; font-weight: 800; border: none;
+            cursor: pointer; text-transform: uppercase; margin-top: 10px; font-family: var(--font-h);
         }
 
-        .close-set { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; color: #555; background: none; border: none; cursor: pointer; }
-
-        /* =========================================
-           8. NAV & TOASTS
-           ========================================= */
-        .nav-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
-            background: var(--bg-nav); border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around; align-items: center;
-            z-index: 100; backdrop-filter: blur(10px);
+        /* --- TOAST --- */
+        #toast {
+            position: fixed; top: 120px; left: 50%; transform: translateX(-50%) translateY(-20px);
+            background: rgba(255,255,255,0.95); color: #000; padding: 12px 24px;
+            border-radius: 40px; font-family: var(--font-h); font-size: 12px; font-weight: 700;
+            z-index: 5000; opacity: 0; transition: 0.3s; pointer-events: none;
         }
-        .nav-icon { color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
-        .nav-icon.active { color: #fff; transform: scale(1.1); text-shadow: 0 0 15px rgba(255,255,255,0.3); }
-        .nav-fab {
-            width: 50px; height: 50px; background: var(--accent);
-            border-radius: 50%; display: flex; justify-content: center; align-items: center;
-            color: #000; font-size: 1.6rem; transform: translateY(-25%);
-            border: 4px solid var(--bg-body); box-shadow: 0 5px 20px var(--accent-glow); cursor: pointer;
-        }
-
-        .toast-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 6000; width: 90%; pointer-events: none; }
-        .toast { pointer-events: auto; background: #222; color: #fff; padding: 12px 16px; border-radius: 8px; border-left: 4px solid #fff; box-shadow: 0 10px 40px #000; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; animation: slideIn 0.3s; }
-        .toast.ok { border-left-color: var(--success); } .toast.err { border-left-color: var(--danger); }
-        
-        .hidden { display: none !important; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
     </style>
 </head>
 <body>
 
-    <div class="profile-header">
-        <div class="header-title">ПРОФИЛЬ</div>
-        <div class="icon-btn" onclick="app.openSettings()"><i class="ri-settings-4-line"></i></div>
+    <canvas id="profile-canvas"></canvas>
+    <div id="toast">Обновлено</div>
+
+    <div class="top-bar">
+        <a href="feed.html" class="top-btn"><i class="fa-solid fa-arrow-left"></i></a>
+        <div style="font-family:var(--font-h); font-weight:800;">PROFILE</div>
+        <div class="top-btn danger" onclick="App.auth.logout()"><i class="fa-solid fa-power-off"></i></div>
     </div>
 
-    <div class="profile-card">
+    <div class="hero">
         <div class="avatar-wrap">
-            <img id="p-ava-img" class="avatar-xl hidden">
-            <div id="p-ava-txt" class="avatar-xl">?</div>
-            <label class="avatar-edit-btn">
-                <i class="ri-camera-line"></i>
-                <input type="file" id="ava-upl" class="hidden" accept="image/*" onchange="app.uploadAvatar()">
+            <div class="avatar" id="pAvatar">?</div>
+            <label class="edit-badge" for="fileAvatar">
+                <i class="fa-solid fa-pen"></i>
+                <input type="file" id="fileAvatar" style="display:none;" accept="image/*" onchange="App.profile.uploadAvatar()">
             </label>
         </div>
-        <div class="user-name" id="p-name">...</div>
-        <div class="user-tag" id="p-tag">@...</div>
-        <div class="user-bio" id="p-bio">Загрузка данных...</div>
-    </div>
-
-    <div class="stats-row">
-        <div class="stat-box">
-            <span class="stat-num" id="stat-posts">0</span>
-            <span class="stat-label">Посты</span>
+        
+        <div class="username">
+            <span id="pName">Loading...</span>
+            <span class="role-badge user" id="pRole">USER</span>
         </div>
-        <div class="stat-box">
-            <span class="stat-num" id="stat-karma">0</span>
-            <span class="stat-label">Карма</span>
-        </div>
-        <div class="stat-box">
-            <span class="stat-num" id="stat-comms">0</span>
-            <span class="stat-label">Комменты</span>
-        </div>
-    </div>
+        
+        <p class="bio" id="pBio" onclick="App.ui.openModal('bioModal')">Нажмите, чтобы добавить био...</p>
 
-    <div class="grid-tabs">
-        <div class="g-tab active" id="tab-my" onclick="app.switchGrid('my')"><i class="ri-grid-fill"></i></div>
-        <div class="g-tab" id="tab-liked" onclick="app.switchGrid('liked')"><i class="ri-heart-3-line"></i></div>
-    </div>
-
-    <div class="posts-grid" id="grid">
-        </div>
-
-    <div class="modal-overlay" id="set-modal">
-        <div class="settings-card">
-            <button class="close-set" onclick="app.closeSettings()">&times;</button>
-            <div class="set-head">РЕДАКТИРОВАТЬ</div>
-            
-            <div class="inp-g">
-                <label class="inp-l">Имя профиля</label>
-                <input type="text" id="in-name" class="inp-f" placeholder="Твое имя">
+        <div class="xp-container">
+            <div class="xp-text">
+                <span>Lvl 5</span>
+                <span>450 / 1000 XP</span>
             </div>
-            <div class="inp-g">
-                <label class="inp-l">Никнейм</label>
-                <input type="text" id="in-user" class="inp-f" placeholder="username_123">
-            </div>
-            <div class="inp-g">
-                <label class="inp-l">Био</label>
-                <input type="text" id="in-bio" class="inp-f" placeholder="Пару слов о себе">
-            </div>
-
-            <button class="btn-main" onclick="app.saveProfile()">Сохранить</button>
-            <button class="btn-sec" onclick="app.logout()">Выйти</button>
+            <div class="xp-track"><div class="xp-fill"></div></div>
         </div>
     </div>
 
-    <div class="lightbox" id="lightbox">
-        <div class="lb-header">
-            <div class="lb-back" onclick="app.closeLightbox()"><i class="ri-arrow-left-line"></i></div>
-            <div class="lb-title">ПРОСМОТР</div>
-            <div style="width:24px"></div>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-val money" id="pBal">0.00</span>
+            <span class="stat-lbl">Баланс (x2)</span>
         </div>
-        <div class="lb-content">
-            <img id="lb-img" class="lb-img hidden">
-            <div id="lb-txt" class="lb-caption"></div>
+        <div class="stat-card">
+            <span class="stat-val" id="pBets">0</span>
+            <span class="stat-lbl">Ставок</span>
         </div>
-        <div class="lb-footer" id="lb-footer">
-            </div>
+        <div class="stat-card">
+            <span class="stat-val" style="color:var(--neon-blue)">42%</span>
+            <span class="stat-lbl">Win Rate</span>
+        </div>
     </div>
 
-    <nav class="nav-bar">
-        <div class="nav-icon" onclick="window.location.href='feed.html'"><i class="ri-home-5-line"></i></div>
-        <div class="nav-icon"><i class="ri-search-2-line"></i></div>
-        <div class="nav-fab" onclick="window.location.href='feed.html'"><i class="ri-add-line"></i></div>
-        <div class="nav-icon"><i class="ri-heart-3-line"></i></div>
-        <div class="nav-icon active"><i class="ri-user-3-fill"></i></div>
+    <div class="tabs-wrap">
+        <div class="tabs">
+            <div class="tab active" onclick="App.ui.switchTab('history', this)">История</div>
+            <div class="tab" onclick="App.ui.switchTab('inventory', this)">Инвентарь</div>
+            <div class="tab" onclick="App.ui.switchTab('settings', this)">Настройки</div>
+        </div>
+    </div>
+
+    <div class="content-area">
+        
+        <div id="tab-history" class="section active">
+            <div class="history-list" id="historyList">
+                <div class="h-item skeleton"><div class="sk-card" style="width:100%"></div></div>
+                <div class="h-item skeleton"><div class="sk-card" style="width:100%"></div></div>
+            </div>
+        </div>
+
+        <div id="tab-inventory" class="section">
+            <div class="inv-grid">
+                <div class="inv-item">
+                    <div class="inv-img">🏆</div>
+                    <div class="inv-name">Early Access</div>
+                </div>
+                <div class="inv-item">
+                    <div class="inv-img">🧢</div>
+                    <div class="inv-name">Cap</div>
+                    <div class="inv-count">x2</div>
+                </div>
+                <div class="inv-item" style="opacity:0.5; border-style:dashed;">
+                    <div class="inv-img">🔒</div>
+                    <div class="inv-name">Locked</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-settings" class="section">
+            <div class="set-list">
+                <div class="set-item" onclick="App.ui.toast('В разработке')">
+                    <div class="set-left"><i class="fa-regular fa-bell set-icon"></i> Уведомления</div>
+                    <i class="fa-solid fa-chevron-right set-arrow"></i>
+                </div>
+                <div class="set-item" onclick="App.ui.toast('В разработке')">
+                    <div class="set-left"><i class="fa-solid fa-shield-halved set-icon"></i> Безопасность</div>
+                    <i class="fa-solid fa-chevron-right set-arrow"></i>
+                </div>
+                <div class="set-item" onclick="window.open('https://t.me/stavoksupport')">
+                    <div class="set-left"><i class="fa-solid fa-headset set-icon"></i> Поддержка</div>
+                    <i class="fa-solid fa-arrow-up-right-from-square set-arrow"></i>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <nav class="nav-dock">
+        <a href="news.html" class="nav-item"><i class="fa-solid fa-bolt"></i><span>News</span></a>
+        <a href="feed.html" class="nav-item"><i class="fa-solid fa-layer-group"></i><span>Feed</span></a>
+        <a href="profile.html" class="nav-item active"><i class="fa-solid fa-user-astronaut"></i><span>Profile</span></a>
     </nav>
 
-    <div class="toast-box" id="toast-box"></div>
+    <div class="overlay" id="bioModal">
+        <div class="modal">
+            <div class="m-head">
+                <h3 class="m-title">Изменить Био</h3>
+                <i class="fa-solid fa-xmark" style="color:#666; cursor:pointer;" onclick="App.ui.closeModal()"></i>
+            </div>
+            <textarea id="bioInput" class="inp" style="height:100px; resize:none;" placeholder="Напишите о себе..."></textarea>
+            <button class="btn-main" onclick="App.profile.saveBio()">Сохранить</button>
+        </div>
+    </div>
 
     <script>
-        /**
-         * MEMASIK 2.0 PROFILE SYSTEM
-         * v6.0 Ultimate Edition
-         */
         const CFG = {
-            URL: 'https://hrrzpftxpafnavlljhum.supabase.co',
-            // ADMIN KEY: Используем для гарантии работы всех функций
-            KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycnpwZnR4cGFmbmF2bGxqaHVtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTI3NzU3NiwiZXhwIjoyMDg0ODUzNTc2fQ.5Dt7zXjEF_lVc5Komkg11A4Jy97rxI94PF3UE40X1RE',
-            BUCKET_AVATAR: 'avatars'
+            url: 'https://cmoeirxugwapvvcdkwjs.supabase.co',
+            key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE'
         };
 
-        class ProfileApp {
-            constructor() {
-                this.sb = window.supabase.createClient(CFG.URL, CFG.KEY);
-                this.user = null;
-                this.postsCache = {};
-                this.currentTab = 'my';
-                this.init();
-            }
+        const App = {
+            sb: null, user: null, profile: null,
 
-            async init() {
+            init: async function() {
                 try {
-                    // 1. Auth
-                    const { data: { user } } = await this.sb.auth.getUser();
-                    if (!user) { window.location.href = 'index.html'; return; }
-                    this.user = user;
+                    this.fx.start();
+                    this.sb = window.supabase.createClient(CFG.url, CFG.key);
+                    const { data: { session } } = await this.sb.auth.getSession();
+                    if(!session) return window.location.href = 'login.html';
+                    this.user = session.user;
 
-                    // 2. Fetch Data
-                    await Promise.all([
-                        this.fetchProfile(),
-                        this.fetchStats(),
-                        this.fetchGrid('my')
-                    ]);
-                } catch(e) {
-                    this.toast(e.message, 'err');
+                    await this.profile.load();
+                    await this.history.load();
+                    this.realtime();
+
+                } catch(e) { console.error(e); }
+            },
+
+            auth: {
+                logout: async () => {
+                    await App.sb.auth.signOut();
+                    window.location.href = 'login.html';
                 }
-            }
+            },
 
-            // === 1. PROFILE INFO ===
-            async fetchProfile() {
-                const { data } = await this.sb.from('profiles').select('*').eq('id', this.user.id).single();
-                
-                if (data) {
-                    // Fallback Name Logic
-                    const name = data.display_name || data.username || this.user.email.split('@')[0];
-                    const tag = data.username ? `@${data.username}` : '@anon';
+            profile: {
+                load: async function() {
+                    let { data } = await App.sb.from('users').select('*').eq('id', App.user.id).single();
+                    if(!data) {
+                        // Auto-create if missing
+                        const np = { id: App.user.id, username: App.user.email.split('@')[0], email: App.user.email, role: 'user', balance: 0 };
+                        await App.sb.from('users').insert([np]);
+                        data = np;
+                    }
+                    App.profile = data;
+                    this.render(data);
+                },
+
+                render: function(p) {
+                    document.getElementById('pName').innerText = p.username;
+                    document.getElementById('pBal').innerText = parseFloat(p.balance).toFixed(2);
+                    document.getElementById('pBio').innerText = p.bio || 'Нажмите, чтобы добавить статус...';
                     
-                    document.getElementById('p-name').innerText = name;
-                    document.getElementById('p-tag').innerText = tag;
-                    document.getElementById('p-bio').innerText = data.bio || "Описание отсутствует";
-                    
-                    if (data.avatar_url) {
-                        const img = document.getElementById('p-ava-img');
-                        img.src = data.avatar_url;
-                        img.classList.remove('hidden');
-                        document.getElementById('p-ava-txt').classList.add('hidden');
+                    // Avatar
+                    const ava = document.getElementById('pAvatar');
+                    if(p.avatar_url) {
+                        ava.innerHTML = `<img src="${p.avatar_url}" alt="ava">`;
                     } else {
-                        document.getElementById('p-ava-txt').innerText = name[0].toUpperCase();
+                        ava.innerText = p.username[0].toUpperCase();
                     }
 
-                    // Fill inputs
-                    document.getElementById('in-name').value = data.display_name || "";
-                    document.getElementById('in-user').value = data.username || "";
-                    document.getElementById('in-bio').value = data.bio || "";
+                    // Role
+                    const badge = document.getElementById('pRole');
+                    badge.innerText = p.role;
+                    badge.className = `role-badge ${p.role}`;
+                },
+
+                saveBio: async function() {
+                    const txt = document.getElementById('bioInput').value;
+                    if(!txt) return;
+                    await App.sb.from('users').update({ bio: txt }).eq('id', App.user.id);
+                    App.ui.closeModal();
+                    App.ui.toast('Био обновлено');
+                },
+
+                uploadAvatar: async function() {
+                    const file = document.getElementById('fileAvatar').files[0];
+                    if(!file) return;
+
+                    // Convert to Base64 (Simple method)
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const base64 = e.target.result;
+                        await App.sb.from('users').update({ avatar_url: base64 }).eq('id', App.user.id);
+                        App.ui.toast('Аватар обновлен');
+                    };
+                    reader.readAsDataURL(file);
                 }
-            }
+            },
 
-            // === 2. REAL STATS ===
-            async fetchStats() {
-                // My Posts
-                const { count: pCnt } = await this.sb.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', this.user.id);
-                document.getElementById('stat-posts').innerText = pCnt || 0;
+            history: {
+                load: async function() {
+                    const el = document.getElementById('historyList');
+                    // Check if bets table exists via try/catch query
+                    try {
+                        const { data, error } = await App.sb
+                            .from('bets')
+                            .select('*')
+                            .eq('user_id', App.user.id)
+                            .order('created_at', { ascending: false });
 
-                // My Comments
-                const { count: cCnt } = await this.sb.from('comments').select('*', { count: 'exact', head: true }).eq('user_id', this.user.id);
-                document.getElementById('stat-comms').innerText = cCnt || 0;
+                        el.innerHTML = '';
+                        
+                        if(error || !data || data.length === 0) {
+                            el.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">История пуста</div>';
+                            return;
+                        }
 
-                // Karma (Total Likes Received)
-                // Сначала берем ID всех моих постов
-                const { data: myPosts } = await this.sb.from('posts').select('id').eq('user_id', this.user.id);
-                if (myPosts && myPosts.length > 0) {
-                    const pids = myPosts.map(p => p.id);
-                    const { count: karma } = await this.sb.from('likes').select('*', { count: 'exact', head: true }).in('post_id', pids);
-                    document.getElementById('stat-karma').innerText = karma || 0;
-                }
-            }
+                        // Bets Count
+                        document.getElementById('pBets').innerText = data.length;
 
-            // === 3. GRID SYSTEM ===
-            async switchGrid(type) {
-                this.currentTab = type;
-                document.querySelectorAll('.g-tab').forEach(t => t.classList.remove('active'));
-                
-                if(type === 'my') document.getElementById('tab-my').classList.add('active');
-                else document.getElementById('tab-liked').classList.add('active');
-                
-                await this.fetchGrid(type);
-            }
+                        data.forEach(bet => {
+                            const statusColor = bet.status === 'win' ? 'win' : (bet.status === 'loss' ? 'loss' : 'pending');
+                            const icon = bet.status === 'win' ? 'check' : (bet.status === 'loss' ? 'xmark' : 'clock');
+                            
+                            const html = `
+                            <div class="h-item">
+                                <div class="h-left">
+                                    <div class="h-icon" style="color:var(--neon-${statusColor === 'win' ? 'green' : (statusColor === 'loss' ? 'red' : 'gold')})">
+                                        <i class="fa-solid fa-${icon}"></i>
+                                    </div>
+                                    <div class="h-info">
+                                        <h4>${bet.outcome || 'Ставка'}</h4>
+                                        <p>Коэф: x${bet.coefficient}</p>
+                                    </div>
+                                </div>
+                                <div class="h-right">
+                                    <div class="h-amount ${statusColor}">${parseFloat(bet.amount).toFixed(2)}</div>
+                                    <span class="h-status ${statusColor}">${bet.status}</span>
+                                </div>
+                            </div>`;
+                            el.innerHTML += html;
+                        });
 
-            async fetchGrid(type) {
-                const grid = document.getElementById('grid');
-                grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:50px;color:#444">Загрузка...</div>';
-
-                let posts = [];
-
-                if (type === 'my') {
-                    // Fetch my posts
-                    const { data } = await this.sb.from('posts').select('*').eq('user_id', this.user.id).order('created_at', {ascending: false});
-                    posts = data || [];
-                } else {
-                    // Fetch liked posts
-                    // 1. Get post_ids from likes
-                    const { data: likes } = await this.sb.from('likes').select('post_id').eq('user_id', this.user.id);
-                    if (likes && likes.length > 0) {
-                        const pids = likes.map(l => l.post_id);
-                        const { data } = await this.sb.from('posts').select('*').in('id', pids).order('created_at', {ascending: false});
-                        posts = data || [];
+                    } catch(e) {
+                        el.innerHTML = '<div style="text-align:center; color:#555;">История недоступна</div>';
                     }
                 }
+            },
 
-                if (posts.length === 0) {
-                    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:50px;color:#444">Здесь пусто</div>';
-                    return;
+            ui: {
+                switchTab: (name, btn) => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                    document.getElementById(`tab-${name}`).classList.add('active');
+                },
+                openModal: (id) => {
+                    // Pre-fill bio
+                    if(id === 'bioModal') document.getElementById('bioInput').value = App.profile.bio || '';
+                    document.getElementById(id).style.display = 'flex';
+                },
+                closeModal: () => document.querySelectorAll('.overlay').forEach(e => e.style.display = 'none'),
+                toast: (m) => {
+                    const t = document.getElementById('toast');
+                    t.innerText = m; t.classList.add('show');
+                    setTimeout(() => t.classList.remove('show'), 2000);
                 }
+            },
 
-                grid.innerHTML = '';
-                posts.forEach(p => {
-                    this.postsCache[p.id] = p; // Cache for lightbox
-                    const item = document.createElement('div');
-                    item.className = 'grid-item';
-                    item.onclick = () => this.openLightbox(p.id);
+            realtime: function() {
+                this.sb.channel('profile')
+                    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${this.user.id}` }, 
+                    p => { App.profile.render(p.new); })
+                    .subscribe();
+            },
 
-                    if (p.image_url) {
-                        item.innerHTML = `<img src="${p.image_url}" class="grid-img">`;
-                    } else {
-                        const txt = p.content.length > 40 ? p.content.slice(0,40)+'...' : p.content;
-                        item.innerHTML = `<div class="grid-txt">${this.esc(txt)}</div>`;
+            fx: {
+                start: function() {
+                    const c = document.getElementById('profile-canvas');
+                    const ctx = c.getContext('2d');
+                    let w, h, orbs = [];
+                    const resize = () => { w = window.innerWidth; h = 400; c.width = w; c.height = h; };
+                    window.addEventListener('resize', resize); resize();
+
+                    for(let i=0; i<5; i++) {
+                        orbs.push({
+                            x: Math.random()*w, y: Math.random()*h, r: Math.random()*100+50,
+                            dx: (Math.random()-0.5)*0.3, dy: (Math.random()-0.5)*0.3,
+                            col: i%2==0 ? 'rgba(0,255,148,0.05)' : 'rgba(0,194,255,0.05)'
+                        });
                     }
-                    grid.appendChild(item);
-                });
-            }
 
-            // === 4. ACTIONS (UPLOAD, EDIT) ===
-            async uploadAvatar() {
-                const file = document.getElementById('ava-upl').files[0];
-                if (!file) return;
-
-                this.toast("Загрузка фото...", "ok");
-
-                try {
-                    const ext = file.name.split('.').pop();
-                    const path = `${this.user.id}_${Date.now()}.${ext}`;
-                    
-                    const { error } = await this.sb.storage.from(CFG.BUCKET_AVATAR).upload(path, file);
-                    if (error) throw error;
-
-                    const { data: { publicUrl } } = this.sb.storage.from(CFG.BUCKET_AVATAR).getPublicUrl(path);
-
-                    await this.sb.from('profiles').update({ avatar_url: publicUrl }).eq('id', this.user.id);
-                    
-                    this.toast("Аватар обновлен", "ok");
-                    this.fetchProfile();
-                } catch(e) {
-                    this.toast("Ошибка загрузки", "err");
+                    function anim() {
+                        ctx.clearRect(0,0,w,h);
+                        orbs.forEach(p => {
+                            p.x+=p.dx; p.y+=p.dy;
+                            if(p.x<-p.r || p.x>w+p.r) p.dx*=-1;
+                            if(p.y<-p.r || p.y>h+p.r) p.dy*=-1;
+                            const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+                            g.addColorStop(0, p.col); g.addColorStop(1, 'transparent');
+                            ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+                        });
+                        requestAnimationFrame(anim);
+                    }
+                    anim();
                 }
             }
+        };
 
-            async saveProfile() {
-                const name = document.getElementById('in-name').value.trim();
-                const username = document.getElementById('in-user').value.trim();
-                const bio = document.getElementById('in-bio').value.trim();
-
-                try {
-                    const { error } = await this.sb.from('profiles').update({
-                        display_name: name,
-                        username: username,
-                        bio: bio
-                    }).eq('id', this.user.id);
-
-                    if (error) throw error;
-                    
-                    this.toast("Профиль сохранен", "ok");
-                    this.closeSettings();
-                    this.fetchProfile();
-                } catch(e) {
-                    this.toast("Ошибка сохранения", "err");
-                }
-            }
-
-            async logout() {
-                await this.sb.auth.signOut();
-                window.location.href = 'index.html';
-            }
-
-            // === 5. LIGHTBOX & DELETE ===
-            openLightbox(pid) {
-                const p = this.postsCache[pid];
-                if (!p) return;
-                
-                const box = document.getElementById('lightbox');
-                const img = document.getElementById('lb-img');
-                const txt = document.getElementById('lb-txt');
-                const footer = document.getElementById('lb-footer');
-
-                if (p.image_url) {
-                    img.src = p.image_url;
-                    img.classList.remove('hidden');
-                } else {
-                    img.classList.add('hidden');
-                }
-                
-                txt.innerText = p.content;
-
-                // Show delete button ONLY if it's my post
-                if (p.user_id === this.user.id) {
-                    footer.innerHTML = `<button class="btn-delete-post" onclick="app.deletePost('${pid}')"><i class="ri-delete-bin-line"></i> Удалить пост</button>`;
-                } else {
-                    footer.innerHTML = '';
-                }
-
-                box.classList.add('open');
-            }
-
-            closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
-
-            async deletePost(pid) {
-                if(!confirm("Удалить этот пост?")) return;
-                
-                const { error } = await this.sb.from('posts').delete().eq('id', pid);
-                if (error) return this.toast("Ошибка удаления", "err");
-                
-                this.toast("Удалено", "ok");
-                this.closeLightbox();
-                this.fetchGrid(this.currentTab);
-                this.fetchStats();
-            }
-
-            // === UTILS ===
-            openSettings() { document.getElementById('set-modal').classList.add('open'); }
-            closeSettings() { document.getElementById('set-modal').classList.remove('open'); }
-            
-            toast(msg, type) {
-                const b = document.getElementById('toast-box');
-                const t = document.createElement('div');
-                t.className = `toast ${type}`;
-                let icon = type==='ok'?'<i class="ri-check-line"></i>':'<i class="ri-error-warning-line"></i>';
-                t.innerHTML = `${icon} <span>${msg}</span>`;
-                b.appendChild(t);
-                setTimeout(()=> t.remove(), 3000);
-            }
-            esc(t) { return t ? t.replace(/</g, "&lt;") : ""; }
-        }
-
-        const app = new ProfileApp();
+        window.onload = () => App.init();
     </script>
 </body>
 </html>
