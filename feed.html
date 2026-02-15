@@ -4,293 +4,439 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#000000">
-    <title>STAVOK.NET | Liquid Feed</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>STAVOK.NET | Titanium Feed</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Unbounded:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Unbounded:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,500&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            /* Palette: Deep Dark & Liquid Accents */
-            --bg-deep: #000000;
-            --bg-mesh: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                       radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                       radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            /* --- COLOR PALETTE --- */
+            --bg-void: #000000;
+            --bg-deep: #050505;
             
-            /* Glass Variables */
-            --glass-surface: rgba(20, 20, 20, 0.65); /* 65% opacity for visibility */
-            --glass-border: rgba(255, 255, 255, 0.12);
-            --glass-shine: rgba(255, 255, 255, 0.07);
-            --glass-blur: 25px;
+            /* Glass System (Layered) */
+            --glass-base: rgba(18, 18, 18, 0.65);
+            --glass-high: rgba(30, 30, 30, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-border-light: rgba(255, 255, 255, 0.15);
+            --glass-shine: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
             
-            /* Brand Colors */
-            --brand-green: #00FF94;
-            --brand-gold: #FFD700;
-            --brand-white: #FFFFFF;
-            --brand-danger: #FF3B30;
+            /* Brand Accents */
+            --neon-green: #00FF94;
+            --neon-green-dim: rgba(0, 255, 148, 0.1);
+            --neon-red: #FF2E2E;
+            --neon-gold: #FFD700;
+            --neon-blue: #00C2FF;
             
             /* Typography */
             --font-display: 'Unbounded', sans-serif;
             --font-body: 'Inter', sans-serif;
             
-            /* Spacing */
-            --safe-area-top: env(safe-area-inset-top);
-            --safe-area-bottom: env(safe-area-inset-bottom);
+            /* UI Dimensions */
             --nav-height: 90px;
+            --header-height: 70px;
+            --radius-L: 32px;
+            --radius-M: 20px;
+            --radius-S: 12px;
+            
+            /* Device Safe Areas */
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+            
+            /* Animation Curves */
+            --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* --- RESET & BASE --- */
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        
+        /* --- GLOBAL RESET --- */
+        *, *::before, *::after {
+            margin: 0; padding: 0; box-sizing: border-box;
+            outline: none; -webkit-tap-highlight-color: transparent;
+        }
+
+        html { font-size: 16px; scroll-behavior: smooth; }
+
         body {
-            background-color: var(--bg-deep);
-            color: var(--brand-white);
+            background-color: var(--bg-void);
+            color: #FFFFFF;
             font-family: var(--font-body);
             overflow-x: hidden;
             min-height: 100vh;
-            /* Mesh Gradient Background */
+            /* Grid Noise Background */
             background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            padding-bottom: calc(var(--nav-height) + 20px);
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            padding-bottom: calc(var(--nav-height) + 40px);
         }
 
-        /* --- LIQUID GLASS UTILITIES --- */
-        .glass-panel {
-            background: var(--glass-surface);
-            backdrop-filter: blur(var(--glass-blur));
-            -webkit-backdrop-filter: blur(var(--glass-blur));
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-            position: relative;
-            overflow: hidden;
+        /* --- BACKGROUND FX --- */
+        #liquid-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; opacity: 0.5; pointer-events: none;
         }
         
-        /* The "Liquid" Shine */
-        .glass-panel::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
-            background: linear-gradient(180deg, var(--glass-shine) 0%, transparent 100%);
-            pointer-events: none; opacity: 0.5;
+        .vignette {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 60%, #000 100%);
+            z-index: -1; pointer-events: none;
         }
 
-        .text-gradient {
-            background: linear-gradient(135deg, #fff 0%, #aaa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        /* --- UTILITY CLASSES --- */
+        .glass-panel {
+            background: var(--glass-base);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
+            position: relative; overflow: hidden;
         }
+        
+        .text-grad-gold {
+            background: linear-gradient(135deg, #FFD700 0%, #FFAA00 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        
+        .h-font { font-family: var(--font-display); }
+        .b-font { font-family: var(--font-body); }
 
-        /* --- HEADER (FLOATING CAPSULE) --- */
-        .header {
+        /* --- HEADER (FLOATING) --- */
+        .header-wrap {
             position: sticky; top: 20px; z-index: 100;
-            width: calc(100% - 40px); max-width: 600px; margin: 0 auto;
-            border-radius: 50px;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 20px;
-            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            width: calc(100% - 30px); max-width: 600px; margin: 0 auto;
         }
 
-        .brand-container {
+        .header-pill {
+            border-radius: 50px; height: 64px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 8px 0 20px;
+            transition: transform 0.3s var(--ease-smooth);
+        }
+
+        .brand-block {
             display: flex; align-items: center; gap: 12px; text-decoration: none;
         }
-        .logo-box {
-            width: 40px; height: 40px; background: #fff; color: #000;
-            border-radius: 8px; /* Square with slight radius */
+        .logo-sq {
+            width: 36px; height: 36px; background: #fff; color: #000;
+            border-radius: 8px; /* Square */
             display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-display); font-weight: 900; font-size: 20px;
-            font-style: italic; transform: skewX(-12deg);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            font-family: var(--font-display); font-weight: 900; font-size: 18px;
+            font-style: italic; transform: skewX(-10deg);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
         }
-        .brand-text {
+        .logo-txt {
             font-family: var(--font-display); font-weight: 800; font-size: 16px;
             color: #fff; letter-spacing: -0.5px; font-style: italic;
         }
 
-        /* Wallet & Profile */
-        .profile-pill {
+        /* Profile Pill */
+        .profile-chip {
             background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border);
-            border-radius: 40px; padding: 6px 6px 6px 16px;
-            display: flex; align-items: center; gap: 10px; cursor: pointer;
+            border-radius: 40px; padding: 4px 4px 4px 16px;
+            display: flex; align-items: center; gap: 12px; cursor: pointer;
+            transition: border-color 0.2s;
         }
-        .user-balance {
-            font-family: var(--font-display); font-size: 12px; font-weight: 700;
-            color: var(--brand-green);
-        }
-        .user-avatar {
-            width: 34px; height: 34px; border-radius: 50%;
-            background: linear-gradient(135deg, #333, #111);
-            border: 1px solid rgba(255,255,255,0.2);
-            display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-display); font-size: 12px; font-weight: 800; color: #fff;
-        }
-
-        /* --- HEADER BANNER (ADMIN CONTROLLED) --- */
-        .header-banner {
-            width: calc(100% - 40px); max-width: 600px; margin: 15px auto 0;
-            background: linear-gradient(90deg, rgba(255,215,0,0.15) 0%, rgba(0,0,0,0) 100%);
-            border: 1px solid rgba(255,215,0,0.3); border-radius: 20px;
-            padding: 15px 20px; display: none; /* Hidden by default */
-            align-items: center; gap: 15px; animation: slideDown 0.5s ease;
-        }
-        .hb-icon { color: var(--brand-gold); font-size: 20px; animation: pulse 2s infinite; }
-        .hb-content h4 { font-family: var(--font-display); font-size: 12px; margin-bottom: 2px; color: #fff; }
-        .hb-content p { font-size: 10px; color: rgba(255,255,255,0.7); }
+        .profile-chip:active { border-color: var(--glass-border-light); transform: scale(0.98); }
         
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .balance-val {
+            font-family: var(--font-display); font-size: 13px; font-weight: 700;
+            color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green-dim);
+        }
+        
+        .avatar-circle {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: linear-gradient(135deg, #222, #111);
+            border: 2px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-display); font-weight: 800; font-size: 14px;
+            color: #fff; overflow: hidden; position: relative;
+        }
+        /* Avatar Status Dot */
+        .avatar-circle::after {
+            content: ''; position: absolute; bottom: 2px; right: 2px;
+            width: 8px; height: 8px; background: var(--neon-green);
+            border-radius: 50%; border: 2px solid #000;
+        }
 
-        /* --- FEED STREAM --- */
-        .feed-container {
+        /* --- HEADER BANNER (ADMIN CONTROLLABLE) --- */
+        .banner-wrapper {
+            width: calc(100% - 30px); max-width: 600px; margin: 15px auto 0;
+            display: none; /* Toggled by JS */
+            animation: slideDown 0.4s var(--ease-elastic);
+        }
+        .head-banner {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.15) 0%, rgba(0,0,0,0.6) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 20px;
+            padding: 16px; display: flex; align-items: center; gap: 16px;
+            position: relative; backdrop-filter: blur(10px);
+        }
+        .hb-icon { font-size: 24px; color: var(--neon-gold); animation: pulse 2s infinite; }
+        .hb-content h4 { font-family: var(--font-display); font-size: 13px; margin-bottom: 2px; color: #fff; }
+        .hb-content p { font-size: 11px; color: rgba(255,255,255,0.7); }
+        
+        /* Admin Edit Controls for Banner */
+        .banner-admin-controls {
+            position: absolute; right: 10px; top: 10px; display: flex; gap: 8px;
+        }
+        .ba-btn {
+            width: 24px; height: 24px; background: rgba(0,0,0,0.5); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: #fff; cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
+        }
+        .ba-btn:hover { background: #fff; color: #000; }
+
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- FEED CONTAINER --- */
+        .feed-main {
             width: 100%; max-width: 600px; margin: 0 auto;
-            padding: 20px; display: flex; flex-direction: column; gap: 24px;
+            padding: 20px 15px; display: flex; flex-direction: column; gap: 24px;
         }
 
-        /* --- POST CARD DESIGN --- */
+        /* --- PINNED POSTS SECTION --- */
+        .pinned-section {
+            display: flex; flex-direction: column; gap: 15px; margin-bottom: 10px;
+        }
+        .pin-label {
+            font-size: 10px; text-transform: uppercase; color: var(--neon-gold);
+            font-weight: 800; letter-spacing: 1px; display: flex; align-items: center; gap: 6px;
+            padding-left: 10px;
+        }
+
+        /* --- POST CARD ARCHITECTURE --- */
         .post {
-            border-radius: 24px; padding: 24px;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border-radius: var(--radius-M); padding: 24px;
+            transition: transform 0.2s; position: relative;
         }
-        .post:active { transform: scale(0.98); }
+        .post::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        }
+        
+        /* Admin Post Style (Dominant) */
+        .post.admin {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* User Post Style (Compact) */
+        .post.user {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 16px 20px;
+            border-radius: 24px 24px 24px 4px; /* Chat bubble style */
+            width: 90%; align-self: flex-start;
+        }
 
-        .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-        .ph-left { display: flex; gap: 12px; align-items: center; }
-        .ph-avatar {
-            width: 44px; height: 44px; border-radius: 14px;
-            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+        /* Post Header */
+        .ph { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+        .ph-user { display: flex; gap: 12px; align-items: center; }
+        .ph-av {
+            width: 40px; height: 40px; border-radius: 12px; background: #252525;
             display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-display); font-weight: 700; color: #fff; font-size: 16px;
+            font-family: var(--font-display); font-weight: 700; font-size: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .ph-info h4 { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 2px; }
-        .ph-info span { font-size: 11px; color: #888; }
-        
-        .badge { 
-            font-size: 9px; padding: 3px 8px; border-radius: 6px; 
-            text-transform: uppercase; font-weight: 800; font-family: var(--font-display); margin-left: 6px; 
-        }
-        .badge.admin { background: #fff; color: #000; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
-        .badge.user { border: 1px solid var(--glass-border); color: #888; }
+        .ph-meta h4 { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 2px; font-family: var(--font-display); }
+        .ph-meta span { font-size: 11px; color: #888; }
 
-        .post-content { font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.85); margin-bottom: 15px; }
-        .post-image { width: 100%; border-radius: 16px; margin-top: 10px; border: 1px solid var(--glass-border); }
+        /* Badges */
+        .badge { font-size: 9px; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-family: var(--font-display); text-transform: uppercase; margin-left: 6px; }
+        .badge.admin { background: #fff; color: #000; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        .badge.user { border: 1px solid #444; color: #888; }
 
-        /* --- WIDGET: MATCH BETTING --- */
-        .widget-match {
-            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%);
-            border: 1px solid var(--glass-border); border-radius: 20px;
-            padding: 16px; margin-top: 15px;
+        /* Admin Controls on Post */
+        .post-admin-menu {
+            position: absolute; top: 15px; right: 15px;
+            display: flex; gap: 8px; opacity: 0; transition: 0.3s;
         }
-        .wm-header { display: flex; justify-content: space-between; margin-bottom: 15px; opacity: 0.7; }
-        .wm-teams { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .wm-team { text-align: center; width: 35%; font-family: var(--font-display); font-size: 12px; font-weight: 700; }
-        .wm-vs { font-family: var(--font-display); font-size: 24px; font-weight: 900; color: var(--brand-green); text-shadow: 0 0 15px rgba(0,255,148,0.4); }
+        .post:hover .post-admin-menu { opacity: 1; }
+        .pam-btn {
+            width: 28px; height: 28px; background: #333; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; color: #fff; cursor: pointer; border: 1px solid #555;
+        }
+        .pam-btn:hover { background: #fff; color: #000; }
+        .pam-btn.pin.active { background: var(--neon-gold); color: #000; border-color: var(--neon-gold); }
+
+        /* Content */
+        .p-body { font-size: 14px; line-height: 1.6; color: #e0e0e0; white-space: pre-wrap; }
+        .p-img { width: 100%; border-radius: 16px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.1); }
+
+        /* --- WIDGET: LIVE MATCH (Betting) --- */
+        .w-match {
+            margin-top: 15px; border-radius: 20px; overflow: hidden;
+            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.2) 100%);
+            border: 1px solid rgba(255,255,255,0.1); position: relative;
+        }
+        /* Live Indicator */
+        .wm-live-badge {
+            position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+            background: rgba(255,0,0,0.2); border: 1px solid var(--neon-red);
+            color: var(--neon-red); font-size: 9px; font-weight: 800; padding: 2px 8px;
+            border-radius: 10px; animation: pulseRed 2s infinite; pointer-events: none;
+        }
+        @keyframes pulseRed { 0% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .wm-main { padding: 20px; }
+        .wm-teams { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .wm-t { text-align: center; width: 35%; }
+        .wm-t-name { font-family: var(--font-display); font-size: 12px; font-weight: 700; margin-top: 8px; display: block; }
+        .wm-icon { font-size: 24px; color: #ccc; }
         
-        .wm-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-        .btn-bet {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
-            border-radius: 12px; padding: 10px; text-align: center; cursor: pointer;
-            transition: 0.2s;
+        .wm-score-box { text-align: center; }
+        .wm-score { font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--white); text-shadow: 0 0 20px rgba(255,255,255,0.3); }
+        .wm-time { font-size: 10px; color: var(--neon-green); font-weight: 600; background: rgba(0,255,148,0.1); padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
+
+        .wm-bets {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px;
+            background: rgba(255,255,255,0.1); margin-top: 15px;
         }
-        .btn-bet:active { background: rgba(0, 255, 148, 0.2); border-color: var(--brand-green); }
-        .bb-coef { display: block; font-family: var(--font-display); font-weight: 800; font-size: 14px; color: #fff; }
-        .bb-label { font-size: 9px; text-transform: uppercase; color: #888; letter-spacing: 1px; }
+        .bet-btn {
+            background: rgba(20,20,20,0.6); padding: 12px; text-align: center; cursor: pointer; transition: 0.2s;
+        }
+        .bet-btn:hover { background: rgba(255,255,255,0.05); }
+        .bet-btn:active { background: rgba(0,255,148,0.1); }
+        .bk { font-family: var(--font-display); font-weight: 700; font-size: 14px; color: #fff; display: block; }
+        .bl { font-size: 9px; text-transform: uppercase; color: #888; }
+
+        /* Admin Controls for Match */
+        .wm-admin {
+            border-top: 1px solid rgba(255,255,255,0.1); padding: 10px;
+            display: flex; justify-content: center; gap: 10px; background: rgba(0,0,0,0.3);
+        }
+        .wm-admin-btn {
+            font-size: 10px; background: #333; color: #fff; padding: 6px 12px;
+            border-radius: 6px; cursor: pointer; border: 1px solid #555;
+        }
 
         /* --- WIDGET: AD PROMO --- */
-        .widget-ad {
-            margin-top: 15px; padding: 20px; border-radius: 20px;
-            background: linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(0,0,0,0.8) 100%);
-            border: 1px solid var(--brand-gold); position: relative; overflow: hidden;
+        .w-ad {
+            margin-top: 15px; border-radius: 20px; padding: 20px;
+            background: radial-gradient(circle at 100% 0%, rgba(255,215,0,0.2) 0%, rgba(20,20,20,0.8) 100%);
+            border: 1px solid var(--neon-gold); position: relative; overflow: hidden;
         }
-        .wa-badge { position: absolute; top: 10px; right: 10px; color: var(--brand-gold); border: 1px solid var(--brand-gold); font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 800; }
-        .wa-title { font-family: var(--font-display); font-size: 18px; color: var(--brand-gold); margin-bottom: 5px; }
-        .wa-btn { display: inline-block; background: var(--brand-gold); color: #000; padding: 10px 20px; border-radius: 30px; font-weight: 800; font-size: 12px; margin-top: 15px; cursor: pointer; font-family: var(--font-display); }
+        .wa-ribbon {
+            position: absolute; top: 12px; right: -30px; transform: rotate(45deg);
+            background: var(--neon-gold); color: #000; font-size: 9px; font-weight: 800;
+            padding: 4px 30px; box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        }
+        .wa-btn {
+            display: inline-block; background: var(--neon-gold); color: #000;
+            padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 12px;
+            margin-top: 15px; cursor: pointer; text-transform: uppercase;
+            font-family: var(--font-display); box-shadow: 0 0 20px rgba(255,215,0,0.4);
+        }
 
-        /* --- POST FOOTER --- */
-        .post-footer { border-top: 1px solid var(--glass-border); margin-top: 20px; padding-top: 15px; display: flex; gap: 20px; }
-        .act-btn { display: flex; align-items: center; gap: 8px; color: #888; font-size: 13px; cursor: pointer; transition: 0.2s; }
-        .act-btn:hover { color: #fff; }
-        .act-btn.liked { color: var(--brand-danger); }
+        /* --- FOOTER ACTIONS --- */
+        .p-foot { display: flex; gap: 20px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 15px; padding-top: 15px; }
+        .act { display: flex; align-items: center; gap: 6px; color: #777; font-size: 13px; cursor: pointer; transition: 0.2s; }
+        .act:hover { color: #fff; }
+        .act.liked { color: var(--neon-red); }
 
-        /* --- BOTTOM NAVIGATION (Floating) --- */
+        /* --- BOTTOM NAV (FLOATING) --- */
         .nav-float {
-            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 400px; height: 75px; border-radius: 60px;
-            display: flex; justify-content: space-evenly; align-items: center;
-            z-index: 1000; background: rgba(10, 10, 10, 0.95);
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px; height: 72px;
+            background: rgba(15, 15, 15, 0.9);
             backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 60px;
+            display: flex; justify-content: space-evenly; align-items: center;
+            z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
-        .nav-item { text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 5px; color: rgba(255,255,255,0.4); width: 60px; transition: 0.3s; }
-        .nav-item i { font-size: 22px; transition: 0.3s; }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; text-decoration: none;
+            color: rgba(255,255,255,0.4); width: 60px; transition: 0.3s;
+        }
+        .nav-item i { font-size: 22px; margin-bottom: 4px; transition: 0.3s; }
         .nav-item span { font-size: 9px; font-family: var(--font-display); font-weight: 700; text-transform: uppercase; opacity: 0; transform: translateY(10px); transition: 0.3s; }
         
         .nav-item.active { color: #fff; }
-        .nav-item.active i { transform: translateY(-4px); text-shadow: 0 0 15px rgba(255,255,255,0.5); }
+        .nav-item.active i { transform: translateY(-2px); text-shadow: 0 0 15px rgba(255,255,255,0.6); }
         .nav-item.active span { opacity: 1; transform: translateY(0); }
 
-        /* --- FAB (ADMIN ONLY) --- */
+        /* --- FAB (ADMIN) --- */
         .fab {
             position: fixed; bottom: 120px; right: 25px;
-            width: 60px; height: 60px; border-radius: 20px;
+            width: 56px; height: 56px; border-radius: 18px;
             background: #fff; color: #000;
-            display: none; /* JS will show this if admin */
+            display: none; /* JS toggles this */
             align-items: center; justify-content: center;
-            font-size: 24px; box-shadow: 0 0 30px rgba(255,255,255,0.3);
-            z-index: 900; cursor: pointer; transform: rotate(0deg); transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            font-size: 22px; box-shadow: 0 0 30px rgba(255,255,255,0.25);
+            z-index: 900; cursor: pointer; transform: rotate(0deg); transition: 0.4s var(--ease-elastic);
         }
-        .fab:hover { transform: scale(1.1) rotate(90deg); }
+        .fab:hover { transform: scale(1.1); }
+        .fab.user-mode {
+            /* User FAB style (smaller, less prominent) */
+            width: 48px; height: 48px; background: rgba(255,255,255,0.1); color: #fff; 
+            border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px);
+            bottom: 115px; right: 30px;
+        }
 
-        /* --- MODALS & OVERLAYS --- */
+        /* --- MODALS --- */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
             z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px;
         }
         .modal {
             width: 100%; max-width: 420px; background: #0A0A0A;
-            border: 1px solid var(--glass-border); border-radius: 32px; padding: 30px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.6); position: relative;
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 30px; padding: 25px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.8); position: relative;
+            transform: translateY(20px); animation: slideUp 0.3s forwards;
         }
-        .m-title { font-family: var(--font-display); font-size: 20px; margin-bottom: 25px; color: #fff; }
+        @keyframes slideUp { to { transform: translateY(0); } }
+
+        .m-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .m-title { font-family: var(--font-display); font-size: 18px; color: #fff; }
         
         .inp {
-            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
-            padding: 16px; border-radius: 16px; color: #fff; margin-bottom: 12px;
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            padding: 16px; border-radius: 14px; color: #fff; margin-bottom: 12px;
             font-family: var(--font-body); font-size: 14px;
         }
         .inp:focus { border-color: #fff; background: rgba(255,255,255,0.08); }
         
-        .btn-main {
-            width: 100%; padding: 18px; background: #fff; color: #000;
-            border-radius: 16px; font-family: var(--font-display); font-weight: 800; border: none;
-            cursor: pointer; text-transform: uppercase; margin-top: 15px;
-            transition: 0.2s;
+        .btn-prime {
+            width: 100%; padding: 16px; background: #fff; color: #000;
+            border-radius: 14px; font-weight: 800; border: none;
+            cursor: pointer; text-transform: uppercase; margin-top: 10px;
+            font-family: var(--font-display); transition: 0.2s;
         }
-        .btn-main:active { transform: scale(0.97); }
+        .btn-prime:active { transform: scale(0.97); }
 
-        /* Admin Specific Inputs */
+        /* Admin Box inside Modal */
         .admin-box {
-            border-top: 1px solid var(--glass-border); margin-top: 20px; padding-top: 15px;
+            background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.1);
+            padding: 15px; border-radius: 14px; margin-top: 15px;
         }
-        .lbl-admin { color: var(--brand-danger); font-size: 10px; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 10px; }
+        .lbl-admin { color: var(--neon-gold); font-size: 10px; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 10px; }
 
-        /* --- TOAST & LOADER --- */
+        /* --- TOAST --- */
         #toast {
-            position: fixed; top: 120px; left: 50%; transform: translateX(-50%) translateY(-20px);
-            background: rgba(255,255,255,0.9); color: #000; padding: 12px 24px; border-radius: 40px;
+            position: fixed; top: 110px; left: 50%; transform: translateX(-50%) translateY(-20px);
+            background: rgba(255,255,255,0.95); color: #000; padding: 12px 24px; border-radius: 40px;
             font-family: var(--font-display); font-size: 12px; font-weight: 700; z-index: 5000;
-            opacity: 0; transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            pointer-events: none;
+            opacity: 0; transition: 0.4s var(--ease-elastic); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            pointer-events: none; text-align: center;
         }
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-        .loader {
-            width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1);
+        /* --- LOADER --- */
+        .loader-wrap { text-align: center; padding: 40px; }
+        .spinner {
+            width: 30px; height: 30px; border: 2px solid rgba(255,255,255,0.1);
             border-top-color: #fff; border-radius: 50%;
-            animation: spin 0.8s linear infinite; margin: 100px auto;
+            animation: spin 0.8s linear infinite; margin: 0 auto;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -298,34 +444,49 @@
 </head>
 <body>
 
-    <canvas id="liquid-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; opacity:0.4; pointer-events:none;"></canvas>
+    <canvas id="liquid-canvas"></canvas>
+    <div class="vignette"></div>
 
-    <div id="toast">Действие выполнено</div>
+    <div id="toast">Уведомление</div>
 
-    <header class="header glass-panel">
-        <a href="feed.html" class="brand-container">
-            <div class="logo-box">S</div>
-            <div class="brand-text">STAVOK</div>
-        </a>
-        <div class="profile-pill" onclick="window.location.href='profile.html'">
-            <span class="user-balance" id="headerBal">...</span>
-            <div class="user-avatar" id="headerAva">?</div>
-        </div>
-    </header>
+    <div class="header-wrap">
+        <header class="header-pill glass-panel">
+            <a href="feed.html" class="brand-block">
+                <div class="logo-sq">S</div>
+                <div class="logo-txt">STAVOK</div>
+            </a>
+            <div class="profile-chip" onclick="window.location.href='profile.html'">
+                <span class="balance-val" id="headBal">...</span>
+                <div class="avatar-circle">
+                    <span id="headAva">?</span>
+                </div>
+            </div>
+        </header>
+    </div>
 
-    <div class="header-banner" id="adminBanner">
-        <i class="fa-solid fa-bolt hb-icon"></i>
-        <div class="hb-content">
-            <h4>БОНУС X2 АКТИВЕН</h4>
-            <p>Успей пополнить баланс до полуночи</p>
+    <div class="banner-wrapper" id="bannerWrap">
+        <div class="head-banner">
+            <i class="fa-solid fa-bolt hb-icon"></i>
+            <div class="hb-content">
+                <h4 id="bannerTitle">BONUS X2 ACTIVE</h4>
+                <p id="bannerText">Limited time offer for new players.</p>
+            </div>
+            <div class="banner-admin-controls" id="bannerAdminControls" style="display:none;">
+                <div class="ba-btn" onclick="App.admin.editBanner()"><i class="fa-solid fa-pen"></i></div>
+                <div class="ba-btn" onclick="App.admin.toggleBanner(false)"><i class="fa-solid fa-times"></i></div>
+            </div>
         </div>
     </div>
 
-    <main class="feed-container" id="feedStream">
-        <div class="loader"></div>
+    <main class="feed-main">
+        <div id="pinnedFeed" class="pinned-section"></div>
+        
+        <div id="feedStream">
+            <div class="loader-wrap"><div class="spinner"></div></div>
+        </div>
     </main>
 
-    <div class="fab" id="adminFab" onclick="App.ui.openModal('createModal')">
+    <div class="fab" id="mainFab" onclick="App.ui.openCreate()">
         <i class="fa-solid fa-plus"></i>
     </div>
 
@@ -346,51 +507,72 @@
 
     <div class="overlay" id="createModal">
         <div class="modal">
-            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                <h3 class="m-title">Создать пост</h3>
+            <div class="m-head">
+                <h3 class="m-title" id="createTitle">New Post</h3>
                 <i class="fa-solid fa-xmark" style="color:#666; cursor:pointer;" onclick="App.ui.closeModal()"></i>
             </div>
             
-            <input type="text" id="pTitle" class="inp" placeholder="Заголовок">
-            <textarea id="pContent" class="inp" style="height:100px; resize:none;" placeholder="Ваш текст..."></textarea>
-            <input type="text" id="pImg" class="inp" placeholder="Ссылка на фото (опционально)">
+            <div id="userPostForm">
+                <textarea id="uContent" class="inp" style="height:80px; resize:none;" placeholder="Поделитесь мыслями..."></textarea>
+            </div>
 
-            <div class="admin-box">
-                <span class="lbl-admin">ADMIN TOOLS</span>
-                <select id="pType" class="inp" style="cursor:pointer;">
-                    <option value="text">Обычный пост</option>
-                    <option value="match">Матч (Ставки)</option>
-                    <option value="ad">Реклама (Баннер)</option>
-                </select>
+            <div id="adminPostForm" style="display:none;">
+                <input type="text" id="pTitle" class="inp" placeholder="Заголовок (Важно)">
+                <textarea id="pContent" class="inp" style="height:100px; resize:none;" placeholder="Текст поста..."></textarea>
+                <input type="text" id="pImg" class="inp" placeholder="URL Картинки (опц.)">
 
-                <div id="matchFields" style="display:none; gap:10px;">
-                    <input type="text" id="mT1" class="inp" placeholder="Команда 1">
-                    <input type="text" id="mT2" class="inp" placeholder="Команда 2">
-                </div>
+                <div class="admin-box">
+                    <span class="lbl-admin">ADMIN CONFIG</span>
+                    <select id="pType" class="inp" style="cursor:pointer;">
+                        <option value="text">Стандартный пост</option>
+                        <option value="match">Матч (Ставки)</option>
+                        <option value="ad">Реклама (Баннер)</option>
+                    </select>
 
-                <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
-                    <input type="checkbox" id="toggleBanner">
-                    <label for="toggleBanner" style="font-size:12px; color:#aaa;">Включить баннер под хедером</label>
+                    <div id="matchFields" style="display:none;">
+                        <input type="text" id="mT1" class="inp" placeholder="Команда 1">
+                        <input type="text" id="mT2" class="inp" placeholder="Команда 2">
+                    </div>
                 </div>
             </div>
 
-            <button class="btn-main" onclick="App.posts.create()">Опубликовать</button>
+            <button class="btn-prime" onclick="App.posts.submit()">Опубликовать</button>
         </div>
     </div>
 
     <div class="overlay" id="betModal">
         <div class="modal">
-            <h3 class="m-title" style="text-align:center;">Сделать ставку</h3>
-            
+            <h3 class="m-title" style="text-align:center;">Ставка</h3>
             <div style="background:rgba(255,255,255,0.05); border-radius:16px; padding:20px; text-align:center; margin-bottom:20px;">
-                <div style="font-size:10px; color:#888; text-transform:uppercase;">ВЫБОР</div>
-                <div id="betOutcome" style="font-family:var(--font-display); font-size:22px; font-weight:700; margin:5px 0;">-</div>
-                <div id="betCoef" style="color:var(--brand-green); font-weight:800; font-size:16px;">-</div>
+                <div style="font-size:10px; color:#888; text-transform:uppercase;">ИСХОД</div>
+                <div id="betOutcome" style="font-family:var(--font-display); font-size:20px; font-weight:700; color:#fff; margin:5px 0;">-</div>
+                <div id="betCoef" style="color:var(--neon-green); font-weight:800; font-size:16px;">-</div>
             </div>
+            <input type="number" id="betAmount" class="inp" placeholder="Сумма (x2)" style="text-align:center; font-size:18px; font-weight:700;">
+            <button class="btn-prime" style="background:var(--neon-green); color:#000;" onclick="App.bets.confirm()">Поставить</button>
+        </div>
+    </div>
 
-            <input type="number" id="betAmount" class="inp" placeholder="Сумма ставки (x2)" style="text-align:center; font-weight:700; font-size:18px;">
-            <button class="btn-main" style="background:var(--brand-green); color:#000;" onclick="App.bets.confirm()">Подтвердить</button>
-            <p onclick="App.ui.closeModal()" style="text-align:center; margin-top:15px; font-size:12px; color:#666; cursor:pointer;">Отмена</p>
+    <div class="overlay" id="editMatchModal">
+        <div class="modal">
+            <h3 class="m-title">Управление Матчем</h3>
+            <div class="admin-box">
+                <input type="text" id="emScore" class="inp" placeholder="Счет (например 1:0)">
+                <input type="text" id="emTime" class="inp" placeholder="Время (например 45')">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="btn-prime" onclick="App.admin.saveMatchUpdate()">Обновить</button>
+                <button class="btn-prime" style="background:#333; color:#fff;" onclick="App.admin.settleBetPrompt()">Расчет</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="editBannerModal">
+        <div class="modal">
+            <h3 class="m-title">Хедер Баннер</h3>
+            <input type="text" id="ebTitle" class="inp" placeholder="Заголовок">
+            <input type="text" id="ebText" class="inp" placeholder="Подпись">
+            <button class="btn-prime" onclick="App.admin.saveBanner()">Сохранить</button>
         </div>
     </div>
 
@@ -401,11 +583,13 @@
         };
 
         const App = {
-            sb: null, user: null, profile: null, tempBet: null,
+            sb: null, user: null, profile: null,
+            tempBet: null, editingPostId: null,
 
+            // --- INIT ---
             init: async function() {
                 try {
-                    this.fx.start(); // Start background canvas
+                    this.fx.start();
                     this.sb = window.supabase.createClient(CFG.url, CFG.key);
                     
                     const { data: { session } } = await this.sb.auth.getSession();
@@ -413,12 +597,11 @@
                     this.user = session.user;
 
                     await Promise.all([this.loadProfile(), this.posts.load()]);
-                    
                     this.listeners();
                     this.realtime();
+                    this.admin.initBanner();
                 } catch(e) {
-                    console.error(e);
-                    document.getElementById('feedStream').innerHTML = `<div style="text-align:center; color:#555; margin-top:50px;">Ошибка подключения</div>`;
+                    console.error("Init Error", e);
                 }
             },
 
@@ -426,14 +609,18 @@
                 const { data } = await this.sb.from('users').select('*').eq('id', this.user.id).single();
                 if(data) {
                     this.profile = data;
-                    document.getElementById('headerBal').innerText = parseFloat(data.balance).toFixed(2);
-                    document.getElementById('headerAva').innerText = (data.username || '?')[0].toUpperCase();
+                    document.getElementById('headBal').innerText = parseFloat(data.balance).toFixed(2) + ' x2';
+                    document.getElementById('headAva').innerText = (data.username || '?')[0].toUpperCase();
                     
+                    // Admin UI Setup
+                    const fab = document.getElementById('mainFab');
                     if(data.role === 'admin') {
-                        document.getElementById('adminFab').style.display = 'flex';
-                    }
-                    if(localStorage.getItem('showBanner') === 'true') {
-                        document.getElementById('adminBanner').style.display = 'flex';
+                        fab.style.display = 'flex'; // Admin style (Default)
+                        document.getElementById('bannerAdminControls').style.display = 'flex';
+                    } else {
+                        fab.classList.add('user-mode');
+                        fab.style.display = 'flex'; // User style
+                        fab.innerHTML = '<i class="fa-solid fa-pen"></i>';
                     }
                 }
             },
@@ -441,9 +628,10 @@
             // --- POSTS ---
             posts: {
                 load: async function() {
-                    const stream = document.getElementById('feedStream');
+                    const mainFeed = document.getElementById('feedStream');
+                    const pinnedFeed = document.getElementById('pinnedFeed');
+                    
                     try {
-                        // FIXED: Explicit relationship definition 'users:author_id'
                         const { data, error } = await App.sb
                             .from('posts')
                             .select('*, users:author_id(username, role, avatar_url)')
@@ -451,107 +639,160 @@
 
                         if(error) throw error;
 
-                        stream.innerHTML = '';
+                        mainFeed.innerHTML = '';
+                        pinnedFeed.innerHTML = '';
+                        
                         if(!data || data.length === 0) {
-                            stream.innerHTML = '<div style="text-align:center; color:#555; margin-top:50px;">Лента пуста</div>';
+                            mainFeed.innerHTML = '<div style="text-align:center; color:#555; margin-top:50px;">Лента пуста</div>';
                             return;
                         }
 
-                        data.forEach(p => stream.innerHTML += this.template(p));
+                        data.forEach(p => {
+                            const html = this.template(p);
+                            if(p.content.includes('|PINNED|')) {
+                                pinnedFeed.innerHTML += html;
+                            } else {
+                                mainFeed.innerHTML += html;
+                            }
+                        });
                     } catch(e) {
-                        console.warn("Feed Load Error:", e.message);
-                        stream.innerHTML = `<div style="text-align:center; color:#666; margin-top:50px;">Постов нет или ошибка доступа<br><small>${e.message}</small></div>`;
+                        mainFeed.innerHTML = `<div style="text-align:center; color:#666;">Ошибка: ${e.message}</div>`;
                     }
                 },
 
                 template: function(p) {
-                    const u = p.users || { username: 'Unknown', role: 'user' };
-                    const isMatch = p.content.includes('|VS|');
-                    const isAd = p.content.includes('|AD|');
-                    const badge = u.role === 'admin' ? '<span class="badge admin">ADMIN</span>' : '<span class="badge user">USER</span>';
+                    const u = p.users || { username: 'Anon', role: 'user' };
+                    const isAdminPost = u.role === 'admin';
+                    const isPinned = p.content.includes('|PINNED|');
+                    const cleanContent = p.content.replace('|PINNED|', '');
                     
-                    let body = `<div class="post-content">${p.content}</div>`;
+                    // Parse special content types
+                    const isMatch = cleanContent.includes('|VS|') && isAdminPost;
+                    const isAd = cleanContent.includes('|AD|') && isAdminPost;
+                    const isLive = cleanContent.includes('|LIVE|'); // Live score data
+                    
+                    let body = `<div class="p-body">${cleanContent}</div>`;
+                    let postClass = isAdminPost ? 'post glass-panel admin' : 'post glass-panel user';
+                    let pinBadge = isPinned ? `<div class="pin-label"><i class="fa-solid fa-thumbtack"></i> ЗАКРЕПЛЕНО</div>` : '';
 
-                    // Match Template
+                    // --- MATCH TEMPLATE ---
                     if(isMatch) {
-                        const [t1, t2] = p.content.split('|VS|');
+                        // Format: Team1|VS|Team2|SCORE|TIME
+                        const parts = cleanContent.split('|VS|');
+                        const t1 = parts[0];
+                        // Parsing score if exists (appended by admin update)
+                        let t2_raw = parts[1] || 'Opponent';
+                        let score = '0 : 0';
+                        let time = 'PRE-MATCH';
+                        
+                        if(t2_raw.includes('|SC|')) {
+                            const scoreParts = t2_raw.split('|SC|');
+                            t2_raw = scoreParts[0];
+                            const meta = scoreParts[1].split('|TM|');
+                            score = meta[0];
+                            time = meta[1] || 'LIVE';
+                        }
+
                         body = `
-                        <div class="widget-match">
-                            <div class="wm-header"><span style="font-size:10px;">LIVE MATCH</span><span style="color:#f00; font-size:10px;">● LIVE</span></div>
-                            <div class="wm-teams">
-                                <div class="wm-team">${t1}</div>
-                                <div class="wm-vs">VS</div>
-                                <div class="wm-team">${t2}</div>
-                            </div>
-                            <div class="wm-grid">
-                                <div class="btn-bet" onclick="App.bets.open('${t1}', 1.85)"><span class="bb-coef">1.85</span><span class="bb-label">WIN 1</span></div>
-                                <div class="btn-bet" onclick="App.bets.open('Ничья', 3.30)"><span class="bb-coef">3.30</span><span class="bb-label">DRAW</span></div>
-                                <div class="btn-bet" onclick="App.bets.open('${t2}', 2.10)"><span class="bb-coef">2.10</span><span class="bb-label">WIN 2</span></div>
+                        <div class="w-match" id="match-${p.id}">
+                            <div class="wm-live-badge">LIVE</div>
+                            <div class="wm-main">
+                                <div class="wm-score-box">
+                                    <div class="wm-score">${score}</div>
+                                    <div class="wm-time">${time}</div>
+                                </div>
+                                <div class="wm-teams">
+                                    <div class="wm-t"><span class="wm-t-name">${t1}</span></div>
+                                    <div class="wm-t"><span class="wm-t-name">${t2_raw}</span></div>
+                                </div>
+                                <div class="wm-bets">
+                                    <div class="bet-btn" onclick="App.bets.open('${t1}', 1.85)"><span class="bk">1.85</span><span class="bl">P1</span></div>
+                                    <div class="bet-btn" onclick="App.bets.open('Ничья', 3.30)"><span class="bk">3.30</span><span class="bl">X</span></div>
+                                    <div class="bet-btn" onclick="App.bets.open('${t2_raw}', 2.10)"><span class="bk">2.10</span><span class="bl">P2</span></div>
+                                </div>
+                                ${App.profile.role === 'admin' ? 
+                                    `<div class="wm-admin">
+                                        <div class="wm-admin-btn" onclick="App.admin.editMatch('${p.id}')">Управление</div>
+                                     </div>` : ''}
                             </div>
                         </div>`;
                     }
-                    // Ad Template
+                    // --- AD TEMPLATE ---
                     else if(isAd) {
-                        const parts = p.content.split('|AD|'); // |AD|Title|Text
-                        const info = parts[1] ? parts[1].split('|') : ['Promo', 'Details'];
+                        const parts = cleanContent.split('|AD|');
+                        const meta = parts[1] ? parts[1].split('|') : ['Promo', 'Text'];
                         body = `
-                        <div class="widget-ad">
-                            <span class="wa-badge">PROMO</span>
-                            <h3 class="wa-title">${info[0]}</h3>
-                            <p style="font-size:12px; color:#ccc;">${info[1] || ''}</p>
-                            <div class="wa-btn">ПОДРОБНЕЕ</div>
+                        <div class="w-ad">
+                            <div class="wa-ribbon">PROMO</div>
+                            <h3 style="font-family:var(--font-display); font-size:18px; color:#fff;">${meta[0]}</h3>
+                            <p style="font-size:12px; color:#ccc; margin-top:5px;">${meta[1]}</p>
+                            <div class="wa-btn">Открыть</div>
                         </div>`;
                     }
-                    // Image Template
+                    // --- IMAGE ---
                     else if(p.image_url) {
-                        body += `<img src="${p.image_url}" class="post-image" loading="lazy">`;
+                        body += `<img src="${p.image_url}" class="p-img" loading="lazy">`;
+                    }
+
+                    // Admin Menu (Pin/Delete)
+                    let adminMenu = '';
+                    if(App.profile.role === 'admin') {
+                        adminMenu = `
+                        <div class="post-admin-menu">
+                            <div class="pam-btn pin ${isPinned?'active':''}" onclick="App.admin.togglePin('${p.id}', ${!isPinned})"><i class="fa-solid fa-thumbtack"></i></div>
+                            <div class="pam-btn" onclick="App.admin.deletePost('${p.id}')"><i class="fa-solid fa-trash"></i></div>
+                        </div>`;
                     }
 
                     return `
-                    <div class="post glass-panel">
-                        <div class="post-header">
-                            <div class="ph-left">
-                                <div class="ph-avatar">${u.username[0].toUpperCase()}</div>
-                                <div class="ph-info">
-                                    <h4>${u.username} ${badge}</h4>
+                    ${pinBadge}
+                    <div class="${postClass}" id="post-${p.id}">
+                        ${adminMenu}
+                        <div class="ph">
+                            <div class="ph-user">
+                                <div class="ph-av">${u.username[0].toUpperCase()}</div>
+                                <div class="ph-meta">
+                                    <h4>${u.username} <span class="badge ${u.role}">${u.role}</span></h4>
                                     <span>Только что</span>
                                 </div>
                             </div>
-                            <i class="fa-solid fa-ellipsis" style="color:#555;"></i>
                         </div>
-                        ${!isMatch && !isAd ? `<h4 style="font-family:var(--font-display); font-size:16px; margin-bottom:10px;">${p.title}</h4>` : ''}
+                        ${!isMatch && !isAd && p.title ? `<h4 style="font-family:var(--font-display); font-size:16px; margin-bottom:10px;">${p.title}</h4>` : ''}
                         ${body}
-                        <div class="post-footer">
-                            <div class="act-btn"><i class="fa-regular fa-heart"></i> Лайк</div>
-                            <div class="act-btn"><i class="fa-regular fa-comment"></i> Коммент</div>
+                        <div class="p-foot">
+                            <div class="act"><i class="fa-regular fa-heart"></i> Лайк</div>
+                            <div class="act"><i class="fa-regular fa-comment"></i> Коммент</div>
                         </div>
                     </div>`;
                 },
 
-                create: async function() {
-                    const title = document.getElementById('pTitle').value;
-                    let content = document.getElementById('pContent').value;
-                    const img = document.getElementById('pImg').value;
-                    const type = document.getElementById('pType').value;
+                submit: async function() {
+                    let content = '';
+                    let title = '';
+                    let img = '';
                     
-                    // Banner Logic
-                    if(document.getElementById('toggleBanner').checked) {
-                        localStorage.setItem('showBanner', 'true');
-                        document.getElementById('adminBanner').style.display = 'flex';
+                    if(App.profile.role === 'admin') {
+                        // Admin Logic
+                        const type = document.getElementById('pType').value;
+                        title = document.getElementById('pTitle').value;
+                        const rawContent = document.getElementById('pContent').value;
+                        img = document.getElementById('pImg').value;
+
+                        if(type === 'match') {
+                            const t1 = document.getElementById('mT1').value;
+                            const t2 = document.getElementById('mT2').value;
+                            content = `${t1}|VS|${t2}`; // Base match format
+                        } else if(type === 'ad') {
+                            content = `|AD|${title}|${rawContent}`;
+                        } else {
+                            content = rawContent;
+                        }
+                        if(!title && type !== 'text') return App.ui.toast('Заполните поля');
                     } else {
-                        localStorage.setItem('showBanner', 'false');
-                        document.getElementById('adminBanner').style.display = 'none';
-                    }
-
-                    if(!title) return App.ui.toast('Введите заголовок');
-
-                    // Admin Content Generators
-                    if(type === 'match' && App.profile.role === 'admin') {
-                        const t1 = document.getElementById('mT1').value;
-                        const t2 = document.getElementById('mT2').value;
-                        content = `${t1}|VS|${t2}`;
-                    } else if(type === 'ad' && App.profile.role === 'admin') {
-                        content = `|AD|${title}|${content}`;
+                        // User Logic
+                        content = document.getElementById('uContent').value;
+                        title = 'User Post'; // Default
+                        if(!content) return App.ui.toast('Напишите что-нибудь');
                     }
 
                     const { error } = await App.sb.from('posts').insert([{
@@ -564,8 +805,8 @@
                     if(!error) {
                         App.ui.closeModal();
                         App.ui.toast('Опубликовано');
-                        // Reset Inputs
-                        document.getElementById('pTitle').value = '';
+                        // Reset forms
+                        document.getElementById('uContent').value = '';
                         document.getElementById('pContent').value = '';
                     } else {
                         App.ui.toast('Ошибка: ' + error.message);
@@ -573,91 +814,197 @@
                 }
             },
 
+            // --- ADMIN CONTROLLER ---
+            admin: {
+                // Banner Logic
+                initBanner: function() {
+                    const active = localStorage.getItem('bannerActive') === 'true';
+                    const title = localStorage.getItem('bannerTitle') || 'BONUS X2';
+                    const text = localStorage.getItem('bannerText') || 'Limited Offer';
+                    
+                    if(active) {
+                        document.getElementById('bannerWrap').style.display = 'block';
+                        document.getElementById('bannerTitle').innerText = title;
+                        document.getElementById('bannerText').innerText = text;
+                    }
+                },
+                toggleBanner: function(show) {
+                    localStorage.setItem('bannerActive', show);
+                    document.getElementById('bannerWrap').style.display = show ? 'block' : 'none';
+                },
+                editBanner: function() {
+                    document.getElementById('ebTitle').value = document.getElementById('bannerTitle').innerText;
+                    document.getElementById('ebText').value = document.getElementById('bannerText').innerText;
+                    App.ui.openModal('editBannerModal');
+                },
+                saveBanner: function() {
+                    const t = document.getElementById('ebTitle').value;
+                    const txt = document.getElementById('ebText').value;
+                    
+                    localStorage.setItem('bannerTitle', t);
+                    localStorage.setItem('bannerText', txt);
+                    localStorage.setItem('bannerActive', 'true');
+                    
+                    document.getElementById('bannerTitle').innerText = t;
+                    document.getElementById('bannerText').innerText = txt;
+                    document.getElementById('bannerWrap').style.display = 'block';
+                    
+                    App.ui.closeModal();
+                    App.ui.toast('Баннер обновлен');
+                },
+
+                // Post Logic
+                togglePin: async function(postId, state) {
+                    // We need to fetch current content first to append/remove |PINNED| tag
+                    const { data } = await App.sb.from('posts').select('content').eq('id', postId).single();
+                    if(!data) return;
+
+                    let newContent = data.content.replace('|PINNED|', '');
+                    if(state) newContent = '|PINNED|' + newContent;
+
+                    await App.sb.from('posts').update({ content: newContent }).eq('id', postId);
+                    App.ui.toast(state ? 'Закреплено' : 'Откреплено');
+                },
+                deletePost: async function(postId) {
+                    if(confirm('Удалить пост?')) {
+                        await App.sb.from('posts').delete().eq('id', postId);
+                        App.ui.toast('Удалено');
+                    }
+                },
+
+                // Match Logic
+                editMatch: function(postId) {
+                    App.editingPostId = postId;
+                    App.ui.openModal('editMatchModal');
+                },
+                saveMatchUpdate: async function() {
+                    const score = document.getElementById('emScore').value; // "2:1"
+                    const time = document.getElementById('emTime').value;   // "78'"
+                    
+                    if(!App.editingPostId) return;
+
+                    // Fetch logic: find where match data ends and update it
+                    const { data } = await App.sb.from('posts').select('content').eq('id', App.editingPostId).single();
+                    // Assume structure: Team1|VS|Team2 (|SC|Score|TM|Time optional)
+                    let base = data.content.split('|SC|')[0]; 
+                    const newContent = `${base}|SC|${score}|TM|${time}`;
+                    
+                    await App.sb.from('posts').update({ content: newContent }).eq('id', App.editingPostId);
+                    App.ui.closeModal();
+                    App.ui.toast('Матч обновлен');
+                },
+                settleBetPrompt: function() {
+                    // Simplified simulation of payout
+                    App.ui.closeModal();
+                    // In a real app, this would trigger a server function
+                    App.ui.toast('Расчет ставок запущен (Simulated)');
+                }
+            },
+
             // --- BETS ---
             bets: {
-                open: (out, coef) => {
-                    App.tempBet = { out, coef };
-                    document.getElementById('betOutcome').innerText = out;
+                open: (outcome, coef) => {
+                    document.getElementById('betOutcome').innerText = outcome;
                     document.getElementById('betCoef').innerText = 'x' + coef;
                     App.ui.openModal('betModal');
                 },
                 confirm: async function() {
-                    const val = parseFloat(document.getElementById('betAmount').value);
-                    if(!val || val <= 0) return App.ui.toast('Неверная сумма');
-                    if(val > App.profile.balance) return App.ui.toast('Мало средств');
+                    const amount = parseFloat(document.getElementById('betAmount').value);
+                    if(!amount || amount <= 0) return App.ui.toast('Неверная сумма');
+                    if(amount > App.profile.balance) return App.ui.toast('Недостаточно средств');
 
-                    const newBal = App.profile.balance - val;
+                    const newBal = App.profile.balance - amount;
                     const { error } = await App.sb.from('users').update({ balance: newBal }).eq('id', App.user.id);
                     
                     if(!error) {
                         App.ui.closeModal();
+                        // Simulation of Win (50% chance for demo)
                         App.ui.toast('Ставка принята!');
                         document.getElementById('betAmount').value = '';
+                        
+                        // Fake win logic for UX demo (remove in prod)
+                        /*
+                        setTimeout(() => {
+                            if(Math.random() > 0.5) {
+                                const win = amount * 2;
+                                App.sb.from('users').update({ balance: newBal + win }).eq('id', App.user.id);
+                                alert(`ПОБЕДА! Вы выиграли ${win} x2`);
+                            }
+                        }, 5000);
+                        */
                     }
                 }
             },
 
-            // --- HELPERS ---
+            // --- UI HELPERS ---
             ui: {
                 toast: (msg) => {
                     const t = document.getElementById('toast');
                     t.innerText = msg; t.classList.add('show');
-                    setTimeout(() => t.classList.remove('show'), 2500);
+                    setTimeout(() => t.classList.remove('show'), 2000);
                 },
                 openModal: (id) => document.getElementById(id).style.display = 'flex',
-                closeModal: () => document.querySelectorAll('.overlay').forEach(e => e.style.display = 'none')
+                closeModal: () => document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'),
+                openCreate: () => {
+                    if(App.profile.role === 'admin') {
+                        document.getElementById('adminPostForm').style.display = 'block';
+                        document.getElementById('userPostForm').style.display = 'none';
+                        document.getElementById('createTitle').innerText = 'Создать (Admin)';
+                    } else {
+                        document.getElementById('adminPostForm').style.display = 'none';
+                        document.getElementById('userPostForm').style.display = 'block';
+                        document.getElementById('createTitle').innerText = 'Новая запись';
+                    }
+                    App.ui.openModal('createModal');
+                }
             },
 
             listeners: function() {
+                // Post Type Switcher
                 document.getElementById('pType').addEventListener('change', (e) => {
-                    const t = e.target.value;
-                    document.getElementById('matchFields').style.display = t === 'match' ? 'flex' : 'none';
+                    document.getElementById('matchFields').style.display = e.target.value === 'match' ? 'flex' : 'none';
                 });
             },
 
             realtime: function() {
-                this.sb.channel('global')
+                this.sb.channel('feed-room')
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => this.posts.load())
                     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${this.user.id}` }, 
                     payload => {
                         this.profile.balance = payload.new.balance;
-                        document.getElementById('headerBal').innerText = parseFloat(payload.new.balance).toFixed(2);
+                        document.getElementById('headBal').innerText = parseFloat(payload.new.balance).toFixed(2) + ' x2';
                     })
                     .subscribe();
             },
 
-            // --- FX ---
+            // --- BACKGROUND FX ---
             fx: {
                 start: function() {
-                    const cvs = document.getElementById('liquid-canvas');
-                    const ctx = cvs.getContext('2d');
+                    const c = document.getElementById('liquid-canvas');
+                    const ctx = c.getContext('2d');
                     let w, h;
-                    const orbs = [];
-                    
-                    const resize = () => { w = window.innerWidth; h = window.innerHeight; cvs.width = w; cvs.height = h; };
+                    const resize = () => { w = window.innerWidth; h = window.innerHeight; c.width = w; c.height = h; };
                     window.addEventListener('resize', resize);
                     resize();
 
-                    for(let i=0; i<6; i++) {
-                        orbs.push({
-                            x: Math.random()*w, y: Math.random()*h, r: Math.random()*150+50,
-                            dx: (Math.random()-0.5)*0.2, dy: (Math.random()-0.5)*0.2,
-                            col: i%2===0 ? 'rgba(0,255,148,0.04)' : 'rgba(255,255,255,0.03)'
-                        });
-                    }
+                    const blobs = [
+                        {x: w*0.2, y: h*0.2, r: 200, c: 'rgba(0,255,148,0.1)', dx: 0.5, dy: 0.3},
+                        {x: w*0.8, y: h*0.8, r: 250, c: 'rgba(255,255,255,0.05)', dx: -0.4, dy: -0.2},
+                        {x: w*0.5, y: h*0.5, r: 150, c: 'rgba(0,100,255,0.05)', dx: 0.2, dy: -0.4}
+                    ];
 
                     function anim() {
                         ctx.clearRect(0,0,w,h);
-                        orbs.forEach(p => {
-                            p.x+=p.dx; p.y+=p.dy;
-                            if(p.x<-p.r || p.x>w+p.r) p.dx*=-1;
-                            if(p.y<-p.r || p.y>h+p.r) p.dy*=-1;
+                        blobs.forEach(b => {
+                            b.x += b.dx; b.y += b.dy;
+                            if(b.x < -b.r || b.x > w+b.r) b.dx *= -1;
+                            if(b.y < -b.r || b.y > h+b.r) b.dy *= -1;
                             
-                            const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-                            g.addColorStop(0, p.col);
+                            const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+                            g.addColorStop(0, b.c);
                             g.addColorStop(1, 'transparent');
                             ctx.fillStyle = g;
-                            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+                            ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2); ctx.fill();
                         });
                         requestAnimationFrame(anim);
                     }
