@@ -3,394 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#000000">
-    <title>STAVOK.NET | Liquid Feed</title>
+    <title>STAVOK.NET | Liquid</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&family=Unbounded:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Unbounded:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            /* --- LIQUID PALETTE --- */
-            --liq-bg: #000000;
+            /* Жидкое стекло (Liquid Glass) Palette */
+            --bg-body: #050505;
             
-            /* Glass Colors (High Transparency 60-80%) */
-            --glass-surf: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-highlight: rgba(255, 255, 255, 0.15);
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            /* Glass Surface (60-80% Opacity) */
+            --glass-bg: rgba(20, 20, 20, 0.70); 
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-shine: rgba(255, 255, 255, 0.08);
             
-            /* Gradients */
-            --grad-metal: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
-            --grad-dark: linear-gradient(180deg, rgba(20,20,20,0.8) 0%, rgba(0,0,0,0.9) 100%);
+            /* Colors */
+            --green: #00FF94;
+            --gold: #FFD700;
+            --white: #FFFFFF;
+            --gray: #888888;
             
-            /* Accents */
-            --acc-green: #00FF94;
-            --acc-gold: #FFD700;
-            --acc-red: #FF3B30;
-            
-            /* Text */
-            --txt-main: #FFFFFF;
-            --txt-muted: rgba(255, 255, 255, 0.5);
-            
-            /* Geometry */
-            --rad-pill: 50px;
-            --rad-card: 24px;
-            --rad-sm: 12px;
-            
-            /* FX */
-            --blur-strength: 20px;
-            --ease-liquid: cubic-bezier(0.23, 1, 0.32, 1);
-            
-            /* Safe Areas */
+            /* Fonts & Spacing */
+            --font-head: 'Unbounded', sans-serif;
+            --font-body: 'Inter', sans-serif;
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        /* --- RESET & BASE --- */
-        *, *::before, *::after {
-            margin: 0; padding: 0; box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; outline: none;
-        }
-
-        html, body {
-            width: 100%; min-height: 100vh;
-            background-color: var(--liq-bg);
-            color: var(--txt-main);
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-            /* Scroll behavior */
-            scroll-behavior: smooth;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
         body {
-            padding-bottom: calc(100px + var(--safe-bottom)); /* Space for floating nav */
+            background-color: var(--bg-body);
+            color: var(--white);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            padding-bottom: 120px;
+            /* Сетчатый фон (Mesh Grid) */
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
         }
 
-        /* --- ANIMATED MESH BACKGROUND (CSS Fallback + Canvas Setup) --- */
-        #liquid-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; opacity: 0.6; pointer-events: none;
-        }
-        
-        .mesh-fallback {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -2;
-            background: 
-                radial-gradient(at 0% 0%, rgba(255,255,255,0.05) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(255,255,255,0.05) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(255,255,255,0.05) 0px, transparent 50%);
-            background-size: cover;
-        }
-
-        /* --- TYPOGRAPHY UTILS --- */
-        .font-liq { font-family: 'Unbounded', sans-serif; }
-        .text-grad {
-            background: var(--grad-metal);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-        }
-
-        /* --- GLASS COMPONENTS --- */
-        .glass-panel {
-            background: var(--glass-surf);
-            backdrop-filter: blur(var(--blur-strength));
-            -webkit-backdrop-filter: blur(var(--blur-strength));
+        /* --- GLASS EFFECT UTILITY --- */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        /* The "Liquid" Shine Effect */
-        .glass-panel::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: inherit; padding: 1px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
 
-        /* --- HEADER (Floating Pill) --- */
-        .liquid-header {
-            position: sticky; top: 20px; z-index: 100;
-            width: 92%; max-width: 600px; margin: 0 auto;
-            border-radius: var(--rad-pill);
+        /* --- HEADER --- */
+        .header {
+            position: sticky; top: 15px; z-index: 100;
+            margin: 0 15px; border-radius: 50px;
+            padding: 10px 20px;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 20px;
-            transition: transform 0.3s var(--ease-liquid);
-        }
-        
-        .header-brand {
-            display: flex; align-items: center; gap: 12px;
-            text-decoration: none;
         }
 
+        .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
         .logo-sq {
-            width: 40px; height: 40px;
-            background: #fff; color: #000;
-            border-radius: 8px; /* Slightly rounded square */
+            width: 38px; height: 38px; background: #fff; color: #000;
+            border-radius: 8px; /* Квадрат */
             display: flex; align-items: center; justify-content: center;
-            font-family: 'Unbounded'; font-weight: 900; font-size: 20px; font-style: italic;
+            font-family: var(--font-head); font-weight: 900; font-style: italic; font-size: 20px;
             transform: skewX(-12deg);
-            box-shadow: 0 0 20px rgba(255,255,255,0.3);
         }
-
         .logo-txt {
-            font-family: 'Unbounded'; font-weight: 700; font-size: 16px;
-            color: #fff; letter-spacing: -0.02em; font-style: italic;
+            font-family: var(--font-head); font-weight: 800; font-size: 14px;
+            color: #fff; text-transform: uppercase; letter-spacing: 0.5px; font-style: italic;
         }
 
-        /* Wallet Pill */
-        .wallet-pill {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--rad-pill);
-            padding: 6px 6px 6px 14px;
+        .profile-chip {
             display: flex; align-items: center; gap: 10px;
-            cursor: pointer; transition: 0.3s;
+            background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
+            padding: 5px 5px 5px 15px; border-radius: 40px; cursor: pointer;
         }
-        .wallet-pill:hover { border-color: rgba(255,255,255,0.3); }
-        
-        .w-bal { font-family: 'Unbounded'; font-size: 12px; font-weight: 600; color: var(--acc-green); }
-        
-        .w-avatar {
-            width: 32px; height: 32px; border-radius: 50%;
-            background: linear-gradient(135deg, #333, #111);
-            border: 1px solid var(--glass-border);
+        .user-bal { font-family: var(--font-head); font-size: 11px; color: var(--green); font-weight: 600; }
+        .user-ava {
+            width: 32px; height: 32px; background: #222; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-family: 'Unbounded'; font-size: 12px; font-weight: 700; color: #fff;
+            font-family: var(--font-head); font-weight: 700; font-size: 12px; border: 1px solid var(--white);
         }
 
-        /* --- ADMIN HEADER BANNER --- */
-        .admin-banner-container {
-            width: 92%; max-width: 600px; margin: 15px auto 0;
-            display: none; /* Toggled by JS */
+        /* --- HEADER BANNER (ADMIN) --- */
+        .head-banner {
+            margin: 15px 15px 0; border-radius: 20px; padding: 15px;
+            background: linear-gradient(90deg, rgba(255,215,0,0.15), rgba(0,0,0,0));
+            border: 1px solid rgba(255,215,0,0.3); display: none; /* Скрыто по дефолту */
+            align-items: center; gap: 15px; animation: slideDown 0.5s ease;
         }
-        .header-banner {
-            border-radius: 16px; padding: 12px 20px;
-            background: linear-gradient(90deg, rgba(255,215,0,0.1), rgba(0,0,0,0));
-            border: 1px solid rgba(255,215,0,0.3);
-            display: flex; align-items: center; gap: 15px;
-        }
-        .hb-icon { color: var(--acc-gold); font-size: 18px; animation: pulse 2s infinite; }
-        .hb-text { font-size: 12px; color: #fff; font-weight: 500; }
+        .hb-icon { color: var(--gold); font-size: 20px; animation: pulse 2s infinite; }
+        .hb-text { font-size: 12px; font-weight: 600; color: #fff; line-height: 1.4; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- FEED LAYOUT --- */
-        .feed-container {
-            width: 100%; max-width: 600px; margin: 0 auto;
-            padding: 20px; display: flex; flex-direction: column; gap: 24px;
-        }
+        /* --- FEED STREAM --- */
+        .feed { padding: 20px 15px; display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; }
 
-        /* --- POST CARD (LIQUID STYLE) --- */
-        .post-card {
-            border-radius: var(--rad-card);
-            padding: 24px;
-            transition: transform 0.3s var(--ease-liquid);
-        }
-        .post-card:active { transform: scale(0.98); }
+        .post { border-radius: 24px; padding: 20px; transition: transform 0.2s; position: relative; overflow: hidden; }
+        .post:active { transform: scale(0.98); }
 
-        /* Post Header */
-        .ph-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .ph-user { display: flex; align-items: center; gap: 12px; }
-        .ph-av { 
-            width: 44px; height: 44px; border-radius: 14px; 
-            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
-            display: flex; align-items: center; justify-content: center;
-            font-family: 'Unbounded'; font-weight: 700; color: #fff;
-        }
-        .ph-meta h4 { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 2px; }
-        .ph-meta span { font-size: 11px; color: var(--txt-muted); }
+        /* POST HEADER */
+        .p-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .p-user { display: flex; gap: 12px; align-items: center; }
+        .p-ava { width: 42px; height: 42px; border-radius: 14px; background: #333; display: flex; align-items: center; justify-content: center; font-weight: 700; font-family: var(--font-head); border: 1px solid var(--glass-border); }
+        .p-info h4 { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 3px; font-family: var(--font-head); }
+        .p-info span { font-size: 11px; color: var(--gray); }
         
-        /* Badges */
-        .badge { 
-            font-size: 9px; padding: 3px 8px; border-radius: 6px; 
-            text-transform: uppercase; font-weight: 800; font-family: 'Unbounded'; margin-left: 6px; 
-        }
-        .badge.admin { background: #fff; color: #000; box-shadow: 0 0 10px rgba(255,255,255,0.4); }
-        .badge.user { border: 1px solid var(--glass-border); color: var(--txt-muted); }
+        .role-badge { font-size: 9px; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; font-weight: 800; margin-left: 6px; }
+        .role-badge.admin { background: #fff; color: #000; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
 
-        /* Post Content */
-        .pc-title { font-family: 'Unbounded'; font-size: 16px; font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
-        .pc-text { font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.8); margin-bottom: 16px; }
-        .pc-img { 
-            width: 100%; border-radius: 16px; margin-top: 10px; 
-            border: 1px solid var(--glass-border); 
-        }
+        /* POST BODY */
+        .p-body { font-size: 14px; line-height: 1.6; color: #ddd; }
+        .p-img { width: 100%; border-radius: 16px; margin-top: 15px; border: 1px solid var(--glass-border); }
 
-        /* --- WIDGETS INSIDE POSTS --- */
+        /* TEMPLATE: MATCH WIDGET */
+        .match-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent);
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            padding: 15px; margin-top: 15px;
+        }
+        .mc-teams { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .mc-t { text-align: center; width: 35%; font-family: var(--font-head); font-size: 12px; font-weight: 700; }
+        .mc-vs { font-family: var(--font-head); font-size: 20px; font-weight: 900; color: var(--green); opacity: 0.8; }
         
-        /* 1. MATCH WIDGET (Betting) */
-        .w-match {
-            background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
-            border: 1px solid var(--glass-border); border-radius: 18px; padding: 16px;
-            margin-top: 10px;
-        }
-        .wm-teams { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .wm-t { text-align: center; width: 40%; }
-        .wm-t-name { font-family: 'Unbounded'; font-size: 12px; font-weight: 700; display: block; margin-top: 8px; }
-        .wm-icon { font-size: 24px; opacity: 0.8; }
-        .wm-vs { font-family: 'Unbounded'; font-size: 20px; font-weight: 900; color: var(--acc-green); opacity: 0.8; }
-
-        .wm-bets { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .mc-bets { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
         .btn-bet {
             background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
             border-radius: 12px; padding: 10px; text-align: center; cursor: pointer;
-            transition: 0.2s; position: relative; overflow: hidden;
         }
-        .btn-bet:active { background: rgba(0, 255, 148, 0.2); border-color: var(--acc-green); }
-        .bb-coef { font-family: 'Unbounded'; font-size: 14px; font-weight: 700; display: block; color: #fff; }
-        .bb-lbl { font-size: 9px; text-transform: uppercase; color: var(--txt-muted); letter-spacing: 1px; }
+        .btn-bet:active { background: rgba(0, 255, 148, 0.2); border-color: var(--green); }
+        .bk { display: block; font-family: var(--font-head); font-weight: 700; font-size: 13px; }
+        .bl { font-size: 9px; color: var(--gray); text-transform: uppercase; }
 
-        /* 2. AD WIDGET */
-        .w-ad {
-            background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(0,0,0,0.8));
-            border: 1px solid rgba(255,215,0,0.3); border-radius: 18px; padding: 20px;
-            margin-top: 10px; position: relative; overflow: hidden;
+        /* TEMPLATE: ADVERTISEMENT */
+        .ad-card {
+            margin-top: 15px; border-radius: 20px; padding: 20px;
+            background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(0,0,0,0.5));
+            border: 1px solid var(--gold); position: relative;
         }
-        .w-ad::after {
-            content: 'SPONSORED'; position: absolute; top: 10px; right: 10px;
-            font-size: 9px; color: var(--acc-gold); font-weight: 800; letter-spacing: 1px;
-        }
-        .wa-btn {
-            display: inline-block; background: var(--acc-gold); color: #000;
-            padding: 10px 20px; border-radius: 30px; font-weight: 700; font-size: 12px;
-            margin-top: 15px; cursor: pointer; font-family: 'Unbounded'; text-transform: uppercase;
+        .ad-badge { position: absolute; top: 10px; right: 10px; color: var(--gold); font-size: 9px; font-weight: 800; border: 1px solid var(--gold); padding: 2px 6px; border-radius: 4px; }
+        .ad-btn {
+            display: inline-block; background: var(--gold); color: #000;
+            padding: 10px 20px; border-radius: 30px; font-family: var(--font-head);
+            font-weight: 800; font-size: 12px; margin-top: 15px; cursor: pointer;
         }
 
-        /* --- POST FOOTER --- */
-        .pf-actions {
-            border-top: 1px solid var(--glass-border); margin-top: 20px; padding-top: 16px;
-            display: flex; gap: 24px;
-        }
-        .act-btn {
-            display: flex; align-items: center; gap: 8px; color: var(--txt-muted);
-            font-size: 13px; cursor: pointer; transition: 0.2s;
-        }
-        .act-btn:hover { color: #fff; }
-        .act-btn i { font-size: 16px; }
+        /* ACTIONS */
+        .p-foot { display: flex; gap: 20px; border-top: 1px solid var(--glass-border); margin-top: 15px; padding-top: 15px; }
+        .act { display: flex; align-items: center; gap: 8px; color: var(--gray); font-size: 13px; cursor: pointer; }
+        .act:hover { color: #fff; }
 
-        /* --- BOTTOM NAV (Floating Pill) --- */
-        .nav-float {
+        /* --- BOTTOM NAV (Floating) --- */
+        .nav-bar {
             position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 400px; height: 70px;
-            border-radius: 50px;
+            width: 90%; max-width: 400px; height: 70px; border-radius: 50px;
             display: flex; justify-content: space-evenly; align-items: center;
-            z-index: 1000;
+            z-index: 900;
         }
-        
-        .nav-item {
-            text-decoration: none; display: flex; flex-direction: column; align-items: center;
-            gap: 4px; color: rgba(255,255,255,0.4); transition: 0.3s;
-            width: 60px;
-        }
+        .nav-item { text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 4px; color: rgba(255,255,255,0.4); width: 60px; }
         .nav-item i { font-size: 20px; transition: 0.3s; }
-        .nav-item span { font-size: 9px; font-family: 'Unbounded'; font-weight: 600; text-transform: uppercase; opacity: 0; transform: translateY(5px); transition: 0.3s; }
+        .nav-item span { font-size: 9px; font-family: var(--font-head); font-weight: 600; opacity: 0; transform: translateY(10px); transition: 0.3s; }
         
         .nav-item.active { color: #fff; }
-        .nav-item.active i { transform: translateY(-2px); text-shadow: 0 0 15px rgba(255,255,255,0.6); }
+        .nav-item.active i { transform: translateY(-3px); text-shadow: 0 0 15px rgba(255,255,255,0.5); }
         .nav-item.active span { opacity: 1; transform: translateY(0); }
 
-        /* --- FAB (Create Post - Admin Only) --- */
+        /* --- FAB (ADMIN) --- */
         .fab {
-            position: fixed; bottom: 110px; right: 25px;
-            width: 60px; height: 60px; border-radius: 18px;
+            position: fixed; bottom: 110px; right: 20px;
+            width: 60px; height: 60px; border-radius: 20px;
             background: #fff; color: #000;
-            display: none; /* Hidden by default, shown for admin */
-            align-items: center; justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             font-size: 24px; box-shadow: 0 0 30px rgba(255,255,255,0.2);
-            z-index: 900; cursor: pointer; transform: rotate(0deg); transition: 0.3s var(--ease-liquid);
+            z-index: 800; cursor: pointer; display: none; /* Hidden for users */
         }
-        .fab:hover { transform: rotate(90deg); }
-        .fab:active { transform: scale(0.9); }
 
-        /* --- MODALS --- */
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
-            z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px;
-        }
-        .modal {
-            background: #000; border: 1px solid var(--glass-border);
-            width: 100%; max-width: 420px; border-radius: 30px; padding: 30px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
-        .m-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .m-title { font-family: 'Unbounded'; font-size: 18px; color: #fff; }
-        
-        .inp-field {
-            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
-            padding: 16px; border-radius: 16px; color: #fff; margin-bottom: 12px;
-            font-family: 'Inter'; font-size: 14px;
-        }
-        .inp-field:focus { border-color: #fff; background: rgba(255,255,255,0.08); }
-        
-        .btn-main {
-            width: 100%; background: #fff; color: #000; padding: 18px;
-            border-radius: 16px; font-weight: 800; border: none; font-family: 'Unbounded';
-            text-transform: uppercase; cursor: pointer; margin-top: 10px;
-            transition: 0.2s;
-        }
-        .btn-main:active { transform: scale(0.98); opacity: 0.9; }
-
-        /* Admin Fields */
-        .admin-options {
-            border-top: 1px solid var(--glass-border); padding-top: 15px; margin-top: 15px;
-        }
-        .badge-label { color: var(--acc-red); font-size: 10px; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 8px; }
-
-        /* --- TOAST --- */
-        #toast {
-            position: fixed; top: 110px; left: 50%; transform: translateX(-50%) translateY(-20px);
-            background: rgba(255,255,255,0.9); color: #000; padding: 12px 24px; border-radius: 40px;
-            font-family: 'Unbounded'; font-size: 12px; font-weight: 700; z-index: 5000;
-            opacity: 0; transition: 0.4s var(--ease-liquid); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            pointer-events: none;
-        }
-        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-        /* LOADING SPINNER */
-        .spinner {
-            width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: #fff; border-radius: 50%;
-            animation: spin 1s linear infinite; margin: 50px auto;
-        }
+        /* --- LOADING & MODALS --- */
+        .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; margin: 50px auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal { width: 100%; max-width: 400px; background: #111; border: 1px solid var(--glass-border); border-radius: 30px; padding: 25px; }
+        .inp { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 15px; border-radius: 12px; color: #fff; margin-bottom: 10px; font-family: var(--font-body); }
+        .btn-main { width: 100%; padding: 15px; background: #fff; color: #000; border-radius: 12px; font-family: var(--font-head); font-weight: 800; border: none; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
 
     </style>
 </head>
 <body>
 
-    <canvas id="liquid-canvas"></canvas>
-    <div class="mesh-fallback"></div>
-
-    <div id="toast">Добро пожаловать</div>
-
-    <header class="liquid-header glass-panel">
-        <a href="feed.html" class="header-brand">
-            <div class="logo-sq">S</div>
-            <div class="logo-txt">STAVOK</div>
-        </a>
-        <div class="wallet-pill" onclick="window.location.href='profile.html'">
-            <div class="w-avatar" id="headAvatar">?</div>
-            <span class="w-bal" id="headBal">...</span>
-        </div>
-    </header>
-
-    <div class="admin-banner-container" id="adminBanner">
-        <div class="header-banner">
-            <i class="fa-solid fa-bolt hb-icon"></i>
-            <span class="hb-text">БОНУС X2 НА ПЕРВЫЙ ДЕПОЗИТ! АКЦИЯ 24 ЧАСА.</span>
+    <div class="head-banner" id="promoBanner">
+        <i class="fa-solid fa-bolt hb-icon"></i>
+        <div class="hb-text">
+            СУПЕР БОНУС! ПОПОЛНИ СЧЕТ СЕГОДНЯ И ПОЛУЧИ x2 НА БАЛАНС.
         </div>
     </div>
 
-    <main class="feed-container" id="feedStream">
+    <header class="header glass">
+        <a href="feed.html" class="brand">
+            <div class="logo-sq">S</div>
+            <div class="logo-txt">STAVOK</div>
+        </a>
+        <div class="profile-chip" onclick="window.location.href='profile.html'">
+            <span class="user-bal" id="headerBal">...</span>
+            <div class="user-ava" id="headerAva">?</div>
+        </div>
+    </header>
+
+    <main class="feed" id="feedStream">
         <div class="spinner"></div>
     </main>
 
@@ -398,9 +224,9 @@
         <i class="fa-solid fa-plus"></i>
     </div>
 
-    <nav class="nav-float glass-panel">
+    <nav class="nav-bar glass">
         <a href="news.html" class="nav-item">
-            <i class="fa-solid fa-newspaper"></i>
+            <i class="fa-solid fa-bolt"></i>
             <span>News</span>
         </a>
         <a href="feed.html" class="nav-item active">
@@ -415,344 +241,254 @@
 
     <div class="overlay" id="createModal">
         <div class="modal">
-            <div class="m-head">
-                <h3 class="m-title">Создать пост</h3>
-                <i class="fa-solid fa-xmark" style="color:#666; cursor:pointer;" onclick="App.ui.closeModal()"></i>
-            </div>
+            <h3 style="font-family:var(--font-head); margin-bottom:20px;">Создать пост</h3>
             
-            <input type="text" id="pTitle" class="inp-field" placeholder="Заголовок (Обязательно)">
-            <textarea id="pContent" class="inp-field" style="height:100px; resize:none;" placeholder="Текст поста..."></textarea>
-            <input type="text" id="pImg" class="inp-field" placeholder="Ссылка на фото (Необязательно)">
-
-            <div class="admin-options">
-                <span class="badge-label">Шаблон</span>
-                <select id="pType" class="inp-field" style="cursor:pointer;">
-                    <option value="text">Обычный текст</option>
+            <input type="text" id="pTitle" class="inp" placeholder="Заголовок">
+            <textarea id="pContent" class="inp" style="height:100px; resize:none;" placeholder="Текст..."></textarea>
+            
+            <div style="margin-top:15px; border-top:1px solid #333; padding-top:15px;">
+                <label style="font-size:10px; color:var(--gold); text-transform:uppercase; font-weight:800;">Admin Mode</label>
+                <select id="pType" class="inp" style="margin-top:5px;">
+                    <option value="text">Обычный</option>
                     <option value="match">Матч (Ставки)</option>
-                    <option value="ad">Реклама (Баннер)</option>
+                    <option value="ad">Реклама</option>
                 </select>
-
-                <div id="matchInputs" style="display:none;">
-                    <input type="text" id="mTeam1" class="inp-field" placeholder="Команда 1">
-                    <input type="text" id="mTeam2" class="inp-field" placeholder="Команда 2">
-                </div>
                 
-                <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
-                    <input type="checkbox" id="toggleBannerCheck">
-                    <label for="toggleBannerCheck" style="font-size:12px; color:#aaa;">Включить баннер под хедером</label>
+                <div id="matchFields" style="display:none;">
+                    <input id="mT1" type="text" class="inp" placeholder="Команда 1">
+                    <input id="mT2" type="text" class="inp" placeholder="Команда 2">
+                </div>
+
+                <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
+                    <input type="checkbox" id="toggleBanner">
+                    <label for="toggleBanner" style="font-size:12px; color:#aaa;">Включить баннер сверху</label>
                 </div>
             </div>
 
             <button class="btn-main" onclick="App.posts.create()">Опубликовать</button>
+            <p onclick="App.ui.closeModal()" style="text-align:center; font-size:12px; color:#666; margin-top:15px;">Отмена</p>
         </div>
     </div>
 
     <div class="overlay" id="betModal">
         <div class="modal">
-            <div class="m-head">
-                <h3 class="m-title">Сделать ставку</h3>
-                <i class="fa-solid fa-xmark" style="color:#666; cursor:pointer;" onclick="App.ui.closeModal()"></i>
+            <h3 style="font-family:var(--font-head); text-align:center;">Ставка</h3>
+            <div style="background:#222; padding:15px; border-radius:12px; margin:15px 0; text-align:center;">
+                <div id="betTarget" style="font-size:18px; font-weight:700;">-</div>
+                <div id="betCoef" style="color:var(--green); font-weight:800;">-</div>
             </div>
-            
-            <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:16px; margin-bottom:20px; text-align:center;">
-                <div style="font-size:10px; color:#888; text-transform:uppercase; letter-spacing:1px;">ВЫБОР</div>
-                <div id="betOutcome" style="font-family:'Unbounded'; font-size:20px; margin:5px 0;">-</div>
-                <div id="betCoef" style="color:var(--acc-green); font-weight:700;">-</div>
-            </div>
-
-            <input type="number" id="betAmount" class="inp-field" placeholder="Сумма (x2)" style="text-align:center; font-size:18px; font-weight:700;">
-            <button class="btn-main" style="background:var(--acc-green); color:#000;" onclick="App.bets.confirm()">Подтвердить</button>
+            <input type="number" id="betSum" class="inp" placeholder="Сумма" style="text-align:center; font-weight:700;">
+            <button class="btn-main" style="background:var(--green); color:#000;" onclick="App.bets.confirm()">Поставить</button>
+            <p onclick="App.ui.closeModal()" style="text-align:center; font-size:12px; color:#666; margin-top:10px;">Отмена</p>
         </div>
     </div>
 
     <script>
-        const CONFIG = {
+        const SB_CFG = {
             url: 'https://cmoeirxugwapvvcdkwjs.supabase.co',
             key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE'
         };
 
         const App = {
-            sb: null,
-            user: null,
-            profile: null,
-            tempBet: null,
+            sb: null, user: null, profile: null, tempBet: null,
 
-            // 1. INIT
             init: async function() {
-                // Background FX
-                this.fx.start();
-
-                this.sb = window.supabase.createClient(CONFIG.url, CONFIG.key);
+                this.sb = window.supabase.createClient(SB_CFG.url, SB_CFG.key);
                 
-                // Auth Check
                 const { data: { session } } = await this.sb.auth.getSession();
                 if(!session) return window.location.href = 'login.html';
                 this.user = session.user;
 
-                // Parallel Loading (Profile + Feed) for speed
-                await Promise.all([this.loadProfile(), this.posts.load()]);
+                // Загружаем профиль + Ленту параллельно
+                await Promise.all([ this.loadProfile(), this.loadFeed() ]);
                 
-                // Listeners & Realtime
-                this.setupListeners();
+                this.listeners();
                 this.realtime();
             },
 
-            // 2. PROFILE & RBAC
             loadProfile: async function() {
                 const { data } = await this.sb.from('users').select('*').eq('id', this.user.id).single();
                 if(data) {
                     this.profile = data;
-                    // UI
-                    document.getElementById('headBal').innerText = parseFloat(data.balance).toFixed(2);
-                    document.getElementById('headAvatar').innerText = (data.username || '?')[0].toUpperCase();
+                    document.getElementById('headerBal').innerText = parseFloat(data.balance).toFixed(2);
+                    document.getElementById('headerAva').innerText = (data.username || '?')[0].toUpperCase();
                     
-                    // ADMIN CHECK
                     if(data.role === 'admin') {
                         document.getElementById('adminFab').style.display = 'flex';
-                        // Check localstorage for banner state (simulated persistence)
-                        if(localStorage.getItem('adminBanner') === 'true') {
-                            document.getElementById('adminBanner').style.display = 'block';
-                        }
+                    }
+                    
+                    // Banner state (simple local check)
+                    if(localStorage.getItem('showBanner') === 'true') {
+                        document.getElementById('promoBanner').style.display = 'flex';
                     }
                 }
             },
 
-            // 3. REALTIME SYNC
-            realtime: function() {
-                // Balance Updates
-                this.sb.channel('public:users')
-                    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${this.user.id}` }, 
-                    payload => {
-                        this.profile.balance = payload.new.balance;
-                        document.getElementById('headBal').innerText = parseFloat(payload.new.balance).toFixed(2);
-                        this.ui.toast("Баланс обновлен");
-                    }).subscribe();
-
-                // New Posts
-                this.sb.channel('public:posts')
-                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, 
-                    () => this.posts.load())
-                    .subscribe();
-            },
-
-            // 4. UI HELPERS
-            ui: {
-                toast: (msg) => {
-                    const t = document.getElementById('toast');
-                    t.innerText = msg; t.classList.add('show');
-                    setTimeout(() => t.classList.remove('show'), 2000);
-                },
-                openModal: (id) => document.getElementById(id).style.display = 'flex',
-                closeModal: () => document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none')
-            },
-
-            // 5. POSTS ENGINE
-            posts: {
-                load: async function() {
-                    const stream = document.getElementById('feedStream');
-                    // Optimized Query
-                    const { data, error } = await App.sb
+            loadFeed: async function() {
+                const stream = document.getElementById('feedStream');
+                try {
+                    const { data, error } = await this.sb
                         .from('posts')
                         .select('*, users(username, role, avatar_url)')
-                        .order('created_at', { ascending: false })
-                        .limit(20); // Limit for performance
+                        .order('created_at', { ascending: false });
 
-                    if(!data) return;
-                    
+                    if(error) throw error;
+
                     stream.innerHTML = '';
-                    if(data.length === 0) stream.innerHTML = '<div style="text-align:center; color:#555; margin-top:50px;">Лента пуста</div>';
-                    
-                    // Use DocumentFragment for performance
-                    const fragment = document.createDocumentFragment();
+                    if(!data || data.length === 0) {
+                        stream.innerHTML = '<div style="text-align:center; color:#555; margin-top:50px;">Лента пуста</div>';
+                        return;
+                    }
+
                     data.forEach(p => {
-                        const el = document.createElement('div');
-                        el.innerHTML = this.template(p);
-                        fragment.appendChild(el.firstElementChild);
+                        stream.innerHTML += this.renderPost(p);
                     });
-                    stream.appendChild(fragment);
-                },
+                } catch(e) {
+                    console.error(e);
+                    stream.innerHTML = `<div style="text-align:center; color:#f33;">Ошибка загрузки: ${e.message}</div>`;
+                }
+            },
 
-                template: function(p) {
-                    const u = p.users || { username: 'Unknown', role: 'user' };
-                    // Only admins can make match/ad posts
-                    const isMatch = p.content.includes('|VS|') && u.role === 'admin';
-                    const isAd = p.content.includes('|AD|') && u.role === 'admin';
-                    const badge = u.role === 'admin' ? '<span class="badge admin">Admin</span>' : '<span class="badge user">User</span>';
-                    
-                    let body = `<div class="pc-text">${p.content}</div>`;
+            renderPost: function(p) {
+                const u = p.users || { username: 'Anon', role: 'user' };
+                const isMatch = p.content.includes('|VS|');
+                const isAd = p.content.includes('|AD|');
+                
+                let body = `<div class="p-body">${p.content}</div>`;
+                let badge = u.role === 'admin' ? '<span class="role-badge admin">ADMIN</span>' : '';
 
-                    // --- TEMPLATE: MATCH ---
-                    if(isMatch) {
-                        const [t1, t2] = p.content.split('|VS|');
-                        body = `
-                        <div class="w-match">
-                            <div class="wm-teams">
-                                <div class="wm-t"><i class="fa-solid fa-shield-cat wm-icon"></i><span class="wm-t-name">${t1}</span></div>
-                                <div class="wm-vs">VS</div>
-                                <div class="wm-t"><i class="fa-solid fa-shield-dog wm-icon"></i><span class="wm-t-name">${t2}</span></div>
-                            </div>
-                            <div class="wm-bets">
-                                <div class="btn-bet" onclick="App.bets.open('${t1}', 1.85)"><span class="bb-coef">1.85</span><span class="bb-lbl">П1</span></div>
-                                <div class="btn-bet" onclick="App.bets.open('Ничья', 3.40)"><span class="bb-coef">3.40</span><span class="bb-lbl">X</span></div>
-                                <div class="btn-bet" onclick="App.bets.open('${t2}', 2.10)"><span class="bb-coef">2.10</span><span class="bb-lbl">П2</span></div>
-                            </div>
-                        </div>`;
-                    }
-                    // --- TEMPLATE: AD ---
-                    else if(isAd) {
-                        const [ignore, title, desc, link] = p.content.split('|');
-                        body = `
-                        <div class="w-ad">
-                            <h3 class="pc-title" style="color:var(--acc-gold)">${title}</h3>
-                            <p class="pc-text" style="margin-bottom:5px;">${desc}</p>
-                            <div class="wa-btn" onclick="window.open('${link || '#'}')">Перейти</div>
-                        </div>`;
-                    }
-                    // --- TEMPLATE: IMAGE ---
-                    else if(p.image_url) {
-                        body += `<img src="${p.image_url}" class="pc-img" loading="lazy">`;
-                    }
-
-                    return `
-                    <div class="post-card glass-panel">
-                        <div class="ph-row">
-                            <div class="ph-user">
-                                <div class="ph-av">${u.username[0].toUpperCase()}</div>
-                                <div class="ph-meta">
-                                    <h4>${u.username} ${badge}</h4>
-                                    <span>Только что</span>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-ellipsis" style="color:#666"></i>
+                // --- ШАБЛОН: МАТЧ ---
+                if(isMatch && u.role === 'admin') {
+                    const [t1, t2] = p.content.split('|VS|');
+                    body = `
+                    <div class="match-card">
+                        <div class="mc-teams">
+                            <div class="mc-t">${t1}</div>
+                            <div class="mc-vs">VS</div>
+                            <div class="mc-t">${t2}</div>
                         </div>
-                        ${!isMatch && !isAd ? `<h4 class="pc-title">${p.title}</h4>` : ''}
-                        ${body}
-                        <div class="pf-actions">
-                            <div class="act-btn"><i class="fa-regular fa-heart"></i> Like</div>
-                            <div class="act-btn"><i class="fa-regular fa-comment"></i> Comment</div>
+                        <div class="mc-bets">
+                            <div class="btn-bet" onclick="App.bets.open('${t1}', 1.85)"><span class="bk">1.85</span><span class="bl">P1</span></div>
+                            <div class="btn-bet" onclick="App.bets.open('X', 3.40)"><span class="bk">3.40</span><span class="bl">DRAW</span></div>
+                            <div class="btn-bet" onclick="App.bets.open('${t2}', 2.10)"><span class="bk">2.10</span><span class="bl">P2</span></div>
                         </div>
                     </div>`;
-                },
+                }
+                // --- ШАБЛОН: РЕКЛАМА ---
+                else if(isAd && u.role === 'admin') {
+                    const [tag, title, desc] = p.content.split('|');
+                    body = `
+                    <div class="ad-card">
+                        <span class="ad-badge">PROMO</span>
+                        <h3 style="font-family:var(--font-head); font-size:18px; margin-bottom:5px;">${title}</h3>
+                        <p style="font-size:12px; color:#ccc;">${desc}</p>
+                        <div class="ad-btn">ПОДРОБНЕЕ</div>
+                    </div>`;
+                }
 
+                return `
+                <div class="post glass">
+                    <div class="p-head">
+                        <div class="p-user">
+                            <div class="p-ava">${u.username[0].toUpperCase()}</div>
+                            <div class="p-info">
+                                <h4>${u.username} ${badge}</h4>
+                                <span>Только что</span>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-ellipsis" style="color:#555;"></i>
+                    </div>
+                    ${!isMatch && !isAd ? `<h4 style="font-family:var(--font-head); font-size:16px; margin-bottom:10px;">${p.title}</h4>` : ''}
+                    ${body}
+                    <div class="p-foot">
+                        <div class="act"><i class="fa-regular fa-heart"></i> Лайк</div>
+                        <div class="act"><i class="fa-regular fa-comment"></i> Коммент</div>
+                    </div>
+                </div>`;
+            },
+
+            posts: {
                 create: async function() {
                     const title = document.getElementById('pTitle').value;
                     let content = document.getElementById('pContent').value;
-                    const img = document.getElementById('pImg').value;
                     const type = document.getElementById('pType').value;
-                    const bannerCheck = document.getElementById('toggleBannerCheck').checked;
+                    const banner = document.getElementById('toggleBanner').checked;
 
-                    // Handle Banner Toggle
-                    if(bannerCheck) {
-                        localStorage.setItem('adminBanner', 'true');
-                        document.getElementById('adminBanner').style.display = 'block';
+                    // Баннер логика (локально для теста)
+                    if(banner) {
+                        localStorage.setItem('showBanner', 'true');
+                        document.getElementById('promoBanner').style.display = 'flex';
                     } else {
-                        localStorage.setItem('adminBanner', 'false');
-                        document.getElementById('adminBanner').style.display = 'none';
+                        localStorage.setItem('showBanner', 'false');
+                        document.getElementById('promoBanner').style.display = 'none';
                     }
 
-                    if(!title) return App.ui.toast("Нужен заголовок");
-
-                    // Admin Content Logic
                     if(type === 'match') {
-                        const t1 = document.getElementById('mTeam1').value;
-                        const t2 = document.getElementById('mTeam2').value;
+                        const t1 = document.getElementById('mT1').value;
+                        const t2 = document.getElementById('mT2').value;
                         content = `${t1}|VS|${t2}`;
-                    } else if (type === 'ad') {
-                        content = `|AD|${title}|${content}|#`;
+                    } else if(type === 'ad') {
+                        content = `|AD|${title}|${content}`;
                     }
+
+                    if(!title) return alert('Введите заголовок');
 
                     const { error } = await App.sb.from('posts').insert([{
                         author_id: App.user.id,
                         title: title,
-                        content: content,
-                        image_url: img || null
+                        content: content
                     }]);
 
                     if(!error) {
                         App.ui.closeModal();
-                        App.ui.toast("Опубликовано");
-                        // Clear
-                        document.getElementById('pTitle').value = '';
-                        document.getElementById('pContent').value = '';
+                        App.loadFeed(); // Перезагрузить ленту
                     } else {
-                        App.ui.toast("Ошибка: " + error.message);
+                        alert(error.message);
                     }
                 }
             },
 
-            // 6. BETS ENGINE
             bets: {
-                open: (outcome, coef) => {
-                    App.tempBet = { outcome, coef };
-                    document.getElementById('betOutcome').innerText = outcome;
+                open: (target, coef) => {
+                    App.tempBet = { target, coef };
+                    document.getElementById('betTarget').innerText = target;
                     document.getElementById('betCoef').innerText = 'x' + coef;
                     App.ui.openModal('betModal');
                 },
                 confirm: async function() {
-                    const amount = parseFloat(document.getElementById('betAmount').value);
-                    if(!amount || amount <= 0) return App.ui.toast("Неверная сумма");
-                    if(amount > App.profile.balance) return App.ui.toast("Недостаточно средств");
+                    const amount = parseFloat(document.getElementById('betSum').value);
+                    if(!amount || amount <= 0) return alert('Неверная сумма');
+                    if(amount > App.profile.balance) return alert('Мало денег');
 
-                    // Optimistic UI
                     const newBal = App.profile.balance - amount;
                     const { error } = await App.sb.from('users').update({ balance: newBal }).eq('id', App.user.id);
                     
                     if(!error) {
                         App.ui.closeModal();
-                        App.ui.toast("Ставка принята!");
-                        document.getElementById('betAmount').value = '';
+                        alert('Ставка принята!');
                     }
                 }
             },
 
-            setupListeners: function() {
-                // Toggle fields in admin modal
-                document.getElementById('pType').addEventListener('change', e => {
-                    const t = e.target.value;
-                    document.getElementById('matchInputs').style.display = t === 'match' ? 'block' : 'none';
+            ui: {
+                openModal: (id) => document.getElementById(id).style.display = 'flex',
+                closeModal: () => document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none')
+            },
+
+            listeners: function() {
+                document.getElementById('pType').addEventListener('change', (e) => {
+                    document.getElementById('matchFields').style.display = e.target.value === 'match' ? 'block' : 'none';
                 });
             },
 
-            // 7. BACKGROUND FX (MESH GRADIENTS)
-            fx: {
-                start: function() {
-                    const canvas = document.getElementById('liquid-canvas');
-                    const ctx = canvas.getContext('2d');
-                    let w, h, orbs = [];
-
-                    const resize = () => { w = window.innerWidth; h = window.innerHeight; canvas.width = w; canvas.height = h; };
-                    window.addEventListener('resize', resize);
-                    resize();
-
-                    // Create Orbs
-                    for(let i=0; i<5; i++) {
-                        orbs.push({
-                            x: Math.random()*w, y: Math.random()*h,
-                            r: Math.random()*200 + 100,
-                            dx: (Math.random()-0.5)*0.5, dy: (Math.random()-0.5)*0.5,
-                            color: i%2===0 ? 'rgba(0,255,148,0.08)' : 'rgba(255,255,255,0.05)'
-                        });
-                    }
-
-                    function animate() {
-                        ctx.clearRect(0,0,w,h);
-                        
-                        orbs.forEach(p => {
-                            p.x += p.dx; p.y += p.dy;
-                            if(p.x < -p.r || p.x > w+p.r) p.dx *= -1;
-                            if(p.y < -p.r || p.y > h+p.r) p.dy *= -1;
-
-                            const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-                            g.addColorStop(0, p.color);
-                            g.addColorStop(1, 'transparent');
-                            
-                            ctx.fillStyle = g;
-                            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
-                        });
-                        requestAnimationFrame(animate);
-                    }
-                    animate();
-                }
+            realtime: function() {
+                this.sb.channel('updates')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => this.loadFeed())
+                    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${this.user.id}` }, 
+                    payload => {
+                        document.getElementById('headerBal').innerText = parseFloat(payload.new.balance).toFixed(2);
+                    })
+                    .subscribe();
             }
         };
 
