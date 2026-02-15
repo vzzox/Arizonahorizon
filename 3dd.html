@@ -3,36 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BET.IO | Football Blog & Predictions</title>
-    
+    <title>BetPro - Футбольные прогнозы</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         /* =========================================
-           1. CORE VARIABLES & RESET (DARK THEME)
+           RESET & CORE VARIABLES
            ========================================= */
         :root {
-            --bg-dark: #050505;
-            --bg-panel: #0a0a0a;
-            --text-main: #e0e0e0;
+            /* Palette based on reference image */
+            --bg-body: #050505;
+            --bg-card: #0F0F0F;
+            --bg-card-hover: #141414;
+            
+            --text-main: #FFFFFF;
             --text-muted: #888888;
+            --text-silver: #E0E0E0;
+
+            --accent-glow: rgba(255, 255, 255, 0.15);
+            --accent-border: rgba(255, 255, 255, 0.1);
+            --accent-border-hover: rgba(255, 255, 255, 0.3);
+
+            --font-main: 'Inter', sans-serif;
             
-            /* Цветовая палитра "Clean Street" + "Neon" */
-            --accent-green: #00ff9d; /* Деньги, Победа */
-            --accent-blue: #2d00f7; /* Жидкое стекло */
-            --accent-red: #ff0055; /* Ошибки, Live */
-            --accent-purple: #bc13fe; /* Магазин */
-            
-            --glass-bg: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-shine: rgba(255, 255, 255, 0.1);
-            
-            --font-head: 'Rajdhani', sans-serif;
-            --font-body: 'Inter', sans-serif;
-            
-            --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+            --grid-color: rgba(255, 255, 255, 0.03);
+            --transition-smooth: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         * {
@@ -41,39 +39,59 @@
             box-sizing: border-box;
         }
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: var(--font-body);
-            overflow-x: hidden;
-            line-height: 1.6;
-            min-height: 100vh;
-            /* Grunge Noise Texture */
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        html {
+            scroll-behavior: smooth;
         }
 
-        /* Скроллбар */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--bg-dark);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--accent-green);
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+            line-height: 1.6;
         }
 
         /* =========================================
-           2. UTILITIES & ANIMATIONS
+           BACKGROUND EFFECTS (GRID & STARS)
+           ========================================= */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: -2;
+            pointer-events: none;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        }
+
+        .canvas-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* =========================================
+           UTILITIES & TYPOGRAPHY
            ========================================= */
         .container {
-            max-width: 1400px;
+            max-width: 1280px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 24px;
+            position: relative;
+            z-index: 10;
         }
 
         .flex-center {
@@ -82,214 +100,83 @@
             justify-content: center;
         }
 
+        .text-gradient {
+            background: linear-gradient(135deg, #FFFFFF 0%, #999999 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         .hidden {
             display: none !important;
         }
 
-        /* Liquid Glass Effect */
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-            transition: transform 0.3s var(--ease-out), border-color 0.3s;
-        }
-
-        .glass-panel:hover {
-            border-color: var(--glass-shine);
-            transform: translateY(-2px);
-        }
-
-        /* Glitch Text Effect for Headers */
-        .glitch-text {
-            font-family: var(--font-head);
-            font-weight: 700;
-            position: relative;
-            color: #fff;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .glitch-text::before,
-        .glitch-text::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-dark);
-        }
-
-        .glitch-text::before {
-            left: 2px;
-            text-shadow: -1px 0 var(--accent-red);
-            clip: rect(24px, 550px, 90px, 0);
-            animation: glitch-anim-2 3s infinite linear alternate-reverse;
-        }
-
-        .glitch-text::after {
-            left: -2px;
-            text-shadow: -1px 0 var(--accent-blue);
-            clip: rect(85px, 550px, 140px, 0);
-            animation: glitch-anim 2.5s infinite linear alternate-reverse;
-        }
-
-        @keyframes glitch-anim {
-            0% { clip: rect(11px, 9999px, 81px, 0); }
-            20% { clip: rect(87px, 9999px, 13px, 0); }
-            40% { clip: rect(23px, 9999px, 114px, 0); }
-            60% { clip: rect(66px, 9999px, 49px, 0); }
-            80% { clip: rect(10px, 9999px, 96px, 0); }
-            100% { clip: rect(54px, 9999px, 26px, 0); }
-        }
-
         /* =========================================
-           3. HEADER & NAV
+           HEADER / NAVIGATION
            ========================================= */
         header {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            z-index: 1000;
             padding: 20px 0;
-            background: linear-gradient(to bottom, rgba(5,5,5,0.9), rgba(5,5,5,0));
+            z-index: 100;
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            backdrop-filter: blur(5px);
+            transition: var(--transition-smooth);
         }
 
-        .nav-wrapper {
+        .nav-inner {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .logo {
-            font-family: var(--font-head);
-            font-size: 2rem;
-            font-weight: 800;
-            color: #fff;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: white;
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        .logo i { color: var(--accent-green); }
+
+        .logo svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
 
         .nav-links {
             display: flex;
-            gap: 30px;
+            gap: 32px;
         }
 
-        .nav-link {
+        .nav-links a {
             color: var(--text-muted);
             text-decoration: none;
+            font-size: 14px;
             font-weight: 500;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: color 0.3s;
+            transition: var(--transition-smooth);
         }
 
-        .nav-link:hover, .nav-link.active {
-            color: #fff;
-            text-shadow: 0 0 10px rgba(255,255,255,0.3);
-        }
-
-        .auth-buttons {
-            display: flex;
-            gap: 15px;
-        }
-
-        .btn {
-            padding: 10px 24px;
-            border-radius: 4px;
-            font-family: var(--font-head);
-            font-weight: 700;
-            text-transform: uppercase;
-            text-decoration: none;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            transition: all 0.3s var(--ease-out);
-            border: 1px solid transparent;
-            cursor: pointer;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #fff;
-        }
-
-        .btn-outline:hover {
-            border-color: var(--accent-green);
-            color: var(--accent-green);
-            box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
-        }
-
-        .btn-primary {
-            background: var(--accent-green);
-            color: #000;
-            border: 1px solid var(--accent-green);
-        }
-
-        .btn-primary:hover {
-            background: transparent;
-            color: var(--accent-green);
-            box-shadow: 0 0 20px rgba(0, 255, 157, 0.4);
-        }
-
-        /* Профиль в шапке */
-        .user-nav {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            cursor: pointer;
-        }
-        
-        .user-balance {
-            font-family: var(--font-head);
-            color: var(--accent-green);
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        .user-avatar-small {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #222;
-            overflow: hidden;
-            border: 2px solid var(--glass-border);
-            position: relative;
-        }
-        
-        .user-avatar-small img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .user-avatar-svg-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 2;
+        .nav-links a:hover {
+            color: white;
         }
 
         /* =========================================
-           4. HERO SECTION
+           HERO SECTION
            ========================================= */
         .hero {
-            padding-top: 160px;
-            padding-bottom: 80px;
+            padding-top: 180px;
+            padding-bottom: 120px;
             text-align: center;
             position: relative;
         }
 
+        /* Декоративное свечение по центру */
         .hero::before {
             content: '';
             position: absolute;
@@ -298,720 +185,526 @@
             transform: translate(-50%, -50%);
             width: 600px;
             height: 600px;
-            background: radial-gradient(circle, rgba(0, 255, 157, 0.1) 0%, rgba(0,0,0,0) 70%);
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
             z-index: -1;
             filter: blur(60px);
         }
 
-        .hero-title {
-            font-size: 5rem;
-            line-height: 0.9;
-            margin-bottom: 20px;
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--accent-border);
+            border-radius: 100px;
+            font-size: 13px;
+            color: var(--text-silver);
+            margin-bottom: 32px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.05);
         }
 
-        .hero-subtitle {
-            font-size: 1.2rem;
+        .badge-pill span {
+            width: 6px;
+            height: 6px;
+            background-color: white;
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 0 10px white;
+        }
+
+        .hero h1 {
+            font-size: 72px;
+            line-height: 1.1;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 24px;
+            color: white;
+        }
+
+        .hero p {
+            font-size: 18px;
             color: var(--text-muted);
             max-width: 600px;
-            margin: 0 auto 40px;
+            margin: 0 auto 48px auto;
         }
 
         /* =========================================
-           5. LAYOUT GRID
+           BUTTONS (CTA)
            ========================================= */
-        .main-grid {
+        .cta-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 80px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 28px;
+            height: 52px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Основная кнопка (Регистрация) */
+        .btn-primary {
+            background: white;
+            color: black;
+            border: 1px solid white;
+        }
+
+        .btn-primary:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.15);
+        }
+
+        /* Вторичная кнопка (Вход) */
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid var(--accent-border);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* =========================================
+           BENTO GRID FEATURES (VISUALS)
+           ========================================= */
+        .bento-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr; /* Блог (2) и Сайдбар (1) */
-            gap: 40px;
-            margin-bottom: 100px;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 300px);
+            gap: 24px;
+            padding-bottom: 120px;
         }
 
-        @media (max-width: 968px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* =========================================
-           6. MATCHES & BETTING (Sidebar/Feed)
-           ========================================= */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .section-title {
-            font-family: var(--font-head);
-            font-size: 1.5rem;
-            color: #fff;
-            text-transform: uppercase;
-        }
-
-        .match-card {
-            padding: 20px;
-            margin-bottom: 20px;
+        .bento-card {
+            background: var(--bg-card);
+            border: 1px solid var(--accent-border);
+            border-radius: 24px;
+            padding: 32px;
             position: relative;
             overflow: hidden;
-        }
-        
-        /* Статус матча */
-        .match-status {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            padding: 2px 8px;
-            border-radius: 4px;
-        }
-        .status-live { background: var(--accent-red); color: #fff; box-shadow: 0 0 10px var(--accent-red); animation: pulse 2s infinite; }
-        .status-scheduled { background: rgba(255,255,255,0.1); color: #aaa; }
-        .status-finished { background: #333; color: #888; }
-
-        .teams {
+            transition: var(--transition-smooth);
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            align-items: center;
-            margin: 20px 0;
         }
 
-        .team {
-            text-align: center;
-            width: 40%;
+        .bento-card:hover {
+            border-color: var(--accent-border-hover);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
 
-        .team-name {
-            font-weight: 700;
-            font-size: 1.1rem;
-            display: block;
-            margin-bottom: 5px;
+        /* Card Variations */
+        .card-large {
+            grid-column: span 2;
         }
 
-        .team-score {
-            font-family: var(--font-head);
-            font-size: 2.5rem;
-            font-weight: 700;
+        .card-tall {
+            grid-row: span 2;
+            background: linear-gradient(180deg, var(--bg-card) 0%, rgba(20,20,20,1) 100%);
         }
 
-        .vs {
+        /* Content inside cards */
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .card-desc {
+            font-size: 14px;
             color: var(--text-muted);
-            font-style: italic;
-            font-family: var(--font-head);
         }
 
-        .bet-actions {
-            margin-top: 15px;
-            border-top: 1px solid var(--glass-border);
-            padding-top: 15px;
-        }
-
-        .bet-input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .bet-input {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--glass-border);
-            color: #fff;
-            padding: 8px;
-            border-radius: 4px;
-            width: 100%;
-            text-align: center;
-            font-family: var(--font-head);
-        }
-        
-        .bet-input:focus {
-            outline: none;
-            border-color: var(--accent-green);
-        }
-
-        .win-multiplier {
-            text-align: center;
-            font-size: 0.8rem;
-            color: var(--accent-green);
-            margin-top: 5px;
-        }
-
-        /* =========================================
-           7. BLOG POSTS
-           ========================================= */
-        .post-card {
-            margin-bottom: 30px;
-            padding: 0; /* Убираем паддинг контейнера, так как паддинг внутри */
-            overflow: hidden;
-        }
-
-        .post-image {
-            width: 100%;
-            height: 300px;
-            background-color: #111;
-            position: relative;
-        }
-        
-        .post-image img {
+        .visual-mockup {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            opacity: 0.8;
-            transition: opacity 0.3s;
-        }
-
-        .post-content {
-            padding: 25px;
-        }
-
-        .post-meta {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .author-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-            color: #ccc;
-        }
-
-        .verified-badge {
-            color: #3b82f6; /* Blue tick */
-            font-size: 0.8rem;
-        }
-
-        .post-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-            line-height: 1.2;
-        }
-
-        .post-text {
-            color: var(--text-muted);
-            margin-bottom: 20px;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .post-actions {
-            display: flex;
-            gap: 20px;
-            border-top: 1px solid var(--glass-border);
-            padding-top: 15px;
-        }
-
-        .action-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.9rem;
-            transition: color 0.2s;
-        }
-
-        .action-btn:hover { color: #fff; }
-        .action-btn.liked { color: var(--accent-red); }
-
-        /* =========================================
-           8. ADMIN PANEL & MODALS
-           ========================================= */
-        #admin-panel-trigger {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--accent-purple);
-            color: #fff;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            margin-top: 20px;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.05);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 20px rgba(188, 19, 254, 0.4);
-            cursor: pointer;
-            z-index: 2000;
-            transition: transform 0.2s;
-        }
-        
-        #admin-panel-trigger:hover { transform: scale(1.1); }
-
-        /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            z-index: 3000;
-        }
-        
-        .toast {
-            background: rgba(10,10,10,0.95);
-            border-left: 4px solid var(--accent-green);
-            padding: 15px 25px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            color: #fff;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            animation: slideIn 0.3s ease-out;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 0, 85, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 0, 85, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 0, 85, 0); }
-        }
-
-        /* SVG Avatar Decoration styling */
-        .avatar-frame {
+        /* Декоративные звезды из референса */
+        .star-decoration {
             position: absolute;
-            top: -5px; left: -5px;
-            width: calc(100% + 10px);
-            height: calc(100% + 10px);
-            z-index: 10;
-            pointer-events: none;
+            width: 40px;
+            height: 40px;
+            top: 20px;
+            right: 20px;
+            animation: pulse 3s infinite ease-in-out;
         }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        /* =========================================
+           FOOTER
+           ========================================= */
+        footer {
+            border-top: 1px solid var(--accent-border);
+            padding: 60px 0;
+            background: #020202;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .footer-brand h3 {
+            font-size: 18px;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .footer-brand p {
+            color: var(--text-muted);
+            font-size: 14px;
+            max-width: 300px;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        /* =========================================
+           RESPONSIVE
+           ========================================= */
+        @media (max-width: 1024px) {
+            .hero h1 { font-size: 56px; }
+            .bento-grid { grid-template-columns: repeat(2, 1fr); }
+            .card-large { grid-column: span 2; }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 42px; }
+            .hero p { font-size: 16px; }
+            .bento-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
+            .card-large, .card-tall { grid-column: span 1; grid-row: span 1; min-height: 250px; }
+            .cta-group { flex-direction: column; padding: 0 20px; }
+            .btn { width: 100%; }
+        }
+
+        /* Specific Mockup Styles (Imitating the image interfaces) */
+        .mockup-match {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+            padding: 15px;
+            background: #1A1A1A;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 10px;
+        }
+        .team-circle { width: 30px; height: 30px; border-radius: 50%; background: #333; }
+        .score { font-family: monospace; font-size: 16px; color: white; letter-spacing: 2px; }
 
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="container nav-wrapper">
-            <a href="index.html" class="logo">
-                <i class="fa-solid fa-bolt"></i>
-                <span class="glitch-text" data-text="BET.IO">BET.IO</span>
-            </a>
+    <div class="bg-grid"></div>
+    <canvas id="starsCanvas" class="canvas-overlay"></canvas>
 
+    <header id="mainHeader">
+        <div class="container nav-inner">
+            <a href="#" class="logo">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/>
+                </svg>
+                BetPro
+            </a>
+            
             <nav class="nav-links">
-                <a href="#" class="nav-link active">Главная</a>
-                <a href="#matches" class="nav-link">Матчи</a>
-                <a href="#blog" class="nav-link">Блог</a>
-                <a href="#shop" class="nav-link">Магазин</a>
+                <a href="#features">Возможности</a>
+                <a href="#stats">Статистика</a>
+                <a href="#about">О нас</a>
             </nav>
 
-            <div class="auth-buttons" id="auth-container">
-                <a href="login.html" class="btn btn-outline">Войти</a>
-                <a href="reg.html" class="btn btn-primary">Регистрация</a>
-            </div>
+            <div style="display: flex; gap: 12px;">
+                </div>
         </div>
     </header>
 
-    <section class="hero">
-        <div class="container">
-            <h1 class="hero-title glitch-text" data-text="PREDICT. WIN. EARN.">PREDICT. WIN. EARN.</h1>
-            <p class="hero-subtitle">
-                Лучшая платформа для ставок на футбол. Анализируй матчи, делай прогнозы, получай 2x выигрыш. 
-                Вступай в элиту.
-            </p>
-            <a href="#matches" class="btn btn-primary" style="padding: 15px 40px; font-size: 1.2rem;">
-                Сделать ставку
-            </a>
-        </div>
-    </section>
-
-    <div class="container main-grid">
+    <main>
         
-        <div class="content-col" id="blog">
-            <div class="section-header">
-                <h2 class="section-title">Лента новостей</h2>
-                <button id="create-post-btn" class="btn btn-outline hidden" style="font-size:0.8rem;">
-                    <i class="fa-solid fa-plus"></i> Пост
-                </button>
-            </div>
-
-            <div id="posts-container">
-                <div class="glass-panel" style="padding: 40px; text-align: center; color: #666;">
-                    <i class="fa-solid fa-circle-notch fa-spin fa-2x"></i>
-                    <p style="margin-top: 10px;">Загрузка постов...</p>
+        <section class="hero">
+            <div class="container">
+                <div class="badge-pill">
+                    <span></span>
+                    Новая система прогнозов 2.0 уже доступна
                 </div>
-            </div>
-        </div>
 
-        <div class="sidebar-col">
-            
-            <div id="matches">
-                <div class="section-header">
-                    <h2 class="section-title">Live Матчи</h2>
+                <h1>
+                    Прогнозируй матчи.<br>
+                    <span class="text-gradient">Зарабатывай репутацию.</span>
+                </h1>
+
+                <p>
+                    Лучшая платформа для футбольной аналитики. Голосуй за победителей, угадывай счет 
+                    и получай 2x выигрыш в валюте сайта. Создай уникальный профиль и стань легендой.
+                </p>
+
+                <div class="cta-group">
+                    <a href="reg.html" class="btn btn-primary">
+                        Регистрация
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:8px"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                    </a>
+                    <a href="login.html" class="btn btn-secondary">
+                        Вход в аккаунт
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:8px"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                    </a>
                 </div>
+
+                <div style="position: relative; margin-top: 40px; padding: 1px; background: linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0)); border-radius: 20px; overflow: hidden;">
+                    <div style="background: #0A0A0A; border-radius: 20px; height: 300px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 60%; background: linear-gradient(0deg, rgba(255,255,255,0.05), transparent);"></div>
+                        <div style="width: 80%; height: 1px; background: rgba(255,255,255,0.1); position: absolute; top: 30%;"></div>
+                        <div style="width: 80%; height: 1px; background: rgba(255,255,255,0.1); position: absolute; top: 60%;"></div>
+                        <h3 style="color: var(--text-muted); font-weight: 400; font-size: 14px; position: absolute; top: 20px;">Live Activity Monitor</h3>
+                        
+                        <svg width="80%" height="100" viewBox="0 0 300 100" fill="none" style="position: absolute; bottom: 50px;">
+                            <path d="M0 80 C 50 80, 50 20, 100 20 C 150 20, 150 60, 200 60 C 250 60, 250 10, 300 10" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M0 80 C 50 80, 50 20, 100 20 C 150 20, 150 60, 200 60 C 250 60, 250 10, 300 10 L 300 100 L 0 100 Z" fill="url(#grad1)" opacity="0.2"/>
+                            <defs>
+                                <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:white;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:white;stop-opacity:0" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="container" id="features">
+            <div class="bento-grid">
                 
-                <div id="matches-container">
-                    <div class="glass-panel" style="padding: 20px; text-align: center;">
-                        Загрузка матчей...
+                <div class="bento-card card-tall">
+                    <div>
+                        <svg class="star-decoration" viewBox="0 0 24 24" fill="white">
+                            <path d="M12 2L15 9L22 9L17 14L19 21L12 17L5 21L7 14L2 9L9 9L12 2Z"/>
+                        </svg>
+                        <h3 class="card-title">Live Ставки</h3>
+                        <p class="card-desc">Голосуй за исход матча в реальном времени. Если прогноз верен — получи 2x.</p>
+                    </div>
+                    <div class="visual-mockup" style="flex-direction: column; justify-content: center; gap: 10px; background: transparent; border: none;">
+                        <div class="mockup-match">
+                            <div class="team-circle"></div>
+                            <span class="score">2 : 1</span>
+                            <div class="team-circle" style="background: #555;"></div>
+                        </div>
+                        <div class="mockup-match" style="opacity: 0.6;">
+                            <div class="team-circle"></div>
+                            <span class="score">0 : 0</span>
+                            <div class="team-circle" style="background: #555;"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div style="margin-top: 40px;">
-                <div class="section-header">
-                    <h2 class="section-title">Топ Победителей</h2>
-                </div>
-                <div class="glass-panel" style="padding: 20px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span><i class="fa-solid fa-crown" style="color: gold;"></i> vzzox</span>
-                        <span style="color: var(--accent-green);">+5000.00</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span><i class="fa-solid fa-medal" style="color: silver;"></i> frost</span>
-                        <span style="color: var(--accent-green);">+3200.00</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span><i class="fa-solid fa-medal" style="color: #cd7f32;"></i> neo_user</span>
-                        <span style="color: var(--accent-green);">+1500.00</span>
+                <div class="bento-card card-large">
+                    <h3 class="card-title">Магазин и Кастомизация</h3>
+                    <p class="card-desc">Покупай уникальные SVG-рамки для профиля, галочки верификации и цвета ника.</p>
+                    <div class="visual-mockup" style="flex-direction: row; gap: 20px;">
+                        <div style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid gold; background: #222;"></div>
+                        <div style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid cyan; box-shadow: 0 0 15px cyan; background: #222;"></div>
+                        <div style="width: 60px; height: 60px; border-radius: 50%; border: 2px dashed #666; background: #222;"></div>
                     </div>
                 </div>
-            </div>
 
+                <div class="bento-card">
+                    <h3 class="card-title">Блог Сообщества</h3>
+                    <p class="card-desc">Читай аналитику от админов, ставь лайки и пиши комментарии.</p>
+                    <div class="visual-mockup">
+                        <div style="width: 80%; height: 8px; background: #333; border-radius: 4px; margin-bottom: 8px;"></div>
+                        <div style="width: 60%; height: 8px; background: #333; border-radius: 4px;"></div>
+                    </div>
+                </div>
+
+                <div class="bento-card">
+                    <h3 class="card-title">Честность</h3>
+                    <p class="card-desc">Все транзакции прозрачны. Админы следят за порядком.</p>
+                    <div class="visual-mockup">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <h3>BetPro</h3>
+                <p>Платформа для тех, кто понимает футбол. <br>© 2026 Все права защищены.</p>
+            </div>
+            <div class="footer-links">
+                <ul>
+                    <li><a href="login.html">Вход</a></li>
+                    <li><a href="reg.html">Регистрация</a></li>
+                    <li><a href="#">Правила</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <ul>
+                    <li><a href="#">Telegram</a></li>
+                    <li><a href="#">Discord</a></li>
+                    <li><a href="#">Support</a></li>
+                </ul>
+            </div>
         </div>
-    </div>
-
-    <div id="admin-panel-trigger" class="hidden" title="Панель Администратора">
-        <i class="fa-solid fa-lock"></i>
-    </div>
-
-    <div class="toast-container" id="toast-container"></div>
+    </footer>
 
     <script>
-        // 1. КОНФИГУРАЦИЯ SUPABASE
-        // Твои данные из запроса
+        // 1. SUPABASE CONFIGURATION
         const SUPABASE_URL = 'https://cmoeirxugwapvvcdkwjs.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE';
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE';
 
-        // Состояние приложения
-        let currentUser = null;
-        let userProfile = null;
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // =========================================
-        // 2. ИНИЦИАЛИЗАЦИЯ
-        // =========================================
-        async function init() {
-            await checkAuth();
-            fetchMatches();
-            fetchPosts();
-        }
-
-        // =========================================
-        // 3. АВТОРИЗАЦИЯ И ПРОФИЛЬ
-        // =========================================
-        async function checkAuth() {
+        // 2. CHECK AUTH STATE (Опционально: редирект если уже вошел)
+        async function checkSession() {
             const { data: { session } } = await supabase.auth.getSession();
-            
-            const authContainer = document.getElementById('auth-container');
-            const adminTrigger = document.getElementById('admin-panel-trigger');
-            const createPostBtn = document.getElementById('create-post-btn');
-
             if (session) {
-                currentUser = session.user;
-                
-                // Загружаем расширенный профиль из таблицы users
-                const { data: profile, error } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('id', currentUser.id)
-                    .single();
-
-                if (profile) {
-                    userProfile = profile;
-                    
-                    // Рендерим Профиль в шапке
-                    authContainer.innerHTML = `
-                        <div class="user-nav" onclick="window.location.href='profile.html'">
-                            <span class="user-balance">${profile.balance} $</span>
-                            <div class="user-avatar-small">
-                                <img src="${profile.avatar_url || 'https://via.placeholder.com/150'}" alt="Avatar">
-                                </div>
-                            <span style="color: #fff; font-weight: 600;">${profile.username}</span>
-                        </div>
-                        <button onclick="logout()" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem;"><i class="fa-solid fa-right-from-bracket"></i></button>
-                    `;
-
-                    // Проверка прав Админа
-                    if (profile.role === 'admin') {
-                        adminTrigger.classList.remove('hidden');
-                        createPostBtn.classList.remove('hidden');
-                        
-                        adminTrigger.onclick = () => {
-                            showToast('Вход в админ-панель...', 'info');
-                            // Тут можно открыть модалку или перекинуть на admin.html
-                        };
-                    }
+                console.log("User is logged in:", session.user.email);
+                // Можно поменять текст кнопок или перенаправить в dashboard.html
+                // Но по заданию оставляем ссылки на login/reg
+                const btnLogin = document.querySelector('.btn-secondary');
+                if(btnLogin) {
+                    btnLogin.innerHTML = `Профиль <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:8px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+                    btnLogin.href = 'profile.html'; // Если будет такая страница
                 }
-            } else {
-                // Если не авторизован - показываем стандартные кнопки
-                authContainer.innerHTML = `
-                    <a href="login.html" class="btn btn-outline">Войти</a>
-                    <a href="reg.html" class="btn btn-primary">Регистрация</a>
-                `;
+            }
+        }
+        checkSession();
+
+        // 3. CANVAS BACKGROUND ANIMATION (STARS/DUST)
+        // Этот скрипт создает эффект летающих частиц как на дорогих сайтах
+        const canvas = document.getElementById('starsCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let particles = [];
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2;
+                this.opacity = Math.random() * 0.5 + 0.1;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Wrap around screen
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.fill();
             }
         }
 
-        async function logout() {
-            await supabase.auth.signOut();
-            window.location.reload();
+        function initParticles() {
+            particles = [];
+            const count = Math.floor(width * height / 15000); // Density
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
         }
 
-        // =========================================
-        // 4. МАТЧИ И СТАВКИ
-        // =========================================
-        async function fetchMatches() {
-            const container = document.getElementById('matches-container');
-            
-            // Запрос матчей (сначала лайв и запланированные)
-            const { data: matches, error } = await supabase
-                .from('matches')
-                .select('*')
-                .in('status', ['live', 'scheduled'])
-                .order('start_time', { ascending: true });
-
-            if (error) {
-                console.error('Ошибка загрузки матчей:', error);
-                container.innerHTML = '<div class="glass-panel" style="padding:20px;">Ошибка загрузки матчей.</div>';
-                return;
-            }
-
-            if (!matches || matches.length === 0) {
-                container.innerHTML = '<div class="glass-panel" style="padding:20px;">Нет активных матчей.</div>';
-                return;
-            }
-
-            container.innerHTML = '';
-            matches.forEach(match => {
-                const date = new Date(match.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const isLive = match.status === 'live';
-                
-                const html = `
-                    <div class="glass-panel match-card">
-                        <div class="match-status ${isLive ? 'status-live' : 'status-scheduled'}">
-                            ${isLive ? 'LIVE' : date}
-                        </div>
-                        
-                        <div class="teams">
-                            <div class="team">
-                                <span class="team-name">${match.team_home}</span>
-                                <span class="team-score">${isLive ? (match.score_home || 0) : '-'}</span>
-                            </div>
-                            <span class="vs">VS</span>
-                            <div class="team">
-                                <span class="team-name">${match.team_away}</span>
-                                <span class="team-score">${isLive ? (match.score_away || 0) : '-'}</span>
-                            </div>
-                        </div>
-
-                        ${currentUser ? `
-                        <div class="bet-actions">
-                            <div style="font-size: 0.8rem; margin-bottom: 5px; color: #aaa;">Сделать прогноз (Счет):</div>
-                            <div class="bet-input-group">
-                                <input type="number" id="ph-${match.id}" class="bet-input" placeholder="${match.team_home}" min="0">
-                                <input type="number" id="pa-${match.id}" class="bet-input" placeholder="${match.team_away}" min="0">
-                            </div>
-                            <input type="number" id="amount-${match.id}" class="bet-input" placeholder="Сумма ставки" style="margin-bottom: 10px;">
-                            
-                            <button onclick="placeBet(${match.id})" class="btn btn-primary" style="width: 100%;">
-                                Поставить
-                            </button>
-                            <div class="win-multiplier">Коэффициент x2.0</div>
-                        </div>
-                        ` : `
-                        <div class="bet-actions" style="text-align:center;">
-                            <a href="login.html" style="color: var(--accent-green); text-decoration: underline;">Войдите</a>, чтобы сделать ставку
-                        </div>
-                        `}
-                    </div>
-                `;
-                container.innerHTML += html;
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
             });
+            requestAnimationFrame(animate);
         }
 
-        async function placeBet(matchId) {
-            if (!userProfile) return;
+        // Init
+        window.addEventListener('resize', () => { resize(); initParticles(); });
+        resize();
+        initParticles();
+        animate();
 
-            const ph = document.getElementById(`ph-${matchId}`).value;
-            const pa = document.getElementById(`pa-${matchId}`).value;
-            const amount = parseFloat(document.getElementById(`amount-${matchId}`).value);
-
-            // Валидация
-            if (ph === '' || pa === '' || !amount || amount <= 0) {
-                showToast('Заполните все поля корректно!', 'error');
-                return;
-            }
-
-            if (userProfile.balance < amount) {
-                showToast('Недостаточно средств на балансе!', 'error');
-                return;
-            }
-
-            // 1. Снимаем деньги (Оптимистичное обновление UI)
-            const newBalance = userProfile.balance - amount;
-            // В реальности это лучше делать через RPC функцию, но для примера сделаем фронтом
-            // Сначала обновим баланс юзера
-            const { error: balanceError } = await supabase
-                .from('users')
-                .update({ balance: newBalance })
-                .eq('id', currentUser.id);
-
-            if (balanceError) {
-                showToast('Ошибка транзакции', 'error');
-                return;
-            }
-
-            // 2. Создаем ставку
-            const { error: betError } = await supabase
-                .from('bets')
-                .insert([{
-                    user_id: currentUser.id,
-                    match_id: matchId,
-                    amount: amount,
-                    predict_home: parseInt(ph),
-                    predict_away: parseInt(pa)
-                }]);
-
-            if (betError) {
-                showToast('Ошибка создания ставки', 'error');
-                // Тут бы по-хорошему вернуть деньги, но это демо
+        // 4. HEADER SCROLL EFFECT
+        const header = document.getElementById('mainHeader');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.style.background = 'rgba(5, 5, 5, 0.8)';
+                header.style.padding = '15px 0';
             } else {
-                showToast(`Ставка ${amount} принята! Удачи!`, 'success');
-                // Обновляем баланс в UI
-                document.querySelector('.user-balance').innerText = newBalance.toFixed(2) + ' $';
-                userProfile.balance = newBalance;
-                // Очищаем поля
-                document.getElementById(`amount-${matchId}`).value = '';
+                header.style.background = 'transparent';
+                header.style.padding = '20px 0';
             }
-        }
-
-        // =========================================
-        // 5. БЛОГ
-        // =========================================
-        async function fetchPosts() {
-            const container = document.getElementById('posts-container');
-
-            // Запрашиваем посты и джойним автора
-            // Примечание: Supabase JS синтаксис для джойнов зависит от настройки FK
-            const { data: posts, error } = await supabase
-                .from('posts')
-                .select(`
-                    *,
-                    users (username, is_verified, avatar_url)
-                `)
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                container.innerHTML = '<div class="glass-panel" style="padding:20px;">Ошибка загрузки блога.</div>';
-                return;
-            }
-
-            if (!posts || posts.length === 0) {
-                container.innerHTML = '<div class="glass-panel" style="padding:20px;">Постов пока нет.</div>';
-                return;
-            }
-
-            container.innerHTML = '';
-            posts.forEach(post => {
-                const author = post.users; // Объект автора
-                const date = new Date(post.created_at).toLocaleDateString();
-                
-                const html = `
-                    <article class="glass-panel post-card">
-                        ${post.image_url ? `
-                        <div class="post-image">
-                            <img src="${post.image_url}" alt="${post.title}">
-                        </div>` : ''}
-                        
-                        <div class="post-content">
-                            <div class="post-meta">
-                                <div class="author-info">
-                                    <img src="${author.avatar_url || 'https://via.placeholder.com/30'}" style="width:30px; height:30px; border-radius:50%;">
-                                    <span style="font-weight: 700; color: #fff;">${author.username}</span>
-                                    ${author.is_verified ? '<i class="fa-solid fa-circle-check verified-badge" title="Verified"></i>' : ''}
-                                </div>
-                                <span style="font-size: 0.8rem; color: #666;">• ${date}</span>
-                            </div>
-
-                            <h3 class="post-title">${post.title}</h3>
-                            <p class="post-text">${post.content}</p>
-
-                            <div class="post-actions">
-                                <button class="action-btn" onclick="likePost(${post.id}, this)">
-                                    <i class="fa-regular fa-heart"></i> Лайк
-                                </button>
-                                <button class="action-btn">
-                                    <i class="fa-regular fa-comment"></i> Комментарии
-                                </button>
-                            </div>
-                        </div>
-                    </article>
-                `;
-                container.innerHTML += html;
-            });
-        }
-
-        async function likePost(postId, btnElement) {
-            if (!currentUser) {
-                showToast('Войдите, чтобы ставить лайки', 'info');
-                return;
-            }
-            // Анимация лайка
-            const icon = btnElement.querySelector('i');
-            icon.classList.remove('fa-regular');
-            icon.classList.add('fa-solid');
-            btnElement.classList.add('liked');
-            
-            // Отправка в базу (игнорируем ошибку дубликата)
-            await supabase.from('post_likes').insert([{ user_id: currentUser.id, post_id: postId }]);
-        }
-
-        // =========================================
-        // 6. УТИЛИТЫ
-        // =========================================
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            
-            let icon = 'fa-check-circle';
-            let color = 'var(--accent-green)';
-            
-            if (type === 'error') {
-                icon = 'fa-exclamation-circle';
-                color = 'var(--accent-red)';
-                toast.style.borderLeftColor = color;
-            } else if (type === 'info') {
-                icon = 'fa-info-circle';
-                color = '#3b82f6';
-                toast.style.borderLeftColor = color;
-            }
-
-            toast.innerHTML = `<i class="fa-solid ${icon}" style="color:${color}"></i> ${message}`;
-            container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // Запуск
-        document.addEventListener('DOMContentLoaded', init);
+        });
 
     </script>
 </body>
