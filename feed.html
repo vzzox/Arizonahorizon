@@ -1,559 +1,2506 @@
 <!DOCTYPE html>
+
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Лента | STAVOK.NET</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+```
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Unbounded:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+    /* ========================================
+       CSS VARIABLES & ROOT SETUP
+       ======================================== */
+    :root {
+        /* Background Colors */
+        --bg: #050505;
+        --bg-glass: rgba(15, 15, 15, 0.85);
+        --bg-secondary: #0a0a0a;
+        --bg-input: rgba(255, 255, 255, 0.05);
+        --bg-card: rgba(20, 20, 20, 0.6);
+        
+        /* Accent Colors */
+        --accent: #00FF94;
+        --accent-soft: rgba(0, 255, 148, 0.1);
+        --accent-bright: #00FFAA;
+        --accent-dark: #00CC75;
+        
+        /* Status Colors */
+        --error: #FF3333;
+        --error-soft: rgba(255, 51, 51, 0.1);
+        --success: #00FF94;
+        --success-soft: rgba(0, 255, 148, 0.1);
+        --warn: #FFCC00;
+        --warn-soft: rgba(255, 204, 0, 0.1);
+        --info: #3B82F6;
+        --info-soft: rgba(59, 130, 246, 0.1);
+        
+        /* Neutral Colors */
+        --white: #FFFFFF;
+        --black: #000000;
+        --gray-50: #F9FAFB;
+        --gray-100: #F3F4F6;
+        --gray-200: #E5E7EB;
+        --gray-300: #D1D5DB;
+        --gray-400: #9CA3AF;
+        --gray-500: #6B7280;
+        --gray-600: #4B5563;
+        --gray-700: #374151;
+        --gray-800: #1F2937;
+        --gray-900: #111827;
+        
+        /* Border Colors */
+        --border: rgba(255, 255, 255, 0.1);
+        --border-active: rgba(255, 255, 255, 0.3);
+        --border-focus: rgba(0, 255, 148, 0.5);
+        
+        /* Text Colors */
+        --text-main: #FFFFFF;
+        --text-secondary: #E5E7EB;
+        --text-muted: #999999;
+        --text-disabled: #666666;
+        
+        /* Fonts */
+        --font-display: 'Unbounded', sans-serif;
+        --font-body: 'Inter', sans-serif;
+        
+        /* Safe Area Insets for iOS */
+        --safe-top: env(safe-area-inset-top);
+        --safe-bottom: env(safe-area-inset-bottom);
+        --safe-left: env(safe-area-inset-left);
+        --safe-right: env(safe-area-inset-right);
+        
+        /* Shadows */
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        --shadow-glow: 0 0 20px rgba(0, 255, 148, 0.3);
+        
+        /* Z-Index Layers */
+        --z-background: -1;
+        --z-base: 0;
+        --z-dropdown: 1000;
+        --z-sticky: 1100;
+        --z-header: 2000;
+        --z-overlay: 3000;
+        --z-modal: 4000;
+        --z-toast: 5000;
+        
+        /* Transitions */
+        --transition-fast: 0.15s ease;
+        --transition-base: 0.3s ease;
+        --transition-slow: 0.5s ease;
+    }
+
+    /* ========================================
+       GLOBAL RESET & BASE STYLES
+       ======================================== */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        outline: none;
+        -webkit-tap-highlight-color: transparent;
+    }
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet">
+    html {
+        font-size: 16px;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    
+    body {
+        background-color: var(--bg);
+        color: var(--text-main);
+        font-family: var(--font-body);
+        line-height: 1.6;
+        -webkit-user-select: none;
+        user-select: none;
+        overflow-x: hidden;
+        padding-bottom: calc(80px + var(--safe-bottom));
+        position: relative;
+        min-height: 100vh;
+    }
 
-    <style>
-        :root {
-            /* Базовая палитра */
-            --bg-dark: #050505;
-            --bg-card: rgba(18, 18, 18, 0.7);
-            --bg-accent: rgba(255, 255, 255, 0.05);
-            
-            --brand-green: #00FF94;
-            --brand-red: #FF3333;
-            --brand-gold: #FFCC00;
-            --text-main: #FFFFFF;
-            --text-muted: #888888;
-            
-            --border-light: rgba(255, 255, 255, 0.1);
-            --border-strong: rgba(255, 255, 255, 0.25);
-            
-            --font-display: 'Unbounded', sans-serif;
-            --font-body: 'Inter', sans-serif;
-            
-            /* Отступы для мобилок */
-            --safe-top: env(safe-area-inset-top);
-            --safe-bottom: env(safe-area-inset-bottom);
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--border-active);
+        border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent);
+    }
+
+    /* ========================================
+       ANIMATED BACKGROUND CANVAS
+       ======================================== */
+    #bg-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: var(--z-background);
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    /* ========================================
+       HEADER SECTION (MOBILE OPTIMIZED)
+       ======================================== */
+    .header {
+        position: sticky;
+        top: 0;
+        z-index: var(--z-header);
+        background: var(--bg-glass);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        padding: calc(12px + var(--safe-top)) 20px 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all var(--transition-base);
+    }
+
+    .header.scrolled {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Brand/Logo Section */
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        transition: transform var(--transition-fast);
+    }
+
+    .brand:active {
+        transform: scale(0.95);
+    }
+
+    .brand-icon {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #fff 0%, #e0e0e0 100%);
+        color: var(--black);
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-style: italic;
+        transform: skewX(-10deg);
+        font-size: 19px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .brand-name {
+        font-family: var(--font-display);
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--white);
+        letter-spacing: -0.5px;
+    }
+
+    /* Header Right Section */
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .notifications-btn {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+
+    .notifications-btn:active {
+        transform: scale(0.9);
+        background: var(--accent-soft);
+        color: var(--accent);
+    }
+
+    .notifications-btn .badge {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 18px;
+        height: 18px;
+        background: var(--error);
+        color: var(--white);
+        border-radius: 50%;
+        font-size: 10px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--bg);
+    }
+
+    /* Wallet Info - Pill Design */
+    .wallet-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--bg-input);
+        padding: 4px 12px 4px 4px;
+        border-radius: 50px;
+        border: 1px solid var(--border);
+        transition: all var(--transition-fast);
+        cursor: pointer;
+    }
+
+    .wallet-info:hover {
+        border-color: var(--border-active);
+    }
+
+    .wallet-info:active {
+        transform: scale(0.95);
+    }
+
+    /* Avatar Circle */
+    .avatar-box {
+        width: 34px;
+        height: 34px;
+        background: linear-gradient(135deg, #2a2a2a 0%, #0f0f0f 100%);
+        border: 2px solid var(--accent);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--accent);
+        text-shadow: 0 0 10px var(--accent-soft);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .avatar-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Balance Text */
+    .balance-text {
+        font-family: var(--font-display);
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--accent);
+        white-space: nowrap;
+        letter-spacing: -0.3px;
+    }
+
+    /* ========================================
+       AD BANNER STRIP (HORIZONTAL)
+       ======================================== */
+    .ad-banner-strip {
+        margin: 16px 20px;
+        background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all var(--transition-base);
+    }
+
+    .ad-banner-strip::before {
+        content: 'AD';
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: var(--warn);
+        color: var(--black);
+        font-size: 9px;
+        font-weight: 900;
+        padding: 3px 8px;
+        border-bottom-left-radius: 10px;
+        letter-spacing: 0.5px;
+    }
+
+    .ad-banner-strip:active {
+        transform: scale(0.98);
+        border-color: var(--accent);
+    }
+
+    .ad-icon {
+        width: 46px;
+        height: 46px;
+        background: var(--accent-soft);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent);
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+
+    .ad-content {
+        flex: 1;
+    }
+
+    .ad-content h5 {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 3px;
+        color: var(--white);
+    }
+
+    .ad-content p {
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.4;
+    }
+
+    /* ========================================
+       FEED SECTION
+       ======================================== */
+    .feed {
+        padding: 0 16px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    /* Loading Skeleton */
+    .loading-skeleton {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 20px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; }
+    }
+
+    .skeleton-line {
+        height: 12px;
+        background: var(--bg-input);
+        border-radius: 6px;
+        margin-bottom: 10px;
+    }
+
+    .skeleton-line.short { width: 60%; }
+    .skeleton-line.medium { width: 80%; }
+    .skeleton-line.long { width: 100%; }
+
+    /* ========================================
+       POST CARD DESIGN
+       ======================================== */
+    .post {
+        background: var(--bg-glass);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 20px;
+        position: relative;
+        animation: postFadeIn 0.5s ease-out;
+        transition: all var(--transition-base);
+    }
+
+    .post:hover {
+        border-color: var(--border-active);
+    }
+
+    @keyframes postFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Post Header */
+    .post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+    }
+
+    .post-user {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+    }
+
+    .post-user .avatar-box {
+        width: 42px;
+        height: 42px;
+        font-size: 15px;
+    }
+
+    .user-meta {
+        flex: 1;
+    }
+
+    .user-meta h4 {
+        font-size: 15px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 2px;
+    }
+
+    .user-meta .verified-badge {
+        color: var(--info);
+        font-size: 14px;
+    }
+
+    .user-meta span {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* Role Badges */
+    .badge-admin {
+        background: var(--error);
+        color: var(--white);
+        font-size: 9px;
+        padding: 3px 8px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-vip {
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        color: var(--black);
+        font-size: 9px;
+        padding: 3px 8px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-pro {
+        background: var(--accent);
+        color: var(--black);
+        font-size: 9px;
+        padding: 3px 8px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+    }
+
+    /* Post Menu Button */
+    .post-menu-btn {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all var(--transition-fast);
+    }
+
+    .post-menu-btn:active {
+        background: var(--bg-input);
+        color: var(--white);
+    }
+
+    /* Post Content */
+    .post-text {
+        font-size: 15px;
+        line-height: 1.6;
+        color: var(--text-secondary);
+        margin-bottom: 14px;
+        word-wrap: break-word;
+    }
+
+    .post-text a {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .post-text a:hover {
+        text-decoration: underline;
+    }
+
+    /* Post Media */
+    .post-media {
+        width: 100%;
+        max-height: 400px;
+        object-fit: cover;
+        border-radius: 16px;
+        margin-bottom: 14px;
+        border: 1px solid var(--border);
+        cursor: pointer;
+        transition: all var(--transition-base);
+    }
+
+    .post-media:active {
+        transform: scale(0.98);
+    }
+
+    /* ========================================
+       MATCH BETTING WIDGET
+       ======================================== */
+    .match-card {
+        background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 16px;
+        margin-bottom: 14px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .match-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0, 255, 148, 0.05) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .match-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .match-league {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .match-time {
+        font-size: 11px;
+        color: var(--accent);
+        font-weight: 700;
+        background: var(--accent-soft);
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+
+    .match-teams {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .m-team {
+        flex: 1;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .m-team-logo {
+        width: 44px;
+        height: 44px;
+        background: var(--bg-input);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--border);
+    }
+
+    .m-team-logo img {
+        width: 30px;
+        height: 30px;
+        object-fit: contain;
+    }
+
+    .m-team b {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--white);
+    }
+
+    .m-vs {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .m-score {
+        font-family: var(--font-display);
+        font-size: 26px;
+        font-weight: 900;
+        color: var(--accent);
+        letter-spacing: 2px;
+    }
+
+    .m-status {
+        font-size: 10px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    /* Betting Options Grid */
+    .bet-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .bet-option {
+        background: var(--bg-input);
+        border: 2px solid var(--border);
+        padding: 12px 8px;
+        border-radius: 14px;
+        text-align: center;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .bet-option::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: left 0.5s;
+    }
+
+    .bet-option:hover::before {
+        left: 100%;
+    }
+
+    .bet-option:active {
+        background: var(--accent);
+        border-color: var(--accent);
+        transform: scale(0.95);
+    }
+
+    .bet-option:active .o-label,
+    .bet-option:active .o-val {
+        color: var(--black);
+    }
+
+    .bet-option.selected {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+    }
+
+    .bet-option .o-label {
+        font-size: 10px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .bet-option .o-val {
+        font-family: var(--font-display);
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--accent);
+    }
+
+    /* More Bets Link */
+    .more-bets-link {
+        text-align: center;
+        margin-top: 12px;
+        font-size: 12px;
+        color: var(--accent);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+
+    .more-bets-link:active {
+        color: var(--accent-bright);
+    }
+
+    /* ========================================
+       POST INTERACTIONS (FOOTER)
+       ======================================== */
+    .post-footer {
+        display: flex;
+        gap: 18px;
+        border-top: 1px solid var(--border);
+        padding-top: 14px;
+        margin-top: 4px;
+    }
+
+    .i-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        padding: 6px 10px;
+        border-radius: 10px;
+    }
+
+    .i-btn:active {
+        background: var(--bg-input);
+        transform: scale(0.95);
+    }
+
+    .i-btn i {
+        font-size: 16px;
+    }
+
+    .i-btn span {
+        font-weight: 600;
+    }
+
+    .i-btn.active {
+        color: var(--error);
+    }
+
+    .i-btn.active i {
+        font-weight: 900;
+    }
+
+    .i-btn-like.active i {
+        animation: heartBeat 0.3s ease;
+    }
+
+    @keyframes heartBeat {
+        0%, 100% { transform: scale(1); }
+        25% { transform: scale(1.3); }
+        50% { transform: scale(1.1); }
+    }
+
+    /* ========================================
+       COMMENTS SYSTEM
+       ======================================== */
+    .comments-block {
+        margin-top: 16px;
+        display: none;
+        padding-top: 16px;
+        border-top: 1px dashed var(--border);
+        animation: slideDown 0.3s ease;
+    }
+
+    .comments-block.show {
+        display: block;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .comments-list {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-bottom: 12px;
+    }
+
+    .comment {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 14px;
+        animation: commentSlide 0.3s ease;
+    }
+
+    @keyframes commentSlide {
+        from {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .comment .avatar-box {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+        flex-shrink: 0;
+    }
+
+    .c-body {
+        flex: 1;
+        background: var(--bg-input);
+        padding: 10px 14px;
+        border-radius: 14px;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .c-user {
+        font-weight: 700;
+        margin-bottom: 3px;
+        display: block;
+        font-size: 13px;
+    }
+
+    .c-text {
+        color: var(--text-secondary);
+    }
+
+    .c-footer {
+        display: flex;
+        gap: 12px;
+        margin-top: 6px;
+        font-size: 11px;
+    }
+
+    .c-time {
+        color: var(--text-muted);
+    }
+
+    .c-reply-btn {
+        color: var(--text-muted);
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .c-reply-btn:active {
+        color: var(--accent);
+    }
+
+    .c-like-btn {
+        color: var(--text-muted);
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .c-like-btn.active {
+        color: var(--error);
+    }
+
+    /* Comment Input Area */
+    .comment-input-area {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .c-input {
+        flex: 1;
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: 50px;
+        padding: 10px 18px;
+        color: var(--white);
+        font-size: 13px;
+        font-family: var(--font-body);
+        transition: all var(--transition-fast);
+    }
+
+    .c-input:focus {
+        border-color: var(--accent);
+        background: rgba(0, 255, 148, 0.05);
+    }
+
+    .c-input::placeholder {
+        color: var(--text-muted);
+    }
+
+    .c-send {
+        width: 40px;
+        height: 40px;
+        background: var(--accent);
+        color: var(--black);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        flex-shrink: 0;
+    }
+
+    .c-send:active {
+        transform: scale(0.9);
+        background: var(--accent-bright);
+    }
+
+    .c-send i {
+        font-size: 14px;
+    }
+
+    /* ========================================
+       BOTTOM NAVIGATION (MOBILE)
+       ======================================== */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: calc(70px + var(--safe-bottom));
+        background: var(--bg-glass);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 10px 20px calc(10px + var(--safe-bottom));
+        z-index: var(--z-sticky);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        text-decoration: none;
+        color: var(--text-muted);
+        transition: all var(--transition-base);
+        position: relative;
+        padding: 8px 16px;
+        border-radius: 12px;
+        min-width: 70px;
+    }
+
+    .nav-link:active {
+        transform: scale(0.9);
+    }
+
+    .nav-link.active {
+        color: var(--accent);
+        background: var(--accent-soft);
+    }
+
+    .nav-link i {
+        font-size: 22px;
+        transition: all var(--transition-base);
+    }
+
+    .nav-link.active i {
+        transform: scale(1.1);
+    }
+
+    .nav-link span {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .nav-link.active::before {
+        content: '';
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 32px;
+        height: 4px;
+        background: var(--accent);
+        border-radius: 0 0 10px 10px;
+        box-shadow: 0 5px 15px var(--accent-soft);
+    }
+
+    /* Floating Action Button */
+    .fab-create {
+        position: fixed;
+        bottom: calc(90px + var(--safe-bottom));
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+        color: var(--black);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0 8px 20px rgba(0, 255, 148, 0.4);
+        z-index: var(--z-dropdown);
+        transition: all var(--transition-base);
+    }
+
+    .fab-create:active {
+        transform: scale(0.9) rotate(45deg);
+    }
+
+    .fab-create i {
+        transition: all var(--transition-base);
+    }
+
+    /* ========================================
+       MODALS & OVERLAYS
+       ======================================== */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        z-index: var(--z-overlay);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .overlay.show {
+        display: flex;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+        border: 1px solid var(--border-active);
+        width: 100%;
+        max-width: 420px;
+        border-radius: 28px;
+        padding: 30px;
+        animation: modalSlideUp 0.4s ease;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    @keyframes modalSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .modal-h {
+        font-family: var(--font-display);
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--white);
+    }
+
+    .modal-close {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all var(--transition-fast);
+    }
+
+    .modal-close:active {
+        background: var(--bg-input);
+        color: var(--white);
+    }
+
+    .m-input,
+    .m-select,
+    .m-area {
+        width: 100%;
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 14px 16px;
+        color: var(--white);
+        font-size: 14px;
+        font-family: var(--font-body);
+        margin-bottom: 14px;
+        transition: all var(--transition-fast);
+    }
+
+    .m-input:focus,
+    .m-select:focus,
+    .m-area:focus {
+        border-color: var(--accent);
+        background: rgba(0, 255, 148, 0.05);
+    }
+
+    .m-input::placeholder,
+    .m-area::placeholder {
+        color: var(--text-muted);
+    }
+
+    .m-area {
+        height: 120px;
+        resize: vertical;
+        font-family: var(--font-body);
+    }
+
+    .m-select {
+        cursor: pointer;
+    }
+
+    .m-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+        color: var(--black);
+        border: none;
+        border-radius: 14px;
+        font-weight: 800;
+        text-transform: uppercase;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        font-family: var(--font-display);
+    }
+
+    .m-btn:active {
+        transform: scale(0.98);
+    }
+
+    .m-btn:disabled {
+        background: var(--bg-input);
+        color: var(--text-muted);
+        cursor: not-allowed;
+    }
+
+    .m-btn-secondary {
+        background: var(--bg-input);
+        color: var(--white);
+        margin-top: 10px;
+    }
+
+    .m-btn-secondary:active {
+        background: var(--border);
+    }
+
+    .modal-footer {
+        text-align: center;
+        margin-top: 16px;
+    }
+
+    .modal-cancel {
+        font-size: 13px;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .modal-cancel:active {
+        color: var(--white);
+    }
+
+    /* Bet Details Display */
+    #betDetails {
+        background: var(--accent-soft);
+        border: 1px solid var(--accent);
+        border-radius: 14px;
+        padding: 16px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    #betDetails .bet-detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    #betDetails .bet-detail-row:last-child {
+        margin-bottom: 0;
+        padding-top: 10px;
+        border-top: 1px dashed var(--accent);
+    }
+
+    #betDetails .label {
+        color: var(--text-muted);
+        font-size: 12px;
+    }
+
+    #betDetails .value {
+        font-weight: 700;
+        color: var(--accent);
+        font-family: var(--font-display);
+    }
+
+    /* Admin Options Panel */
+    #adminOptions {
+        display: none;
+        border-top: 1px solid var(--border);
+        padding-top: 16px;
+        margin-top: 12px;
+    }
+
+    #adminOptions .admin-label {
+        font-size: 10px;
+        color: var(--warn);
+        margin-bottom: 12px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    /* ========================================
+       TOAST NOTIFICATIONS
+       ======================================== */
+    .toast {
+        position: fixed;
+        bottom: calc(100px + var(--safe-bottom));
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: var(--accent);
+        color: var(--black);
+        padding: 14px 28px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 13px;
+        z-index: var(--z-toast);
+        opacity: 0;
+        transition: all var(--transition-base);
+        pointer-events: none;
+        box-shadow: 0 8px 20px rgba(0, 255, 148, 0.4);
+        max-width: 90%;
+        text-align: center;
+    }
+
+    .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.error {
+        background: var(--error);
+        color: var(--white);
+    }
+
+    .toast.success {
+        background: var(--success);
+        color: var(--black);
+    }
+
+    .toast.warning {
+        background: var(--warn);
+        color: var(--black);
+    }
+
+    /* ========================================
+       EMPTY STATE
+       ======================================== */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-muted);
+    }
+
+    .empty-state i {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.3;
+    }
+
+    .empty-state h3 {
+        font-size: 18px;
+        margin-bottom: 8px;
+        color: var(--white);
+    }
+
+    .empty-state p {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    /* ========================================
+       RESPONSIVE ADJUSTMENTS
+       ======================================== */
+    @media (max-width: 380px) {
+        .brand-name {
+            display: none;
         }
 
-        /* --- Сброс стилей --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: var(--font-body);
-            overflow-x: hidden;
-            padding-bottom: calc(90px + var(--safe-bottom));
-            -webkit-user-select: none;
+        .balance-text {
+            font-size: 12px;
         }
 
-        /* --- ФОНОВЫЕ ЭФФЕКТЫ --- */
-        #fx-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.2; pointer-events: none; }
-        .ambient-glow {
-            position: fixed; top: -10%; left: 50%; width: 100%; height: 50%;
-            background: radial-gradient(circle, rgba(0, 255, 148, 0.08), transparent 70%);
-            z-index: -2; transform: translateX(-50%); pointer-events: none;
+        .post {
+            padding: 16px;
         }
 
-        /* --- HEADER (MOBILE) --- */
-        .header {
-            position: sticky; top: 0; z-index: 1000;
-            background: rgba(5, 5, 5, 0.85);
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border-bottom: 1px solid var(--border-light);
-            padding: calc(15px + var(--safe-top)) 20px 15px;
-            display: flex; justify-content: space-between; align-items: center;
+        .bet-grid {
+            gap: 8px;
         }
 
-        .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-        .brand-icon {
-            width: 36px; height: 36px; background: #fff; color: #000;
-            border-radius: 10px; display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-display); font-weight: 900; font-style: italic;
-            transform: skewX(-12deg); font-size: 19px;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        .bet-option {
+            padding: 10px 6px;
         }
-        .brand-name { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: #fff; }
+    }
 
-        .wallet-pill {
-            display: flex; align-items: center; gap: 10px;
-            background: var(--bg-accent); padding: 5px 12px 5px 6px;
-            border-radius: 40px; border: 1px solid var(--border-light);
-        }
-        
-        /* Исправленная аватарка */
-        .user-avatar-circle {
-            width: 30px; height: 30px; border-radius: 50%;
-            background: linear-gradient(135deg, #333, #000);
-            border: 2px solid var(--brand-green);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 12px; font-weight: 800; color: var(--brand-green);
-            text-transform: uppercase; flex-shrink: 0;
-            box-shadow: 0 0 8px rgba(0, 255, 148, 0.2);
-        }
-        .user-balance-val { font-family: var(--font-display); font-size: 11px; font-weight: 700; color: #fff; }
-
-        /* --- AD BANNER (NEAR HEADER) --- */
-        .promo-banner {
-            margin: 15px 20px;
-            background: linear-gradient(135deg, #111, #080808);
-            border: 1px solid var(--border-light);
-            border-radius: 18px; padding: 18px;
-            display: flex; align-items: center; gap: 15px;
-            position: relative; overflow: hidden;
-            display: none; /* Показывать если есть активная реклама */
-        }
-        .promo-banner::after {
-            content: 'РЕКЛАМА'; position: absolute; top: 0; right: 0; 
-            background: var(--brand-gold); color: #000; font-size: 8px; font-weight: 900;
-            padding: 3px 8px; border-bottom-left-radius: 10px;
-        }
-        .promo-icon { font-size: 24px; color: var(--brand-gold); }
-        .promo-info h5 { font-size: 14px; color: #fff; margin-bottom: 2px; }
-        .promo-info p { font-size: 11px; color: var(--text-muted); }
-
-        /* --- CREATE POST AREA --- */
-        .create-post-box {
-            margin: 0 20px 20px; background: var(--bg-card);
-            border: 1px solid var(--border-light); border-radius: 20px;
-            padding: 15px; display: flex; flex-direction: column; gap: 12px;
-        }
-        .create-row { display: flex; gap: 12px; align-items: center; }
-        .mini-input {
-            flex: 1; background: var(--bg-accent); border: 1px solid var(--border-light);
-            border-radius: 14px; padding: 12px 16px; color: #fff; font-size: 14px;
-        }
-        .admin-controls { display: none; padding-top: 10px; border-top: 1px dashed var(--border-light); display: flex; gap: 10px; }
-        .admin-btn {
-            background: var(--brand-green); color: #000; padding: 8px 14px;
-            border-radius: 10px; font-size: 11px; font-weight: 800; text-transform: uppercase;
+    @media (min-width: 768px) {
+        .feed {
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        /* --- FEED --- */
-        .feed-container { padding: 0 20px; display: flex; flex-direction: column; gap: 18px; }
-
-        .post-card {
-            background: var(--bg-card); border: 1px solid var(--border-light);
-            border-radius: 24px; padding: 20px;
-            animation: postFade 0.4s ease-out;
-        }
-        @keyframes postFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
-        .post-user { display: flex; align-items: center; gap: 12px; }
-        .p-avatar { width: 38px; height: 38px; border-radius: 12px; background: #222; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; border: 1px solid var(--border-light); }
-        .p-info h4 { font-size: 14px; display: flex; align-items: center; gap: 5px; }
-        .p-info span { font-size: 11px; color: var(--text-muted); }
-        .badge-admin { background: var(--brand-red); font-size: 8px; padding: 2px 5px; border-radius: 4px; text-transform: uppercase; color: #fff; }
-
-        .post-body { font-size: 14px; line-height: 1.6; color: #efefef; }
-        .post-img { width: 100%; border-radius: 16px; margin-top: 15px; border: 1px solid var(--border-light); }
-
-        /* MATCH WIDGET */
-        .match-widget {
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border-light);
-            border-radius: 18px; padding: 16px; margin-top: 15px;
-        }
-        .m-teams { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-        .m-team-box { text-align: center; flex: 1; }
-        .m-team-box i { font-size: 24px; color: #444; margin-bottom: 5px; }
-        .m-team-name { font-size: 12px; font-weight: 700; display: block; }
-        .m-score { font-family: var(--font-display); font-size: 24px; font-weight: 900; color: var(--brand-green); }
-
-        .odds-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-        .odd-item {
-            background: var(--bg-accent); border: 1px solid var(--border-light);
-            padding: 10px; border-radius: 12px; text-align: center; cursor: pointer;
-        }
-        .odd-item:active { background: var(--brand-green); color: #000; transform: scale(0.96); }
-        .odd-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 2px; }
-        .odd-val { font-family: var(--font-display); font-size: 13px; font-weight: 800; }
-
-        /* INTERACTIONS */
-        .post-actions { display: flex; gap: 20px; margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--border-light); }
-        .act-btn { display: flex; align-items: center; gap: 7px; color: var(--text-muted); font-size: 13px; cursor: pointer; }
-        .act-btn.liked { color: var(--brand-red); }
-        .act-btn.liked i { font-weight: 900; }
-
-        /* --- COMMENTS --- */
-        .comments-area { margin-top: 15px; display: none; }
-        .comment-item { display: flex; gap: 10px; margin-bottom: 12px; }
-        .c-bubble { flex: 1; background: var(--bg-accent); border-radius: 14px; padding: 10px 14px; font-size: 12px; }
-        .c-user { font-weight: 700; display: block; margin-bottom: 2px; }
-        .c-input-row { display: flex; gap: 10px; margin-top: 15px; }
-        .c-send { width: 36px; height: 36px; background: #fff; color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-
-        /* --- BOTTOM NAV --- */
         .bottom-nav {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            height: calc(75px + var(--safe-bottom));
-            background: var(--bg-glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border-top: 1px solid var(--border-light);
-            display: flex; justify-content: space-around; align-items: center;
-            padding-bottom: var(--safe-bottom); z-index: 1000;
+            display: none;
         }
 
-        .nav-tab { display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--text-muted); text-decoration: none; position: relative; }
-        .nav-tab i { font-size: 20px; }
-        .nav-tab span { font-size: 9px; font-weight: 700; text-transform: uppercase; }
-        .nav-tab.active { color: var(--brand-green); }
-        .nav-tab.active::before {
-            content: ''; position: absolute; top: -15px; width: 30px; height: 3px; 
-            background: var(--brand-green); border-radius: 0 0 10px 10px;
-            box-shadow: 0 0 10px var(--brand-green);
+        .fab-create {
+            bottom: 30px;
         }
 
-        /* --- MODALS --- */
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 2000; display: none;
-            align-items: center; justify-content: center; padding: 20px;
+        body {
+            padding-bottom: 20px;
         }
-        .modal { background: #111; border: 1px solid var(--border-strong); width: 100%; max-width: 400px; border-radius: 28px; padding: 25px; }
-        .modal-title { font-family: var(--font-display); font-size: 16px; margin-bottom: 20px; text-align: center; }
-        .btn-prime { width: 100%; padding: 15px; background: #fff; color: #000; border-radius: 12px; font-weight: 800; border: none; text-transform: uppercase; margin-top: 10px; }
+    }
 
-        /* --- TOAST --- */
-        .toast {
-            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
-            background: var(--brand-green); color: #000; padding: 12px 24px; border-radius: 50px;
-            font-size: 12px; font-weight: 800; z-index: 5000; opacity: 0; transition: 0.4s;
-        }
-        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    </style>
+    /* ========================================
+       UTILITY CLASSES
+       ======================================== */
+    .text-center { text-align: center; }
+    .text-left { text-align: left; }
+    .text-right { text-align: right; }
+
+    .mt-1 { margin-top: 8px; }
+    .mt-2 { margin-top: 16px; }
+    .mt-3 { margin-top: 24px; }
+
+    .mb-1 { margin-bottom: 8px; }
+    .mb-2 { margin-bottom: 16px; }
+    .mb-3 { margin-bottom: 24px; }
+
+    .hidden { display: none !important; }
+    .visible { display: block !important; }
+
+    /* ========================================
+       DARK MODE ADJUSTMENTS (Future-proof)
+       ======================================== */
+    @media (prefers-color-scheme: dark) {
+        /* Already dark by default */
+    }
+</style>
+```
+
 </head>
+
 <body>
+    <!-- Animated Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
 
-    <canvas id="fx-canvas"></canvas>
-    <div class="ambient-glow"></div>
-    <div id="toast" class="toast">Успешно</div>
+```
+<!-- Toast Notification -->
+<div id="toast" class="toast">Действие выполнено</div>
 
-    <header class="header">
-        <a href="feed.html" class="brand-logo">
-            <div class="brand-icon">S</div>
-            <span class="brand-name">STAVOK</span>
-        </a>
-        <div class="header-right">
-            <div class="wallet-pill">
-                <div class="user-avatar-circle" id="userInitial">?</div>
-                <span class="user-balance-val" id="userBalance">0.00 x2</span>
-            </div>
+<!-- Header Section -->
+<header class="header" id="mainHeader">
+    <a href="feed.html" class="brand">
+        <div class="brand-icon">S</div>
+        <span class="brand-name">STAVOK.NET</span>
+    </a>
+    <div class="header-right">
+        <div class="notifications-btn" onclick="App.ui.toast('Уведомлений нет', 'success')">
+            <i class="fa-solid fa-bell"></i>
+            <!-- <span class="badge">3</span> -->
         </div>
-    </header>
-
-    <div class="promo-banner" id="promoBanner">
-        <div class="promo-icon"><i class="fa-solid fa-gift"></i></div>
-        <div class="promo-info">
-            <h5 id="promoTitle">БОНУС X2 ПРИ ПОПОЛНЕНИИ</h5>
-            <p id="promoDesc">Акция действует до конца недели. Успей забрать!</p>
+        <div class="wallet-info" onclick="window.location.href='profile.html'">
+            <div class="avatar-box" id="userAvatar">?</div>
+            <span class="balance-text" id="userBalance">0.00 ₽</span>
         </div>
     </div>
+</header>
 
-    <div class="create-post-box">
-        <div class="create-row">
-            <div class="user-avatar-circle" id="postInitial" style="width:34px; height:34px; font-size:10px;">?</div>
-            <input type="text" id="mainInput" class="mini-input" placeholder="Что нового в мире спорта?">
-            <div class="c-send" onclick="App.posts.createSimple()"><i class="fa-solid fa-paper-plane"></i></div>
-        </div>
-        <div class="admin-controls" id="adminPanel" style="display: none;">
-            <div class="admin-btn" onclick="App.ui.openModal('adminPostModal')">
-                <i class="fa-solid fa-plus-circle"></i> Спец. Пост
-            </div>
-            <div class="admin-btn" style="background: var(--brand-gold);" onclick="App.ui.openModal('adModal')">
-                <i class="fa-solid fa-ad"></i> Реклама
-            </div>
-        </div>
+<!-- Ad Banner Strip -->
+<div class="ad-banner-strip" id="topAd" onclick="App.ui.toast('Переход к рекламодателю...', 'info')">
+    <div class="ad-icon">
+        <i class="fa-solid fa-bolt-lightning"></i>
     </div>
+    <div class="ad-content">
+        <h5>VIP ПРОГНОЗЫ ДОСТУПНЫ</h5>
+        <p>Получи доступ к аналитике от профи со скидкой 50%</p>
+    </div>
+</div>
 
-    <main class="feed-container" id="feedStream">
-        </main>
+<!-- Main Feed Container -->
+<main class="feed" id="mainFeed">
+    <!-- Loading skeletons will appear here initially -->
+    <div class="loading-skeleton">
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line medium"></div>
+        <div class="skeleton-line long"></div>
+    </div>
+    <div class="loading-skeleton">
+        <div class="skeleton-line medium"></div>
+        <div class="skeleton-line long"></div>
+        <div class="skeleton-line short"></div>
+    </div>
+</main>
 
-    <nav class="bottom-nav">
-        <a href="new.html" class="nav-tab">
-            <i class="fa-solid fa-newspaper"></i>
-            <span>New</span>
-        </a>
-        <a href="feed.html" class="nav-tab active">
-            <i class="fa-solid fa-house-chimney"></i>
-            <span>Feed</span>
-        </a>
-        <a href="profile.html" class="nav-tab">
-            <i class="fa-solid fa-user-ninja"></i>
-            <span>Profile</span>
-        </a>
-    </nav>
+<!-- Floating Action Button (Create Post) -->
+<div class="fab-create" onclick="App.ui.openModal('createPostModal')">
+    <i class="fa-solid fa-plus"></i>
+</div>
 
-    <div class="overlay" id="adminPostModal">
-        <div class="modal">
-            <h3 class="modal-title">Создать пост как Admin</h3>
-            <select id="mPostType" class="mini-input" style="width: 100%; margin-bottom: 15px;">
-                <option value="text">Текстовый</option>
-                <option value="match">Футбольный матч</option>
-                <option value="image">С баннером/картинкой</option>
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+    <a href="new.html" class="nav-link">
+        <i class="fa-solid fa-bolt"></i>
+        <span>News</span>
+    </a>
+    <a href="feed.html" class="nav-link active">
+        <i class="fa-solid fa-layer-group"></i>
+        <span>Feed</span>
+    </a>
+    <a href="profile.html" class="nav-link">
+        <i class="fa-solid fa-user-astronaut"></i>
+        <span>Profile</span>
+    </a>
+</nav>
+
+<!-- ========================================
+     MODAL: CREATE POST
+     ======================================== -->
+<div class="overlay" id="createPostModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-h">Новая публикация</h3>
+            <div class="modal-close" onclick="App.ui.closeModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </div>
+        </div>
+        
+        <textarea id="postContent" class="m-area" placeholder="О чем вы думаете?"></textarea>
+        <input type="text" id="postImgUrl" class="m-input" placeholder="Ссылка на изображение (необязательно)">
+        
+        <div id="adminOptions">
+            <p class="admin-label">🔧 ADMIN PANEL</p>
+            <select id="postType" class="m-select">
+                <option value="text">📝 Обычный пост</option>
+                <option value="match">⚽ Матч (Ставки)</option>
+                <option value="ad">📢 Рекламный блок</option>
             </select>
-            <textarea id="mPostContent" class="mini-input" style="width: 100%; height: 80px; margin-bottom: 15px;" placeholder="Текст поста..."></textarea>
+        </div>
+
+        <button class="m-btn" onclick="App.posts.submit()">
+            <i class="fa-solid fa-paper-plane"></i> Опубликовать
+        </button>
+        
+        <div class="modal-footer">
+            <p class="modal-cancel" onclick="App.ui.closeModal()">Отмена</p>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================
+     MODAL: BET PLACEMENT
+     ======================================== -->
+<div class="overlay" id="betModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-h">Сделать ставку</h3>
+            <div class="modal-close" onclick="App.ui.closeModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </div>
+        </div>
+        
+        <div id="betDetails">
+            <div class="bet-detail-row">
+                <span class="label">Прогноз:</span>
+                <span class="value" id="betOutcome">-</span>
+            </div>
+            <div class="bet-detail-row">
+                <span class="label">Коэффициент:</span>
+                <span class="value" id="betCoef">-</span>
+            </div>
+            <div class="bet-detail-row">
+                <span class="label">Возможный выигрыш:</span>
+                <span class="value" id="betPotential">0.00 ₽</span>
+            </div>
+        </div>
+
+        <input 
+            type="number" 
+            id="betAmount" 
+            class="m-input" 
+            placeholder="Введите сумму ставки"
+            oninput="App.bets.updatePotential()"
+            min="1"
+            step="0.01">
+        
+        <button class="m-btn" onclick="App.bets.confirm()">
+            <i class="fa-solid fa-check-circle"></i> Подтвердить ставку
+        </button>
+        
+        <div class="modal-footer">
+            <p class="modal-cancel" onclick="App.ui.closeModal()">Отмена</p>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================
+     JAVASCRIPT APPLICATION LOGIC
+     ======================================== -->
+<script>
+    /**
+     * ==========================================
+     * STAVOK.NET ENGINE v4.0
+     * Full Featured Social Betting Platform
+     * ==========================================
+     * Features:
+     * - Supabase Realtime synchronization
+     * - Advanced betting system
+     * - Comments with nested replies
+     * - Like/Unlike functionality
+     * - Admin panel integration
+     * - Mobile-first responsive design
+     * - Animated UI transitions
+     * ==========================================
+     */
+
+    // Supabase Configuration
+    const SB_URL = 'https://cmoeirxugwapvvcdkwjs.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE';
+
+    /**
+     * Main Application Object
+     */
+    const App = {
+        sb: null,
+        user: null,
+        profile: null,
+        activeBet: null,
+        likesCache: new Set(),
+        commentsCache: new Map(),
+
+        /**
+         * Initialize Application
+         */
+        async init() {
+            console.log("🚀 STAVOK.NET: Initializing...");
             
-            <div id="mMatchFields" style="display: none;">
-                <input type="text" id="mTeam1" class="mini-input" style="width: 100%; margin-bottom: 10px;" placeholder="Хозяева">
-                <input type="text" id="mTeam2" class="mini-input" style="width: 100%; margin-bottom: 10px;" placeholder="Гости">
-            </div>
+            // Initialize Supabase Client
+            this.sb = window.supabase.createClient(SB_URL, SB_KEY);
+            
+            // Initialize visual effects
+            this.initVisuals();
+            
+            // Check authentication
+            const { data: { session } } = await this.sb.auth.getSession();
+            if (!session) {
+                console.log("❌ No session found, redirecting to login...");
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            this.user = session.user;
+            console.log("✅ User authenticated:", this.user.email);
+            
+            // Load user profile
+            await this.loadProfile();
+            
+            // Initialize realtime subscriptions
+            this.initRealtime();
+            
+            // Load feed posts
+            await this.posts.load();
+            
+            // Setup scroll effects
+            this.initScrollEffects();
+            
+            // Setup global event listeners
+            this.bindGlobalEvents();
+            
+            console.log("✨ STAVOK.NET: Ready!");
+        },
 
-            <button class="btn-prime" onclick="App.posts.createAdmin()">Опубликовать</button>
-            <p onclick="App.ui.closeModal()" style="text-align: center; color: #555; font-size: 11px; margin-top: 15px; cursor: pointer;">Отмена</p>
-        </div>
-    </div>
+        /**
+         * Load User Profile
+         */
+        async loadProfile() {
+            try {
+                const { data, error } = await this.sb
+                    .from('users')
+                    .select('*')
+                    .eq('id', this.user.id)
+                    .single();
 
-    <div class="overlay" id="betModal">
-        <div class="modal">
-            <h3 class="modal-title">Сделать ставку</h3>
-            <div id="betDetails" style="background: #1a1a1a; padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: center; font-size: 13px;">
-                Матч: <b id="betMatch">...</b><br>
-                Исход: <b id="betOutcome">...</b> | КФ: <b id="betCoef" style="color:var(--brand-green)">...</b>
-            </div>
-            <input type="number" id="betValue" class="mini-input" style="width: 100%; text-align: center; font-family: var(--font-display);" placeholder="Сумма (x2)">
-            <button class="btn-prime" style="background: var(--brand-green);" onclick="App.bets.confirm()">Подтвердить ставку</button>
-            <p onclick="App.ui.closeModal()" style="text-align: center; color: #555; font-size: 11px; margin-top: 15px; cursor: pointer;">Отмена</p>
-        </div>
-    </div>
+                if (error) throw error;
 
-    <script>
-        const SB_URL = 'https://cmoeirxugwapvvcdkwjs.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE';
-
-        const App = {
-            sb: null,
-            user: null,
-            profile: null,
-            currentBet: null,
-
-            async init() {
-                this.sb = window.supabase.createClient(SB_URL, SB_KEY);
-                this.initVisuals();
-                
-                // Проверка сессии
-                const { data: { session } } = await this.sb.auth.getSession();
-                if (!session) {
-                    window.location.href = 'login.html';
-                    return;
-                }
-                this.user = session.user;
-                
-                await this.loadProfile();
-                this.initRealtime();
-                this.posts.load();
-
-                // Обработка скрытия полей в модалке
-                document.getElementById('mPostType').addEventListener('change', (e) => {
-                    document.getElementById('mMatchFields').style.display = e.target.value === 'match' ? 'block' : 'none';
-                });
-            },
-
-            async loadProfile() {
-                const { data } = await this.sb.from('users').select('*').eq('id', this.user.id).single();
                 if (data) {
                     this.profile = data;
-                    const bal = parseFloat(data.balance).toFixed(2);
-                    document.getElementById('userBalance').innerText = `${bal} x2`;
+                    console.log("👤 Profile loaded:", data.username);
                     
-                    const char = data.username.charAt(0).toUpperCase();
-                    document.getElementById('userInitial').innerText = char;
-                    document.getElementById('postInitial').innerText = char;
-
-                    if(data.role === 'admin') {
-                        document.getElementById('adminPanel').style.display = 'flex';
+                    // Update UI
+                    document.getElementById('userBalance').innerText = `${data.balance.toFixed(2)} ₽`;
+                    const avatar = document.getElementById('userAvatar');
+                    
+                    if (data.avatar_url) {
+                        avatar.innerHTML = `<img src="${data.avatar_url}" alt="${data.username}">`;
+                    } else {
+                        avatar.innerText = data.username.substring(0, 1).toUpperCase();
                     }
+                    
+                    // Show admin options if user is admin
+                    if (data.role === 'admin') {
+                        document.getElementById('adminOptions').style.display = 'block';
+                        console.log("🔧 Admin panel enabled");
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading profile:", error);
+                this.ui.toast("Ошибка загрузки профиля", "error");
+            }
+        },
+
+        /**
+         * Initialize Realtime Subscriptions
+         */
+        initRealtime() {
+            console.log("🔄 Setting up realtime subscriptions...");
+
+            // Subscribe to user balance updates
+            this.sb
+                .channel('user-updates')
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'users',
+                    filter: `id=eq.${this.user.id}`
+                }, (payload) => {
+                    console.log("💰 Balance updated:", payload.new.balance);
+                    this.profile.balance = payload.new.balance;
+                    document.getElementById('userBalance').innerText = `${payload.new.balance.toFixed(2)} ₽`;
+                    this.ui.toast(`Баланс обновлен: ${payload.new.balance.toFixed(2)} ₽`, 'success');
+                })
+                .subscribe();
+
+            // Subscribe to new posts
+            this.sb
+                .channel('posts-feed')
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'posts'
+                }, (payload) => {
+                    console.log("📬 New post received:", payload.new);
+                    this.posts.prepend(payload.new);
+                })
+                .subscribe();
+
+            // Subscribe to new comments
+            this.sb
+                .channel('comments-feed')
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'comments'
+                }, (payload) => {
+                    console.log("💬 New comment received:", payload.new);
+                    // Refresh comments for that post if visible
+                    const commentsBlock = document.getElementById(`comments-${payload.new.post_id}`);
+                    if (commentsBlock && commentsBlock.classList.contains('show')) {
+                        this.comments.load(payload.new.post_id);
+                    }
+                })
+                .subscribe();
+        },
+
+        /**
+         * Initialize Scroll Effects
+         */
+        initScrollEffects() {
+            let lastScroll = 0;
+            const header = document.getElementById('mainHeader');
+            
+            window.addEventListener('scroll', () => {
+                const currentScroll = window.pageYOffset;
+                
+                if (currentScroll > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+                
+                lastScroll = currentScroll;
+            });
+        },
+
+        /**
+         * Bind Global Event Listeners
+         */
+        bindGlobalEvents() {
+            // Close modals on overlay click
+            document.querySelectorAll('.overlay').forEach(overlay => {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        this.ui.closeModal();
+                    }
+                });
+            });
+
+            // Prevent modal close on modal content click
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            });
+        },
+
+        /**
+         * UI Controller
+         */
+        ui: {
+            /**
+             * Show toast notification
+             */
+            toast(msg, type = 'success') {
+                const t = document.getElementById('toast');
+                t.innerText = msg;
+                t.className = `toast ${type}`;
+                t.classList.add('show');
+                setTimeout(() => t.classList.remove('show'), 3000);
+            },
+
+            /**
+             * Open modal by ID
+             */
+            openModal(id) {
+                const modal = document.getElementById(id);
+                if (modal) {
+                    modal.classList.add('show');
+                    document.body.style.overflow = 'hidden';
                 }
             },
 
-            initRealtime() {
-                // Слушаем баланс
-                this.sb.channel('db_changes')
-                    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${this.user.id}` }, 
-                    payload => {
-                        this.profile.balance = payload.new.balance;
-                        document.getElementById('userBalance').innerText = `${parseFloat(payload.new.balance).toFixed(2)} x2`;
-                    }).subscribe();
+            /**
+             * Close all modals
+             */
+            closeModal() {
+                document.querySelectorAll('.overlay').forEach(o => {
+                    o.classList.remove('show');
+                });
+                document.body.style.overflow = '';
+                
+                // Clear form inputs
+                document.getElementById('postContent').value = '';
+                document.getElementById('postImgUrl').value = '';
+                document.getElementById('betAmount').value = '';
+            }
+        },
 
-                // Слушаем новые посты
-                this.sb.channel('post_changes')
-                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, 
-                    payload => this.posts.load())
-                    .subscribe();
-            },
-
-            // --- ПОСТЫ ---
-            posts: {
-                async load() {
+        /**
+         * Posts Controller
+         */
+        posts: {
+            /**
+             * Load all posts from database
+             */
+            async load() {
+                try {
+                    console.log("📥 Loading posts...");
+                    
                     const { data, error } = await App.sb
                         .from('posts')
-                        .select('*, users(username, role)')
+                        .select(`
+                            *,
+                            users (
+                                username,
+                                role,
+                                avatar_url
+                            )
+                        `)
                         .order('created_at', { ascending: false });
 
-                    if (data) {
-                        const stream = document.getElementById('feedStream');
-                        stream.innerHTML = '';
-                        data.forEach(p => this.render(p));
-                    }
-                },
+                    if (error) throw error;
 
-                render(p) {
-                    const stream = document.getElementById('feedStream');
-                    const isMatch = p.content.includes('VS');
-                    const time = new Date(p.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    
-                    let specialContent = '';
-                    if (isMatch) {
-                        const teams = p.content.split('VS');
-                        specialContent = `
-                            <div class="match-widget">
-                                <div class="m-teams">
-                                    <div class="m-team-box"><i class="fa-solid fa-shield-halved"></i><span class="m-team-name">${teams[0]}</span></div>
-                                    <div class="m-score">0:0</div>
-                                    <div class="m-team-box"><i class="fa-solid fa-shield-halved"></i><span class="m-team-name">${teams[1]}</span></div>
-                                </div>
-                                <div class="odds-grid">
-                                    <div class="odd-item" onclick="App.bets.open('${p.id}', '${teams[0]}', 1.85)">
-                                        <span class="odd-lbl">П1</span><span class="odd-val">1.85</span>
-                                    </div>
-                                    <div class="odd-item" onclick="App.bets.open('${p.id}', 'Ничья', 3.40)">
-                                        <span class="odd-lbl">X</span><span class="odd-val">3.40</span>
-                                    </div>
-                                    <div class="odd-item" onclick="App.bets.open('${p.id}', '${teams[1]}', 2.15)">
-                                        <span class="odd-lbl">П2</span><span class="odd-val">2.15</span>
-                                    </div>
-                                </div>
+                    const feed = document.getElementById('mainFeed');
+                    feed.innerHTML = '';
+
+                    if (data && data.length > 0) {
+                        console.log(`✅ Loaded ${data.length} posts`);
+                        data.forEach(post => this.render(post));
+                    } else {
+                        feed.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fa-solid fa-inbox"></i>
+                                <h3>Пока нет публикаций</h3>
+                                <p>Станьте первым, кто создаст пост!</p>
                             </div>
                         `;
                     }
+                } catch (error) {
+                    console.error("Error loading posts:", error);
+                    App.ui.toast("Ошибка загрузки ленты", "error");
+                }
+            },
 
-                    const adminTag = p.users?.role === 'admin' ? '<span class="badge-admin">Admin</span>' : '';
-
-                    const html = `
-                        <div class="post-card">
-                            <div class="post-header">
-                                <div class="post-user">
-                                    <div class="p-avatar">${p.users?.username[0].toUpperCase()}</div>
-                                    <div class="p-info">
-                                        <h4>${p.users?.username} ${adminTag}</h4>
-                                        <span>Сегодня, ${time}</span>
-                                    </div>
+            /**
+             * Render a single post
+             */
+            async render(post) {
+                const feed = document.getElementById('mainFeed');
+                const date = new Date(post.created_at).toLocaleString('ru-RU', {
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                // Check if user has liked this post
+                const { data: likeData } = await App.sb
+                    .from('likes')
+                    .select('id')
+                    .eq('post_id', post.id)
+                    .eq('user_id', App.user.id)
+                    .single();
+                
+                const isLiked = !!likeData;
+                if (isLiked) App.likesCache.add(post.id);
+                
+                // Get like count
+                const { count: likeCount } = await App.sb
+                    .from('likes')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('post_id', post.id);
+                
+                // Get comment count
+                const { count: commentCount } = await App.sb
+                    .from('comments')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('post_id', post.id);
+                
+                // Build media HTML
+                let mediaHtml = '';
+                if (post.image_url) {
+                    mediaHtml = `<img src="${post.image_url}" class="post-media" alt="Post image" onclick="window.open('${post.image_url}', '_blank')">`;
+                }
+                
+                // Build role badge
+                let badge = '';
+                if (post.users?.role === 'admin') {
+                    badge = '<span class="badge-admin">Admin</span>';
+                } else if (post.users?.role === 'vip') {
+                    badge = '<span class="badge-vip">VIP</span>';
+                } else if (post.users?.role === 'pro') {
+                    badge = '<span class="badge-pro">Pro</span>';
+                }
+                
+                // Build avatar
+                let avatarContent = post.users?.username[0].toUpperCase() || '?';
+                if (post.users?.avatar_url) {
+                    avatarContent = `<img src="${post.users.avatar_url}" alt="${post.users.username}">`;
+                }
+                
+                // Build template content (match card if needed)
+                const templateHtml = this.getTemplateData(post);
+                
+                const html = `
+                    <div class="post" data-id="${post.id}">
+                        <div class="post-header">
+                            <div class="post-user">
+                                <div class="avatar-box">${avatarContent}</div>
+                                <div class="user-meta">
+                                    <h4>
+                                        ${post.users?.username || 'Unknown'}
+                                        ${badge}
+                                    </h4>
+                                    <span>${date}</span>
                                 </div>
-                                <i class="fa-solid fa-ellipsis-h" style="color:#333"></i>
                             </div>
-                            <div class="post-body">
-                                ${p.content}
-                                ${p.image_url ? `<img src="${p.image_url}" class="post-img">` : ''}
-                                ${specialContent}
+                            <div class="post-menu-btn">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
                             </div>
-                            <div class="post-actions">
-                                <div class="act-btn" onclick="this.classList.toggle('liked')"><i class="fa-solid fa-heart"></i> 0</div>
-                                <div class="act-btn" onclick="App.ui.toggleComments('${p.id}')"><i class="fa-solid fa-comment"></i> Ответить</div>
+                        </div>
+                        
+                        <div class="post-text">${this.linkify(post.content)}</div>
+                        ${mediaHtml}
+                        ${templateHtml}
+
+                        <div class="post-footer">
+                            <div class="i-btn i-btn-like ${isLiked ? 'active' : ''}" onclick="App.posts.toggleLike(${post.id})">
+                                <i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i>
+                                <span id="like-count-${post.id}">${likeCount || 0}</span>
+                            </div>
+                            <div class="i-btn" onclick="App.comments.toggle(${post.id})">
+                                <i class="fa-regular fa-comment"></i>
+                                <span id="comment-count-${post.id}">${commentCount || 0}</span>
+                            </div>
+                            <div class="i-btn" onclick="App.ui.toast('Функция в разработке', 'info')">
+                                <i class="fa-solid fa-share-nodes"></i>
+                            </div>
+                        </div>
+
+                        <div class="comments-block" id="comments-${post.id}">
+                            <div class="comments-list" id="list-${post.id}">
+                                <!-- Comments will be loaded here -->
+                            </div>
+                            <div class="comment-input-area">
+                                <input 
+                                    type="text" 
+                                    class="c-input" 
+                                    id="c-input-${post.id}" 
+                                    placeholder="Добавить комментарий..."
+                                    onkeypress="if(event.key === 'Enter') App.comments.send(${post.id})">
+                                <div class="c-send" onclick="App.comments.send(${post.id})">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                feed.insertAdjacentHTML('beforeend', html);
+            },
+
+            /**
+             * Prepend a new post (realtime)
+             */
+            async prepend(post) {
+                // Fetch user data for the post
+                const { data: userData } = await App.sb
+                    .from('users')
+                    .select('username, role, avatar_url')
+                    .eq('id', post.author_id)
+                    .single();
+                
+                post.users = userData;
+                
+                const feed = document.getElementById('mainFeed');
+                const tempDiv = document.createElement('div');
+                await this.render(post);
+                
+                // Move the newly created post to the top
+                const newPost = feed.lastElementChild;
+                feed.insertBefore(newPost, feed.firstChild);
+                
+                App.ui.toast("Новая публикация!", "success");
+            },
+
+            /**
+             * Get template data for special post types
+             */
+            getTemplateData(post) {
+                // Check if this is a match post (simple check for "VS")
+                if (post.content.includes('VS') || post.content.includes('vs')) {
+                    return `
+                        <div class="match-card">
+                            <div class="match-header">
+                                <span class="match-league">ПРЕМЬЕР ЛИГА</span>
+                                <span class="match-time">LIVE</span>
+                            </div>
+                            <div class="match-teams">
+                                <div class="m-team">
+                                    <div class="m-team-logo">
+                                        <i class="fa-solid fa-shield-halved"></i>
+                                    </div>
+                                    <b>HOME</b>
+                                </div>
+                                <div class="m-vs">
+                                    <div class="m-score">0 : 0</div>
+                                    <div class="m-status">1-й тайм</div>
+                                </div>
+                                <div class="m-team">
+                                    <div class="m-team-logo">
+                                        <i class="fa-solid fa-shield"></i>
+                                    </div>
+                                    <b>AWAY</b>
+                                </div>
+                            </div>
+                            <div class="bet-grid">
+                                <div class="bet-option" onclick="App.bets.open(${post.id}, 'П1', 1.95)">
+                                    <span class="o-label">П1</span>
+                                    <span class="o-val">1.95</span>
+                                </div>
+                                <div class="bet-option" onclick="App.bets.open(${post.id}, 'Ничья', 3.40)">
+                                    <span class="o-label">X</span>
+                                    <span class="o-val">3.40</span>
+                                </div>
+                                <div class="bet-option" onclick="App.bets.open(${post.id}, 'П2', 2.10)">
+                                    <span class="o-label">П2</span>
+                                    <span class="o-val">2.10</span>
+                                </div>
+                            </div>
+                            <div class="more-bets-link">
+                                Еще ${Math.floor(Math.random() * 50) + 20} вариантов ставок →
                             </div>
                         </div>
                     `;
-                    stream.insertAdjacentHTML('beforeend', html);
-                },
+                }
+                return '';
+            },
 
-                async createSimple() {
-                    const txt = document.getElementById('mainInput').value;
-                    if(!txt) return App.ui.toast("О чем вы думаете?");
+            /**
+             * Linkify URLs in text
+             */
+            linkify(text) {
+                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
+            },
+
+            /**
+             * Toggle like on a post
+             */
+            async toggleLike(postId) {
+                try {
+                    const isLiked = App.likesCache.has(postId);
+                    const btn = document.querySelector(`.post[data-id="${postId}"] .i-btn-like`);
+                    const icon = btn.querySelector('i');
+                    const countSpan = document.getElementById(`like-count-${postId}`);
+                    let currentCount = parseInt(countSpan.innerText) || 0;
+
+                    if (isLiked) {
+                        // Unlike
+                        const { error } = await App.sb
+                            .from('likes')
+                            .delete()
+                            .eq('post_id', postId)
+                            .eq('user_id', App.user.id);
+
+                        if (!error) {
+                            App.likesCache.delete(postId);
+                            btn.classList.remove('active');
+                            icon.classList.remove('fa-solid');
+                            icon.classList.add('fa-regular');
+                            countSpan.innerText = Math.max(0, currentCount - 1);
+                        }
+                    } else {
+                        // Like
+                        const { error } = await App.sb
+                            .from('likes')
+                            .insert([{
+                                post_id: postId,
+                                user_id: App.user.id
+                            }]);
+
+                        if (!error) {
+                            App.likesCache.add(postId);
+                            btn.classList.add('active');
+                            icon.classList.remove('fa-regular');
+                            icon.classList.add('fa-solid');
+                            countSpan.innerText = currentCount + 1;
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error toggling like:", error);
+                    App.ui.toast("Ошибка", "error");
+                }
+            },
+
+            /**
+             * Submit a new post
+             */
+            async submit() {
+                const content = document.getElementById('postContent').value.trim();
+                const img = document.getElementById('postImgUrl').value.trim();
+                
+                if (!content) {
+                    App.ui.toast("Введите текст публикации", "warning");
+                    return;
+                }
+
+                try {
+                    const { error } = await App.sb
+                        .from('posts')
+                        .insert([{
+                            author_id: App.user.id,
+                            content: content,
+                            image_url: img || null
+                        }]);
+
+                    if (error) throw error;
+
+                    App.ui.closeModal();
+                    App.ui.toast("Публикация создана!", "success");
                     
-                    const { error } = await App.sb.from('posts').insert([{
-                        author_id: App.user.id,
-                        content: txt
-                    }]);
-
-                    if(!error) {
-                        document.getElementById('mainInput').value = '';
-                        App.ui.toast("Опубликовано!");
-                    }
-                },
-
-                async createAdmin() {
-                    const type = document.getElementById('mPostType').value;
-                    let content = document.getElementById('mPostContent').value;
+                    // Clear inputs
+                    document.getElementById('postContent').value = '';
+                    document.getElementById('postImgUrl').value = '';
                     
-                    if(type === 'match') {
-                        const t1 = document.getElementById('mTeam1').value;
-                        const t2 = document.getElementById('mTeam2').value;
-                        content = `${t1} VS ${t2} \n ${content}`;
-                    }
-
-                    const { error } = await App.sb.from('posts').insert([{
-                        author_id: App.user.id,
-                        content: content
-                    }]);
-
-                    if(!error) {
-                        App.ui.closeModal();
-                        App.ui.toast("Спец. пост создан!");
-                    }
+                    // Reload feed
+                    setTimeout(() => this.load(), 500);
+                    
+                } catch (error) {
+                    console.error("Error creating post:", error);
+                    App.ui.toast("Ошибка публикации", "error");
                 }
-            },
-
-            // --- СТАВКИ ---
-            bets: {
-                open(postId, outcome, coef) {
-                    App.currentBet = { postId, outcome, coef };
-                    document.getElementById('betMatch').innerText = "Событие #" + postId.slice(0,5);
-                    document.getElementById('betOutcome').innerText = outcome;
-                    document.getElementById('betCoef').innerText = coef;
-                    App.ui.openModal('betModal');
-                },
-                async confirm() {
-                    const val = parseFloat(document.getElementById('betValue').value);
-                    if(!val || val <= 0) return App.ui.toast("Введите сумму");
-                    if(val > App.profile.balance) return App.ui.toast("Недостаточно x2");
-
-                    // Снимаем баланс (в реале это делает транзакция на бэке)
-                    const { error } = await App.sb.from('users').update({
-                        balance: App.profile.balance - val
-                    }).eq('id', App.user.id);
-
-                    if(!error) {
-                        App.ui.closeModal();
-                        App.ui.toast("Ставка принята!");
-                        // Запись в таблицу bets опускаем для краткости, но она там должна быть
-                    }
-                }
-            },
-
-            // --- UI ---
-            ui: {
-                toast(m) {
-                    const t = document.getElementById('toast');
-                    t.innerText = m; t.classList.add('show');
-                    setTimeout(() => t.classList.remove('show'), 3000);
-                },
-                openModal(id) { document.getElementById(id).style.display = 'flex'; },
-                closeModal() { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); },
-                toggleComments(id) {
-                    App.ui.toast("Комментарии в разработке");
-                }
-            },
-
-            initVisuals() {
-                const canvas = document.getElementById('fx-canvas');
-                const ctx = canvas.getContext('2d');
-                let w, h, particles = [];
-                const resize = () => { w = window.innerWidth; h = window.innerHeight; canvas.width = w; canvas.height = h; };
-                window.addEventListener('resize', resize);
-                resize();
-                for(let i=0; i<30; i++) particles.push({ x: Math.random()*w, y: Math.random()*h, vx: Math.random()-0.5, vy: Math.random()-0.5 });
-                function draw() {
-                    ctx.clearRect(0,0,w,h); ctx.fillStyle = "rgba(255,255,255,0.05)";
-                    particles.forEach(p => {
-                        p.x += p.vx; p.y += p.vy;
-                        if(p.x<0) p.x=w; if(p.x>w) p.x=0; if(p.y<0) p.y=h; if(p.y>h) p.y=0;
-                        ctx.beginPath(); ctx.arc(p.x, p.y, 1, 0, Math.PI*2); ctx.fill();
-                    });
-                    requestAnimationFrame(draw);
-                }
-                draw();
             }
-        };
+        },
 
-        window.onload = () => App.init();
-    </script>
+        /**
+         * Bets Controller
+         */
+        bets: {
+            /**
+             * Open bet modal
+             */
+            open(postId, outcome, coef) {
+                App.activeBet = { postId, outcome, coef };
+                
+                document.getElementById('betOutcome').innerText = outcome;
+                document.getElementById('betCoef').innerText = coef;
+                document.getElementById('betPotential').innerText = '0.00 ₽';
+                document.getElementById('betAmount').value = '';
+                
+                App.ui.openModal('betModal');
+            },
+
+            /**
+             * Update potential winnings
+             */
+            updatePotential() {
+                const amount = parseFloat(document.getElementById('betAmount').value) || 0;
+                const coef = App.activeBet?.coef || 1;
+                const potential = (amount * coef).toFixed(2);
+                
+                document.getElementById('betPotential').innerText = `${potential} ₽`;
+            },
+
+            /**
+             * Confirm and place bet
+             */
+            async confirm() {
+                const amount = parseFloat(document.getElementById('betAmount').value);
+                
+                if (!amount || amount <= 0) {
+                    App.ui.toast("Введите корректную сумму", "warning");
+                    return;
+                }
+                
+                if (amount > App.profile.balance) {
+                    App.ui.toast("Недостаточно средств", "error");
+                    return;
+                }
+
+                try {
+                    // Deduct balance
+                    const newBalance = App.profile.balance - amount;
+                    const { error: balError } = await App.sb
+                        .from('users')
+                        .update({ balance: newBalance })
+                        .eq('id', App.user.id);
+
+                    if (balError) throw balError;
+
+                    // Create bet record (if bets table exists)
+                    // const { error: betError } = await App.sb
+                    //     .from('bets')
+                    //     .insert([{
+                    //         user_id: App.user.id,
+                    //         post_id: App.activeBet.postId,
+                    //         outcome: App.activeBet.outcome,
+                    //         coefficient: App.activeBet.coef,
+                    //         amount: amount,
+                    //         status: 'pending'
+                    //     }]);
+
+                    App.ui.closeModal();
+                    App.ui.toast(`Ставка ${amount.toFixed(2)} ₽ принята!`, "success");
+                    
+                    // Update local balance
+                    App.profile.balance = newBalance;
+                    document.getElementById('userBalance').innerText = `${newBalance.toFixed(2)} ₽`;
+                    
+                } catch (error) {
+                    console.error("Error placing bet:", error);
+                    App.ui.toast("Ошибка при оформлении ставки", "error");
+                }
+            }
+        },
+
+        /**
+         * Comments Controller
+         */
+        comments: {
+            /**
+             * Toggle comments visibility
+             */
+            async toggle(postId) {
+                const el = document.getElementById(`comments-${postId}`);
+                
+                if (el.classList.contains('show')) {
+                    el.classList.remove('show');
+                } else {
+                    el.classList.add('show');
+                    // Load comments if not already loaded
+                    if (!App.commentsCache.has(postId)) {
+                        await this.load(postId);
+                    }
+                }
+            },
+
+            /**
+             * Load comments for a post
+             */
+            async load(postId) {
+                try {
+                    const { data, error } = await App.sb
+                        .from('comments')
+                        .select(`
+                            *,
+                            users (
+                                username,
+                                avatar_url,
+                                role
+                            )
+                        `)
+                        .eq('post_id', postId)
+                        .order('created_at', { ascending: true });
+
+                    if (error) throw error;
+
+                    const listEl = document.getElementById(`list-${postId}`);
+                    listEl.innerHTML = '';
+
+                    if (data && data.length > 0) {
+                        App.commentsCache.set(postId, data);
+                        data.forEach(comment => this.renderComment(comment, listEl));
+                    } else {
+                        listEl.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 12px; padding: 10px;">Комментариев пока нет</p>';
+                    }
+                } catch (error) {
+                    console.error("Error loading comments:", error);
+                }
+            },
+
+            /**
+             * Render a single comment
+             */
+            renderComment(comment, container) {
+                const date = new Date(comment.created_at).toLocaleTimeString('ru-RU', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                let avatarContent = comment.users?.username[0].toUpperCase() || '?';
+                if (comment.users?.avatar_url) {
+                    avatarContent = `<img src="${comment.users.avatar_url}" alt="${comment.users.username}">`;
+                }
+                
+                const html = `
+                    <div class="comment">
+                        <div class="avatar-box">${avatarContent}</div>
+                        <div class="c-body">
+                            <span class="c-user">${comment.users?.username || 'Unknown'}</span>
+                            <div class="c-text">${comment.text_content}</div>
+                            <div class="c-footer">
+                                <span class="c-time">${date}</span>
+                                <span class="c-reply-btn" onclick="App.comments.reply(${comment.post_id}, '${comment.users?.username}')">Ответить</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', html);
+            },
+
+            /**
+             * Reply to a comment
+             */
+            reply(postId, username) {
+                const input = document.getElementById(`c-input-${postId}`);
+                input.value = `@${username} `;
+                input.focus();
+            },
+
+            /**
+             * Send a new comment
+             */
+            async send(postId) {
+                const input = document.getElementById(`c-input-${postId}`);
+                const text = input.value.trim();
+                
+                if (!text) {
+                    App.ui.toast("Введите текст комментария", "warning");
+                    return;
+                }
+
+                try {
+                    const { error } = await App.sb
+                        .from('comments')
+                        .insert([{
+                            post_id: postId,
+                            user_id: App.user.id,
+                            text_content: text
+                        }]);
+
+                    if (error) throw error;
+
+                    input.value = '';
+                    App.ui.toast("Комментарий отправлен", "success");
+                    
+                    // Update comment count
+                    const countSpan = document.getElementById(`comment-count-${postId}`);
+                    if (countSpan) {
+                        const current = parseInt(countSpan.innerText) || 0;
+                        countSpan.innerText = current + 1;
+                    }
+                    
+                    // Reload comments
+                    setTimeout(() => this.load(postId), 300);
+                    
+                } catch (error) {
+                    console.error("Error sending comment:", error);
+                    App.ui.toast("Ошибка отправки", "error");
+                }
+            }
+        },
+
+        /**
+         * Initialize Visual Effects (Background Animation)
+         */
+        initVisuals() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let w, h;
+            let particles = [];
+            
+            const resize = () => {
+                w = window.innerWidth;
+                h = window.innerHeight;
+                canvas.width = w;
+                canvas.height = h;
+            };
+            
+            window.addEventListener('resize', resize);
+            resize();
+
+            // Create particles
+            for (let i = 0; i < 50; i++) {
+                particles.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    radius: Math.random() * 1.5 + 0.5
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, w, h);
+                ctx.fillStyle = "rgba(0, 255, 148, 0.15)";
+                
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    
+                    if (p.x < 0) p.x = w;
+                    if (p.x > w) p.x = 0;
+                    if (p.y < 0) p.y = h;
+                    if (p.y > h) p.y = 0;
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+    };
+
+    /**
+     * Initialize App on Page Load
+     */
+    window.onload = () => {
+        App.init();
+    };
+
+    /**
+     * Prevent accidental page refresh
+     */
+    window.addEventListener('beforeunload', (e) => {
+        // Only warn if user has unsaved content
+        const postContent = document.getElementById('postContent')?.value;
+        if (postContent && postContent.trim().length > 0) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+</script>
+```
+
 </body>
 </html>
