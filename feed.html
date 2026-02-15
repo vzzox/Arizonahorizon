@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#000000">
-    <title>STAVOK.NET | Titanium</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>STAVOK.NET | Titanium Ultra</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -13,241 +14,346 @@
     <style>
         :root {
             --bg: #000000;
-            --glass: rgba(20, 20, 20, 0.75);
-            --border: rgba(255, 255, 255, 0.1);
-            --accent: #00FF94;
-            --gold: #FFD700;
-            --danger: #FF3B30;
-            --text: #FFFFFF;
-            --font-h: 'Unbounded', sans-serif;
-            --font-b: 'Inter', sans-serif;
+            --glass-surf: rgba(20, 20, 20, 0.70);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-highlight: rgba(255, 255, 255, 0.05);
+            --neon-green: #00FF94;
+            --neon-red: #FF2E2E;
+            --neon-gold: #FFD700;
+            --text-main: #FFFFFF;
+            --text-muted: #888888;
+            --font-display: 'Unbounded', sans-serif;
+            --font-body: 'Inter', sans-serif;
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
+            --z-modal: 9999;
+            --z-toast: 10000;
         }
 
+        /* RESET & BASE */
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
         body {
-            background: var(--bg); color: var(--text); font-family: var(--font-b);
-            overflow-x: hidden; padding-bottom: 120px;
-            background-image: radial-gradient(circle at 50% 0%, rgba(0,255,148,0.05), transparent 40%);
+            background-color: var(--bg); color: var(--text-main); font-family: var(--font-body);
+            overflow-x: hidden; min-height: 100vh; padding-bottom: 120px;
+            /* Quantum Grid Background */
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(0, 255, 148, 0.03), transparent 70%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
         }
 
-        /* LIQUID GLASS */
-        .glass {
-            background: var(--glass); backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px); border: 1px solid var(--border);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        /* --- GLASS UTILS --- */
+        .glass-panel {
+            background: var(--glass-surf);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+            position: relative; overflow: hidden;
+        }
+        .glass-panel::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
         }
 
-        /* HEADER */
-        .header {
-            position: sticky; top: 15px; z-index: 100; margin: 0 15px;
-            border-radius: 50px; padding: 10px 20px;
+        /* --- HEADER --- */
+        .header-container {
+            position: sticky; top: 15px; z-index: 100;
+            width: calc(100% - 24px); max-width: 600px; margin: 0 auto;
+        }
+        
+        .header-pill {
+            border-radius: 50px; height: 64px;
             display: flex; justify-content: space-between; align-items: center;
+            padding: 0 8px 0 20px; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        .logo-box {
-            display: flex; align-items: center; gap: 10px; text-decoration: none;
+
+        .brand-link { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .brand-logo {
+            width: 38px; height: 38px; background: #fff; color: #000;
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 20px;
+            transform: skewX(-10deg); box-shadow: 0 0 20px rgba(255,255,255,0.2);
         }
-        .sq {
-            width: 36px; height: 36px; background: #fff; color: #000; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-h); font-weight: 900; font-style: italic; font-size: 18px;
-            transform: skewX(-10deg);
-        }
-        .txt { font-family: var(--font-h); font-weight: 800; font-size: 14px; color: #fff; font-style: italic; }
+        .brand-text { font-family: var(--font-display); font-weight: 800; font-size: 16px; color: #fff; letter-spacing: -0.5px; font-style: italic; }
 
         .profile-pill {
-            background: rgba(0,0,0,0.4); border: 1px solid var(--border);
-            padding: 5px 5px 5px 15px; border-radius: 40px; display: flex; align-items: center; gap: 10px;
+            background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border);
+            border-radius: 40px; padding: 5px 5px 5px 16px;
+            display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s;
         }
-        .bal { font-family: var(--font-h); font-size: 11px; color: var(--accent); }
-        .ava {
-            width: 32px; height: 32px; border-radius: 50%; background: #222;
-            border: 1px solid #fff; display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-h); font-weight: 700; font-size: 12px;
+        .profile-pill:active { transform: scale(0.96); border-color: rgba(255,255,255,0.3); }
+        .bal-text { font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--neon-green); }
+        .ava-circle {
+            width: 34px; height: 34px; border-radius: 50%; background: #222;
+            border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-display); font-size: 12px; font-weight: 800; color: #fff;
         }
 
-        /* ADMIN BANNER */
-        .banner {
-            margin: 15px 15px 0; background: linear-gradient(90deg, rgba(255,215,0,0.1), transparent);
-            border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 15px;
-            display: none; align-items: center; gap: 15px; position: relative;
+        /* --- ADMIN BANNER (DB SYNCED) --- */
+        .banner-wrap {
+            width: calc(100% - 24px); max-width: 600px; margin: 15px auto 0;
+            display: none; /* JS enables this */
+            animation: slideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .b-icon { font-size: 20px; color: var(--gold); animation: pulse 2s infinite; }
-        .b-text h4 { font-family: var(--font-h); font-size: 12px; margin-bottom: 2px; }
-        .b-text p { font-size: 10px; color: #aaa; }
-        .b-edit { position: absolute; right: 10px; top: 10px; font-size: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 50%; cursor: pointer; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .admin-banner {
+            background: linear-gradient(90deg, rgba(255,215,0,0.1), rgba(0,0,0,0));
+            border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 16px;
+            display: flex; align-items: center; gap: 15px; position: relative;
+        }
+        .ab-icon { font-size: 22px; color: var(--neon-gold); animation: pulse 2s infinite; }
+        .ab-content h4 { font-family: var(--font-display); font-size: 13px; margin-bottom: 2px; color: #fff; }
+        .ab-content p { font-size: 11px; color: rgba(255,255,255,0.6); }
+        .ab-controls { position: absolute; right: 10px; top: 10px; display: flex; gap: 8px; }
+        .ab-btn { width: 26px; height: 26px; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
+        .ab-btn:hover { background: #fff; color: #000; }
 
-        /* FEED */
-        .feed { padding: 20px 15px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.9); } }
+
+        /* --- FEED --- */
+        .feed-container {
+            padding: 20px 12px; max-width: 600px; margin: 0 auto;
+            display: flex; flex-direction: column; gap: 24px;
+        }
+
+        /* Post Card */
+        .post {
+            border-radius: 24px; padding: 20px; transition: transform 0.2s;
+            position: relative;
+        }
+        .post.pinned { border: 1px solid var(--neon-gold); box-shadow: 0 0 20px rgba(255,215,0,0.1); }
+        .pin-marker {
+            position: absolute; top: -10px; right: 20px; background: var(--neon-gold);
+            color: #000; font-size: 10px; font-weight: 800; padding: 4px 10px;
+            border-radius: 10px; display: flex; align-items: center; gap: 5px;
+            z-index: 10; box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+        }
+
+        .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .ph-user { display: flex; gap: 12px; align-items: center; }
+        .ph-ava {
+            width: 42px; height: 42px; background: #222; border-radius: 14px;
+            border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-display); font-weight: 700; font-size: 14px;
+        }
+        .ph-meta h4 { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 2px; font-family: var(--font-display); }
+        .ph-meta span { font-size: 11px; color: var(--text-muted); }
         
-        .post { border-radius: 24px; padding: 20px; position: relative; }
-        .p-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
-        .p-u { display: flex; gap: 10px; align-items: center; }
-        .p-a { width: 40px; height: 40px; border-radius: 12px; background: #333; display: flex; align-items: center; justify-content: center; font-weight: 700; border: 1px solid var(--border); }
-        .p-i h4 { font-size: 13px; font-weight: 700; margin-bottom: 2px; font-family: var(--font-h); }
-        .badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: #fff; color: #000; font-weight: 800; margin-left: 5px; }
-        
-        .p-admin-opts { position: absolute; top: 15px; right: 15px; display: flex; gap: 5px; opacity: 0; transition: 0.3s; }
-        .post:hover .p-admin-opts { opacity: 1; }
-        .ao-btn { width: 24px; height: 24px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; border: 1px solid #555; }
-        .ao-btn:hover { background: #fff; color: #000; }
+        .badge { font-size: 9px; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; font-weight: 800; margin-left: 6px; }
+        .badge.admin { background: #fff; color: #000; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        .badge.user { border: 1px solid #444; color: #777; }
 
-        .p-body { font-size: 14px; color: #ddd; line-height: 1.5; white-space: pre-wrap; }
-        .p-img { width: 100%; border-radius: 16px; margin-top: 10px; border: 1px solid var(--border); }
+        /* Admin Controls (Absolute) */
+        .admin-controls-overlay {
+            position: absolute; top: 20px; right: 20px; display: flex; gap: 8px;
+            opacity: 0; transition: 0.3s;
+        }
+        .post:hover .admin-controls-overlay { opacity: 1; }
+        .ac-btn {
+            width: 30px; height: 30px; background: #222; border-radius: 50%; border: 1px solid #444;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 12px;
+        }
+        .ac-btn:hover { background: #fff; color: #000; }
+        .ac-btn.active { color: var(--neon-gold); border-color: var(--neon-gold); }
 
-        /* MATCH WIDGET */
-        .match { background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent); border: 1px solid var(--border); border-radius: 20px; padding: 15px; margin-top: 15px; position: relative; }
-        .m-live { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); color: var(--danger); font-size: 9px; font-weight: 800; border: 1px solid var(--danger); padding: 2px 8px; border-radius: 10px; }
-        .m-teams { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; margin-bottom: 20px; }
-        .mt { text-align: center; width: 35%; font-family: var(--font-h); font-size: 12px; font-weight: 700; }
-        .ms { font-size: 24px; font-weight: 900; color: #fff; font-family: var(--font-h); }
-        .m-time { font-size: 10px; color: var(--accent); display: block; text-align: center; }
-        
-        .m-bets { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
-        .btn-bet { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; }
-        .btn-bet:active { background: var(--accent); color: #000; }
-        .bk { display: block; font-weight: 700; font-family: var(--font-h); }
-        .bl { font-size: 9px; text-transform: uppercase; color: #888; }
+        .post-body { font-size: 14px; line-height: 1.6; color: #e0e0e0; white-space: pre-wrap; }
+        .post-img { width: 100%; border-radius: 16px; margin-top: 15px; border: 1px solid var(--glass-border); }
 
-        /* NAV */
-        .nav {
+        /* --- MATCH WIDGET (Interactive) --- */
+        .match-widget {
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            padding: 16px; margin-top: 15px; position: relative;
+        }
+        .mw-live {
+            position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+            color: var(--neon-red); font-size: 9px; font-weight: 800; border: 1px solid var(--neon-red);
+            padding: 2px 8px; border-radius: 10px; animation: blink 2s infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .mw-teams { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; margin-bottom: 20px; }
+        .mw-t { text-align: center; width: 35%; font-family: var(--font-display); font-size: 12px; font-weight: 700; }
+        .mw-score { font-family: var(--font-display); font-size: 26px; font-weight: 900; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        .mw-time { font-size: 10px; color: var(--neon-green); display: block; text-align: center; margin-top: 4px; }
+
+        .mw-bets { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .bet-btn {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+            border-radius: 12px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s;
+        }
+        .bet-btn:active { background: var(--neon-green); color: #000; border-color: var(--neon-green); transform: scale(0.95); }
+        .bk { display: block; font-family: var(--font-display); font-weight: 700; font-size: 14px; }
+        .bl { font-size: 9px; text-transform: uppercase; color: #777; }
+
+        /* --- AD WIDGET --- */
+        .ad-widget {
+            margin-top: 15px; padding: 20px; border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(0,0,0,0.5));
+            border: 1px solid var(--neon-gold); position: relative; overflow: hidden;
+        }
+        .ad-badge { position: absolute; top: 10px; right: 10px; border: 1px solid var(--neon-gold); color: var(--neon-gold); font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 800; }
+        .ad-btn {
+            display: inline-block; background: var(--neon-gold); color: #000; padding: 10px 20px;
+            border-radius: 30px; font-weight: 800; font-size: 12px; margin-top: 15px;
+            cursor: pointer; font-family: var(--font-display); text-transform: uppercase;
+        }
+
+        /* --- POST FOOTER --- */
+        .post-foot { border-top: 1px solid var(--glass-border); margin-top: 15px; padding-top: 15px; display: flex; gap: 20px; }
+        .act { display: flex; align-items: center; gap: 6px; color: #777; font-size: 13px; cursor: pointer; transition: 0.2s; }
+        .act:hover { color: #fff; }
+
+        /* --- BOTTOM NAV --- */
+        .nav-dock {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 400px; height: 70px; background: #111;
-            border-radius: 50px; border: 1px solid var(--border); display: flex; justify-content: space-evenly; align-items: center; z-index: 900;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 90%; max-width: 400px; height: 72px;
+            background: rgba(10, 10, 10, 0.9); backdrop-filter: blur(25px);
+            border-radius: 60px; border: 1px solid var(--glass-border);
+            display: flex; justify-content: space-evenly; align-items: center; z-index: 900;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
-        .ni { display: flex; flex-direction: column; align-items: center; color: #555; text-decoration: none; width: 60px; }
-        .ni i { font-size: 20px; margin-bottom: 3px; }
-        .ni span { font-size: 9px; font-weight: 700; font-family: var(--font-h); text-transform: uppercase; }
-        .ni.active { color: #fff; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #555; width: 60px; transition: 0.3s; }
+        .nav-item i { font-size: 22px; transition: 0.3s; }
+        .nav-item span { font-size: 9px; font-family: var(--font-display); font-weight: 700; text-transform: uppercase; opacity: 0; transform: translateY(10px); transition: 0.3s; }
+        .nav-item.active { color: #fff; }
+        .nav-item.active i { transform: translateY(-4px); text-shadow: 0 0 15px rgba(255,255,255,0.5); }
+        .nav-item.active span { opacity: 1; transform: translateY(0); }
 
-        /* FAB */
+        /* --- FAB --- */
         .fab {
-            position: fixed; bottom: 120px; right: 20px; width: 60px; height: 60px;
+            position: fixed; bottom: 120px; right: 20px; width: 56px; height: 56px;
             background: #fff; color: #000; border-radius: 18px; display: none;
-            align-items: center; justify-content: center; font-size: 24px; z-index: 800;
-            cursor: pointer; box-shadow: 0 0 20px rgba(255,255,255,0.2); transition: 0.3s;
+            align-items: center; justify-content: center; font-size: 24px;
+            box-shadow: 0 0 30px rgba(255,255,255,0.25); z-index: 800; cursor: pointer;
+            transition: 0.4s var(--ease-elastic);
         }
-        .fab:hover { transform: rotate(90deg); }
+        .fab:hover { transform: scale(1.1) rotate(90deg); }
 
-        /* MODALS */
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .modal { width: 100%; max-width: 400px; background: #0A0A0A; border: 1px solid var(--border); border-radius: 30px; padding: 25px; }
-        .m-t { font-family: var(--font-h); font-size: 18px; margin-bottom: 20px; color: #fff; }
-        .inp { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 15px; border-radius: 12px; color: #fff; margin-bottom: 10px; font-family: var(--font-b); }
-        .btn { width: 100%; padding: 15px; background: #fff; color: #000; border-radius: 12px; font-weight: 800; border: none; font-family: var(--font-h); text-transform: uppercase; cursor: pointer; margin-top: 10px; }
+        /* --- MODALS --- */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: var(--z-modal); display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal { width: 100%; max-width: 420px; background: #0A0A0A; border: 1px solid var(--glass-border); border-radius: 30px; padding: 25px; box-shadow: 0 40px 80px rgba(0,0,0,0.8); }
         
-        /* ADMIN CONTROLS */
-        .adm-box { border-top: 1px solid var(--border); padding-top: 15px; margin-top: 15px; display: none; }
-        .adm-lbl { color: var(--gold); font-size: 10px; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 8px; }
+        .inp { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 16px; border-radius: 14px; color: #fff; margin-bottom: 12px; font-family: var(--font-body); font-size: 14px; }
+        .btn-main { width: 100%; padding: 16px; background: #fff; color: #000; border-radius: 14px; font-weight: 800; border: none; font-family: var(--font-display); text-transform: uppercase; cursor: pointer; margin-top: 10px; }
+        .btn-sub { width: 100%; padding: 12px; background: transparent; border: 1px solid #333; color: #888; border-radius: 14px; font-weight: 600; cursor: pointer; margin-top: 10px; }
 
-        /* TOAST */
-        #toast { position: fixed; top: 100px; left: 50%; transform: translateX(-50%) translateY(-20px); background: #fff; color: #000; padding: 10px 20px; border-radius: 30px; font-weight: 700; opacity: 0; transition: 0.3s; z-index: 5000; font-family: var(--font-h); font-size: 12px; pointer-events: none; }
+        /* Admin Controls in Modal */
+        .admin-tools { border-top: 1px solid var(--glass-border); padding-top: 15px; margin-top: 15px; display: none; }
+        .lbl { font-size: 10px; color: var(--neon-gold); font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 8px; }
+
+        /* --- TOAST --- */
+        #toast { position: fixed; top: 120px; left: 50%; transform: translateX(-50%) translateY(-20px); background: #fff; color: #000; padding: 12px 24px; border-radius: 40px; font-family: var(--font-display); font-size: 12px; font-weight: 700; z-index: var(--z-toast); opacity: 0; transition: 0.3s; pointer-events: none; text-align: center; white-space: nowrap; }
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
     </style>
 </head>
 <body>
 
-    <div id="toast">Действие выполнено</div>
+    <div id="toast">Ready</div>
 
-    <header class="header glass">
-        <a href="feed.html" class="logo-box">
-            <div class="sq">S</div>
-            <div class="txt">STAVOK</div>
-        </a>
-        <div class="profile-pill" onclick="window.location.href='profile.html'">
-            <span class="bal" id="headBal">...</span>
-            <div class="ava" id="headAva">?</div>
-        </div>
-    </header>
-
-    <div class="banner" id="adminBanner">
-        <i class="fa-solid fa-bolt b-icon"></i>
-        <div class="b-text">
-            <h4 id="bnrTitle">BONUS X2</h4>
-            <p id="bnrText">Only today</p>
-        </div>
-        <div class="b-edit" id="bnrEdit" style="display:none;" onclick="App.admin.editBanner()"><i class="fa-solid fa-pen"></i></div>
+    <div class="header-container">
+        <header class="header-pill glass-panel">
+            <a href="feed.html" class="brand-link">
+                <div class="brand-logo">S</div>
+                <div class="brand-text">STAVOK</div>
+            </a>
+            <div class="profile-pill" onclick="window.location.href='profile.html'">
+                <span class="bal-text" id="headBal">...</span>
+                <div class="ava-circle" id="headAva">?</div>
+            </div>
+        </header>
     </div>
 
-    <main class="feed">
-        <div id="pinnedStream"></div>
+    <div class="banner-wrap" id="bannerWrap">
+        <div class="admin-banner">
+            <i class="fa-solid fa-bolt ab-icon"></i>
+            <div class="ab-content">
+                <h4 id="bnrTitle">LOADING...</h4>
+                <p id="bnrText">...</p>
+            </div>
+            <div class="ab-controls" id="bnrAdminControls" style="display:none;">
+                <div class="ab-btn" onclick="App.admin.editBanner()"><i class="fa-solid fa-pen"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <main class="feed-container">
         <div id="feedStream">
             <div style="text-align:center; margin-top:50px;"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
         </div>
     </main>
 
-    <div class="fab" id="adminFab" onclick="App.ui.openModal('createModal')">
+    <div class="fab" id="mainFab" onclick="App.ui.openCreate()">
         <i class="fa-solid fa-plus"></i>
     </div>
 
-    <nav class="nav">
-        <a href="news.html" class="ni"><i class="fa-solid fa-bolt"></i><span>News</span></a>
-        <a href="feed.html" class="ni active"><i class="fa-solid fa-layer-group"></i><span>Feed</span></a>
-        <a href="profile.html" class="ni"><i class="fa-solid fa-user-astronaut"></i><span>Profile</span></a>
+    <nav class="nav-dock">
+        <a href="news.html" class="nav-item"><i class="fa-solid fa-bolt"></i><span>News</span></a>
+        <a href="feed.html" class="nav-item active"><i class="fa-solid fa-layer-group"></i><span>Feed</span></a>
+        <a href="profile.html" class="nav-item"><i class="fa-solid fa-user-astronaut"></i><span>Profile</span></a>
     </nav>
 
     <div class="overlay" id="createModal">
         <div class="modal">
             <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-                <h3 class="m-t">Создать пост</h3>
+                <h3 style="font-family:var(--font-display); color:#fff; font-size:18px;">Новый пост</h3>
                 <i class="fa-solid fa-xmark" style="color:#666; cursor:pointer;" onclick="App.ui.closeModal()"></i>
             </div>
             
-            <input type="text" id="pTitle" class="inp" placeholder="Заголовок">
-            <textarea id="pContent" class="inp" style="height:100px; resize:none;" placeholder="Текст..."></textarea>
-            
-            <div class="adm-box" id="adminFields">
-                <span class="adm-lbl">ИНСТРУМЕНТЫ АДМИНА</span>
-                <select id="pType" class="inp" style="background:#222; cursor:pointer;">
+            <textarea id="uContent" class="inp" style="height:100px; resize:none;" placeholder="Ваш текст..."></textarea>
+
+            <div class="admin-tools" id="adminFields">
+                <span class="lbl">ADMIN MODE</span>
+                <input type="text" id="pTitle" class="inp" placeholder="Заголовок">
+                <select id="pType" class="inp" style="cursor:pointer;">
                     <option value="text">Обычный пост</option>
-                    <option value="match">Матч (Ставки)</option>
+                    <option value="match">Матч</option>
                     <option value="ad">Реклама</option>
                 </select>
-                <div id="matchInp" style="display:none; gap:5px;">
+                <div id="matchInp" style="display:none; gap:10px;">
                     <input type="text" id="mT1" class="inp" placeholder="Команда 1">
                     <input type="text" id="mT2" class="inp" placeholder="Команда 2">
                 </div>
             </div>
 
-            <button class="btn" onclick="App.posts.create()">Опубликовать</button>
+            <button class="btn-main" onclick="App.posts.submit()">Опубликовать</button>
         </div>
     </div>
 
     <div class="overlay" id="editMatchModal">
         <div class="modal">
-            <h3 class="m-t">Управление матчем</h3>
-            <input type="text" id="emScore" class="inp" placeholder="Счет (2:1)">
+            <h3 style="font-family:var(--font-display); color:#fff; font-size:18px; margin-bottom:20px;">Управление матчем</h3>
+            <input type="text" id="emScore" class="inp" placeholder="Счет (1:0)">
             <input type="text" id="emTime" class="inp" placeholder="Время (45')">
-            <div style="display:flex; gap:10px;">
-                <button class="btn" onclick="App.admin.updateMatch()">Обновить</button>
-                <button class="btn" style="background:#333; color:#fff;" onclick="App.admin.settleBet()">Расчет ставок</button>
+            <button class="btn-main" onclick="App.admin.updateMatch()">Обновить</button>
+            <button class="btn-sub" onclick="App.admin.settleBet()">Расчитать ставки</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="editBannerModal">
+        <div class="modal">
+            <h3 style="font-family:var(--font-display); color:#fff; font-size:18px; margin-bottom:20px;">Настройка баннера</h3>
+            <input type="text" id="ebTitle" class="inp" placeholder="Заголовок">
+            <input type="text" id="ebText" class="inp" placeholder="Текст">
+            <div style="display:flex; gap:10px; margin-top:10px; align-items:center;">
+                <input type="checkbox" id="ebActive"> <label for="ebActive" style="color:#fff; font-size:12px;">Показывать</label>
             </div>
+            <button class="btn-main" onclick="App.admin.saveBanner()">Сохранить</button>
         </div>
     </div>
 
     <div class="overlay" id="betModal">
         <div class="modal">
-            <h3 class="m-t" style="text-align:center">Ставка</h3>
-            <div style="text-align:center; margin-bottom:20px; background:#222; padding:10px; border-radius:10px;">
-                <div id="bOut" style="font-size:18px; font-weight:700;">-</div>
-                <div id="bCoef" style="color:var(--accent); font-weight:800;">-</div>
+            <h3 style="text-align:center; font-family:var(--font-display); color:#fff; margin-bottom:20px;">Ставка</h3>
+            <div style="background:#222; border-radius:12px; padding:15px; text-align:center; margin-bottom:15px;">
+                <div id="betTarget" style="font-size:18px; font-weight:700; color:#fff;">-</div>
+                <div id="betCoef" style="color:var(--neon-green); font-weight:800;">-</div>
             </div>
-            <input type="number" id="bSum" class="inp" placeholder="Сумма" style="text-align:center; font-weight:700;">
-            <button class="btn" style="background:var(--accent); color:#000;" onclick="App.bets.confirm()">Поставить</button>
-        </div>
-    </div>
-
-    <div class="overlay" id="bannerModal">
-        <div class="modal">
-            <h3 class="m-t">Баннер</h3>
-            <input type="text" id="ebTitle" class="inp" placeholder="Заголовок">
-            <input type="text" id="ebText" class="inp" placeholder="Текст">
-            <button class="btn" onclick="App.admin.saveBanner()">Сохранить</button>
-            <button class="btn" style="background:#333; color:#fff; margin-top:5px;" onclick="App.admin.hideBanner()">Скрыть</button>
+            <input type="number" id="betSum" class="inp" placeholder="Сумма (x2)" style="text-align:center; font-size:18px; font-weight:700;">
+            <button class="btn-main" style="background:var(--neon-green); color:#000;" onclick="App.bets.confirm()">Поставить</button>
         </div>
     </div>
 
@@ -261,89 +367,71 @@
             sb: null, user: null, profile: null,
             tempBet: null, editId: null,
 
+            // 1. BOOTSTRAP
             init: async function() {
                 try {
                     this.sb = window.supabase.createClient(CFG.url, CFG.key);
+                    
                     const { data: { session } } = await this.sb.auth.getSession();
                     if(!session) return window.location.href = 'login.html';
                     this.user = session.user;
 
-                    await Promise.all([this.loadProfile(), this.posts.load()]);
+                    // Ensure profile exists then load feed
+                    await this.ensureProfile();
                     this.realtime();
-                    this.setupUI();
+                    this.admin.loadBanner();
                     
-                    // Banner Init
-                    if(localStorage.getItem('showBanner') === 'true') {
-                        document.getElementById('adminBanner').style.display = 'flex';
-                        document.getElementById('bnrTitle').innerText = localStorage.getItem('bnrT') || 'BONUS';
-                        document.getElementById('bnrText').innerText = localStorage.getItem('bnrD') || 'Info';
-                    }
+                    // Initial load
+                    await this.posts.load();
+                    this.ui.setup();
 
-                } catch(e) { console.error(e); }
+                } catch(e) { console.error("Init failed:", e); }
             },
 
-            loadProfile: async function() {
-                // Fetch profile or create if missing (Self-healing)
+            // 2. PROFILE SYSTEM (AUTO-CREATE)
+            ensureProfile: async function() {
                 let { data } = await this.sb.from('users').select('*').eq('id', this.user.id).single();
                 
                 if(!data) {
-                    // Create profile if missing
-                    const newProfile = { 
-                        id: this.user.id, 
-                        username: this.user.user_metadata.username || 'User',
-                        email: this.user.email,
-                        role: 'user', 
-                        balance: 0 
-                    };
-                    await this.sb.from('users').insert([newProfile]);
-                    data = newProfile;
+                    // Create if missing
+                    const def = { id: this.user.id, username: this.user.email.split('@')[0], email: this.user.email, role: 'user', balance: 0 };
+                    const { data: newP } = await this.sb.from('users').insert([def]).select().single();
+                    data = newP;
                 }
-
+                
                 this.profile = data;
-                document.getElementById('headBal').innerText = parseFloat(data.balance).toFixed(2);
-                document.getElementById('headAva').innerText = (data.username || '?')[0].toUpperCase();
-
-                // RBAC
-                if(data.role === 'admin') {
-                    document.getElementById('adminFab').style.display = 'flex';
-                    document.getElementById('adminFields').style.display = 'block';
-                    document.getElementById('bnrEdit').style.display = 'block';
-                }
+                this.ui.updateProfile(data);
+                this.ui.applyRole(data.role);
             },
 
+            // 3. POSTS SYSTEM
             posts: {
                 load: async function() {
-                    const s1 = document.getElementById('feedStream');
-                    const s2 = document.getElementById('pinnedStream');
-                    
-                    // Запрос с явным указанием связи (users:author_id)
+                    const el = document.getElementById('feedStream');
                     const { data } = await App.sb
                         .from('posts')
                         .select('*, users:author_id(username, role)')
-                        .order('created_at', { ascending: false });
+                        .order('is_pinned', {ascending:false}) // Pinned first
+                        .order('created_at', {ascending:false}); // Then new
 
-                    s1.innerHTML = ''; s2.innerHTML = '';
-                    if(!data || !data.length) {
-                        s1.innerHTML = '<div style="text-align:center; color:#555;">Пусто</div>';
-                        return;
-                    }
+                    el.innerHTML = '';
+                    if(!data || !data.length) { el.innerHTML = '<div style="text-align:center; color:#555; margin-top:50px;">Пусто</div>'; return; }
 
-                    data.forEach(p => {
-                        const html = this.render(p);
-                        if(p.content.includes('|PIN|')) s2.innerHTML += html;
-                        else s1.innerHTML += html;
-                    });
+                    data.forEach(p => el.innerHTML += this.render(p));
                 },
 
                 render: function(p) {
                     const u = p.users || { username: 'Anon', role: 'user' };
-                    let body = p.content.replace('|PIN|','');
+                    const isAdmin = App.profile?.role === 'admin';
+                    const isPinned = p.is_pinned;
+                    
+                    // Logic Parsers
+                    let body = p.content;
                     const isMatch = body.includes('|VS|');
                     const isAd = body.includes('|AD|');
                     
                     // --- MATCH RENDERER ---
                     if(isMatch) {
-                        // Parse: T1|VS|T2|SC|1:0|TM|45'
                         let [main, meta] = body.split('|SC|');
                         let [t1, t2] = main.split('|VS|');
                         let score = '0:0', time = 'LIVE';
@@ -351,167 +439,212 @@
                             let [sc, tm] = meta.split('|TM|');
                             score = sc || score; time = tm || time;
                         }
-
+                        
                         body = `
-                        <div class="match">
-                            <div class="m-live">${time}</div>
-                            <div class="m-teams">
-                                <div class="mt">${t1}</div>
-                                <div class="ms">${score}</div>
-                                <div class="mt">${t2}</div>
+                        <div class="match-widget">
+                            <div class="mw-live">${time}</div>
+                            <div class="mw-teams">
+                                <div class="mw-t">${t1}</div>
+                                <div class="mw-score">${score}</div>
+                                <div class="mw-t">${t2}</div>
                             </div>
-                            <div class="m-bets">
-                                <div class="btn-bet" onclick="App.bets.open('${t1}', 1.85)"><span class="bk">1.85</span><span class="bl">P1</span></div>
-                                <div class="btn-bet" onclick="App.bets.open('Draw', 3.20)"><span class="bk">3.20</span><span class="bl">X</span></div>
-                                <div class="btn-bet" onclick="App.bets.open('${t2}', 2.10)"><span class="bk">2.10</span><span class="bl">P2</span></div>
+                            <div class="mw-bets">
+                                <div class="bet-btn" onclick="App.bets.open('${t1}', 1.85)"><span class="bk">1.85</span><span class="bl">P1</span></div>
+                                <div class="bet-btn" onclick="App.bets.open('X', 3.20)"><span class="bk">3.20</span><span class="bl">X</span></div>
+                                <div class="bet-btn" onclick="App.bets.open('${t2}', 2.10)"><span class="bk">2.10</span><span class="bl">P2</span></div>
                             </div>
-                            ${App.profile?.role === 'admin' ? 
-                                `<div style="text-align:center; margin-top:10px;">
-                                    <button class="ao-btn" style="width:auto; padding:5px 15px; border-radius:10px;" onclick="App.admin.openMatch('${p.id}')">Управление</button>
-                                 </div>` : ''}
+                            ${isAdmin ? `<div style="text-align:center; margin-top:10px;"><button class="btn-sub" style="width:auto; padding:5px 15px;" onclick="App.admin.openMatch('${p.id}')">EDIT</button></div>` : ''}
                         </div>`;
                     }
                     // --- AD RENDERER ---
                     else if(isAd) {
                         let [tag, title, desc] = body.split('|');
                         body = `
-                        <div style="background:linear-gradient(45deg, #FFD70033, #000); padding:20px; border-radius:16px; border:1px solid #FFD700;">
-                            <h3 style="color:#FFD700; font-family:var(--font-h);">${title}</h3>
-                            <p style="font-size:12px; color:#ddd;">${desc}</p>
-                            <button class="btn" style="background:#FFD700; color:#000; margin-top:10px; width:auto; padding:10px 20px;">Открыть</button>
+                        <div class="ad-widget">
+                            <div class="ad-badge">PROMO</div>
+                            <h3 style="font-family:var(--font-display); color:#fff; font-size:18px;">${title}</h3>
+                            <p style="font-size:12px; color:#ccc;">${desc}</p>
+                            <div class="ad-btn">Открыть</div>
                         </div>`;
                     }
+                    // --- TEXT ---
                     else {
-                        body = `<div class="p-body">${body}</div>`;
-                        if(p.image_url) body += `<img src="${p.image_url}" class="p-img">`;
+                        body = `<div class="post-body">${body}</div>`;
                     }
 
                     // Admin Overlay
                     let adminUI = '';
-                    if(App.profile?.role === 'admin') {
+                    if(isAdmin) {
                         adminUI = `
-                        <div class="p-admin-opts">
-                            <div class="ao-btn" onclick="App.admin.pin('${p.id}', '${p.content}')"><i class="fa-solid fa-thumbtack"></i></div>
-                            <div class="ao-btn" onclick="App.admin.del('${p.id}')"><i class="fa-solid fa-trash"></i></div>
+                        <div class="admin-controls-overlay">
+                            <div class="ac-btn ${isPinned?'active':''}" onclick="App.admin.togglePin('${p.id}', ${!isPinned})"><i class="fa-solid fa-thumbtack"></i></div>
+                            <div class="ac-btn" onclick="App.admin.del('${p.id}')"><i class="fa-solid fa-trash"></i></div>
                         </div>`;
                     }
 
+                    // Pin Marker
+                    let pinMark = isPinned ? `<div class="pin-marker"><i class="fa-solid fa-thumbtack"></i> PIN</div>` : '';
+
                     return `
-                    <div class="post glass">
-                        ${adminUI}
-                        <div class="p-head">
-                            <div class="p-u">
-                                <div class="p-a">${u.username[0].toUpperCase()}</div>
-                                <div class="p-i">
-                                    <h4>${u.username} <span class="badge" style="${u.role==='admin'?'background:#fff':'background:#333; color:#fff'}">${u.role}</span></h4>
-                                    <span style="font-size:10px; color:#777;">Только что</span>
+                    <div class="post glass-panel ${isPinned?'pinned':''}">
+                        ${pinMark} ${adminUI}
+                        <div class="post-header">
+                            <div class="ph-user">
+                                <div class="ph-ava">${u.username[0].toUpperCase()}</div>
+                                <div class="ph-meta">
+                                    <h4>${u.username} <span class="badge ${u.role}">${u.role}</span></h4>
+                                    <span>Только что</span>
                                 </div>
                             </div>
                         </div>
-                        <h4 style="font-family:var(--font-h); font-size:15px; margin-bottom:10px;">${p.title}</h4>
+                        ${!isMatch && !isAd && p.title ? `<h4 style="font-family:var(--font-display); margin-bottom:10px;">${p.title}</h4>` : ''}
                         ${body}
+                        <div class="post-foot">
+                            <div class="act"><i class="fa-regular fa-heart"></i> Лайк</div>
+                            <div class="act"><i class="fa-regular fa-comment"></i> Коммент</div>
+                        </div>
                     </div>`;
                 },
 
-                create: async function() {
-                    const t = document.getElementById('pTitle').value;
-                    let c = document.getElementById('pContent').value;
-                    const type = document.getElementById('pType').value;
-                    const img = document.getElementById('pImg')?.value; // Optional
+                submit: async function() {
+                    const isAdmin = App.profile.role === 'admin';
+                    let title, content, img;
 
-                    if(!t) return App.ui.toast("Заголовок!");
-
-                    if(App.profile.role === 'admin') {
+                    if(isAdmin) {
+                        const type = document.getElementById('pType').value;
+                        title = document.getElementById('pTitle').value;
+                        content = document.getElementById('pContent').value;
+                        
                         if(type === 'match') {
                             const t1 = document.getElementById('mT1').value;
                             const t2 = document.getElementById('mT2').value;
-                            c = `${t1}|VS|${t2}`;
+                            content = `${t1}|VS|${t2}`;
                         } else if(type === 'ad') {
-                            c = `|AD|${t}|${c}`;
+                            content = `|AD|${title}|${content}`;
                         }
+                    } else {
+                        title = 'User Post';
+                        content = document.getElementById('uContent').value;
                     }
 
-                    const { error } = await App.sb.from('posts').insert([{
+                    if(!content) return App.ui.toast('Пустое поле');
+
+                    await App.sb.from('posts').insert([{
                         author_id: App.user.id,
-                        title: t, content: c, image_url: img || null
+                        title: title || 'Post',
+                        content: content
                     }]);
 
-                    if(!error) {
-                        App.ui.closeModal();
-                        App.ui.toast("Готово");
-                        document.getElementById('pTitle').value = '';
-                        document.getElementById('pContent').value = '';
-                    } else {
-                        alert(error.message);
-                    }
+                    App.ui.closeModal();
+                    App.ui.toast('Опубликовано');
                 }
             },
 
+            // 4. ADMIN SYSTEM (DB CONFIG & MATCH)
             admin: {
+                // Config (Banner)
+                loadBanner: async function() {
+                    const { data } = await App.sb.from('app_config').select('*').eq('key', 'banner').single();
+                    if(data && data.value.active) {
+                        document.getElementById('bannerWrap').style.display = 'block';
+                        document.getElementById('bnrTitle').innerText = data.value.title;
+                        document.getElementById('bnrText').innerText = data.value.text;
+                    } else {
+                        document.getElementById('bannerWrap').style.display = 'none';
+                    }
+                },
+                editBanner: () => {
+                    const t = document.getElementById('bnrTitle').innerText;
+                    const txt = document.getElementById('bnrText').innerText;
+                    document.getElementById('ebTitle').value = t;
+                    document.getElementById('ebText').value = txt;
+                    document.getElementById('ebActive').checked = document.getElementById('bannerWrap').style.display !== 'none';
+                    App.ui.openModal('editBannerModal');
+                },
+                saveBanner: async () => {
+                    const val = {
+                        title: document.getElementById('ebTitle').value,
+                        text: document.getElementById('ebText').value,
+                        active: document.getElementById('ebActive').checked
+                    };
+                    await App.sb.from('app_config').upsert({ key: 'banner', value: val });
+                    App.ui.closeModal();
+                    App.ui.toast('Баннер обновлен');
+                },
+
+                // Match Control
                 openMatch: (id) => { App.editId = id; App.ui.openModal('editMatchModal'); },
                 updateMatch: async () => {
                     const sc = document.getElementById('emScore').value;
                     const tm = document.getElementById('emTime').value;
-                    // Fetch old content to preserve teams
+                    // Read current content to preserve teams
                     const { data } = await App.sb.from('posts').select('content').eq('id', App.editId).single();
                     let base = data.content.split('|SC|')[0];
                     let newC = `${base}|SC|${sc}|TM|${tm}`;
                     await App.sb.from('posts').update({ content: newC }).eq('id', App.editId);
                     App.ui.closeModal();
                 },
-                settleBet: () => {
-                    App.ui.closeModal();
-                    App.ui.toast("Ставки рассчитаны (Simulated)");
+                settleBet: () => { App.ui.closeModal(); App.ui.toast('Расчет ставок... (Sim)'); },
+
+                // Post Actions
+                togglePin: async (id, state) => {
+                    await App.sb.from('posts').update({ is_pinned: state }).eq('id', id);
+                    App.ui.toast(state ? 'Закреплено' : 'Откреплено');
                 },
                 del: async (id) => {
-                    if(confirm('Delete?')) await App.sb.from('posts').delete().eq('id', id);
-                },
-                pin: async (id, oldC) => {
-                    let newC = oldC.includes('|PIN|') ? oldC.replace('|PIN|','') : oldC + '|PIN|';
-                    await App.sb.from('posts').update({ content: newC }).eq('id', id);
-                },
-                // Banner
-                editBanner: () => App.ui.openModal('bannerModal'),
-                saveBanner: () => {
-                    const t = document.getElementById('ebTitle').value;
-                    const d = document.getElementById('ebText').value;
-                    localStorage.setItem('showBanner', 'true');
-                    localStorage.setItem('bnrT', t);
-                    localStorage.setItem('bnrD', d);
-                    document.getElementById('adminBanner').style.display = 'flex';
-                    document.getElementById('bnrTitle').innerText = t;
-                    document.getElementById('bnrText').innerText = d;
-                    App.ui.closeModal();
-                },
-                hideBanner: () => {
-                    localStorage.setItem('showBanner', 'false');
-                    document.getElementById('adminBanner').style.display = 'none';
-                    App.ui.closeModal();
+                    if(confirm('Удалить?')) {
+                        await App.sb.from('posts').delete().eq('id', id);
+                        App.ui.toast('Удалено');
+                    }
                 }
             },
 
+            // 5. BETS
             bets: {
-                open: (res, coef) => {
-                    App.tempBet = { res, coef };
-                    document.getElementById('bOut').innerText = res;
-                    document.getElementById('bCoef').innerText = 'x'+coef;
+                open: (t, c) => {
+                    App.tempBet = { t, c };
+                    document.getElementById('betTarget').innerText = t;
+                    document.getElementById('betCoef').innerText = 'x'+c;
                     App.ui.openModal('betModal');
                 },
                 confirm: async () => {
-                    const v = parseFloat(document.getElementById('bSum').value);
-                    if(!v || v <= 0) return App.ui.toast('Сумма?');
-                    if(v > App.profile.balance) return App.ui.toast('Мало денег');
+                    const v = parseFloat(document.getElementById('betSum').value);
+                    if(!v || v <= 0) return App.ui.toast('Неверная сумма');
+                    if(v > App.profile.balance) return App.ui.toast('Мало средств');
                     
-                    const newB = App.profile.balance - v;
-                    await App.sb.from('users').update({ balance: newB }).eq('id', App.user.id);
+                    const nb = App.profile.balance - v;
+                    await App.sb.from('users').update({ balance: nb }).eq('id', App.user.id);
                     App.ui.closeModal();
-                    App.ui.toast('Принято!');
+                    App.ui.toast('Ставка принята!');
                 }
             },
 
+            // 6. UI
             ui: {
-                openModal: (id) => document.getElementById(id).style.display = 'block',
+                updateProfile: (p) => {
+                    document.getElementById('headBal').innerText = parseFloat(p.balance).toFixed(2);
+                    document.getElementById('headAva').innerText = (p.username||'?')[0].toUpperCase();
+                },
+                applyRole: (role) => {
+                    if(role === 'admin') {
+                        document.getElementById('adminFab').style.display = 'flex'; // Show +
+                        document.getElementById('bnrAdminControls').style.display = 'flex';
+                        document.getElementById('adminFields').style.display = 'block';
+                        document.getElementById('uContent').style.display = 'none';
+                    } else {
+                        document.getElementById('adminFab').classList.add('user-mode');
+                        document.getElementById('adminFab').style.display = 'flex'; // User also has +
+                        document.getElementById('adminFields').style.display = 'none';
+                    }
+                },
+                openCreate: () => App.ui.openModal('createModal'),
+                openModal: (id) => document.getElementById(id).style.display = 'flex',
                 closeModal: () => document.querySelectorAll('.overlay').forEach(e => e.style.display = 'none'),
+                setup: () => {
+                    document.getElementById('pType').addEventListener('change', e => {
+                        document.getElementById('matchInp').style.display = e.target.value==='match'?'flex':'none';
+                    });
+                },
                 toast: (m) => {
                     const t = document.getElementById('toast');
                     t.innerText = m; t.classList.add('show');
@@ -519,19 +652,15 @@
                 }
             },
 
-            setupUI: () => {
-                document.getElementById('pType').addEventListener('change', e => {
-                    document.getElementById('matchInp').style.display = e.target.value === 'match' ? 'flex' : 'none';
-                });
-            },
-
+            // 7. REALTIME
             realtime: function() {
-                this.sb.channel('main')
+                this.sb.channel('global')
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => this.posts.load())
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'app_config' }, () => this.admin.loadBanner())
                     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${this.user.id}` }, 
                     p => {
                         this.profile.balance = p.new.balance;
-                        document.getElementById('headBal').innerText = parseFloat(p.new.balance).toFixed(2);
+                        this.ui.updateProfile(p.new);
                     })
                     .subscribe();
             }
