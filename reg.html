@@ -12,506 +12,337 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Unbounded:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
-        /* ========================================================================
-           1. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И СБРОС (RESET CSS)
-           ======================================================================== */
         :root {
-            --color-bg: #030303;
-            --color-card-bg: rgba(20, 20, 20, 0.75);
-            --color-input-bg: rgba(255, 255, 255, 0.07);
-            --color-input-border: rgba(255, 255, 255, 0.15);
-            --color-input-focus: rgba(255, 255, 255, 0.5);
-            
-            --color-text-primary: #FFFFFF;
-            --color-text-secondary: #9CA3AF;
-            --color-text-muted: #4B5563;
-            
-            --color-accent: #FFFFFF;
-            --color-success: #10B981;
-            --color-error: #EF4444;
-            --color-warning: #F59E0B;
-            
-            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+            --bg-deep: #050505;
+            --bg-glass: rgba(20, 20, 20, 0.7);
+            --border-glass: rgba(255, 255, 255, 0.15);
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --accent: #FFFFFF;
+            --error: #FF3333;
+            --success: #00FF94;
             --font-display: 'Unbounded', sans-serif;
-            
-            --shadow-card: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
-            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-body: 'Inter', sans-serif;
         }
 
-        *, *::before, *::after {
-            margin: 0; padding: 0; box-sizing: border-box; outline: none;
-            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-        }
-
-        html, body {
-            width: 100%; min-height: 100vh;
-            background-color: var(--color-bg); color: var(--color-text-primary);
-            font-family: var(--font-main); overflow-x: hidden; position: relative;
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: var(--bg-deep); color: white;
+            font-family: var(--font-body); min-height: 100vh;
             display: flex; justify-content: center; align-items: center;
+            overflow-x: hidden; position: relative;
         }
 
-        a { text-decoration: none; color: inherit; transition: var(--transition-fast); }
-        button, input { border: none; background: none; font-family: inherit; }
-
-        /* ========================================================================
-           2. ФОНОВЫЕ ЭФФЕКТЫ
-           ======================================================================== */
-        #canvas-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.4; }
-
-        .ambient-light {
-            position: fixed; width: 800px; height: 800px;
-            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0) 70%);
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: -2; pointer-events: none; filter: blur(80px);
-            animation: pulseLight 8s infinite alternate ease-in-out;
-        }
-        @keyframes pulseLight {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
-            100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+        /* BACKGROUND */
+        #canvas-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.3; }
+        .glow-orb {
+            position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(255,255,255,0.05), transparent 70%);
+            top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: -2;
         }
 
-        /* ========================================================================
-           3. КОНТЕЙНЕР АВТОРИЗАЦИИ
-           ======================================================================== */
-        .auth-container { width: 100%; max-width: 460px; padding: 20px; z-index: 10; perspective: 1000px; }
-
+        /* CARD */
         .auth-card {
-            background: var(--color-card-bg); border: 1px solid var(--color-input-border);
-            border-radius: 30px; padding: 48px 40px;
-            backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
-            box-shadow: var(--shadow-card); position: relative; overflow: hidden;
-            transform-style: preserve-3d;
-            animation: cardEntrance 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-            opacity: 0; transform: translateY(30px) rotateX(5deg);
+            width: 100%; max-width: 440px; margin: 20px;
+            background: var(--bg-glass); border: 1px solid var(--border-glass);
+            border-radius: 24px; padding: 40px 30px;
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            opacity: 0; transform: translateY(20px);
+            animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
-        @keyframes cardEntrance { to { opacity: 1; transform: translateY(0) rotateX(0); } }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
 
-        .auth-card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
-            opacity: 0.5;
-        }
-
-        /* ========================================================================
-           4. ЛОГОТИП
-           ======================================================================== */
-        .header { display: flex; flex-direction: column; align-items: center; margin-bottom: 40px; }
-        .logo-wrap { display: flex; align-items: center; gap: 15px; margin-bottom: 12px; }
-
+        /* LOGO */
+        .header { text-align: center; margin-bottom: 35px; }
+        .logo-box { display: inline-flex; align-items: center; gap: 14px; text-decoration: none; margin-bottom: 10px; }
+        
         .logo-cube {
-            width: 48px; height: 48px; background: #FFFFFF; border-radius: 10px;
+            width: 44px; height: 44px; background: white; color: black;
             display: flex; align-items: center; justify-content: center;
-            transform: skewX(-12deg); /* НАКЛОН КУБА */
-            box-shadow: 0 0 25px rgba(255,255,255,0.25); position: relative; overflow: hidden;
+            border-radius: 8px;
+            font-family: var(--font-display); font-weight: 900; font-size: 24px;
+            /* ВАЖНО: Курсив/наклон только у куба */
+            transform: skewX(-12deg); 
+            font-style: italic;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+            position: relative; overflow: hidden;
         }
         
+        /* Блик на кубе */
         .logo-cube::after {
             content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
-            transform: skewX(-20deg); animation: shine 4s infinite;
+            transform: skewX(-20deg); animation: shine 3s infinite;
         }
         @keyframes shine { 0%, 80% { left: -100%; } 100% { left: 200%; } }
 
-        .logo-char {
-            color: #000000; font-family: var(--font-display); font-weight: 900;
-            font-size: 26px; font-style: italic; line-height: 1; padding-right: 4px;
-        }
-
         .logo-text {
-            font-family: var(--font-display); font-size: 26px; font-weight: 800;
-            color: #FFFFFF; text-transform: uppercase; letter-spacing: -1px;
-            font-style: normal; /* ТЕКСТ ПРЯМОЙ */
+            font-family: var(--font-display); font-size: 22px; font-weight: 800;
+            color: white; text-transform: uppercase; letter-spacing: -0.5px;
+            /* ВАЖНО: Текст прямой */
+            font-style: normal;
         }
+        .subtitle { color: #888; font-size: 13px; margin-top: 5px; }
 
-        .header-desc { font-size: 14px; color: var(--color-text-secondary); font-weight: 400; }
-
-        /* ========================================================================
-           5. ПОЛЯ ВВОДА
-           ======================================================================== */
-        .form-group { margin-bottom: 20px; position: relative; }
-        .input-wrapper { position: relative; width: 100%; }
-
-        .form-input {
-            width: 100%; height: 60px; background: var(--color-input-bg);
-            border: 1px solid var(--color-input-border); border-radius: 16px;
-            padding: 0 50px 0 20px; color: white; font-size: 16px;
-            font-family: var(--font-main); transition: all 0.3s ease;
-        }
-
-        .form-input:focus {
-            background: rgba(255,255,255,0.1); border-color: var(--color-input-focus);
-            box-shadow: 0 0 0 4px rgba(255,255,255,0.05);
-        }
-
-        .input-icon-right {
-            position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
-            color: var(--color-text-secondary); pointer-events: none; transition: 0.2s;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .input-icon-right svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .form-input:focus ~ .input-icon-right { color: var(--color-text-primary); }
-
-        .toggle-password { pointer-events: auto; cursor: pointer; }
-        .toggle-password:hover { color: white; }
-
-        /* Сила пароля */
-        .password-strength {
-            height: 4px; width: 100%; background: rgba(255,255,255,0.1);
-            margin-top: 8px; border-radius: 2px; overflow: hidden; display: flex;
-            opacity: 0; transition: opacity 0.3s;
-        }
-        .form-group:focus-within .password-strength { opacity: 1; }
-        .strength-bar { height: 100%; width: 0%; background: var(--color-error); transition: width 0.3s, background 0.3s; }
-
-        /* ========================================================================
-           6. КНОПКА
-           ======================================================================== */
-        .policy-text { font-size: 12px; color: var(--color-text-secondary); text-align: center; margin: 24px 0; line-height: 1.5; }
-        .policy-link { color: var(--color-text-primary); text-decoration: underline; cursor: pointer; }
+        /* INPUTS */
+        .form-group { margin-bottom: 18px; position: relative; }
         
-        .btn-main {
-            width: 100%; height: 64px; background: #FFFFFF; color: #000000;
-            border-radius: 16px; font-family: var(--font-display); font-weight: 800;
-            font-size: 16px; text-transform: uppercase; cursor: pointer;
-            position: relative; overflow: hidden; transition: all 0.3s ease;
-            transform: skewX(-5deg); /* НАКЛОН КНОПКИ */
+        .input-field {
+            width: 100%; height: 56px; background: var(--input-bg);
+            border: 1px solid var(--border-glass); border-radius: 14px;
+            padding: 0 45px 0 18px; color: white; font-size: 15px;
+            transition: 0.3s; font-family: var(--font-body);
         }
-        .btn-main span { display: block; transform: skewX(5deg); /* ТЕКСТ ПРЯМО */ }
-        .btn-main:hover { transform: skewX(-5deg) scale(1.02); box-shadow: 0 10px 40px rgba(255,255,255,0.25); }
-        .btn-main:active { transform: skewX(-5deg) scale(0.98); }
-        .btn-main:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
-
-        .loader {
-            display: none; width: 24px; height: 24px; border: 3px solid #000;
-            border-bottom-color: transparent; border-radius: 50%;
-            animation: spin 1s linear infinite; margin: 0 auto;
+        .input-field:focus { border-color: white; background: rgba(255,255,255,0.1); }
+        
+        .input-icon {
+            position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
+            color: #666; pointer-events: none; transition: 0.3s;
+            display: flex; align-items: center;
         }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .input-field:focus ~ .input-icon { color: white; }
+        .input-icon svg { width: 20px; height: 20px; }
 
-        .footer { margin-top: 32px; text-align: center; font-size: 14px; color: var(--color-text-secondary); }
-        .footer a { color: var(--color-text-primary); font-weight: 600; margin-left: 5px; }
+        .eye-btn { pointer-events: auto; cursor: pointer; }
+        .eye-btn:hover { color: white; }
 
-        /* ========================================================================
-           7. УВЕДОМЛЕНИЯ (TOAST)
-           ======================================================================== */
-        .toast-container {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 5000; display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+        /* BUTTON */
+        .btn-submit {
+            width: 100%; height: 58px; background: white; color: black;
+            border: none; border-radius: 14px;
+            font-family: var(--font-display); font-weight: 800; font-size: 15px;
+            text-transform: uppercase; cursor: pointer;
+            margin-top: 10px; position: relative; overflow: hidden;
+            transform: skewX(-6deg); transition: 0.3s;
         }
+        .btn-submit span { display: block; transform: skewX(6deg); /* Выпрямляем текст */ }
+        .btn-submit:hover { transform: skewX(-6deg) scale(1.02); box-shadow: 0 0 25px rgba(255,255,255,0.3); }
+        .btn-submit:active { transform: skewX(-6deg) scale(0.98); }
+        .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .loader { display: none; width: 20px; height: 20px; border: 2px solid black; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* FOOTER & TERMS */
+        .terms { font-size: 11px; color: #666; text-align: center; margin-top: 15px; }
+        .terms span { color: white; cursor: pointer; text-decoration: underline; }
+        .footer-link { display: block; text-align: center; margin-top: 25px; color: #888; font-size: 14px; text-decoration: none; }
+        .footer-link b { color: white; }
+
+        /* TOAST */
         .toast {
-            background: rgba(10, 10, 10, 0.95); border: 1px solid rgba(255,255,255,0.1);
-            color: white; padding: 16px 24px; border-radius: 50px; font-size: 14px; font-weight: 500;
-            display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            opacity: 0; transform: translateY(-20px) scale(0.9); transition: all 0.4s;
+            position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            background: #111; border: 1px solid #333; padding: 14px 24px; border-radius: 50px;
+            color: white; font-weight: 600; font-size: 13px; z-index: 1000;
+            display: flex; align-items: center; gap: 10px;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0;
         }
-        .toast.visible { opacity: 1; transform: translateY(0) scale(1); }
-        .toast.success { border-color: var(--color-success); } .toast.success svg { color: var(--color-success); }
-        .toast.error { border-color: var(--color-error); } .toast.error svg { color: var(--color-error); }
-
-        /* ========================================================================
-           8. МОДАЛКА
-           ======================================================================== */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
-            z-index: 4000; opacity: 0; visibility: hidden; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center; padding: 20px;
-        }
-        .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal {
-            background: #111; border: 1px solid #333; width: 100%; max-width: 500px;
-            border-radius: 24px; padding: 32px; transform: scale(0.9); transition: 0.3s;
-        }
-        .modal-overlay.active .modal { transform: scale(1); }
-        .modal h2 { font-family: var(--font-display); font-size: 20px; margin-bottom: 16px; }
-        .modal-close-btn { width: 100%; padding: 14px; background: white; color: black; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success { border-color: var(--success); color: var(--success); }
+        .toast.error { border-color: var(--error); color: var(--error); }
 
     </style>
 </head>
 <body>
 
-    <div class="ambient-light"></div>
+    <div class="glow-orb"></div>
     <canvas id="canvas-bg"></canvas>
-    <div class="toast-container" id="toastContainer"></div>
+    
+    <div id="toast" class="toast"></div>
 
-    <div class="auth-container">
-        <div class="auth-card">
+    <div class="auth-card">
+        <div class="header">
+            <a href="#" class="logo-box">
+                <div class="logo-cube">S</div>
+                <div class="logo-text">STAVOK.NET</div>
+            </a>
+            <div class="subtitle">Присоединяйся к элите</div>
+        </div>
+
+        <form id="regForm">
             
-            <div class="header">
-                <div class="logo-wrap">
-                    <div class="logo-cube"><span class="logo-char">S</span></div>
-                    <span class="logo-text">Stavok.net</span>
+            <div class="form-group">
+                <input type="text" id="username" class="input-field" placeholder="Никнейм" autocomplete="off">
+                <div class="input-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </div>
-                <p class="header-desc">Создай аккаунт и начни побеждать</p>
             </div>
 
-            <form id="registerForm" novalidate>
-                
-                <div class="form-group">
-                    <div class="input-wrapper">
-                        <input type="text" id="username" class="form-input" placeholder="Никнейм" autocomplete="off" name="unique-nickname-field">
-                        <div class="input-icon-right">
-                            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        </div>
-                    </div>
+            <div class="form-group">
+                <input type="email" id="email" class="input-field" placeholder="Email" autocomplete="off">
+                <div class="input-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                 </div>
-
-                <div class="form-group">
-                    <div class="input-wrapper">
-                        <input type="email" id="email" class="form-input" placeholder="Email адрес" autocomplete="email" name="email">
-                        <div class="input-icon-right">
-                            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <div class="input-wrapper">
-                        <input type="password" id="password" class="form-input" placeholder="Пароль" autocomplete="new-password">
-                        <div class="input-icon-right toggle-password" id="togglePassBtn">
-                            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        </div>
-                    </div>
-                    <div class="password-strength"><div class="strength-bar" id="strengthBar"></div></div>
-                </div>
-
-                <div class="form-group">
-                    <div class="input-wrapper">
-                        <input type="password" id="confirm" class="form-input" placeholder="Повторите пароль">
-                        <div class="input-icon-right">
-                            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="policy-text">
-                    Нажимая кнопку, я подтверждаю, что мне исполнилось 18 лет и я согласен с 
-                    <span class="policy-link" onclick="app.openModal()">правилами сервиса</span>.
-                </div>
-
-                <button type="submit" class="btn-main" id="submitBtn">
-                    <span id="btnText">Зарегистрироваться</span>
-                    <div class="loader" id="btnLoader"></div>
-                </button>
-
-            </form>
-
-            <div class="footer">Уже есть аккаунт? <a href="login.html">Войти</a></div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="termsModal">
-        <div class="modal">
-            <h2>Условия использования</h2>
-            <div style="max-height: 300px; overflow-y: auto; padding-right: 10px; color: #aaa; font-size: 14px; line-height: 1.6;">
-                <p>1. <strong>Общие положения:</strong> Регистрируясь на сайте STAVOK.NET, вы подтверждаете свое согласие с данными правилами.</p>
-                <p>2. <strong>Возраст:</strong> К игре допускаются только лица, достигшие 18 лет.</p>
-                <p>3. <strong>Аккаунт:</strong> Запрещено создание мультиаккаунтов.</p>
             </div>
-            <button class="modal-close-btn" onclick="app.closeModal()">Я понимаю</button>
-        </div>
+
+            <div class="form-group">
+                <input type="password" id="password" class="input-field" placeholder="Пароль">
+                <div class="input-icon eye-btn" onclick="togglePass()">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <input type="password" id="confirm" class="input-field" placeholder="Повторите пароль">
+                <div class="input-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+            </div>
+
+            <div class="terms">
+                Регистрируясь, вы принимаете <span>правила сервиса</span>.
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <span id="btnText">ЗАРЕГИСТРИРОВАТЬСЯ</span>
+                <div class="loader" id="loader"></div>
+            </button>
+        </form>
+
+        <a href="login.html" class="footer-link">Уже есть аккаунт? <b>Войти</b></a>
     </div>
 
     <script>
-        const SUPABASE_CONFIG = {
-            url: 'https://cmoeirxugwapvvcdkwjs.supabase.co',
-            key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE'
-        };
+        // 1. КОНФИГУРАЦИЯ SUPABASE
+        const SUPABASE_URL = 'https://cmoeirxugwapvvcdkwjs.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // ИСПРАВЛЕНИЕ 3: Случайные фразы успеха
-        const SUCCESS_MESSAGES = [
+        // 2. ФРАЗЫ УСПЕХА
+        const SUCCESS_PHRASES = [
             "Добро пожаловать в элиту!",
-            "Аккаунт создан. Время побеждать.",
-            "Успешная регистрация! Твой выход.",
-            "Ты в игре. Покажи, на что способен.",
-            "Регистрация пройдена. Удачи, чемпион!"
+            "Твой аккаунт создан. Врывайся!",
+            "Регистрация успешна. Время побеждать.",
+            "Ты теперь часть STAVOK.NET!",
+            "Успех! Твоя игра начинается."
         ];
 
-        document.addEventListener('DOMContentLoaded', () => { app.init(); });
+        // 3. ЛОГИКА UI
+        function togglePass() {
+            const p = document.getElementById('password');
+            p.type = p.type === 'password' ? 'text' : 'password';
+        }
 
-        const app = {
-            supabase: null,
+        function showToast(msg, type = 'error') {
+            const t = document.getElementById('toast');
+            t.className = `toast show ${type}`;
+            t.innerHTML = type === 'error' 
+                ? `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${msg}`
+                : `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg> ${msg}`;
             
-            init: function() {
-                this.initSupabase();
-                this.initVisuals();
-                this.bindEvents();
-            },
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
 
-            initSupabase: function() {
-                if (window.supabase) this.supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
-                else this.showToast("Ошибка соединения с сервером", "error");
-            },
+        // 4. ЛОГИКА РЕГИСТРАЦИИ
+        document.getElementById('regForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm').value;
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const loader = document.getElementById('loader');
 
-            bindEvents: function() {
-                const form = document.getElementById('registerForm');
-                if (form) form.addEventListener('submit', (e) => this.handleRegister(e));
+            if(!username || !email || !password) return showToast('Заполните все поля');
+            if(password !== confirm) return showToast('Пароли не совпадают');
+            if(password.length < 6) return showToast('Пароль минимум 6 символов');
 
-                const toggleBtn = document.getElementById('togglePassBtn');
-                if (toggleBtn) toggleBtn.addEventListener('click', () => {
-                    const passInput = document.getElementById('password');
-                    const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                    passInput.setAttribute('type', type);
-                    toggleBtn.style.opacity = type === 'text' ? '1' : '0.7';
+            // Анимация загрузки
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            loader.style.display = 'block';
+
+            try {
+                // Регистрируем в Auth. 
+                // Важно: передаем username в options.data.
+                // Триггер в SQL подхватит это и сам создаст запись в public.users.
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: { 
+                            username: username,
+                            display_name: username 
+                        }
+                    }
                 });
 
-                const passInput = document.getElementById('password');
-                if (passInput) passInput.addEventListener('input', (e) => this.checkPasswordStrength(e.target.value));
-            },
+                if (error) throw error;
 
-            handleRegister: async function(e) {
-                e.preventDefault();
-                if (!this.supabase) return this.showToast("Библиотеки не загружены", "error");
+                // Успех!
+                const phrase = SUCCESS_PHRASES[Math.floor(Math.random() * SUCCESS_PHRASES.length)];
+                showToast(phrase, 'success');
 
-                const username = document.getElementById('username').value.trim();
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
-                const confirm = document.getElementById('confirm').value;
-
-                if (!username) return this.showToast("Придумайте никнейм", "error");
-                if (!this.isValidEmail(email)) return this.showToast("Некорректный Email", "error");
-                if (password.length < 6) return this.showToast("Пароль минимум 6 символов", "error");
-                if (password !== confirm) return this.showToast("Пароли не совпадают", "error");
-
-                this.setLoading(true);
-
-                try {
-                    // ИСПРАВЛЕНИЕ 2: Сохранение Display Name в метаданные Auth
-                    const { data, error } = await this.supabase.auth.signUp({
-                        email: email,
-                        password: password,
-                        options: {
-                            data: { 
-                                username: username,       // Для совместимости
-                                display_name: username    // Стандарт Supabase
-                            }
-                        }
-                    });
-
-                    if (error) throw error;
-
-                    if (data.user) {
-                        // Дублирование в таблицу базы данных (для надежности)
-                        const { error: dbError } = await this.supabase
-                            .from('users')
-                            .insert([{
-                                id: data.user.id,
-                                username: username, // Важно: убедитесь, что колонка называется username
-                                email: email,
-                                role: 'user',
-                                balance: 0
-                            }]);
-
-                        // Выбор случайного сообщения
-                        const randomMsg = SUCCESS_MESSAGES[Math.floor(Math.random() * SUCCESS_MESSAGES.length)];
-                        this.showToast(randomMsg, "success");
-                        
-                        setTimeout(() => {
-                            if (!data.session) {
-                                alert("Проверьте почту для подтверждения аккаунта.");
-                                window.location.href = 'login.html';
-                            } else {
-                                window.location.href = 'index.html';
-                            }
-                        }, 2000);
+                setTimeout(() => {
+                    if (data.session) {
+                        window.location.href = 'index.html';
+                    } else {
+                        alert('Подтвердите Email (ссылка отправлена на почту)!');
+                        window.location.href = 'login.html';
                     }
+                }, 2000);
 
-                } catch (err) {
-                    console.error("Auth Error:", err);
-                    this.handleError(err);
-                    this.setLoading(false);
-                }
-            },
-
-            setLoading: function(isLoading) {
-                const btn = document.getElementById('submitBtn');
-                const text = document.getElementById('btnText');
-                const loader = document.getElementById('btnLoader');
-                if (isLoading) { btn.disabled = true; text.style.display = 'none'; loader.style.display = 'block'; }
-                else { btn.disabled = false; text.style.display = 'block'; loader.style.display = 'none'; }
-            },
-
-            isValidEmail: function(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); },
-
-            checkPasswordStrength: function(password) {
-                const bar = document.getElementById('strengthBar');
-                let strength = 0;
-                if (password.length > 5) strength += 20;
-                if (password.length > 8) strength += 20;
-                if (/[A-Z]/.test(password)) strength += 20;
-                if (/[0-9]/.test(password)) strength += 20;
-                if (/[^A-Za-z0-9]/.test(password)) strength += 20;
-                bar.style.width = strength + '%';
-                if (strength <= 20) bar.style.background = '#EF4444';
-                else if (strength <= 60) bar.style.background = '#F59E0B';
-                else bar.style.background = '#10B981';
-            },
-
-            handleError: function(err) {
-                let msg = err.message || "Ошибка";
-                if (msg.includes('registered')) msg = "Этот Email уже занят";
-                if (msg.includes('rate limit')) msg = "Слишком много попыток";
-                this.showToast(msg, "error");
-            },
-
-            showToast: function(message, type = 'success') {
-                const container = document.getElementById('toastContainer');
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                let icon = type === 'error' 
-                    ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>'
-                    : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
-                toast.innerHTML = `${icon}<span>${message}</span>`;
-                container.appendChild(toast);
-                requestAnimationFrame(() => toast.classList.add('visible'));
-                setTimeout(() => { toast.classList.remove('visible'); setTimeout(() => toast.remove(), 400); }, 3000);
-            },
-
-            openModal: function() { document.getElementById('termsModal').classList.add('active'); },
-            closeModal: function() { document.getElementById('termsModal').classList.remove('active'); },
-
-            initVisuals: function() {
-                const canvas = document.getElementById('canvas-bg');
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                let w, h, particles = [];
-                const resize = () => { w = window.innerWidth; h = window.innerHeight; canvas.width = w; canvas.height = h; };
-                window.addEventListener('resize', () => { resize(); createParticles(); });
-
-                const createParticles = () => {
-                    particles = [];
-                    const count = Math.min(80, (w * h) / 12000);
-                    for (let i = 0; i < count; i++) {
-                        particles.push({
-                            x: Math.random() * w, y: Math.random() * h,
-                            vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
-                            size: Math.random() * 2 + 1, alpha: Math.random() * 0.5 + 0.1
-                        });
-                    }
-                };
-
-                const animate = () => {
-                    ctx.clearRect(0, 0, w, h);
-                    particles.forEach((p, index) => {
-                        p.x += p.vx; p.y += p.vy;
-                        if (p.x < 0 || p.x > w) p.vx *= -1;
-                        if (p.y < 0 || p.y > h) p.vy *= -1;
-                        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                        ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`; ctx.fill();
-                        for (let j = index + 1; j < particles.length; j++) {
-                            const p2 = particles[j];
-                            const dist = Math.sqrt((p.x - p2.x)**2 + (p.y - p2.y)**2);
-                            if (dist < 100) {
-                                ctx.beginPath(); ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 * (1 - dist / 100)})`;
-                                ctx.lineWidth = 0.5; ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
-                            }
-                        }
-                    });
-                    requestAnimationFrame(animate);
-                };
-                resize(); createParticles(); animate();
+            } catch (err) {
+                let msg = err.message;
+                if(msg.includes('already registered')) msg = 'Этот Email уже занят';
+                showToast(msg);
+                
+                // Возвращаем кнопку
+                btn.disabled = false;
+                btnText.style.display = 'block';
+                loader.style.display = 'none';
             }
-        };
+        });
+
+        // 5. FON (CANVAS PARTICLES)
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        let w, h, particles = [];
+
+        function resize() { w = window.innerWidth; h = window.innerHeight; canvas.width = w; canvas.height = h; }
+        window.addEventListener('resize', () => { resize(); init(); });
+
+        function init() {
+            particles = [];
+            for(let i=0; i<60; i++) {
+                particles.push({
+                    x: Math.random() * w, y: Math.random() * h,
+                    vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5,
+                    size: Math.random() * 2, alpha: Math.random() * 0.5 + 0.2
+                });
+            }
+        }
+
+        function anim() {
+            ctx.clearRect(0, 0, w, h);
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if(p.x < 0) p.x = w; if(p.x > w) p.x = 0;
+                if(p.y < 0) p.y = h; if(p.y > h) p.y = 0;
+                ctx.fillStyle = `rgba(255,255,255,${p.alpha})`;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+            });
+            // Линии
+            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+            for(let i=0; i<particles.length; i++) {
+                for(let j=i+1; j<particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if(dist < 100) {
+                        ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(anim);
+        }
+
+        resize(); init(); anim();
+
     </script>
 </body>
 </html>
