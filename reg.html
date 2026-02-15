@@ -102,7 +102,7 @@
         }
 
         /* ========================================================================
-           4. LOGO (ИСПРАВЛЕНО: УБРАН SKEW У КОНТЕЙНЕРА)
+           4. LOGO (ИСПРАВЛЕНО ПО ЗАПРОСУ)
            ======================================================================== */
         .card-header {
             text-align: center;
@@ -116,7 +116,6 @@
             gap: 12px;
             text-decoration: none;
             margin-bottom: 15px;
-            /* Убран transform: skewX(-10deg); чтобы блок был ровным */
         }
 
         .logo-icon {
@@ -127,7 +126,12 @@
             display: flex; align-items: center; justify-content: center;
             font-family: var(--font-display);
             font-weight: 900; font-size: 20px; 
-            font-style: italic; /* Курсив только здесь */
+            
+            /* ИСПРАВЛЕНИЯ ДЛЯ БУКВЫ S */
+            font-style: italic; /* Только S курсивная */
+            line-height: 1;     /* Для лучшего вертикального центрирования */
+            padding-right: 2px; /* Визуальная компенсация наклона для точного центра */
+            
             box-shadow: 0 0 15px rgba(255,255,255,0.3);
         }
 
@@ -135,7 +139,10 @@
             font-family: var(--font-display);
             font-size: 24px;
             font-weight: 800;
-            font-style: italic; /* И здесь */
+            
+            /* ИСПРАВЛЕНИЯ ДЛЯ ТЕКСТА */
+            font-style: normal; /* Текст прямой */
+            
             color: white;
             text-transform: uppercase;
             letter-spacing: -1px;
@@ -176,7 +183,7 @@
         .input-field:focus ~ .input-icon { color: white; }
 
         /* ========================================================================
-           6. BUTTONS & DISCLAIMER (ИСПРАВЛЕНО)
+           6. BUTTONS & DISCLAIMER
            ======================================================================== */
         .btn-submit {
             width: 100%; height: 60px;
@@ -184,7 +191,7 @@
             border: none; border-radius: 14px;
             font-family: var(--font-display);
             font-weight: 800; 
-            font-style: normal; /* Убран курсив */
+            font-style: normal;
             text-transform: uppercase; font-size: 16px;
             cursor: pointer; transition: 0.3s;
             margin-top: 10px;
@@ -193,7 +200,7 @@
         }
 
         .btn-submit:hover {
-            transform: scale(1.02); /* Убран skewX */
+            transform: scale(1.02);
             box-shadow: 0 10px 30px rgba(255,255,255,0.2);
         }
         
@@ -329,12 +336,11 @@
         const SUPABASE_URL = 'https://cmoeirxugwapvvcdkwjs.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE';
         
-        // Исправлена инициализация
+        // Пытаемся инициализировать клиент. Если CDN не прогрузился, supabase будет null.
         const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
         if (!supabase) {
-            console.error('Supabase library not loaded');
-            alert('Ошибка загрузки библиотек. Проверьте соединение.');
+            console.error('Supabase library failed to load from CDN.');
         }
 
         // 2. UI LOGIC
@@ -360,22 +366,26 @@
 
         if (form) {
             form.addEventListener('submit', async (e) => {
+                // 1. САМОЕ ВАЖНОЕ: Останавливаем стандартную отправку формы
                 e.preventDefault();
+                console.log("Форма отправляется, перезагрузка предотвращена.");
+
+                // 2. Проверяем, загрузилась ли библиотека Supabase
+                if (!supabase) {
+                    showToast('Ошибка: Не удалось подключиться к серверу. Проверьте интернет или обновите страницу.');
+                    return; // Останавливаем выполнение, чтобы не вызвать ошибку
+                }
                 
-                const usernameEl = document.getElementById('username');
-                const emailEl = document.getElementById('email');
-                const passwordEl = document.getElementById('password');
-                const confirmEl = document.getElementById('confirm');
+                // Собираем значения
+                const username = document.getElementById('username').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                const confirm = document.getElementById('confirm').value;
 
-                const username = usernameEl ? usernameEl.value.trim() : '';
-                const email = emailEl ? emailEl.value.trim() : '';
-                const password = passwordEl ? passwordEl.value : '';
-                const confirm = confirmEl ? confirmEl.value : '';
-
-                // Валидация
+                // Валидация на клиенте
                 if(!username || !email || !password) return showToast('Заполните все поля');
                 if(password !== confirm) return showToast('Пароли не совпадают');
-                if(password.length < 6) return showToast('Пароль слишком короткий');
+                if(password.length < 6) return showToast('Пароль слишком короткий (минимум 6 символов)');
 
                 btn.disabled = true;
                 btn.innerHTML = "Обработка...";
@@ -393,9 +403,7 @@
                     if (error) throw error;
 
                     if (data.user) {
-                        // Б. Создание профиля в БД (public.users)
-                        // Примечание: Это может не сработать, если включен RLS (Row Level Security).
-                        // Лучшая практика - использовать Database Trigger в Supabase.
+                        // Б. Создание профиля в БД (если RLS позволяет)
                         const { error: dbError } = await supabase
                             .from('users')
                             .insert([{ 
@@ -407,14 +415,16 @@
                             }]);
 
                         if (dbError) {
-                            console.warn('DB Insert warning (возможно, нужен Backend триггер):', dbError.message);
+                            // Это не критичная ошибка для пользователя, профиль может создаться триггером на сервере
+                            console.warn('Не удалось создать запись в public.users (возможно, RLS):', dbError.message);
                         }
 
-                        showToast('Успешно! Переходим...', 'success');
+                        showToast('Успешно! Перенаправление...', 'success');
                         
                         setTimeout(() => {
+                            // Если сессии нет, значит требуется подтверждение почты
                             if (data.user && !data.session) {
-                                alert('Аккаунт создан! Пожалуйста, подтвердите Email перед входом.');
+                                alert('Аккаунт создан! Пожалуйста, проверьте свою почту для подтверждения.');
                                 window.location.href = 'login.html';
                             } else {
                                 window.location.href = 'index.html';
@@ -423,16 +433,18 @@
                     }
 
                 } catch (err) {
-                    console.error(err);
-                    let msg = err.message;
-                    if(msg.includes('registered')) msg = 'Этот Email уже занят';
-                    if(msg.includes('rate limit')) msg = 'Слишком много попыток';
+                    console.error("Ошибка регистрации:", err);
+                    let msg = err.message || "Произошла ошибка";
+                    if(msg.includes('registered')) msg = 'Этот Email уже зарегистрирован';
+                    if(msg.includes('rate limit')) msg = 'Слишком много попыток, подождите';
                     showToast(msg);
                 } finally {
                     btn.disabled = false;
                     btn.innerHTML = "<span>Зарегистрироваться</span>";
                 }
             });
+        } else {
+            console.error("Форма регистрации не найдена в DOM");
         }
 
         // 4. CANVAS ANIMATION (PARTICLES)
