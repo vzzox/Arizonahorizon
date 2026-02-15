@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>stavok.net</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,13 +11,12 @@
     
     <style>
         /* =========================================
-           1. БАЗОВЫЕ НАСТРОЙКИ (Стиль Dark Premium)
+           1. БАЗОВЫЕ НАСТРОЙКИ
            ========================================= */
         :root {
             --bg-body: #050505;
             --text-main: #FFFFFF;
             --text-muted: #888888;
-            --accent-glow: rgba(255, 255, 255, 0.15);
             --font-main: 'Inter', sans-serif;
             --grid-color: rgba(255, 255, 255, 0.03);
         }
@@ -28,15 +27,15 @@
             font-family: var(--font-main);
             background-color: var(--bg-body);
             color: var(--text-main);
-            height: 100vh; /* На весь экран */
-            overflow: hidden; /* Убираем скролл, так как контента мало */
+            height: 100vh;
+            /* overflow: hidden;  <-- Убрал жесткий запрет скролла, чтобы на очень маленьких экранах можно было прокрутить, если не влезает */
             display: flex;
             flex-direction: column;
             position: relative;
         }
 
         /* =========================================
-           2. ФОНОВЫЕ ЭФФЕКТЫ (Сетка и Звезды)
+           2. ФОНОВЫЕ ЭФФЕКТЫ
            ========================================= */
         .bg-grid {
             position: fixed;
@@ -47,8 +46,8 @@
             background-size: 60px 60px;
             z-index: -2;
             pointer-events: none;
-            mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
-            -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+            mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
         }
 
         .canvas-overlay {
@@ -60,7 +59,7 @@
         }
 
         /* =========================================
-           3. HEADER (Логотип)
+           3. HEADER
            ========================================= */
         header {
             padding: 30px 40px;
@@ -68,6 +67,7 @@
             z-index: 100;
             display: flex;
             align-items: center;
+            justify-content: flex-start; /* Логотип слева */
         }
 
         .logo {
@@ -94,7 +94,7 @@
         }
 
         /* =========================================
-           4. HERO SECTION (Центральный блок)
+           4. HERO SECTION (Центр)
            ========================================= */
         .hero-wrapper {
             flex: 1;
@@ -104,16 +104,18 @@
             justify-content: center;
             text-align: center;
             padding: 0 20px;
-            margin-top: -40px; /* Чуть выше визуально */
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
             position: relative;
+            min-height: 600px; /* Чтобы на маленьких экранах контент не сжимался слишком сильно */
         }
 
-        /* Свечение за текстом */
         .hero-glow {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 600px; height: 600px;
+            width: 60vw; height: 60vw;
             background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
             z-index: -1;
             filter: blur(80px);
@@ -143,13 +145,14 @@
         }
 
         /* =========================================
-           5. КНОПКИ (CTA)
+           5. КНОПКИ
            ========================================= */
         .cta-group {
             display: flex;
             gap: 16px;
             justify-content: center;
-            margin-bottom: 80px;
+            margin-bottom: 60px;
+            width: 100%;
         }
 
         .btn {
@@ -164,6 +167,7 @@
             text-decoration: none;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             cursor: pointer;
+            white-space: nowrap;
         }
 
         .btn-primary {
@@ -192,13 +196,14 @@
         }
 
         /* =========================================
-           6. БЛОК ПАРТНЕРОВ (Вместо графика)
+           6. БРЕНДЫ
            ========================================= */
         .brands-container {
             border-top: 1px solid rgba(255,255,255,0.05);
-            padding-top: 40px;
+            padding-top: 30px;
             width: 100%;
             max-width: 800px;
+            margin-bottom: 40px;
         }
 
         .brands-title {
@@ -206,7 +211,7 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             color: #444;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             font-weight: 600;
         }
 
@@ -215,7 +220,7 @@
             justify-content: space-between;
             align-items: center;
             gap: 40px;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* Чтобы переносились на мобилке */
         }
 
         .brand-logo {
@@ -227,16 +232,65 @@
 
         .brand-logo:hover {
             opacity: 1;
-            filter: drop-shadow(0 0 8px rgba(255,255,255,0.5));
         }
 
-        /* Адаптив под мобилки */
+        /* =========================================
+           7. FOOTER / COPYRIGHT
+           ========================================= */
+        .footer-copy {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.2);
+            width: 100%;
+            position: relative; /* Чтобы не накладывался */
+        }
+
+        /* =========================================
+           8. МОБИЛЬНАЯ АДАПТАЦИЯ (Media Queries)
+           ========================================= */
         @media (max-width: 768px) {
-            h1 { font-size: 48px; }
-            .cta-group { flex-direction: column; width: 100%; max-width: 300px; }
-            .btn { width: 100%; }
-            .brands-row { justify-content: center; gap: 30px; }
-            header { padding: 20px; }
+            header {
+                padding: 20px;
+            }
+
+            h1 { 
+                font-size: 42px; /* Уменьшаем шрифт */
+                margin-bottom: 16px;
+                padding: 0 10px;
+            }
+
+            p.subtitle {
+                font-size: 15px;
+                padding: 0 15px;
+                margin-bottom: 32px;
+            }
+
+            .cta-group {
+                flex-direction: column; /* Кнопки вертикально */
+                align-items: center;
+                gap: 12px;
+                max-width: 100%;
+                padding: 0 20px;
+            }
+
+            .btn {
+                width: 100%; /* Кнопка на всю ширину */
+            }
+
+            .brands-row {
+                justify-content: center; /* Центрируем логотипы */
+                gap: 24px;
+            }
+            
+            .brand-logo {
+                height: 22px; /* Чуть меньше логотипы */
+            }
+
+            .hero-wrapper {
+                justify-content: center; 
+                margin-top: 0;
+            }
         }
     </style>
 </head>
@@ -273,22 +327,18 @@
         <div class="brands-container">
             <p class="brands-title">Нас поддерживают</p>
             <div class="brands-row">
-                <svg class="brand-logo" viewBox="0 0 24 24" style="height: 40px;">
+                <svg class="brand-logo" viewBox="0 0 24 24" style="height: 32px;">
                     <path d="M21 8.25c-6.85 0-11.5 5.5-14.5 10.5C5.5 17.5 3 14.5 3 14.5s2.5 5.5 7.5 5.5c6.5 0 12.5-11.75 12.5-11.75H21z"/>
                 </svg>
-
-                <svg class="brand-logo" viewBox="0 0 24 24" style="height: 35px;">
+                <svg class="brand-logo" viewBox="0 0 24 24" style="height: 28px;">
                     <path d="M18 4l3 1-8 15-3-1 8-15zM12 7l3 1-6 12-3-1 6-12zM6 10l3 1-4.5 9-3-1 4.5-9z"/>
                 </svg>
-
                 <svg class="brand-logo" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm0-4H9V8h2v4z"/>
                 </svg>
-
                 <svg class="brand-logo" viewBox="0 0 100 24">
                     <text x="0" y="20" fill="currentColor" font-family="Arial" font-weight="bold" font-size="20">BETBOOM</text>
                 </svg>
-                
                 <svg class="brand-logo" viewBox="0 0 80 24">
                      <text x="0" y="20" fill="currentColor" font-family="Arial" font-weight="bold" font-size="20">WINLINE</text>
                 </svg>
@@ -296,13 +346,11 @@
         </div>
     </div>
 
-    <script>
-        // 1. SUPABASE
-        const SUPABASE_URL = 'https://cmoeirxugwapvvcdkwjs.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <div class="footer-copy">
+        &copy; 2026 stavok.net. Все права защищены. Разработано NewToyers.
+    </div>
 
-        // 2. ANIMATION
+    <script>
         const canvas = document.getElementById('starsCanvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -319,7 +367,7 @@
             constructor() {
                 this.x = Math.random() * width;
                 this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 0.3; // Медленнее для элегантности
+                this.vx = (Math.random() - 0.5) * 0.3;
                 this.vy = (Math.random() - 0.5) * 0.3;
                 this.size = Math.random() * 1.5;
                 this.opacity = Math.random() * 0.5 + 0.1;
