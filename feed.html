@@ -2,831 +2,624 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Лента | STAVOK.NET</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Лента | STAVOK.NET Mobile</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Unbounded:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Unbounded:wght@400;600;900&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            /* COLORS */
-            --bg-body: #050505;
-            --bg-panel: #0F0F0F;
-            --bg-card: rgba(20, 20, 20, 0.6);
-            --bg-card-hover: rgba(30, 30, 30, 0.8);
+            --bg: #050505;
+            --bg-glass: rgba(15, 15, 15, 0.85);
+            --bg-input: rgba(255, 255, 255, 0.05);
             
-            --border-weak: rgba(255, 255, 255, 0.08);
-            --border-strong: rgba(255, 255, 255, 0.2);
+            --accent: #00FF94;
+            --accent-soft: rgba(0, 255, 148, 0.1);
+            --error: #FF3333;
+            --warn: #FFCC00;
+            --white: #FFFFFF;
             
-            --brand-white: #FFFFFF;
-            --brand-green: #00E096;
-            --brand-red: #FF4444;
-            --brand-blue: #2E86DE;
-            --brand-gold: #FFBB00;
+            --border: rgba(255, 255, 255, 0.1);
+            --border-active: rgba(255, 255, 255, 0.3);
             
             --text-main: #FFFFFF;
-            --text-muted: #888888;
+            --text-muted: #999999;
             
-            /* SIZES */
-            --nav-height: 70px;
-            --sidebar-width: 280px;
-            --feed-width: 680px;
-            
-            /* FONTS */
             --font-display: 'Unbounded', sans-serif;
             --font-body: 'Inter', sans-serif;
             
-            /* EFFECTS */
-            --glass-blur: blur(20px);
-            --shadow-card: 0 10px 40px -10px rgba(0,0,0,0.5);
-            --transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        /* --- RESET --- */
+        /* --- BASIC SETUP --- */
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-body); }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         
         body {
-            background-color: var(--bg-body);
+            background-color: var(--bg);
             color: var(--text-main);
             font-family: var(--font-body);
+            line-height: 1.5;
+            -webkit-user-select: none;
             overflow-x: hidden;
-            min-height: 100vh;
+            padding-bottom: calc(80px + var(--safe-bottom)); /* Пространство для нижнего бара */
         }
 
-        /* --- PARTICLES BG --- */
-        #canvas-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.4; pointer-events: none; }
-        .ambient-light {
-            position: fixed; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: -2;
-            background: radial-gradient(circle at 50% 0%, rgba(0, 224, 150, 0.05), transparent 60%);
+        /* --- BACKGROUND PARTICLES --- */
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.3; }
+
+        /* --- HEADER SECTION --- */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: calc(15px + var(--safe-top)) 20px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* --- LAYOUT GRID --- */
-        .app-layout {
-            display: grid;
-            grid-template-columns: var(--sidebar-width) 1fr var(--sidebar-width);
-            gap: 30px;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding-top: calc(var(--nav-height) + 40px); /* +40px for Ad Banner space */
-            padding-bottom: 50px;
-            padding-left: 20px; padding-right: 20px;
+        .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .brand-icon {
+            width: 34px; height: 34px; background: #fff; color: #000;
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-display); font-weight: 900; font-style: italic;
+            transform: skewX(-12deg); font-size: 18px;
+        }
+        .brand-name { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: #fff; }
+
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        
+        /* Исправленная аватарка и баланс */
+        .wallet-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-input);
+            padding: 5px 12px 5px 6px;
+            border-radius: 50px;
+            border: 1px solid var(--border);
         }
 
-        /* --- HEADER & AD BANNER --- */
-        .top-ad-banner {
-            position: fixed; top: 0; left: 0; width: 100%; height: 40px;
-            background: linear-gradient(90deg, #111, #222, #111);
-            z-index: 1002; display: flex; align-items: center; justify-content: center;
-            border-bottom: 1px solid var(--border-weak);
-            font-size: 12px; font-weight: 600; letter-spacing: 1px;
-            transform: translateY(0); transition: transform 0.3s;
-        }
-        .top-ad-banner.hidden { transform: translateY(-100%); }
-        .top-ad-banner span { color: var(--brand-green); margin-right: 10px; }
-
-        .navbar {
-            position: fixed; top: 40px; left: 0; width: 100%; height: var(--nav-height);
-            background: rgba(5, 5, 5, 0.8);
-            backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-            border-bottom: 1px solid var(--border-weak);
-            z-index: 1000; display: flex; align-items: center; justify-content: space-between;
-            padding: 0 40px; transition: top 0.3s;
-        }
-
-        /* LOGO (Copied from Reg) */
-        .logo-box { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-        .logo-cube {
-            width: 36px; height: 36px; background: white; color: black; border-radius: 8px;
+        .avatar-box {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #444, #111);
+            border: 2px solid var(--border-active);
+            border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-display); font-weight: 900; font-size: 18px;
-            font-style: italic; transform: skewX(-12deg);
-        }
-        .logo-text {
-            font-family: var(--font-display); font-size: 20px; font-weight: 800;
-            color: white; font-style: normal; letter-spacing: -0.5px;
+            font-size: 12px; font-weight: 800; color: var(--accent);
+            text-shadow: 0 0 10px var(--accent-soft);
+            overflow: hidden;
         }
 
-        .nav-actions { display: flex; align-items: center; gap: 20px; }
+        .balance-text { font-family: var(--font-display); font-size: 12px; font-weight: 600; color: var(--accent); }
+
+        /* --- AD BANNER (HORIZONTAL) --- */
+        .ad-banner-strip {
+            margin: 15px 20px;
+            background: linear-gradient(90deg, #1a1a1a, #0a0a0a);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        .ad-banner-strip::before {
+            content: 'AD'; position: absolute; top: 0; right: 0; background: var(--warn);
+            color: #000; font-size: 8px; font-weight: 900; padding: 2px 6px; border-bottom-left-radius: 8px;
+        }
+        .ad-icon { width: 40px; height: 40px; background: var(--accent-soft); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 20px; }
+        .ad-content h5 { font-size: 14px; margin-bottom: 2px; }
+        .ad-content p { font-size: 11px; color: var(--text-muted); }
+
+        /* --- FEED SECTION --- */
+        .feed { padding: 0 15px; display: flex; flex-direction: column; gap: 20px; }
+
+        .post {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 20px;
+            position: relative;
+            animation: postFadeIn 0.5s ease-out;
+        }
+
+        @keyframes postFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .post-user { display: flex; align-items: center; gap: 12px; }
+        .user-meta h4 { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+        .user-meta span { font-size: 11px; color: var(--text-muted); }
+        .badge-admin { background: var(--error); color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+
+        .post-text { font-size: 15px; line-height: 1.6; color: #efefef; margin-bottom: 15px; }
+        .post-media { width: 100%; border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--border); }
+
+        /* --- MATCH WIDGET --- */
+        .match-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .match-teams { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .m-team { flex: 1; text-align: center; }
+        .m-team img { width: 40px; height: 40px; margin-bottom: 5px; }
+        .m-team b { font-size: 12px; display: block; }
+        .m-score { font-family: var(--font-display); font-size: 24px; font-weight: 900; color: var(--accent); }
+
+        .bet-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .bet-option {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            padding: 10px 5px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .bet-option:active { background: var(--accent); color: #000; transform: scale(0.95); }
+        .bet-option .o-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; display: block; }
+        .bet-option .o-val { font-family: var(--font-display); font-size: 14px; font-weight: 700; }
+
+        /* --- INTERACTIONS --- */
+        .post-footer { display: flex; gap: 20px; border-top: 1px solid var(--border); padding-top: 15px; }
+        .i-btn { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-muted); cursor: pointer; }
+        .i-btn.active { color: var(--error); }
+        .i-btn.active i { font-weight: 900; }
+
+        /* --- COMMENTS SYSTEM --- */
+        .comments-block { margin-top: 15px; display: none; padding-top: 15px; border-top: 1px dashed var(--border); }
+        .comment { display: flex; gap: 10px; margin-bottom: 12px; }
+        .c-body { flex: 1; background: var(--bg-input); padding: 10px 14px; border-radius: 14px; font-size: 13px; }
+        .c-user { font-weight: 700; margin-bottom: 2px; display: block; }
+        .c-reply-btn { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: inline-block; }
+
+        .comment-input-area { display: flex; gap: 10px; margin-top: 15px; }
+        .c-input { flex: 1; background: var(--bg-input); border: 1px solid var(--border); border-radius: 50px; padding: 10px 18px; color: #fff; font-size: 13px; }
+        .c-send { width: 38px; height: 38px; background: var(--white); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        /* --- BOTTOM NAVIGATION (MOBILE) --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            height: calc(70px + var(--safe-bottom));
+            background: var(--bg-glass);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: var(--safe-bottom);
+            z-index: 2000;
+        }
+
+        .nav-link {
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            text-decoration: none; color: var(--text-muted); transition: 0.3s;
+            position: relative;
+        }
+        .nav-link.active { color: var(--accent); }
+        .nav-link i { font-size: 20px; }
+        .nav-link span { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .user-chip {
-            display: flex; align-items: center; gap: 10px;
-            background: var(--bg-card); border: 1px solid var(--border-weak);
-            padding: 6px 12px; border-radius: 20px; cursor: pointer; transition: 0.3s;
+        .nav-link.active::after {
+            content: ''; position: absolute; top: -15px; width: 30px; height: 4px;
+            background: var(--accent); border-radius: 0 0 10px 10px; box-shadow: 0 5px 15px var(--accent-soft);
         }
-        .user-chip:hover { border-color: var(--brand-white); }
-        .user-avatar { width: 28px; height: 28px; background: #333; border-radius: 50%; }
-        .user-balance { color: var(--brand-green); font-weight: 600; font-size: 14px; font-family: var(--font-display); }
 
-        /* --- SIDEBARS --- */
-        .sidebar { position: sticky; top: 130px; height: fit-content; }
-        .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-        .nav-item {
-            padding: 12px 16px; border-radius: 12px; color: var(--text-muted);
-            cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px;
-            font-weight: 500;
-        }
-        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: white; }
-        .nav-item i { width: 20px; text-align: center; }
-
-        .widget-card {
-            background: var(--bg-card); border: 1px solid var(--border-weak);
-            border-radius: 16px; padding: 20px; margin-bottom: 20px;
-        }
-        .widget-title { font-family: var(--font-display); font-size: 14px; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase; }
-
-        /* --- FEED STREAM --- */
-        .feed-stream { display: flex; flex-direction: column; gap: 24px; }
-
-        /* POST CARD BASE */
-        .post-card {
-            background: var(--bg-card); border: 1px solid var(--border-weak);
-            border-radius: 20px; overflow: hidden; position: relative;
-            animation: slideUp 0.5s ease-out;
-        }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .post-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .post-author { display: flex; align-items: center; gap: 10px; }
-        .author-avatar { width: 40px; height: 40px; border-radius: 10px; background: white; color: black; display: flex; align-items: center; justify-content: center; font-weight: 900; font-style: italic; transform: skewX(-5deg); }
-        .author-info h4 { font-size: 15px; font-weight: 700; color: white; display: flex; align-items: center; gap: 6px; }
-        .admin-badge { font-size: 10px; background: var(--brand-red); padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
-        .post-time { font-size: 12px; color: var(--text-muted); }
-
-        .post-content { padding: 0 20px 20px; font-size: 15px; line-height: 1.6; color: #ddd; }
-        .post-image { width: 100%; height: auto; display: block; margin-top: 15px; border-radius: 12px; }
-
-        /* TEMPLATE: FOOTBALL SCORE */
-        .match-widget {
-            background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.0));
-            border: 1px solid var(--border-weak); border-radius: 16px;
-            padding: 20px; margin-top: 15px; text-align: center;
-        }
-        .match-header { font-family: var(--font-display); font-size: 12px; color: var(--brand-green); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
-        .teams-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .team { width: 30%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .team-logo { width: 60px; height: 60px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: #555; }
-        .team-name { font-weight: 700; font-size: 14px; }
-        .score-board { font-family: var(--font-display); font-size: 32px; font-weight: 800; letter-spacing: 2px; }
-        
-        .bet-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .bet-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border-weak);
-            padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s;
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-        }
-        .bet-btn:hover { background: var(--brand-green); border-color: var(--brand-green); color: black; }
-        .coef { font-weight: 800; font-size: 16px; font-family: var(--font-display); }
-        .label { font-size: 11px; text-transform: uppercase; opacity: 0.7; }
-
-        /* TEMPLATE: PROMO */
-        .promo-card {
-            background: linear-gradient(135deg, #222, #111);
-            border: 1px solid var(--brand-gold);
-        }
-        .promo-badge { background: var(--brand-gold); color: black; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 11px; text-transform: uppercase; display: inline-block; margin-bottom: 10px; }
-        .promo-btn {
-            display: inline-block; background: var(--brand-gold); color: black;
-            padding: 12px 24px; border-radius: 30px; font-weight: 700;
-            text-decoration: none; margin-top: 15px; transform: skewX(-10deg);
-        }
-        .promo-btn span { display: block; transform: skewX(10deg); }
-
-        /* ACTIONS & COMMENTS */
-        .post-actions {
-            padding: 15px 20px; border-top: 1px solid var(--border-weak);
-            display: flex; gap: 20px;
-        }
-        .action-btn { color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 14px; transition: 0.2s; }
-        .action-btn:hover { color: white; }
-        .action-btn.active { color: var(--brand-red); }
-
-        .comments-section {
-            background: rgba(0,0,0,0.2); border-top: 1px solid var(--border-weak);
-            padding: 20px; display: none; /* Hidden by default */
-        }
-        .comments-section.open { display: block; }
-        
-        .comment-input-wrap { display: flex; gap: 10px; margin-bottom: 20px; }
-        .comment-input {
-            flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border-weak);
-            border-radius: 20px; padding: 10px 16px; color: white; font-family: var(--font-body);
-        }
-        .send-btn { background: white; color: black; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .send-btn:hover { transform: scale(1.1); }
-
-        .comment-list { display: flex; flex-direction: column; gap: 15px; }
-        .comment { display: flex; gap: 12px; font-size: 13px; }
-        .comment-avatar { width: 32px; height: 32px; border-radius: 50%; background: #333; flex-shrink: 0; }
-        .comment-body { flex: 1; }
-        .comment-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
-        .comment-user { font-weight: 600; color: white; }
-        .comment-text { color: #ccc; line-height: 1.4; }
-        .comment-actions { margin-top: 6px; display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); }
-        .reply-link { cursor: pointer; } .reply-link:hover { color: white; }
-
-        /* Nested comments */
-        .comment-reply { margin-left: 44px; margin-top: 10px; border-left: 2px solid var(--border-weak); padding-left: 12px; }
-
-        /* --- ADMIN FAB & MODAL --- */
-        .admin-fab {
-            position: fixed; bottom: 30px; right: 30px;
-            width: 60px; height: 60px; background: var(--brand-green);
-            color: black; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px; box-shadow: 0 0 20px rgba(0, 224, 150, 0.4);
-            cursor: pointer; z-index: 2000; transition: 0.3s;
-            display: none; /* Visible only to admin */
-        }
-        .admin-fab:hover { transform: scale(1.1) rotate(90deg); }
-
-        .modal-overlay {
+        /* --- MODALS --- */
+        .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
-            z-index: 3000; display: none; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.8); z-index: 3000;
+            display: none; align-items: center; justify-content: center; padding: 20px;
         }
-        .modal-overlay.active { display: flex; }
-        
-        .modal-card {
-            background: #111; border: 1px solid var(--border-strong);
-            width: 500px; padding: 30px; border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        .modal {
+            background: #111; border: 1px solid var(--border-active);
+            width: 100%; max-width: 400px; border-radius: 28px; padding: 30px;
         }
-        .modal-title { font-family: var(--font-display); font-size: 20px; margin-bottom: 20px; }
-        
-        .form-select, .form-input, .form-textarea {
-            width: 100%; padding: 12px; background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border-weak); border-radius: 8px;
-            color: white; margin-bottom: 15px; font-family: var(--font-body);
+        .modal-h { font-family: var(--font-display); font-size: 18px; margin-bottom: 20px; }
+        .m-input, .m-area {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border);
+            border-radius: 12px; padding: 12px; color: #fff; margin-bottom: 15px;
         }
-        .form-textarea { height: 100px; resize: vertical; }
-
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
-        .btn-cancel { padding: 10px 20px; border-radius: 8px; background: transparent; border: 1px solid var(--border-weak); color: white; cursor: pointer; }
-        .btn-publish { padding: 10px 20px; border-radius: 8px; background: white; color: black; border: none; font-weight: 700; cursor: pointer; }
+        .m-area { height: 100px; resize: none; }
+        .m-btn {
+            width: 100%; padding: 15px; background: var(--white); color: #000;
+            border: none; border-radius: 12px; font-weight: 800; text-transform: uppercase;
+        }
 
         /* --- TOAST --- */
         .toast {
-            position: fixed; top: 80px; right: 20px;
-            background: #222; border: 1px solid var(--border-weak);
-            padding: 15px 25px; border-radius: 12px; z-index: 4000;
-            display: flex; align-items: center; gap: 10px;
-            transform: translateX(120%); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: var(--accent); color: #000; padding: 12px 25px; border-radius: 50px;
+            font-weight: 700; font-size: 13px; z-index: 5000; opacity: 0; transition: 0.4s; pointer-events: none;
         }
-        .toast.show { transform: translateX(0); }
-        .toast.success { border-left: 4px solid var(--brand-green); }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        /* Responsive */
-        @media (max-width: 1100px) {
-            .app-layout { grid-template-columns: 80px 1fr 250px; }
-            .sidebar span { display: none; } /* Icon only sidebar */
-        }
-        @media (max-width: 900px) {
-            .app-layout { grid-template-columns: 1fr; padding-left: 0; padding-right: 0; }
-            .sidebar, .widgets-col { display: none; }
-            .navbar { padding: 0 20px; }
-            .feed-stream { width: 100%; max-width: 600px; margin: 0 auto; padding: 0 10px; }
-        }
     </style>
 </head>
 <body>
 
-    <div class="ambient-light"></div>
-    <canvas id="canvas-bg"></canvas>
+    <canvas id="bg-canvas"></canvas>
+    <div id="toast" class="toast">Действие выполнено</div>
 
-    <div class="top-ad-banner" id="topBanner">
-        <span>⚡ BONUS X2</span> ПОПОЛНИ БАЛАНС СЕЙЧАС И ПОЛУЧИ УДВОЕНИЕ! <i class="fa-solid fa-xmark" style="margin-left: 15px; cursor: pointer;" onclick="toggleBanner()"></i>
+    <header class="header">
+        <a href="feed.html" class="brand">
+            <div class="brand-icon">S</div>
+            <span class="brand-name">STAVOK.NET</span>
+        </a>
+        <div class="header-right">
+            <div class="wallet-info">
+                <div class="avatar-box" id="userAvatar">?</div>
+                <span class="balance-text" id="userBalance">0.00 x2</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="ad-banner-strip" id="topAd">
+        <div class="ad-icon"><i class="fa-solid fa-bolt-lightning"></i></div>
+        <div class="ad-content">
+            <h5>VIP ПРОГНОЗЫ ДОСТУПНЫ</h5>
+            <p>Получи доступ к аналитике от профи со скидкой 50%</p>
+        </div>
     </div>
 
-    <nav class="navbar">
-        <a href="feed.html" class="logo-box">
-            <div class="logo-cube">S</div>
-            <div class="logo-text">STAVOK.NET</div>
-        </a>
+    <main class="feed" id="mainFeed">
+        </main>
 
-        <div class="nav-actions">
-            <div class="user-chip" id="userChip">
-                <div class="user-avatar" id="navAvatar"></div>
-                <span class="user-balance" id="navBalance">0.00 x2</span>
-            </div>
-            <i class="fa-solid fa-right-from-bracket" style="color: #666; cursor: pointer;" onclick="App.auth.logout()"></i>
-        </div>
+    <nav class="bottom-nav">
+        <a href="new.html" class="nav-link">
+            <i class="fa-solid fa-bolt"></i>
+            <span>News</span>
+        </a>
+        <a href="feed.html" class="nav-link active">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Feed</span>
+        </a>
+        <a href="profile.html" class="nav-link">
+            <i class="fa-solid fa-user-astronaut"></i>
+            <span>Profile</span>
+        </a>
     </nav>
 
-    <main class="app-layout">
-        
-        <aside class="sidebar">
-            <ul class="nav-menu">
-                <li class="nav-item active"><i class="fa-solid fa-house"></i> <span>Лента</span></li>
-                <li class="nav-item"><i class="fa-solid fa-fire"></i> <span>Live Матчи</span></li>
-                <li class="nav-item"><i class="fa-solid fa-chart-pie"></i> <span>Мои Ставки</span></li>
-                <li class="nav-item"><i class="fa-solid fa-trophy"></i> <span>Турниры</span></li>
-                <li class="nav-item"><i class="fa-solid fa-headphones"></i> <span>Поддержка</span></li>
-            </ul>
-        </aside>
-
-        <section class="feed-container">
-            <div class="feed-stream" id="feedStream">
-                </div>
+    <div class="overlay" id="createPostModal">
+        <div class="modal">
+            <h3 class="modal-h">Новая публикация</h3>
+            <textarea id="postContent" class="m-area" placeholder="О чем вы думаете?"></textarea>
+            <input type="text" id="postImgUrl" class="m-input" placeholder="Ссылка на фото (необязательно)">
             
-            <div style="height: 50px;"></div> </section>
-
-        <aside class="widgets-col">
-            <div class="widget-card">
-                <div class="widget-title">🔥 Горячий матч</div>
-                <div style="font-size: 13px; color: #fff;">
-                    Real Madrid vs Barcelona<br>
-                    <span style="color: var(--brand-green); font-weight: bold;">22:00 Сегодня</span>
-                </div>
+            <div id="adminOptions" style="display: none; border-top: 1px solid var(--border); padding-top: 15px; margin-top: 10px;">
+                <p style="font-size: 10px; color: var(--warn); margin-bottom: 10px;">ADMIN PANEL</p>
+                <select id="postType" class="m-input">
+                    <option value="text">Обычный пост</option>
+                    <option value="match">Матч (Ставки)</option>
+                    <option value="ad">Рекламный блок</option>
+                </select>
             </div>
 
-            <div class="widget-card">
-                <div class="widget-title">🏆 Топ игроков</div>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                        <span>AlexBet</span> <span style="color: var(--brand-gold);">145,000 x2</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                        <span>DimaPro</span> <span style="color: #ccc;">98,000 x2</span>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-    </main>
-
-    <div class="admin-fab" id="adminFab" onclick="App.admin.openModal()">
-        <i class="fa-solid fa-plus"></i>
-    </div>
-
-    <div class="modal-overlay" id="postModal">
-        <div class="modal-card">
-            <h3 class="modal-title">Создать пост</h3>
-            
-            <select id="postTemplate" class="form-select" onchange="App.admin.toggleFields()">
-                <option value="text">Обычный текст</option>
-                <option value="match">Футбольный матч</option>
-                <option value="image">Фото/Баннер</option>
-                <option value="promo">Рекламный блок</option>
-            </select>
-
-            <input type="text" id="postTitle" class="form-input" placeholder="Заголовок (необязательно)">
-            <textarea id="postContent" class="form-textarea" placeholder="Текст поста..."></textarea>
-            
-            <div id="imageFields" style="display: none;">
-                <input type="text" id="postImageUrl" class="form-input" placeholder="Ссылка на изображение (URL)">
-            </div>
-
-            <div id="matchFields" style="display: none;">
-                <input type="text" id="team1" class="form-input" placeholder="Команда 1">
-                <input type="text" id="team2" class="form-input" placeholder="Команда 2">
-                <div style="display: flex; gap: 10px;">
-                    <input type="number" id="odd1" class="form-input" placeholder="Коэф П1">
-                    <input type="number" id="oddX" class="form-input" placeholder="Коэф X">
-                    <input type="number" id="odd2" class="form-input" placeholder="Коэф П2">
-                </div>
-            </div>
-
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="App.admin.closeModal()">Отмена</button>
-                <button class="btn-publish" onclick="App.admin.publishPost()">Опубликовать</button>
-            </div>
+            <button class="m-btn" onclick="App.posts.submit()">Опубликовать</button>
+            <p onclick="App.ui.closeModal()" style="text-align: center; font-size: 12px; margin-top: 15px; color: var(--text-muted);">Отмена</p>
         </div>
     </div>
 
-    <div class="toast" id="toast">
-        <i class="fa-solid fa-check-circle" style="color: var(--brand-green);"></i>
-        <span id="toastMsg">Действие выполнено</span>
+    <div class="overlay" id="betModal">
+        <div class="modal">
+            <h3 class="modal-h">Сделать ставку</h3>
+            <div id="betDetails" style="margin-bottom: 20px; font-size: 14px;"></div>
+            <input type="number" id="betAmount" class="m-input" placeholder="Сумма ставки">
+            <button class="m-btn" style="background: var(--accent);" onclick="App.bets.confirm()">Подтвердить</button>
+            <p onclick="App.ui.closeModal()" style="text-align: center; font-size: 12px; margin-top: 15px; color: var(--text-muted);">Отмена</p>
+        </div>
     </div>
 
     <script>
-        // CONFIG
-        const CONFIG = {
-            supabaseUrl: 'https://cmoeirxugwapvvcdkwjs.supabase.co',
-            supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE',
-            adminEmails: ['admin@stavok.net', 'boss@stavok.net'] // Mock admin list for prototype
-        };
+        /**
+         * STAVOK.NET ENGINE v3.0
+         * Синхронизация с Supabase Realtime + Логика Ставок
+         */
 
-        // --- AUTH MANAGER ---
-        class AuthManager {
-            constructor() {
-                this.supabase = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
-                this.user = null;
-                this.profile = null;
-            }
+        const SB_URL = 'https://cmoeirxugwapvvcdkwjs.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE';
+
+        const App = {
+            sb: null,
+            user: null,
+            profile: null,
+            activeBet: null,
 
             async init() {
-                // Check session
-                const { data: { session } } = await this.supabase.auth.getSession();
+                console.log("App: Initialization...");
+                this.sb = window.supabase.createClient(SB_URL, SB_KEY);
+                this.initVisuals();
+                
+                // 1. Auth Check
+                const { data: { session } } = await this.sb.auth.getSession();
                 if (!session) {
                     window.location.href = 'login.html';
                     return;
                 }
                 this.user = session.user;
+
+                // 2. Load Profile & Realtime
                 await this.loadProfile();
-                this.updateUI();
+                this.initRealtime();
                 
-                // Check Admin
-                if (this.profile && this.profile.role === 'admin') {
-                    document.getElementById('adminFab').style.display = 'flex';
-                }
-            }
+                // 3. Load Feed
+                App.posts.load();
+
+                // 4. Bind Global Clicks
+                document.addEventListener('click', (e) => {
+                    if(e.target.closest('.i-btn-like')) App.posts.like(e.target.closest('.post').dataset.id);
+                });
+            },
 
             async loadProfile() {
-                // Fetch profile from 'users' table
-                const { data, error } = await this.supabase
+                const { data, error } = await this.sb
                     .from('users')
                     .select('*')
                     .eq('id', this.user.id)
                     .single();
-                
-                if (data) this.profile = data;
-                else {
-                    // Fallback for demo if DB isn't populated
-                    this.profile = { 
-                        username: this.user.user_metadata.username || 'User',
-                        balance: 0,
-                        role: this.user.user_metadata.role || 'user' // Assume role passed in metadata or DB
-                    };
-                }
-            }
 
-            updateUI() {
-                document.getElementById('navBalance').innerText = `${this.profile.balance.toFixed(2)} x2`;
-                // Generate avatar from letters
-                const av = document.getElementById('navAvatar');
-                av.innerText = this.profile.username.substring(0, 1).toUpperCase();
-            }
-
-            async logout() {
-                await this.supabase.auth.signOut();
-                window.location.href = 'login.html';
-            }
-        }
-
-        // --- POST & FEED MANAGER ---
-        class FeedManager {
-            constructor() {
-                this.stream = document.getElementById('feedStream');
-                this.posts = [];
-            }
-
-            init() {
-                // In a real app, fetch from DB. Here we load mock initial data + created ones
-                this.loadMockData();
-                this.renderAll();
-            }
-
-            loadMockData() {
-                this.posts = [
-                    {
-                        id: 1, type: 'match',
-                        author: 'STAVOK ADMIN', role: 'admin', time: '10 мин назад',
-                        content: 'Главное событие вечера! Лига Чемпионов возвращается. Делайте ваши ставки.',
-                        data: {
-                            team1: 'Bayern', team2: 'PSG',
-                            score1: 0, score2: 0,
-                            odds: { w1: 2.15, x: 3.50, w2: 3.10 }
-                        },
-                        likes: 42, comments: []
-                    },
-                    {
-                        id: 2, type: 'promo',
-                        author: 'Partners', role: 'admin', time: '1 час назад',
-                        content: 'Специальное предложение от наших партнеров. Используйте промокод STAVOK2024.',
-                        data: {
-                            badge: 'Реклама',
-                            btnText: 'Забрать Бонус',
-                            link: '#'
-                        },
-                        likes: 120, comments: []
+                if (data) {
+                    this.profile = data;
+                    document.getElementById('userBalance').innerText = `${data.balance.toFixed(2)} x2`;
+                    const avatar = document.getElementById('userAvatar');
+                    avatar.innerText = data.username.substring(0, 1).toUpperCase();
+                    
+                    if(data.role === 'admin') {
+                        document.getElementById('adminOptions').style.display = 'block';
                     }
-                ];
-            }
+                }
+            },
 
-            addPost(post) {
-                this.posts.unshift(post);
-                this.renderAll();
-            }
+            initRealtime() {
+                // Слушаем изменения баланса
+                this.sb
+                    .channel('any')
+                    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${this.user.id}` }, 
+                    payload => {
+                        this.profile.balance = payload.new.balance;
+                        document.getElementById('userBalance').innerText = `${payload.new.balance.toFixed(2)} x2`;
+                    })
+                    .subscribe();
 
-            renderAll() {
-                this.stream.innerHTML = '';
-                this.posts.forEach(post => {
-                    const html = this.generateHTML(post);
-                    this.stream.insertAdjacentHTML('beforeend', html);
-                });
-            }
+                // Слушаем новые посты
+                this.sb
+                    .channel('posts')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, 
+                    payload => App.posts.prepend(payload.new))
+                    .subscribe();
+            },
 
-            generateHTML(post) {
-                let innerContent = '';
+            // --- UI CONTROLLER ---
+            ui: {
+                toast(msg) {
+                    const t = document.getElementById('toast');
+                    t.innerText = msg;
+                    t.classList.add('show');
+                    setTimeout(() => t.classList.remove('show'), 3000);
+                },
+                openModal(id) { document.getElementById(id).style.display = 'flex'; },
+                closeModal() { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); }
+            },
 
-                // TEMPLATE SWITCHER
-                if (post.type === 'text') {
-                    innerContent = `<div class="post-content">${post.content}</div>`;
-                } 
-                else if (post.type === 'image') {
-                    innerContent = `
-                        <div class="post-content">
-                            ${post.content}
-                            <img src="${post.data.image}" class="post-image" alt="Post Image">
+            // --- POSTS CONTROLLER ---
+            posts: {
+                async load() {
+                    const { data, error } = await App.sb
+                        .from('posts')
+                        .select('*, users(username, role, avatar_url)')
+                        .order('created_at', { ascending: false });
+
+                    if (data) {
+                        const feed = document.getElementById('mainFeed');
+                        feed.innerHTML = '';
+                        data.forEach(post => this.render(post));
+                    }
+                },
+
+                render(post) {
+                    const feed = document.getElementById('mainFeed');
+                    const isLiked = false; // TODO: Check likes table
+                    const date = new Date(post.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    let mediaHtml = post.image_url ? `<img src="${post.image_url}" class="post-media">` : '';
+                    let adminBadge = post.users?.role === 'admin' ? '<span class="badge-admin">Admin</span>' : '';
+
+                    let html = `
+                        <div class="post" data-id="${post.id}">
+                            <div class="post-header">
+                                <div class="post-user">
+                                    <div class="avatar-box">${post.users?.username[0].toUpperCase()}</div>
+                                    <div class="user-meta">
+                                        <h4>${post.users?.username} ${adminBadge}</h4>
+                                        <span>${date}</span>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-ellipsis-vertical" style="color:#444"></i>
+                            </div>
+                            <div class="post-text">${post.content}</div>
+                            ${mediaHtml}
+                            
+                            ${this.getTemplateData(post)}
+
+                            <div class="post-footer">
+                                <div class="i-btn i-btn-like">
+                                    <i class="fa-regular fa-heart"></i> <span>24</span>
+                                </div>
+                                <div class="i-btn" onclick="App.comments.toggle(${post.id})">
+                                    <i class="fa-regular fa-comment"></i> <span>12</span>
+                                </div>
+                                <div class="i-btn">
+                                    <i class="fa-solid fa-share-nodes"></i>
+                                </div>
+                            </div>
+
+                            <div class="comments-block" id="comments-${post.id}">
+                                <div id="list-${post.id}"></div>
+                                <div class="comment-input-area">
+                                    <input type="text" class="c-input" id="c-input-${post.id}" placeholder="Ваш комментарий...">
+                                    <div class="c-send" onclick="App.comments.send(${post.id})">
+                                        <i class="fa-solid fa-paper-plane"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    feed.insertAdjacentHTML('beforeend', html);
+                },
+
+                getTemplateData(post) {
+                    // Если это пост-матч (упрощенная проверка по содержанию или метаданным)
+                    if(post.content.includes('VS')) {
+                        return `
+                        <div class="match-card">
+                            <div class="match-teams">
+                                <div class="m-team"><b>HOME</b></div>
+                                <div class="m-score">0 : 0</div>
+                                <div class="m-team"><b>AWAY</b></div>
+                            </div>
+                            <div class="bet-grid">
+                                <div class="bet-option" onclick="App.bets.open(${post.id}, 'W1', 1.95)">
+                                    <span class="o-label">П1</span>
+                                    <span class="o-val">1.95</span>
+                                </div>
+                                <div class="bet-option" onclick="App.bets.open(${post.id}, 'Draw', 3.40)">
+                                    <span class="o-label">Ничья</span>
+                                    <span class="o-val">3.40</span>
+                                </div>
+                                <div class="bet-option" onclick="App.bets.open(${post.id}, 'W2', 2.10)">
+                                    <span class="o-label">П2</span>
+                                    <span class="o-val">2.10</span>
+                                </div>
+                            </div>
                         </div>`;
+                    }
+                    return '';
+                },
+
+                async submit() {
+                    const content = document.getElementById('postContent').value;
+                    const img = document.getElementById('postImgUrl').value;
+                    
+                    if(!content) return App.ui.toast("Введите текст");
+
+                    const { error } = await App.sb
+                        .from('posts')
+                        .insert([{ 
+                            author_id: App.user.id, 
+                            content: content, 
+                            image_url: img 
+                        }]);
+
+                    if(!error) {
+                        App.ui.closeModal();
+                        App.ui.toast("Опубликовано!");
+                        document.getElementById('postContent').value = '';
+                    }
                 }
-                else if (post.type === 'match') {
-                    innerContent = `
-                        <div class="post-content">${post.content}</div>
-                        <div class="match-widget">
-                            <div class="match-header">Champions League • Live</div>
-                            <div class="teams-row">
-                                <div class="team">
-                                    <div class="team-logo">${post.data.team1[0]}</div>
-                                    <div class="team-name">${post.data.team1}</div>
-                                </div>
-                                <div class="score-board">${post.data.score1} : ${post.data.score2}</div>
-                                <div class="team">
-                                    <div class="team-logo">${post.data.team2[0]}</div>
-                                    <div class="team-name">${post.data.team2}</div>
-                                </div>
-                            </div>
-                            <div class="bet-buttons">
-                                <div class="bet-btn" onclick="App.bet.placeBet('${post.data.team1}', ${post.data.odds.w1})">
-                                    <div class="label">Победа 1</div>
-                                    <div class="coef">${post.data.odds.w1}</div>
-                                </div>
-                                <div class="bet-btn" onclick="App.bet.placeBet('Draw', ${post.data.odds.x})">
-                                    <div class="label">Ничья</div>
-                                    <div class="coef">${post.data.odds.x}</div>
-                                </div>
-                                <div class="bet-btn" onclick="App.bet.placeBet('${post.data.team2}', ${post.data.odds.w2})">
-                                    <div class="label">Победа 2</div>
-                                    <div class="coef">${post.data.odds.w2}</div>
-                                </div>
-                            </div>
-                        </div>`;
+            },
+
+            // --- BETS CONTROLLER ---
+            bets: {
+                open(postId, outcome, coef) {
+                    App.activeBet = { postId, outcome, coef };
+                    document.getElementById('betDetails').innerHTML = `
+                        Прогноз: <b>${outcome}</b><br>
+                        Коэффициент: <b>${coef}</b>
+                    `;
+                    App.ui.openModal('betModal');
+                },
+
+                async confirm() {
+                    const amount = parseFloat(document.getElementById('betAmount').value);
+                    if(!amount || amount <= 0) return App.ui.toast("Введите сумму");
+                    if(amount > App.profile.balance) return App.ui.toast("Недостаточно средств");
+
+                    // 1. Снимаем баланс
+                    const newBalance = App.profile.balance - amount;
+                    const { error: balErr } = await App.sb
+                        .from('users')
+                        .update({ balance: newBalance })
+                        .eq('id', App.user.id);
+
+                    if(!balErr) {
+                        // 2. Записываем ставку в таблицу (если она создана)
+                        App.ui.closeModal();
+                        App.ui.toast("Ставка принята!");
+                        // Здесь должен быть INSERT в таблицу bets
+                    }
                 }
-                else if (post.type === 'promo') {
-                    innerContent = `
-                        <div class="post-content">
-                            <div class="promo-card" style="padding: 20px; border-radius: 12px; margin-top: 10px;">
-                                <span class="promo-badge">${post.data.badge}</span>
-                                <h3 style="color:white; margin-bottom: 10px;">${post.content}</h3>
-                                <a href="${post.data.link}" class="promo-btn"><span>${post.data.btnText}</span></a>
-                            </div>
-                        </div>`;
+            },
+
+            // --- COMMENTS CONTROLLER ---
+            comments: {
+                toggle(id) {
+                    const el = document.getElementById(`comments-${id}`);
+                    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+                },
+                async send(postId) {
+                    const input = document.getElementById(`c-input-${postId}`);
+                    const text = input.value.trim();
+                    if(!text) return;
+
+                    const { error } = await App.sb
+                        .from('comments')
+                        .insert([{ 
+                            post_id: postId, 
+                            user_id: App.user.id, 
+                            text_content: text 
+                        }]);
+                    
+                    if(!error) {
+                        input.value = '';
+                        App.ui.toast("Комментарий отправлен");
+                        // В идеале тут Realtime подгрузка в блок
+                    }
                 }
+            },
 
-                // COMMON WRAPPER
-                return `
-                    <article class="post-card" id="post-${post.id}">
-                        <div class="post-header">
-                            <div class="post-author">
-                                <div class="author-avatar">${post.author[0]}</div>
-                                <div class="author-info">
-                                    <h4>${post.author} <span class="admin-badge">ADMIN</span></h4>
-                                    <div class="post-time">${post.time}</div>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-ellipsis" style="color: #666;"></i>
-                        </div>
-                        ${innerContent}
-                        <div class="post-actions">
-                            <div class="action-btn" onclick="this.classList.toggle('active')">
-                                <i class="fa-regular fa-heart"></i> ${post.likes}
-                            </div>
-                            <div class="action-btn" onclick="App.comments.toggle(${post.id})">
-                                <i class="fa-regular fa-comment"></i> Комментарии
-                            </div>
-                            <div class="action-btn">
-                                <i class="fa-solid fa-share"></i>
-                            </div>
-                        </div>
-                        
-                        <div class="comments-section" id="comments-${post.id}">
-                            <div class="comment-input-wrap">
-                                <input type="text" class="comment-input" id="input-${post.id}" placeholder="Написать комментарий...">
-                                <button class="send-btn" onclick="App.comments.add(${post.id})"><i class="fa-solid fa-paper-plane"></i></button>
-                            </div>
-                            <div class="comment-list" id="list-${post.id}">
-                                </div>
-                        </div>
-                    </article>
-                `;
-            }
-        }
+            // --- VISUAL EFFECTS ---
+            initVisuals() {
+                const canvas = document.getElementById('bg-canvas');
+                const ctx = canvas.getContext('2d');
+                let w, h, particles = [];
+                const resize = () => { w = window.innerWidth; h = window.innerHeight; canvas.width = w; canvas.height = h; };
+                window.addEventListener('resize', resize);
+                resize();
 
-        // --- BETTING SYSTEM ---
-        class BetManager {
-            placeBet(outcome, coef) {
-                // Here we would check balance and API
-                App.ui.toast(`Ставка принята: ${outcome} (k=${coef})`, 'success');
-                // Simulate balance deduction
-                App.auth.profile.balance -= 10;
-                App.auth.updateUI();
-            }
-        }
+                for(let i=0; i<40; i++) particles.push({ x: Math.random()*w, y: Math.random()*h, vx: Math.random()-0.5, vy: Math.random()-0.5 });
 
-        // --- COMMENT SYSTEM ---
-        class CommentManager {
-            toggle(postId) {
-                const sec = document.getElementById(`comments-${postId}`);
-                sec.classList.toggle('open');
-            }
-
-            add(postId) {
-                const input = document.getElementById(`input-${postId}`);
-                const text = input.value.trim();
-                if (!text) return;
-
-                const username = App.auth.profile.username;
-                
-                const html = `
-                    <div class="comment">
-                        <div class="comment-avatar" style="color:white; display:flex; align-items:center; justify-content:center;">${username[0]}</div>
-                        <div class="comment-body">
-                            <div class="comment-header">
-                                <span class="comment-user">${username}</span>
-                                <span style="color:#666;">Только что</span>
-                            </div>
-                            <div class="comment-text">${text}</div>
-                            <div class="comment-actions">
-                                <span>Нравится</span>
-                                <span class="reply-link" onclick="App.comments.reply(this)">Ответить</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                const list = document.getElementById(`list-${postId}`);
-                list.insertAdjacentHTML('afterbegin', html);
-                input.value = '';
-            }
-
-            reply(el) {
-                // Simple visual reply simulation
-                const parent = el.closest('.comment-body');
-                if(parent.querySelector('.comment-input')) return; // Already replying
-
-                const replyBox = document.createElement('div');
-                replyBox.className = 'comment-input-wrap';
-                replyBox.style.marginTop = '10px';
-                replyBox.innerHTML = `
-                     <input type="text" class="comment-input" placeholder="Ответ...">
-                     <button class="send-btn" onclick="App.comments.submitReply(this)"><i class="fa-solid fa-paper-plane"></i></button>
-                `;
-                parent.appendChild(replyBox);
-            }
-
-            submitReply(btn) {
-                const input = btn.previousElementSibling;
-                const text = input.value.trim();
-                if(!text) return;
-
-                const wrapper = btn.closest('.comment-input-wrap');
-                const parentBody = wrapper.parentElement; // comment-body
-                
-                const html = `
-                    <div class="comment comment-reply">
-                        <div class="comment-avatar" style="width:24px; height:24px; font-size:10px; color:white; display:flex; align-items:center; justify-content:center;">YOU</div>
-                        <div class="comment-body">
-                            <div class="comment-header"><span class="comment-user">${App.auth.profile.username}</span></div>
-                            <div class="comment-text">${text}</div>
-                        </div>
-                    </div>
-                `;
-                
-                // Insert after parent comment
-                wrapper.remove();
-                parentBody.insertAdjacentHTML('beforeend', html);
-            }
-        }
-
-        // --- ADMIN SYSTEM ---
-        class AdminManager {
-            openModal() {
-                document.getElementById('postModal').classList.add('active');
-            }
-            closeModal() {
-                document.getElementById('postModal').classList.remove('active');
-            }
-
-            toggleFields() {
-                const type = document.getElementById('postTemplate').value;
-                document.getElementById('imageFields').style.display = type === 'image' ? 'block' : 'none';
-                document.getElementById('matchFields').style.display = type === 'match' ? 'flex' : 'none';
-                document.getElementById('matchFields').style.flexDirection = 'column';
-                document.getElementById('matchFields').style.gap = '10px';
-            }
-
-            publishPost() {
-                const type = document.getElementById('postTemplate').value;
-                const title = document.getElementById('postTitle').value;
-                const content = document.getElementById('postContent').value;
-
-                const newPost = {
-                    id: Date.now(),
-                    type: type,
-                    author: 'STAVOK ADMIN',
-                    role: 'admin',
-                    time: 'Только что',
-                    content: content,
-                    likes: 0,
-                    data: {}
-                };
-
-                if (type === 'image') {
-                    newPost.data.image = document.getElementById('postImageUrl').value || 'https://via.placeholder.com/600x300';
+                function draw() {
+                    ctx.clearRect(0,0,w,h);
+                    ctx.fillStyle = "rgba(255,255,255,0.1)";
+                    particles.forEach(p => {
+                        p.x += p.vx; p.y += p.vy;
+                        if(p.x<0) p.x=w; if(p.x>w) p.x=0; if(p.y<0) p.y=h; if(p.y>h) p.y=0;
+                        ctx.beginPath(); ctx.arc(p.x, p.y, 1, 0, Math.PI*2); ctx.fill();
+                    });
+                    requestAnimationFrame(draw);
                 }
-                else if (type === 'match') {
-                    newPost.data = {
-                        team1: document.getElementById('team1').value || 'Team A',
-                        team2: document.getElementById('team2').value || 'Team B',
-                        score1: 0, score2: 0,
-                        odds: {
-                            w1: document.getElementById('odd1').value || 2.0,
-                            x: document.getElementById('oddX').value || 3.0,
-                            w2: document.getElementById('odd2').value || 2.0
-                        }
-                    };
-                }
-                else if (type === 'promo') {
-                    newPost.data = { badge: 'Promo', btnText: 'Подробнее', link: '#' };
-                }
-
-                App.feed.addPost(newPost);
-                this.closeModal();
-                App.ui.toast('Пост опубликован', 'success');
-                
-                // Clear inputs
-                document.getElementById('postContent').value = '';
-                document.getElementById('postTitle').value = '';
+                draw();
             }
-        }
-
-        // --- UI UTILS ---
-        class UIManager {
-            toast(msg, type = 'normal') {
-                const t = document.getElementById('toast');
-                const txt = document.getElementById('toastMsg');
-                txt.innerText = msg;
-                t.className = `toast show ${type}`;
-                setTimeout(() => t.className = 'toast', 3000);
-            }
-        }
-
-        // --- PARTICLES (Shared code) ---
-        function initParticles() {
-            const canvas = document.getElementById('canvas-bg');
-            const ctx = canvas.getContext('2d');
-            let w, h, particles = [];
-            const resize = () => { w = window.innerWidth; h = window.innerHeight; canvas.width = w; canvas.height = h; };
-            window.addEventListener('resize', () => { resize(); create(); });
-            const create = () => {
-                particles = [];
-                for(let i=0; i<40; i++) particles.push({
-                    x: Math.random()*w, y: Math.random()*h,
-                    vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3, size: Math.random()*2
-                });
-            };
-            const anim = () => {
-                ctx.clearRect(0,0,w,h);
-                ctx.fillStyle = 'rgba(255,255,255,0.1)';
-                particles.forEach(p => {
-                    p.x+=p.vx; p.y+=p.vy;
-                    if(p.x<0)p.x=w; if(p.x>w)p.x=0; if(p.y<0)p.y=h; if(p.y>h)p.y=0;
-                    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
-                });
-                requestAnimationFrame(anim);
-            };
-            resize(); create(); anim();
-        }
-
-        // --- GLOBAL APP ---
-        const App = {
-            auth: new AuthManager(),
-            feed: new FeedManager(),
-            bet: new BetManager(),
-            comments: new CommentManager(),
-            admin: new AdminManager(),
-            ui: new UIManager()
         };
 
-        // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', () => {
-            initParticles();
-            App.auth.init().then(() => {
-                App.feed.init();
-            });
-        });
-
-        function toggleBanner() {
-            document.getElementById('topBanner').classList.add('hidden');
-        }
+        // RUN
+        window.onload = () => App.init();
 
     </script>
 </body>
