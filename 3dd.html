@@ -5,133 +5,130 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>stavok.net</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Unbounded:wght@400;600;800;900&display=swap" rel="stylesheet">
     
     <style>
         /* =========================================
-           1. БАЗОВЫЕ НАСТРОЙКИ
+           CORE VARIABLES
            ========================================= */
         :root {
             --bg-body: #050505;
             --text-main: #FFFFFF;
             --text-muted: #888888;
-            --font-main: 'Inter', sans-serif;
-            --grid-color: rgba(255, 255, 255, 0.03);
+            --font-display: 'Unbounded', sans-serif; /* Wide Font */
+            --font-body: 'Inter', sans-serif;
+            --accent-glow: rgba(255, 255, 255, 0.15);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: var(--font-main);
+            font-family: var(--font-body);
             background-color: var(--bg-body);
             color: var(--text-main);
-            height: 100vh;
-            /* overflow: hidden;  <-- Убрал жесткий запрет скролла, чтобы на очень маленьких экранах можно было прокрутить, если не влезает */
+            min-height: 100vh;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            position: relative;
         }
 
         /* =========================================
-           2. ФОНОВЫЕ ЭФФЕКТЫ
+           BACKGROUND
            ========================================= */
         .bg-grid {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background-image: 
-                linear-gradient(var(--grid-color) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-            background-size: 60px 60px;
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
             z-index: -2;
-            pointer-events: none;
-            mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
-            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+            mask-image: radial-gradient(circle at center, black 40%, transparent 95%);
         }
 
         .canvas-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            opacity: 0.5;
+            opacity: 0.4;
             pointer-events: none;
         }
 
         /* =========================================
-           3. HEADER
+           HEADER & LOGO
            ========================================= */
         header {
-            padding: 30px 40px;
+            padding: 30px 5%;
             width: 100%;
-            z-index: 100;
             display: flex;
             align-items: center;
-            justify-content: flex-start; /* Логотип слева */
+            justify-content: space-between;
+            z-index: 100;
         }
 
         .logo {
-            font-size: 24px;
+            font-family: var(--font-display);
             font-weight: 800;
-            letter-spacing: -1px;
+            font-size: 22px;
             color: white;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
         }
 
-        .logo-icon {
-            width: 32px; height: 32px;
+        /* Логотип (значок) */
+        .logo-symbol {
+            width: 30px; height: 30px;
             background: white;
-            border-radius: 8px;
+            color: black;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: black;
-            font-weight: bold;
             font-size: 18px;
+            transform: skew(-10deg); /* Наклон для динамики */
         }
 
         /* =========================================
-           4. HERO SECTION (Центр)
+           HERO SECTION (SPLIT LAYOUT)
            ========================================= */
-        .hero-wrapper {
+        .hero-container {
             flex: 1;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 0 20px;
-            width: 100%;
-            max-width: 1200px;
+            justify-content: space-between;
+            padding: 0 5%;
+            max-width: 1400px;
             margin: 0 auto;
-            position: relative;
-            min-height: 600px; /* Чтобы на маленьких экранах контент не сжимался слишком сильно */
+            width: 100%;
+            gap: 40px;
         }
 
-        .hero-glow {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60vw; height: 60vw;
-            background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
-            z-index: -1;
-            filter: blur(80px);
+        /* LEFT SIDE: TEXT */
+        .hero-text {
+            flex: 1;
+            max-width: 600px;
+            z-index: 10;
         }
 
         h1 {
-            font-size: 80px;
-            line-height: 1.05;
-            font-weight: 800;
-            letter-spacing: -3px;
+            font-family: var(--font-display);
+            font-size: 68px;
+            line-height: 1.1;
+            font-weight: 900;
             margin-bottom: 24px;
-            color: white;
+            text-transform: uppercase;
+            letter-spacing: -2px;
         }
 
         .text-gradient {
-            background: linear-gradient(180deg, #FFFFFF 20%, #666666 100%);
+            background: linear-gradient(135deg, #fff 30%, #666 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -139,158 +136,167 @@
         p.subtitle {
             font-size: 18px;
             color: var(--text-muted);
-            max-width: 500px;
-            margin: 0 auto 48px auto;
             line-height: 1.6;
+            margin-bottom: 40px;
+            max-width: 450px;
         }
 
-        /* =========================================
-           5. КНОПКИ
-           ========================================= */
+        /* BUTTONS */
         .cta-group {
             display: flex;
             gap: 16px;
-            justify-content: center;
-            margin-bottom: 60px;
-            width: 100%;
         }
 
         .btn {
-            display: inline-flex;
+            height: 54px;
+            padding: 0 32px;
+            border-radius: 8px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 32px;
-            height: 56px;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 600;
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
             text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: 0.3s;
             cursor: pointer;
-            white-space: nowrap;
         }
 
         .btn-primary {
             background: white;
             color: black;
             border: 1px solid white;
-            box-shadow: 0 0 20px rgba(255,255,255,0.1);
         }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(255, 255, 255, 0.2);
-        }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(255,255,255,0.2); }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.03);
+            background: transparent;
             color: white;
-            border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-secondary:hover { border-color: white; background: rgba(255,255,255,0.05); }
+
+        /* RIGHT SIDE: PHONE MOCKUP */
+        .hero-visual {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
         }
 
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
+        /* CSS IPHONE */
+        .iphone {
+            width: 300px;
+            height: 600px;
+            background: #000;
+            border-radius: 40px;
+            border: 4px solid #333;
+            box-shadow: 0 0 0 2px #555, 0 20px 50px -10px rgba(0,0,0,0.8);
+            position: relative;
+            overflow: hidden;
+            transform: rotate(-5deg); /* Легкий наклон */
+            transition: transform 0.5s ease;
         }
+        
+        .iphone:hover {
+            transform: rotate(0deg) scale(1.02);
+        }
+
+        /* Notch */
+        .iphone::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 120px; height: 30px;
+            background: #000;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            z-index: 10;
+        }
+
+        /* Screen Content (Fake UI) */
+        .screen {
+            width: 100%; height: 100%;
+            background: linear-gradient(180deg, #111 0%, #050505 100%);
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .ui-card {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .ui-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .ui-team { width: 30px; height: 30px; border-radius: 50%; background: #333; }
+        .ui-score { font-family: var(--font-display); font-size: 18px; font-weight: bold; }
+        .ui-badge { font-size: 10px; background: #333; padding: 2px 6px; border-radius: 4px; color: #888; }
+        .ui-btn { width: 100%; height: 36px; background: white; border-radius: 8px; margin-top: 10px; }
 
         /* =========================================
-           6. БРЕНДЫ
+           BRANDS (PARTNERS)
            ========================================= */
-        .brands-container {
+        .brands-section {
+            padding: 40px 5%;
             border-top: 1px solid rgba(255,255,255,0.05);
-            padding-top: 30px;
-            width: 100%;
-            max-width: 800px;
-            margin-bottom: 40px;
+            margin-top: auto; /* Push to bottom */
         }
 
-        .brands-title {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #444;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-
-        .brands-row {
+        .brands-grid {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            gap: 40px;
-            flex-wrap: wrap; /* Чтобы переносились на мобилке */
+            gap: 50px;
+            flex-wrap: wrap;
+            opacity: 0.6;
         }
 
-        .brand-logo {
-            opacity: 0.3;
-            transition: 0.3s;
+        .brands-grid svg {
             height: 28px;
             fill: white;
+            transition: 0.3s;
         }
+        .brands-grid svg:hover { opacity: 1; transform: scale(1.05); fill: #fff; }
 
-        .brand-logo:hover {
-            opacity: 1;
-        }
+        .brand-tbank { height: 32px !important; }
 
         /* =========================================
-           7. FOOTER / COPYRIGHT
+           MOBILE ADAPTIVE
            ========================================= */
-        .footer-copy {
-            padding: 20px;
-            text-align: center;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.2);
-            width: 100%;
-            position: relative; /* Чтобы не накладывался */
-        }
-
-        /* =========================================
-           8. МОБИЛЬНАЯ АДАПТАЦИЯ (Media Queries)
-           ========================================= */
-        @media (max-width: 768px) {
-            header {
-                padding: 20px;
+        @media (max-width: 900px) {
+            .hero-container {
+                flex-direction: column;
+                text-align: center;
+                padding-top: 40px;
+                gap: 60px;
             }
 
-            h1 { 
-                font-size: 42px; /* Уменьшаем шрифт */
-                margin-bottom: 16px;
-                padding: 0 10px;
-            }
-
-            p.subtitle {
-                font-size: 15px;
-                padding: 0 15px;
-                margin-bottom: 32px;
-            }
-
-            .cta-group {
-                flex-direction: column; /* Кнопки вертикально */
-                align-items: center;
-                gap: 12px;
+            .hero-text {
                 max-width: 100%;
-                padding: 0 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
             }
 
-            .btn {
-                width: 100%; /* Кнопка на всю ширину */
+            h1 { font-size: 42px; margin-bottom: 16px; }
+            p.subtitle { font-size: 16px; margin-bottom: 30px; }
+
+            .cta-group { width: 100%; max-width: 320px; flex-direction: column; }
+            .btn { width: 100%; }
+
+            .hero-visual { width: 100%; display: flex; justify-content: center; }
+            .iphone { 
+                width: 260px; height: 520px; 
+                transform: rotate(0deg); /* На мобиле прямо */
             }
 
-            .brands-row {
-                justify-content: center; /* Центрируем логотипы */
-                gap: 24px;
-            }
-            
-            .brand-logo {
-                height: 22px; /* Чуть меньше логотипы */
-            }
-
-            .hero-wrapper {
-                justify-content: center; 
-                margin-top: 0;
-            }
+            .brands-grid { justify-content: center; gap: 30px; }
         }
     </style>
 </head>
@@ -301,60 +307,107 @@
 
     <header>
         <a href="#" class="logo">
-            <div class="logo-icon">S</div>
+            <div class="logo-symbol">S</div>
             stavok.net
         </a>
     </header>
 
-    <div class="hero-wrapper">
-        <div class="hero-glow"></div>
-
-        <h1>
-            Побеждай.<br>
-            <span class="text-gradient">Забирай своё.</span>
-        </h1>
-
-        <p class="subtitle">
-            Премиальная платформа для футбольных прогнозов. 
-            Делай выбор, угадывай счет и получай удвоенный выигрыш.
-        </p>
-
-        <div class="cta-group">
-            <a href="reg.html" class="btn btn-primary">Регистрация</a>
-            <a href="login.html" class="btn btn-secondary">Вход в аккаунт</a>
+    <div class="hero-container">
+        
+        <div class="hero-text">
+            <h1>
+                Играй.<br>
+                <span class="text-gradient">Побеждай.</span>
+            </h1>
+            <p class="subtitle">
+                Премиальная платформа для прогнозов. 
+                Голосуй, угадывай и забирай x2 на баланс. 
+                Твой стиль, твои правила.
+            </p>
+            <div class="cta-group">
+                <a href="reg.html" class="btn btn-primary">Регистрация</a>
+                <a href="login.html" class="btn btn-secondary">Войти</a>
+            </div>
         </div>
 
-        <div class="brands-container">
-            <p class="brands-title">Нас поддерживают</p>
-            <div class="brands-row">
-                <svg class="brand-logo" viewBox="0 0 24 24" style="height: 32px;">
-                    <path d="M21 8.25c-6.85 0-11.5 5.5-14.5 10.5C5.5 17.5 3 14.5 3 14.5s2.5 5.5 7.5 5.5c6.5 0 12.5-11.75 12.5-11.75H21z"/>
-                </svg>
-                <svg class="brand-logo" viewBox="0 0 24 24" style="height: 28px;">
-                    <path d="M18 4l3 1-8 15-3-1 8-15zM12 7l3 1-6 12-3-1 6-12zM6 10l3 1-4.5 9-3-1 4.5-9z"/>
-                </svg>
-                <svg class="brand-logo" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm0-4H9V8h2v4z"/>
-                </svg>
-                <svg class="brand-logo" viewBox="0 0 100 24">
-                    <text x="0" y="20" fill="currentColor" font-family="Arial" font-weight="bold" font-size="20">BETBOOM</text>
-                </svg>
-                <svg class="brand-logo" viewBox="0 0 80 24">
-                     <text x="0" y="20" fill="currentColor" font-family="Arial" font-weight="bold" font-size="20">WINLINE</text>
-                </svg>
+        <div class="hero-visual">
+            <div class="iphone">
+                <div class="screen">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div style="font-family: var(--font-display); font-weight:800; font-size:14px;">STAVOK.NET</div>
+                        <div style="width:24px; height:24px; background:#333; border-radius:50%;"></div>
+                    </div>
+
+                    <div class="ui-card">
+                        <div class="ui-row">
+                            <span class="ui-badge">LIVE • 45'</span>
+                            <span class="ui-badge" style="color:white">x2.0</span>
+                        </div>
+                        <div class="ui-row" style="margin: 15px 0;">
+                            <div class="ui-team" style="background:white;"></div>
+                            <span class="ui-score">2 : 1</span>
+                            <div class="ui-team" style="border:1px solid #555;"></div>
+                        </div>
+                        <div style="text-align:center; font-size:10px; color:#666; font-family:var(--font-display);">REAL MADRID vs BARCELONA</div>
+                        <div class="ui-btn"></div>
+                    </div>
+
+                    <div class="ui-card" style="opacity: 0.6;">
+                        <div class="ui-row">
+                            <span class="ui-badge">20:00</span>
+                        </div>
+                        <div class="ui-row" style="margin: 15px 0;">
+                            <div class="ui-team"></div>
+                            <span class="ui-score">VS</span>
+                            <div class="ui-team"></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:auto; background: #222; height: 60px; border-radius: 30px; display:flex; justify-content:space-around; align-items:center; padding: 0 20px;">
+                        <div style="width:20px; height:20px; background:#555; border-radius:4px;"></div>
+                        <div style="width:20px; height:20px; background:white; border-radius:4px;"></div>
+                        <div style="width:20px; height:20px; background:#555; border-radius:4px;"></div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="footer-copy">
-        &copy; 2026 stavok.net. Все права защищены. Разработано NewToyers.
+    <div class="brands-section">
+        <div class="brands-grid">
+            <svg viewBox="0 0 384 512">
+                <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 52.3-11.4 69.5-34.3z"/>
+            </svg>
+
+            <svg viewBox="0 0 100 24" style="width: 100px;">
+                <text x="0" y="20" fill="currentColor" font-family="Arial" font-weight="bold" font-size="20">SAMSUNG</text>
+            </svg>
+
+            <svg viewBox="0 0 24 24">
+                <path d="M19.5 5.5L12 2 4.5 5.5v7l7.5 9.5 7.5-9.5v-7zM12 19.2L6.5 12V7l5.5-2.6L17.5 7v5l-5.5 7.2z"/> 
+                </svg>
+
+            <svg viewBox="0 0 24 24" class="brand-tbank">
+                <path d="M3 4h18v2h-8v14h-2V6H3V4z" fill="currentColor"/> <path d="M12 2L2 7v6c0 5.5 4.5 10 10 10s10-4.5 10-10V7l-10-5z" fill="none" stroke="currentColor" stroke-width="2"/>
+            </svg>
+        </div>
+        
+        <div style="margin-top: 20px; font-size: 12px; color: #333;">
+            &copy; 2026 stavok.net. All rights reserved.
+        </div>
     </div>
 
     <script>
+        // Supabase Init
+        const SUPABASE_URL = 'https://cmoeirxugwapvvcdkwjs.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Stars Animation
         const canvas = document.getElementById('starsCanvas');
         const ctx = canvas.getContext('2d');
-        let width, height;
-        let particles = [];
+        let width, height, particles = [];
 
         function resize() {
             width = window.innerWidth;
@@ -367,8 +420,8 @@
             constructor() {
                 this.x = Math.random() * width;
                 this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 0.3;
-                this.vy = (Math.random() - 0.5) * 0.3;
+                this.vx = (Math.random() - 0.5) * 0.2;
+                this.vy = (Math.random() - 0.5) * 0.2;
                 this.size = Math.random() * 1.5;
                 this.opacity = Math.random() * 0.5 + 0.1;
             }
@@ -391,9 +444,7 @@
         function initParticles() {
             particles = [];
             const count = Math.floor(width * height / 20000); 
-            for (let i = 0; i < count; i++) {
-                particles.push(new Particle());
-            }
+            for (let i = 0; i < count; i++) { particles.push(new Particle()); }
         }
 
         function animate() {
@@ -403,9 +454,7 @@
         }
 
         window.addEventListener('resize', () => { resize(); initParticles(); });
-        resize();
-        initParticles();
-        animate();
+        resize(); initParticles(); animate();
     </script>
 </body>
 </html>
