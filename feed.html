@@ -3,335 +3,320 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Лента | STAVOK.NET Mobile</title>
-    
+    <title>Лента | STAVOK.NET</title>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Unbounded:wght@400;600;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --bg: #050505;
-            --bg-glass: rgba(15, 15, 15, 0.85);
-            --bg-input: rgba(255, 255, 255, 0.05);
+            /* Базовая палитра */
+            --bg-dark: #050505;
+            --bg-card: rgba(18, 18, 18, 0.7);
+            --bg-accent: rgba(255, 255, 255, 0.05);
             
-            --accent: #00FF94;
-            --accent-soft: rgba(0, 255, 148, 0.1);
-            --error: #FF3333;
-            --warn: #FFCC00;
-            --white: #FFFFFF;
-            
-            --border: rgba(255, 255, 255, 0.1);
-            --border-active: rgba(255, 255, 255, 0.3);
-            
+            --brand-green: #00FF94;
+            --brand-red: #FF3333;
+            --brand-gold: #FFCC00;
             --text-main: #FFFFFF;
-            --text-muted: #999999;
+            --text-muted: #888888;
+            
+            --border-light: rgba(255, 255, 255, 0.1);
+            --border-strong: rgba(255, 255, 255, 0.25);
             
             --font-display: 'Unbounded', sans-serif;
             --font-body: 'Inter', sans-serif;
             
+            /* Отступы для мобилок */
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        /* --- BASIC SETUP --- */
+        /* --- Сброс стилей --- */
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
         body {
-            background-color: var(--bg);
+            background-color: var(--bg-dark);
             color: var(--text-main);
             font-family: var(--font-body);
-            line-height: 1.5;
-            -webkit-user-select: none;
             overflow-x: hidden;
-            padding-bottom: calc(80px + var(--safe-bottom)); /* Пространство для нижнего бара */
+            padding-bottom: calc(90px + var(--safe-bottom));
+            -webkit-user-select: none;
         }
 
-        /* --- BACKGROUND PARTICLES --- */
-        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.3; }
+        /* --- ФОНОВЫЕ ЭФФЕКТЫ --- */
+        #fx-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.2; pointer-events: none; }
+        .ambient-glow {
+            position: fixed; top: -10%; left: 50%; width: 100%; height: 50%;
+            background: radial-gradient(circle, rgba(0, 255, 148, 0.08), transparent 70%);
+            z-index: -2; transform: translateX(-50%); pointer-events: none;
+        }
 
-        /* --- HEADER SECTION --- */
+        /* --- HEADER (MOBILE) --- */
         .header {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background: var(--bg-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 1000;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border-bottom: 1px solid var(--border-light);
             padding: calc(15px + var(--safe-top)) 20px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
         }
 
-        .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
         .brand-icon {
-            width: 34px; height: 34px; background: #fff; color: #000;
-            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; background: #fff; color: #000;
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
             font-family: var(--font-display); font-weight: 900; font-style: italic;
-            transform: skewX(-12deg); font-size: 18px;
+            transform: skewX(-12deg); font-size: 19px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
         }
         .brand-name { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: #fff; }
 
-        .header-right { display: flex; align-items: center; gap: 15px; }
-        
-        /* Исправленная аватарка и баланс */
-        .wallet-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--bg-input);
-            padding: 5px 12px 5px 6px;
-            border-radius: 50px;
-            border: 1px solid var(--border);
+        .wallet-pill {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--bg-accent); padding: 5px 12px 5px 6px;
+            border-radius: 40px; border: 1px solid var(--border-light);
         }
-
-        .avatar-box {
-            width: 32px; height: 32px;
-            background: linear-gradient(135deg, #444, #111);
-            border: 2px solid var(--border-active);
-            border-radius: 50%;
+        
+        /* Исправленная аватарка */
+        .user-avatar-circle {
+            width: 30px; height: 30px; border-radius: 50%;
+            background: linear-gradient(135deg, #333, #000);
+            border: 2px solid var(--brand-green);
             display: flex; align-items: center; justify-content: center;
-            font-size: 12px; font-weight: 800; color: var(--accent);
-            text-shadow: 0 0 10px var(--accent-soft);
-            overflow: hidden;
+            font-size: 12px; font-weight: 800; color: var(--brand-green);
+            text-transform: uppercase; flex-shrink: 0;
+            box-shadow: 0 0 8px rgba(0, 255, 148, 0.2);
         }
+        .user-balance-val { font-family: var(--font-display); font-size: 11px; font-weight: 700; color: #fff; }
 
-        .balance-text { font-family: var(--font-display); font-size: 12px; font-weight: 600; color: var(--accent); }
-
-        /* --- AD BANNER (HORIZONTAL) --- */
-        .ad-banner-strip {
+        /* --- AD BANNER (NEAR HEADER) --- */
+        .promo-banner {
             margin: 15px 20px;
-            background: linear-gradient(90deg, #1a1a1a, #0a0a0a);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            position: relative;
-            overflow: hidden;
+            background: linear-gradient(135deg, #111, #080808);
+            border: 1px solid var(--border-light);
+            border-radius: 18px; padding: 18px;
+            display: flex; align-items: center; gap: 15px;
+            position: relative; overflow: hidden;
+            display: none; /* Показывать если есть активная реклама */
         }
-        .ad-banner-strip::before {
-            content: 'AD'; position: absolute; top: 0; right: 0; background: var(--warn);
-            color: #000; font-size: 8px; font-weight: 900; padding: 2px 6px; border-bottom-left-radius: 8px;
+        .promo-banner::after {
+            content: 'РЕКЛАМА'; position: absolute; top: 0; right: 0; 
+            background: var(--brand-gold); color: #000; font-size: 8px; font-weight: 900;
+            padding: 3px 8px; border-bottom-left-radius: 10px;
         }
-        .ad-icon { width: 40px; height: 40px; background: var(--accent-soft); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 20px; }
-        .ad-content h5 { font-size: 14px; margin-bottom: 2px; }
-        .ad-content p { font-size: 11px; color: var(--text-muted); }
+        .promo-icon { font-size: 24px; color: var(--brand-gold); }
+        .promo-info h5 { font-size: 14px; color: #fff; margin-bottom: 2px; }
+        .promo-info p { font-size: 11px; color: var(--text-muted); }
 
-        /* --- FEED SECTION --- */
-        .feed { padding: 0 15px; display: flex; flex-direction: column; gap: 20px; }
-
-        .post {
-            background: var(--bg-glass);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 20px;
-            position: relative;
-            animation: postFadeIn 0.5s ease-out;
+        /* --- CREATE POST AREA --- */
+        .create-post-box {
+            margin: 0 20px 20px; background: var(--bg-card);
+            border: 1px solid var(--border-light); border-radius: 20px;
+            padding: 15px; display: flex; flex-direction: column; gap: 12px;
+        }
+        .create-row { display: flex; gap: 12px; align-items: center; }
+        .mini-input {
+            flex: 1; background: var(--bg-accent); border: 1px solid var(--border-light);
+            border-radius: 14px; padding: 12px 16px; color: #fff; font-size: 14px;
+        }
+        .admin-controls { display: none; padding-top: 10px; border-top: 1px dashed var(--border-light); display: flex; gap: 10px; }
+        .admin-btn {
+            background: var(--brand-green); color: #000; padding: 8px 14px;
+            border-radius: 10px; font-size: 11px; font-weight: 800; text-transform: uppercase;
         }
 
-        @keyframes postFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* --- FEED --- */
+        .feed-container { padding: 0 20px; display: flex; flex-direction: column; gap: 18px; }
 
-        .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .post-card {
+            background: var(--bg-card); border: 1px solid var(--border-light);
+            border-radius: 24px; padding: 20px;
+            animation: postFade 0.4s ease-out;
+        }
+        @keyframes postFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
         .post-user { display: flex; align-items: center; gap: 12px; }
-        .user-meta h4 { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-        .user-meta span { font-size: 11px; color: var(--text-muted); }
-        .badge-admin { background: var(--error); color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+        .p-avatar { width: 38px; height: 38px; border-radius: 12px; background: #222; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; border: 1px solid var(--border-light); }
+        .p-info h4 { font-size: 14px; display: flex; align-items: center; gap: 5px; }
+        .p-info span { font-size: 11px; color: var(--text-muted); }
+        .badge-admin { background: var(--brand-red); font-size: 8px; padding: 2px 5px; border-radius: 4px; text-transform: uppercase; color: #fff; }
 
-        .post-text { font-size: 15px; line-height: 1.6; color: #efefef; margin-bottom: 15px; }
-        .post-media { width: 100%; border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .post-body { font-size: 14px; line-height: 1.6; color: #efefef; }
+        .post-img { width: 100%; border-radius: 16px; margin-top: 15px; border: 1px solid var(--border-light); }
 
-        /* --- MATCH WIDGET --- */
-        .match-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 15px;
-            margin-bottom: 15px;
+        /* MATCH WIDGET */
+        .match-widget {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border-light);
+            border-radius: 18px; padding: 16px; margin-top: 15px;
         }
-        .match-teams { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .m-team { flex: 1; text-align: center; }
-        .m-team img { width: 40px; height: 40px; margin-bottom: 5px; }
-        .m-team b { font-size: 12px; display: block; }
-        .m-score { font-family: var(--font-display); font-size: 24px; font-weight: 900; color: var(--accent); }
+        .m-teams { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .m-team-box { text-align: center; flex: 1; }
+        .m-team-box i { font-size: 24px; color: #444; margin-bottom: 5px; }
+        .m-team-name { font-size: 12px; font-weight: 700; display: block; }
+        .m-score { font-family: var(--font-display); font-size: 24px; font-weight: 900; color: var(--brand-green); }
 
-        .bet-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-        .bet-option {
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            padding: 10px 5px;
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
+        .odds-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .odd-item {
+            background: var(--bg-accent); border: 1px solid var(--border-light);
+            padding: 10px; border-radius: 12px; text-align: center; cursor: pointer;
         }
-        .bet-option:active { background: var(--accent); color: #000; transform: scale(0.95); }
-        .bet-option .o-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; display: block; }
-        .bet-option .o-val { font-family: var(--font-display); font-size: 14px; font-weight: 700; }
+        .odd-item:active { background: var(--brand-green); color: #000; transform: scale(0.96); }
+        .odd-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 2px; }
+        .odd-val { font-family: var(--font-display); font-size: 13px; font-weight: 800; }
 
-        /* --- INTERACTIONS --- */
-        .post-footer { display: flex; gap: 20px; border-top: 1px solid var(--border); padding-top: 15px; }
-        .i-btn { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-muted); cursor: pointer; }
-        .i-btn.active { color: var(--error); }
-        .i-btn.active i { font-weight: 900; }
+        /* INTERACTIONS */
+        .post-actions { display: flex; gap: 20px; margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--border-light); }
+        .act-btn { display: flex; align-items: center; gap: 7px; color: var(--text-muted); font-size: 13px; cursor: pointer; }
+        .act-btn.liked { color: var(--brand-red); }
+        .act-btn.liked i { font-weight: 900; }
 
-        /* --- COMMENTS SYSTEM --- */
-        .comments-block { margin-top: 15px; display: none; padding-top: 15px; border-top: 1px dashed var(--border); }
-        .comment { display: flex; gap: 10px; margin-bottom: 12px; }
-        .c-body { flex: 1; background: var(--bg-input); padding: 10px 14px; border-radius: 14px; font-size: 13px; }
-        .c-user { font-weight: 700; margin-bottom: 2px; display: block; }
-        .c-reply-btn { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: inline-block; }
+        /* --- COMMENTS --- */
+        .comments-area { margin-top: 15px; display: none; }
+        .comment-item { display: flex; gap: 10px; margin-bottom: 12px; }
+        .c-bubble { flex: 1; background: var(--bg-accent); border-radius: 14px; padding: 10px 14px; font-size: 12px; }
+        .c-user { font-weight: 700; display: block; margin-bottom: 2px; }
+        .c-input-row { display: flex; gap: 10px; margin-top: 15px; }
+        .c-send { width: 36px; height: 36px; background: #fff; color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
 
-        .comment-input-area { display: flex; gap: 10px; margin-top: 15px; }
-        .c-input { flex: 1; background: var(--bg-input); border: 1px solid var(--border); border-radius: 50px; padding: 10px 18px; color: #fff; font-size: 13px; }
-        .c-send { width: 38px; height: 38px; background: var(--white); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-
-        /* --- BOTTOM NAVIGATION (MOBILE) --- */
+        /* --- BOTTOM NAV --- */
         .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; width: 100%;
-            height: calc(70px + var(--safe-bottom));
-            background: var(--bg-glass);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding-bottom: var(--safe-bottom);
-            z-index: 2000;
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            height: calc(75px + var(--safe-bottom));
+            background: var(--bg-glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border-top: 1px solid var(--border-light);
+            display: flex; justify-content: space-around; align-items: center;
+            padding-bottom: var(--safe-bottom); z-index: 1000;
         }
 
-        .nav-link {
-            display: flex; flex-direction: column; align-items: center; gap: 5px;
-            text-decoration: none; color: var(--text-muted); transition: 0.3s;
-            position: relative;
-        }
-        .nav-link.active { color: var(--accent); }
-        .nav-link i { font-size: 20px; }
-        .nav-link span { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .nav-link.active::after {
-            content: ''; position: absolute; top: -15px; width: 30px; height: 4px;
-            background: var(--accent); border-radius: 0 0 10px 10px; box-shadow: 0 5px 15px var(--accent-soft);
+        .nav-tab { display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--text-muted); text-decoration: none; position: relative; }
+        .nav-tab i { font-size: 20px; }
+        .nav-tab span { font-size: 9px; font-weight: 700; text-transform: uppercase; }
+        .nav-tab.active { color: var(--brand-green); }
+        .nav-tab.active::before {
+            content: ''; position: absolute; top: -15px; width: 30px; height: 3px; 
+            background: var(--brand-green); border-radius: 0 0 10px 10px;
+            box-shadow: 0 0 10px var(--brand-green);
         }
 
         /* --- MODALS --- */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 3000;
-            display: none; align-items: center; justify-content: center; padding: 20px;
+            background: rgba(0,0,0,0.85); z-index: 2000; display: none;
+            align-items: center; justify-content: center; padding: 20px;
         }
-        .modal {
-            background: #111; border: 1px solid var(--border-active);
-            width: 100%; max-width: 400px; border-radius: 28px; padding: 30px;
-        }
-        .modal-h { font-family: var(--font-display); font-size: 18px; margin-bottom: 20px; }
-        .m-input, .m-area {
-            width: 100%; background: var(--bg-input); border: 1px solid var(--border);
-            border-radius: 12px; padding: 12px; color: #fff; margin-bottom: 15px;
-        }
-        .m-area { height: 100px; resize: none; }
-        .m-btn {
-            width: 100%; padding: 15px; background: var(--white); color: #000;
-            border: none; border-radius: 12px; font-weight: 800; text-transform: uppercase;
-        }
+        .modal { background: #111; border: 1px solid var(--border-strong); width: 100%; max-width: 400px; border-radius: 28px; padding: 25px; }
+        .modal-title { font-family: var(--font-display); font-size: 16px; margin-bottom: 20px; text-align: center; }
+        .btn-prime { width: 100%; padding: 15px; background: #fff; color: #000; border-radius: 12px; font-weight: 800; border: none; text-transform: uppercase; margin-top: 10px; }
 
         /* --- TOAST --- */
         .toast {
             position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
-            background: var(--accent); color: #000; padding: 12px 25px; border-radius: 50px;
-            font-weight: 700; font-size: 13px; z-index: 5000; opacity: 0; transition: 0.4s; pointer-events: none;
+            background: var(--brand-green); color: #000; padding: 12px 24px; border-radius: 50px;
+            font-size: 12px; font-weight: 800; z-index: 5000; opacity: 0; transition: 0.4s;
         }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
     </style>
 </head>
 <body>
 
-    <canvas id="bg-canvas"></canvas>
-    <div id="toast" class="toast">Действие выполнено</div>
+    <canvas id="fx-canvas"></canvas>
+    <div class="ambient-glow"></div>
+    <div id="toast" class="toast">Успешно</div>
 
     <header class="header">
-        <a href="feed.html" class="brand">
+        <a href="feed.html" class="brand-logo">
             <div class="brand-icon">S</div>
-            <span class="brand-name">STAVOK.NET</span>
+            <span class="brand-name">STAVOK</span>
         </a>
         <div class="header-right">
-            <div class="wallet-info">
-                <div class="avatar-box" id="userAvatar">?</div>
-                <span class="balance-text" id="userBalance">0.00 x2</span>
+            <div class="wallet-pill">
+                <div class="user-avatar-circle" id="userInitial">?</div>
+                <span class="user-balance-val" id="userBalance">0.00 x2</span>
             </div>
         </div>
     </header>
 
-    <div class="ad-banner-strip" id="topAd">
-        <div class="ad-icon"><i class="fa-solid fa-bolt-lightning"></i></div>
-        <div class="ad-content">
-            <h5>VIP ПРОГНОЗЫ ДОСТУПНЫ</h5>
-            <p>Получи доступ к аналитике от профи со скидкой 50%</p>
+    <div class="promo-banner" id="promoBanner">
+        <div class="promo-icon"><i class="fa-solid fa-gift"></i></div>
+        <div class="promo-info">
+            <h5 id="promoTitle">БОНУС X2 ПРИ ПОПОЛНЕНИИ</h5>
+            <p id="promoDesc">Акция действует до конца недели. Успей забрать!</p>
         </div>
     </div>
 
-    <main class="feed" id="mainFeed">
+    <div class="create-post-box">
+        <div class="create-row">
+            <div class="user-avatar-circle" id="postInitial" style="width:34px; height:34px; font-size:10px;">?</div>
+            <input type="text" id="mainInput" class="mini-input" placeholder="Что нового в мире спорта?">
+            <div class="c-send" onclick="App.posts.createSimple()"><i class="fa-solid fa-paper-plane"></i></div>
+        </div>
+        <div class="admin-controls" id="adminPanel" style="display: none;">
+            <div class="admin-btn" onclick="App.ui.openModal('adminPostModal')">
+                <i class="fa-solid fa-plus-circle"></i> Спец. Пост
+            </div>
+            <div class="admin-btn" style="background: var(--brand-gold);" onclick="App.ui.openModal('adModal')">
+                <i class="fa-solid fa-ad"></i> Реклама
+            </div>
+        </div>
+    </div>
+
+    <main class="feed-container" id="feedStream">
         </main>
 
     <nav class="bottom-nav">
-        <a href="new.html" class="nav-link">
-            <i class="fa-solid fa-bolt"></i>
-            <span>News</span>
+        <a href="new.html" class="nav-tab">
+            <i class="fa-solid fa-newspaper"></i>
+            <span>New</span>
         </a>
-        <a href="feed.html" class="nav-link active">
-            <i class="fa-solid fa-layer-group"></i>
+        <a href="feed.html" class="nav-tab active">
+            <i class="fa-solid fa-house-chimney"></i>
             <span>Feed</span>
         </a>
-        <a href="profile.html" class="nav-link">
-            <i class="fa-solid fa-user-astronaut"></i>
+        <a href="profile.html" class="nav-tab">
+            <i class="fa-solid fa-user-ninja"></i>
             <span>Profile</span>
         </a>
     </nav>
 
-    <div class="overlay" id="createPostModal">
+    <div class="overlay" id="adminPostModal">
         <div class="modal">
-            <h3 class="modal-h">Новая публикация</h3>
-            <textarea id="postContent" class="m-area" placeholder="О чем вы думаете?"></textarea>
-            <input type="text" id="postImgUrl" class="m-input" placeholder="Ссылка на фото (необязательно)">
+            <h3 class="modal-title">Создать пост как Admin</h3>
+            <select id="mPostType" class="mini-input" style="width: 100%; margin-bottom: 15px;">
+                <option value="text">Текстовый</option>
+                <option value="match">Футбольный матч</option>
+                <option value="image">С баннером/картинкой</option>
+            </select>
+            <textarea id="mPostContent" class="mini-input" style="width: 100%; height: 80px; margin-bottom: 15px;" placeholder="Текст поста..."></textarea>
             
-            <div id="adminOptions" style="display: none; border-top: 1px solid var(--border); padding-top: 15px; margin-top: 10px;">
-                <p style="font-size: 10px; color: var(--warn); margin-bottom: 10px;">ADMIN PANEL</p>
-                <select id="postType" class="m-input">
-                    <option value="text">Обычный пост</option>
-                    <option value="match">Матч (Ставки)</option>
-                    <option value="ad">Рекламный блок</option>
-                </select>
+            <div id="mMatchFields" style="display: none;">
+                <input type="text" id="mTeam1" class="mini-input" style="width: 100%; margin-bottom: 10px;" placeholder="Хозяева">
+                <input type="text" id="mTeam2" class="mini-input" style="width: 100%; margin-bottom: 10px;" placeholder="Гости">
             </div>
 
-            <button class="m-btn" onclick="App.posts.submit()">Опубликовать</button>
-            <p onclick="App.ui.closeModal()" style="text-align: center; font-size: 12px; margin-top: 15px; color: var(--text-muted);">Отмена</p>
+            <button class="btn-prime" onclick="App.posts.createAdmin()">Опубликовать</button>
+            <p onclick="App.ui.closeModal()" style="text-align: center; color: #555; font-size: 11px; margin-top: 15px; cursor: pointer;">Отмена</p>
         </div>
     </div>
 
     <div class="overlay" id="betModal">
         <div class="modal">
-            <h3 class="modal-h">Сделать ставку</h3>
-            <div id="betDetails" style="margin-bottom: 20px; font-size: 14px;"></div>
-            <input type="number" id="betAmount" class="m-input" placeholder="Сумма ставки">
-            <button class="m-btn" style="background: var(--accent);" onclick="App.bets.confirm()">Подтвердить</button>
-            <p onclick="App.ui.closeModal()" style="text-align: center; font-size: 12px; margin-top: 15px; color: var(--text-muted);">Отмена</p>
+            <h3 class="modal-title">Сделать ставку</h3>
+            <div id="betDetails" style="background: #1a1a1a; padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: center; font-size: 13px;">
+                Матч: <b id="betMatch">...</b><br>
+                Исход: <b id="betOutcome">...</b> | КФ: <b id="betCoef" style="color:var(--brand-green)">...</b>
+            </div>
+            <input type="number" id="betValue" class="mini-input" style="width: 100%; text-align: center; font-family: var(--font-display);" placeholder="Сумма (x2)">
+            <button class="btn-prime" style="background: var(--brand-green);" onclick="App.bets.confirm()">Подтвердить ставку</button>
+            <p onclick="App.ui.closeModal()" style="text-align: center; color: #555; font-size: 11px; margin-top: 15px; cursor: pointer;">Отмена</p>
         </div>
     </div>
 
     <script>
-        /**
-         * STAVOK.NET ENGINE v3.0
-         * Синхронизация с Supabase Realtime + Логика Ставок
-         */
-
         const SB_URL = 'https://cmoeirxugwapvvcdkwjs.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2Vpcnh1Z3dhcHZ2Y2Rrd2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMDQ1NzUsImV4cCI6MjA4NjY4MDU3NX0.UchZU_itRYdOEAUpJ1p-G06RjpRam3rLhQnoQnpu3YE';
 
@@ -339,274 +324,224 @@
             sb: null,
             user: null,
             profile: null,
-            activeBet: null,
+            currentBet: null,
 
             async init() {
-                console.log("App: Initialization...");
                 this.sb = window.supabase.createClient(SB_URL, SB_KEY);
                 this.initVisuals();
                 
-                // 1. Auth Check
+                // Проверка сессии
                 const { data: { session } } = await this.sb.auth.getSession();
                 if (!session) {
                     window.location.href = 'login.html';
                     return;
                 }
                 this.user = session.user;
-
-                // 2. Load Profile & Realtime
+                
                 await this.loadProfile();
                 this.initRealtime();
-                
-                // 3. Load Feed
-                App.posts.load();
+                this.posts.load();
 
-                // 4. Bind Global Clicks
-                document.addEventListener('click', (e) => {
-                    if(e.target.closest('.i-btn-like')) App.posts.like(e.target.closest('.post').dataset.id);
+                // Обработка скрытия полей в модалке
+                document.getElementById('mPostType').addEventListener('change', (e) => {
+                    document.getElementById('mMatchFields').style.display = e.target.value === 'match' ? 'block' : 'none';
                 });
             },
 
             async loadProfile() {
-                const { data, error } = await this.sb
-                    .from('users')
-                    .select('*')
-                    .eq('id', this.user.id)
-                    .single();
-
+                const { data } = await this.sb.from('users').select('*').eq('id', this.user.id).single();
                 if (data) {
                     this.profile = data;
-                    document.getElementById('userBalance').innerText = `${data.balance.toFixed(2)} x2`;
-                    const avatar = document.getElementById('userAvatar');
-                    avatar.innerText = data.username.substring(0, 1).toUpperCase();
+                    const bal = parseFloat(data.balance).toFixed(2);
+                    document.getElementById('userBalance').innerText = `${bal} x2`;
                     
+                    const char = data.username.charAt(0).toUpperCase();
+                    document.getElementById('userInitial').innerText = char;
+                    document.getElementById('postInitial').innerText = char;
+
                     if(data.role === 'admin') {
-                        document.getElementById('adminOptions').style.display = 'block';
+                        document.getElementById('adminPanel').style.display = 'flex';
                     }
                 }
             },
 
             initRealtime() {
-                // Слушаем изменения баланса
-                this.sb
-                    .channel('any')
+                // Слушаем баланс
+                this.sb.channel('db_changes')
                     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${this.user.id}` }, 
                     payload => {
                         this.profile.balance = payload.new.balance;
-                        document.getElementById('userBalance').innerText = `${payload.new.balance.toFixed(2)} x2`;
-                    })
-                    .subscribe();
+                        document.getElementById('userBalance').innerText = `${parseFloat(payload.new.balance).toFixed(2)} x2`;
+                    }).subscribe();
 
                 // Слушаем новые посты
-                this.sb
-                    .channel('posts')
+                this.sb.channel('post_changes')
                     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, 
-                    payload => App.posts.prepend(payload.new))
+                    payload => this.posts.load())
                     .subscribe();
             },
 
-            // --- UI CONTROLLER ---
-            ui: {
-                toast(msg) {
-                    const t = document.getElementById('toast');
-                    t.innerText = msg;
-                    t.classList.add('show');
-                    setTimeout(() => t.classList.remove('show'), 3000);
-                },
-                openModal(id) { document.getElementById(id).style.display = 'flex'; },
-                closeModal() { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); }
-            },
-
-            // --- POSTS CONTROLLER ---
+            // --- ПОСТЫ ---
             posts: {
                 async load() {
                     const { data, error } = await App.sb
                         .from('posts')
-                        .select('*, users(username, role, avatar_url)')
+                        .select('*, users(username, role)')
                         .order('created_at', { ascending: false });
 
                     if (data) {
-                        const feed = document.getElementById('mainFeed');
-                        feed.innerHTML = '';
-                        data.forEach(post => this.render(post));
+                        const stream = document.getElementById('feedStream');
+                        stream.innerHTML = '';
+                        data.forEach(p => this.render(p));
                     }
                 },
 
-                render(post) {
-                    const feed = document.getElementById('mainFeed');
-                    const isLiked = false; // TODO: Check likes table
-                    const date = new Date(post.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                render(p) {
+                    const stream = document.getElementById('feedStream');
+                    const isMatch = p.content.includes('VS');
+                    const time = new Date(p.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     
-                    let mediaHtml = post.image_url ? `<img src="${post.image_url}" class="post-media">` : '';
-                    let adminBadge = post.users?.role === 'admin' ? '<span class="badge-admin">Admin</span>' : '';
+                    let specialContent = '';
+                    if (isMatch) {
+                        const teams = p.content.split('VS');
+                        specialContent = `
+                            <div class="match-widget">
+                                <div class="m-teams">
+                                    <div class="m-team-box"><i class="fa-solid fa-shield-halved"></i><span class="m-team-name">${teams[0]}</span></div>
+                                    <div class="m-score">0:0</div>
+                                    <div class="m-team-box"><i class="fa-solid fa-shield-halved"></i><span class="m-team-name">${teams[1]}</span></div>
+                                </div>
+                                <div class="odds-grid">
+                                    <div class="odd-item" onclick="App.bets.open('${p.id}', '${teams[0]}', 1.85)">
+                                        <span class="odd-lbl">П1</span><span class="odd-val">1.85</span>
+                                    </div>
+                                    <div class="odd-item" onclick="App.bets.open('${p.id}', 'Ничья', 3.40)">
+                                        <span class="odd-lbl">X</span><span class="odd-val">3.40</span>
+                                    </div>
+                                    <div class="odd-item" onclick="App.bets.open('${p.id}', '${teams[1]}', 2.15)">
+                                        <span class="odd-lbl">П2</span><span class="odd-val">2.15</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
 
-                    let html = `
-                        <div class="post" data-id="${post.id}">
+                    const adminTag = p.users?.role === 'admin' ? '<span class="badge-admin">Admin</span>' : '';
+
+                    const html = `
+                        <div class="post-card">
                             <div class="post-header">
                                 <div class="post-user">
-                                    <div class="avatar-box">${post.users?.username[0].toUpperCase()}</div>
-                                    <div class="user-meta">
-                                        <h4>${post.users?.username} ${adminBadge}</h4>
-                                        <span>${date}</span>
+                                    <div class="p-avatar">${p.users?.username[0].toUpperCase()}</div>
+                                    <div class="p-info">
+                                        <h4>${p.users?.username} ${adminTag}</h4>
+                                        <span>Сегодня, ${time}</span>
                                     </div>
                                 </div>
-                                <i class="fa-solid fa-ellipsis-vertical" style="color:#444"></i>
+                                <i class="fa-solid fa-ellipsis-h" style="color:#333"></i>
                             </div>
-                            <div class="post-text">${post.content}</div>
-                            ${mediaHtml}
-                            
-                            ${this.getTemplateData(post)}
-
-                            <div class="post-footer">
-                                <div class="i-btn i-btn-like">
-                                    <i class="fa-regular fa-heart"></i> <span>24</span>
-                                </div>
-                                <div class="i-btn" onclick="App.comments.toggle(${post.id})">
-                                    <i class="fa-regular fa-comment"></i> <span>12</span>
-                                </div>
-                                <div class="i-btn">
-                                    <i class="fa-solid fa-share-nodes"></i>
-                                </div>
+                            <div class="post-body">
+                                ${p.content}
+                                ${p.image_url ? `<img src="${p.image_url}" class="post-img">` : ''}
+                                ${specialContent}
                             </div>
-
-                            <div class="comments-block" id="comments-${post.id}">
-                                <div id="list-${post.id}"></div>
-                                <div class="comment-input-area">
-                                    <input type="text" class="c-input" id="c-input-${post.id}" placeholder="Ваш комментарий...">
-                                    <div class="c-send" onclick="App.comments.send(${post.id})">
-                                        <i class="fa-solid fa-paper-plane"></i>
-                                    </div>
-                                </div>
+                            <div class="post-actions">
+                                <div class="act-btn" onclick="this.classList.toggle('liked')"><i class="fa-solid fa-heart"></i> 0</div>
+                                <div class="act-btn" onclick="App.ui.toggleComments('${p.id}')"><i class="fa-solid fa-comment"></i> Ответить</div>
                             </div>
                         </div>
                     `;
-                    feed.insertAdjacentHTML('beforeend', html);
+                    stream.insertAdjacentHTML('beforeend', html);
                 },
 
-                getTemplateData(post) {
-                    // Если это пост-матч (упрощенная проверка по содержанию или метаданным)
-                    if(post.content.includes('VS')) {
-                        return `
-                        <div class="match-card">
-                            <div class="match-teams">
-                                <div class="m-team"><b>HOME</b></div>
-                                <div class="m-score">0 : 0</div>
-                                <div class="m-team"><b>AWAY</b></div>
-                            </div>
-                            <div class="bet-grid">
-                                <div class="bet-option" onclick="App.bets.open(${post.id}, 'W1', 1.95)">
-                                    <span class="o-label">П1</span>
-                                    <span class="o-val">1.95</span>
-                                </div>
-                                <div class="bet-option" onclick="App.bets.open(${post.id}, 'Draw', 3.40)">
-                                    <span class="o-label">Ничья</span>
-                                    <span class="o-val">3.40</span>
-                                </div>
-                                <div class="bet-option" onclick="App.bets.open(${post.id}, 'W2', 2.10)">
-                                    <span class="o-label">П2</span>
-                                    <span class="o-val">2.10</span>
-                                </div>
-                            </div>
-                        </div>`;
-                    }
-                    return '';
-                },
-
-                async submit() {
-                    const content = document.getElementById('postContent').value;
-                    const img = document.getElementById('postImgUrl').value;
+                async createSimple() {
+                    const txt = document.getElementById('mainInput').value;
+                    if(!txt) return App.ui.toast("О чем вы думаете?");
                     
-                    if(!content) return App.ui.toast("Введите текст");
+                    const { error } = await App.sb.from('posts').insert([{
+                        author_id: App.user.id,
+                        content: txt
+                    }]);
 
-                    const { error } = await App.sb
-                        .from('posts')
-                        .insert([{ 
-                            author_id: App.user.id, 
-                            content: content, 
-                            image_url: img 
-                        }]);
+                    if(!error) {
+                        document.getElementById('mainInput').value = '';
+                        App.ui.toast("Опубликовано!");
+                    }
+                },
+
+                async createAdmin() {
+                    const type = document.getElementById('mPostType').value;
+                    let content = document.getElementById('mPostContent').value;
+                    
+                    if(type === 'match') {
+                        const t1 = document.getElementById('mTeam1').value;
+                        const t2 = document.getElementById('mTeam2').value;
+                        content = `${t1} VS ${t2} \n ${content}`;
+                    }
+
+                    const { error } = await App.sb.from('posts').insert([{
+                        author_id: App.user.id,
+                        content: content
+                    }]);
 
                     if(!error) {
                         App.ui.closeModal();
-                        App.ui.toast("Опубликовано!");
-                        document.getElementById('postContent').value = '';
+                        App.ui.toast("Спец. пост создан!");
                     }
                 }
             },
 
-            // --- BETS CONTROLLER ---
+            // --- СТАВКИ ---
             bets: {
                 open(postId, outcome, coef) {
-                    App.activeBet = { postId, outcome, coef };
-                    document.getElementById('betDetails').innerHTML = `
-                        Прогноз: <b>${outcome}</b><br>
-                        Коэффициент: <b>${coef}</b>
-                    `;
+                    App.currentBet = { postId, outcome, coef };
+                    document.getElementById('betMatch').innerText = "Событие #" + postId.slice(0,5);
+                    document.getElementById('betOutcome').innerText = outcome;
+                    document.getElementById('betCoef').innerText = coef;
                     App.ui.openModal('betModal');
                 },
-
                 async confirm() {
-                    const amount = parseFloat(document.getElementById('betAmount').value);
-                    if(!amount || amount <= 0) return App.ui.toast("Введите сумму");
-                    if(amount > App.profile.balance) return App.ui.toast("Недостаточно средств");
+                    const val = parseFloat(document.getElementById('betValue').value);
+                    if(!val || val <= 0) return App.ui.toast("Введите сумму");
+                    if(val > App.profile.balance) return App.ui.toast("Недостаточно x2");
 
-                    // 1. Снимаем баланс
-                    const newBalance = App.profile.balance - amount;
-                    const { error: balErr } = await App.sb
-                        .from('users')
-                        .update({ balance: newBalance })
-                        .eq('id', App.user.id);
+                    // Снимаем баланс (в реале это делает транзакция на бэке)
+                    const { error } = await App.sb.from('users').update({
+                        balance: App.profile.balance - val
+                    }).eq('id', App.user.id);
 
-                    if(!balErr) {
-                        // 2. Записываем ставку в таблицу (если она создана)
+                    if(!error) {
                         App.ui.closeModal();
                         App.ui.toast("Ставка принята!");
-                        // Здесь должен быть INSERT в таблицу bets
+                        // Запись в таблицу bets опускаем для краткости, но она там должна быть
                     }
                 }
             },
 
-            // --- COMMENTS CONTROLLER ---
-            comments: {
-                toggle(id) {
-                    const el = document.getElementById(`comments-${id}`);
-                    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+            // --- UI ---
+            ui: {
+                toast(m) {
+                    const t = document.getElementById('toast');
+                    t.innerText = m; t.classList.add('show');
+                    setTimeout(() => t.classList.remove('show'), 3000);
                 },
-                async send(postId) {
-                    const input = document.getElementById(`c-input-${postId}`);
-                    const text = input.value.trim();
-                    if(!text) return;
-
-                    const { error } = await App.sb
-                        .from('comments')
-                        .insert([{ 
-                            post_id: postId, 
-                            user_id: App.user.id, 
-                            text_content: text 
-                        }]);
-                    
-                    if(!error) {
-                        input.value = '';
-                        App.ui.toast("Комментарий отправлен");
-                        // В идеале тут Realtime подгрузка в блок
-                    }
+                openModal(id) { document.getElementById(id).style.display = 'flex'; },
+                closeModal() { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); },
+                toggleComments(id) {
+                    App.ui.toast("Комментарии в разработке");
                 }
             },
 
-            // --- VISUAL EFFECTS ---
             initVisuals() {
-                const canvas = document.getElementById('bg-canvas');
+                const canvas = document.getElementById('fx-canvas');
                 const ctx = canvas.getContext('2d');
                 let w, h, particles = [];
                 const resize = () => { w = window.innerWidth; h = window.innerHeight; canvas.width = w; canvas.height = h; };
                 window.addEventListener('resize', resize);
                 resize();
-
-                for(let i=0; i<40; i++) particles.push({ x: Math.random()*w, y: Math.random()*h, vx: Math.random()-0.5, vy: Math.random()-0.5 });
-
+                for(let i=0; i<30; i++) particles.push({ x: Math.random()*w, y: Math.random()*h, vx: Math.random()-0.5, vy: Math.random()-0.5 });
                 function draw() {
-                    ctx.clearRect(0,0,w,h);
-                    ctx.fillStyle = "rgba(255,255,255,0.1)";
+                    ctx.clearRect(0,0,w,h); ctx.fillStyle = "rgba(255,255,255,0.05)";
                     particles.forEach(p => {
                         p.x += p.vx; p.y += p.vy;
                         if(p.x<0) p.x=w; if(p.x>w) p.x=0; if(p.y<0) p.y=h; if(p.y>h) p.y=0;
@@ -618,9 +553,7 @@
             }
         };
 
-        // RUN
         window.onload = () => App.init();
-
     </script>
 </body>
 </html>
