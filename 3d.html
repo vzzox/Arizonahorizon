@@ -2,37 +2,137 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Заявление на модерацию</title>
+    <title>Liquid Glass + Grunge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <link rel="stylesheet" href="css.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
+        body {
+            background: #1a1a1a;
+            font-family: sans-serif;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+
+        /* Liquid Glass эффект */
+        .liquid-glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .liquid-glass::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            transform: rotate(45deg);
+            animation: shine 3s infinite linear;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        /* Гранж-стиль */
+        .grunge {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23333"/><path d="M0,0 L100,100 M100,0 L0,100" stroke="%23555" stroke-width="1" opacity="0.3"/></svg>');
+            border: 2px dashed #555;
+            filter: sepia(0.5) brightness(0.9);
+        }
+
+        .grunge-text {
+            font-family: 'Impact', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #e0e0e0;
+            text-shadow: 1px 1px 0 #333, 2px 2px 0 #000;
+            background: linear-gradient(to right, #888, #ccc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Анимация пузырей */
+        .bubble {
+            position: absolute;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+    </style>
 </head>
-
 <body>
+    <!-- Liquid Glass блок -->
+    <div class="liquid-glass grunge" id="mainContainer">
+        <h1 class="grunge-text">Liquid Glass + Grunge</h1>
+        <p>Плавные формы, размытые границы, текстуры потёртостей.</p>
+        <button onclick="addBubble()">Добавить пузырь</button>
+    </div>
 
-<h3 style="color: orange;">Заявление на модерацию</h3>
+    <script>
+        // Генерация случайных пузырей
+        function addBubble() {
+            const bubble = document.createElement('div');
+            bubble.classList.add('bubble');
 
-<p style="font-size:20px;">
-    Укажите ваш возраст<br>
-    <input type="text">
-</p>
+            const size = Math.random() * 100 + 50;
+            const x = Math.random() * window.innerWidth;
+            const y = window.innerHeight;
 
-<p>
-    Сколько времени вы готовы уделять модерации?<br>
-    <input type="text">
-</p>
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${x}px`;
+            bubble.style.bottom = '-100px';
 
-<p>
-    Ваш тег-id Memoasis<br>
-    <input type="text">
-</p>
+            document.body.appendChild(bubble);
 
-<script>
-    // тут можно добавить JS
-</script>
+            // Анимация подъёма
+            let posY = -100;
+            const interval = setInterval(() => {
+                posY += 2;
+                bubble.style.bottom = `${posY}px`;
+                bubble.style.transform = `translateX(${Math.sin(posY * 0.05) * 20}px)`;
 
+                if (posY > window.innerHeight + 100) {
+                    clearInterval(interval);
+                    bubble.remove();
+                }
+            }, 16);
+        }
+
+        // Автоматическое создание пузырей
+        setInterval(addBubble, 1000);
+
+        // Генерация множества гранж-элементов
+        for (let i = 0; i < 50; i++) {
+            const grungeEl = document.createElement('div');
+            grungeEl.classList.add('grunge');
+            grungeEl.style.position = 'absolute';
+            grungeEl.style.width = Math.random() * 300 + 100 + 'px';
+            grungeEl.style.height = Math.random() * 200 + 50 + 'px';
+            grungeEl.style.left = Math.random() * window.innerWidth + 'px';
+            grungeEl.style.top = Math.random() * window.innerHeight + 'px';
+            grungeEl.style.opacity = '0.1';
+            grungeEl.style.zIndex = '-1';
+            document.body.appendChild(grungeEl);
+        }
+    </script>
 </body>
 </html>
