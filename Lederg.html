@@ -1,277 +1,549 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lederg</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Божий Шепот | Поддержка и Утешение</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
 
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================
+           CSS ПЕРЕМЕННЫЕ И СБРОС СТИЛЕЙ
+        ========================================= */
+        :root {
+            --primary-font: 'Cormorant Garamond', serif;
+            --secondary-font: 'Montserrat', sans-serif;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --text-main: #2c3e50;
+            --text-light: #576574;
+            --accent: #ff9a9e;
+            --accent-hover: #fecfef;
+        }
 
-<style>
-:root {
-    --bg: #0a0a0a;
-    --card: #111;
-    --gold: #e6c75a;
-    --white: #f5f5f5;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: var(--secondary-font);
+            background: linear-gradient(-45deg, #fbc2eb, #a6c1ee, #fecfef, #e0c3fc);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
 
-html, body {
-    background: var(--bg);
-    font-family: 'Bebas Neue', sans-serif;
-    overflow-x: hidden;
-}
+        /* =========================================
+           АНИМАЦИИ
+        ========================================= */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-/* ===== ФОНОВЫЙ ТЕКСТ ===== */
-.bg-text {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-45deg);
-    font-size: 38vw;
-    letter-spacing: 0.45em;
-    color: rgba(255,255,255,0.02);
-    text-transform: uppercase;
-    pointer-events: none;
-    z-index: 0;
-}
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
 
-/* ===== ШАПКА ===== */
-.header {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    height: 64px;
-    background: rgba(10,10,10,0.95);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 22px;
-    border-bottom: 1px solid #1c1c1c;
-    z-index: 10;
-}
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-.logo {
-    color: var(--gold);
-    letter-spacing: 0.4em;
-    font-size: 24px;
-}
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 15px rgba(255, 154, 158, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(255, 154, 158, 0.8); }
+            100% { box-shadow: 0 0 15px rgba(255, 154, 158, 0.4); }
+        }
 
-/* ===== ГАМБУРГЕР МЕНЮ ===== */
-.menu {
-    position: relative;
-}
+        /* =========================================
+           ХОЛСТЫ ДЛЯ ГРАФИКИ (КАНВАСЫ)
+        ========================================= */
+        #petals-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
 
-.menu-icon {
-    width: 30px;
-    height: 3px;
-    background-color: var(--gold);
-    display: block;
-    margin: 6px 0;
-    transition: 0.4s;
-    cursor: pointer;
-}
+        .corner-tree {
+            position: absolute;
+            bottom: 0;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0.85;
+        }
 
-.menu-items {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 64px;
-    background: var(--card);
-    border: 1px solid #1a1a1a;
-    border-radius: 12px;
-    min-width: 160px;
-    z-index: 20;
-    text-align: left;
-}
+        #tree-left { left: -50px; }
+        #tree-right { right: -50px; }
 
-.menu-items a {
-    display: block;
-    padding: 12px 20px;
-    color: var(--white);
-    text-decoration: none;
-    transition: 0.3s;
-}
+        /* =========================================
+           ОСНОВНОЙ КОНТЕЙНЕР (GLASSMORPHISM)
+        ========================================= */
+        .wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            padding: 20px;
+        }
 
-.menu-items a:hover {
-    background: rgba(230,199,90,0.1);
-    color: var(--gold);
-}
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 50px 60px;
+            max-width: 700px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 2s ease-out forwards, float 6s ease-in-out infinite;
+        }
 
-/* Активное меню при клике */
-.menu.active .menu-items {
-    display: block;
-}
+        /* =========================================
+           ТИПОГРАФИКА И КОНТЕНТ
+        ========================================= */
+        .holiday-greeting {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #d6336c;
+            font-weight: 500;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
 
-/* ===== ОСНОВА ===== */
-.main {
-    padding-top: 120px;
-    position: relative;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 26px;
-}
+        h1 {
+            font-family: var(--primary-font);
+            font-size: 4.5rem;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            font-weight: 600;
+            line-height: 1.1;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+        }
 
-/* ===== КАРТОЧКИ ===== */
-.card {
-    background: var(--card);
-    border-radius: 18px;
-    padding: 38px;
-    width: 90%;
-    max-width: 480px;
-    border: 1px solid #1a1a1a;
-    text-align: center;
-    transition: 0.35s ease;
-    opacity: 0;
-    transform: translateY(10px);
-    animation: fadeInUp 0.8s forwards;
-    animation-delay: 0.2s;
-}
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
 
-.card p {
-    color: var(--white);
-    font-size: 20px;
-    letter-spacing: 0.14em;
-    line-height: 1.5;
-}
+        .divider {
+            width: 50px;
+            height: 2px;
+            background: var(--accent);
+            margin: 0 auto 30px auto;
+            border-radius: 2px;
+        }
 
-/* Hover эффект по краям */
-.card:hover {
-    border-color: var(--gold);
-    box-shadow:
-        0 0 12px rgba(230,199,90,0.7),
-        0 0 28px rgba(230,199,90,0.4);
-    transform: translateY(-3px);
-}
+        /* =========================================
+           КНОПКИ
+        ========================================= */
+        .button-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
 
-/* ===== КНОПКА ===== */
-.neon-btn {
-    margin-top: 10px;
-    padding: 16px 34px;
-    border-radius: 30px;
-    border: 1px solid var(--gold);
-    color: var(--gold);
-    background: transparent;
-    letter-spacing: 0.25em;
-    cursor: pointer;
-    transition: 0.35s ease;
-    animation: pulse 2s infinite;
-}
+        .btn {
+            position: relative;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 50px;
+            font-family: var(--secondary-font);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            text-decoration: none;
+            display: inline-block;
+            z-index: 1;
+        }
 
-.neon-btn:hover {
-    color: #000;
-    background: var(--gold);
-    box-shadow:
-        0 0 16px rgba(230,199,90,0.9),
-        0 0 36px rgba(230,199,90,0.7),
-        inset 0 0 18px rgba(255,255,255,0.35);
-}
+        .btn-primary {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(255, 154, 158, 0.3);
+            animation: pulseGlow 3s infinite;
+        }
 
-@keyframes pulse {
-    0%, 100% {
-        box-shadow: 0 0 12px rgba(230,199,90,0.5),
-                    0 0 28px rgba(230,199,90,0.3);
-    }
-    50% {
-        box-shadow: 0 0 22px rgba(230,199,90,0.8),
-                    0 0 48px rgba(230,199,90,0.5);
-    }
-}
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 25px rgba(255, 154, 158, 0.5);
+            color: #fff;
+        }
 
-@keyframes fadeInUp {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
 
-/* ===== ФУТЕР ===== */
-.footer {
-    margin: 60px 0 25px;
-    color: rgba(255,255,255,0.4);
-    font-size: 14px;
-    letter-spacing: 0.2em;
-    text-align: center;
-}
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-3px);
+        }
 
-/* Мобилка */
-@media (max-width: 480px) {
-    .bg-text {
-        font-size: 55vw;
-    }
-    .card p {
-        font-size: 17px;
-    }
-}
-</style>
+        /* Эффект ряби при клике */
+        .btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: -1;
+            transform: scaleY(0);
+            transform-origin: bottom center;
+            transition: transform 0.4s ease;
+        }
+
+        .btn:hover::after {
+            transform: scaleY(1);
+        }
+
+        /* =========================================
+           АДАПТИВНОСТЬ
+        ========================================= */
+        @media (max-width: 768px) {
+            h1 { font-size: 3rem; }
+            .glass-card { padding: 40px 20px; }
+            .button-group { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+
+        /* =========================================
+           ВСПЛЫВАЮЩИЕ ОКНА (МОДАЛКИ)
+        ========================================= */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            transform: translateY(50px);
+            transition: transform 0.4s ease;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .close-btn {
+            margin-top: 20px;
+            background: #f1f2f6;
+            color: #2f3542;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: var(--secondary-font);
+            transition: background 0.3s;
+        }
+
+        .close-btn:hover {
+            background: #dfe4ea;
+        }
+    </style>
 </head>
 <body>
 
-<div class="bg-text">Lederg</div>
+    <canvas id="petals-canvas"></canvas>
 
-<header class="header">
-    <div class="logo">Lederg</div>
-    
-    <div class="menu" id="menu">
-        <div class="menu-icon" onclick="toggleMenu()"></div>
-        <div class="menu-icon" onclick="toggleMenu()"></div>
-        <div class="menu-icon" onclick="toggleMenu()"></div>
+    <canvas id="tree-left" class="corner-tree"></canvas>
+    <canvas id="tree-right" class="corner-tree"></canvas>
 
-        <div class="menu-items" id="menuItems">
-            <a href="https://newtoyers.vercel.app/checksLederg.html" target="_blank">Выборы</a>
+    <div class="wrapper">
+        <main class="glass-card">
+            <div class="holiday-greeting">С праздником весны, с 8 Марта! 🌸</div>
+            <h1>Божий Шепот</h1>
+            <div class="divider"></div>
+            <p class="subtitle">
+                Здесь вы не одни. Мы создали это пространство, чтобы каждый мог найти утешение, 
+                поделиться своими тревогами и услышать тихий голос надежды. <br><br>
+                Остановитесь на мгновение. Сделайте глубокий вдох. Ваш путь к спокойствию и свету начинается здесь.
+            </p>
+            
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="openModal('supportModal')">Мне нужна поддержка</button>
+                <button class="btn btn-secondary" onclick="openModal('speakModal')">Выговориться</button>
+            </div>
+        </main>
+    </div>
+
+    <div id="supportModal" class="modal">
+        <div class="modal-content">
+            <h2 style="font-family: var(--primary-font); margin-bottom: 15px; font-size: 2rem;">Мы рядом</h2>
+            <p style="color: var(--text-light); line-height: 1.6;">
+                Иногда самое важное — просто знать, что кто-то готов выслушать. 
+                Наши специалисты и волонтеры готовы поддержать вас в трудную минуту. 
+                Вскоре здесь появится чат поддержки.
+            </p>
+            <button class="close-btn" onclick="closeModal('supportModal')">Закрыть</button>
         </div>
     </div>
-</header>
 
-<main class="main">
-
-    <div class="card">
-        <p>
-            LEDERG — это сообщество игроков,<br>
-            объединённых интересом к разным играм,<br>
-            стилю и атмосфере.
-        </p>
+    <div id="speakModal" class="modal">
+        <div class="modal-content">
+            <h2 style="font-family: var(--primary-font); margin-bottom: 15px; font-size: 2rem;">Ваша история важна</h2>
+            <p style="color: var(--text-light); line-height: 1.6;">
+                Выплесните свои эмоции. Все, что вы напишете здесь, останется анонимным. 
+                Освободите свою душу от тяжести.
+            </p>
+            <textarea style="width: 100%; height: 100px; margin-top: 15px; padding: 10px; border-radius: 10px; border: 1px solid #ccc; font-family: var(--secondary-font); resize: none;" placeholder="Начните писать здесь..."></textarea>
+            <button class="close-btn" style="background: var(--accent); color: white;" onclick="closeModal('speakModal')">Отправить в вечность</button>
+            <button class="close-btn" onclick="closeModal('speakModal')">Отмена</button>
+        </div>
     </div>
 
-    <div class="card">
-        <p>
-            Здесь собрались игроки из разных миров:<br>
-            Minecraft, FPS, sandbox,<br>
-            survival и не только.
-        </p>
-    </div>
+    <script>
+        // --- Управление Модальными Окнами ---
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
 
-    <div class="card">
-        <p>
-            Мы ценим спокойствие,<br>
-            минимализм и уважение.<br>
-            Lederg — не просто сервер.
-        </p>
-    </div>
+        // ===================================================================
+        // ДВИЖОК ГЕНЕРАТИВНЫХ ДЕРЕВЬЕВ (Фрактальная математика)
+        // ===================================================================
+        function drawFractalTree(canvasId, isLeft) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            // Настройка размера канваса
+            const width = window.innerWidth / 2.5;
+            const height = window.innerHeight * 0.7;
+            canvas.width = width;
+            canvas.height = height;
 
-<a href="https://discord.gg/ENCDREZSXm" target="_blank" style="text-decoration:none;">
-    <button class="neon-btn">ВОЙТИ</button>
-</a>
+            // Настройка начальной точки
+            const startX = isLeft ? 50 : width - 50;
+            const startY = height;
+            const initialLength = height / 4;
+            const initialAngle = isLeft ? -Math.PI / 2 + 0.2 : -Math.PI / 2 - 0.2;
 
-</main>
+            function drawBranch(x, y, length, angle, depth, branchWidth) {
+                ctx.beginPath();
+                ctx.save();
+                ctx.strokeStyle = `rgba(80, 50, 60, ${0.4 + depth*0.05})`; // Цвет коры
+                ctx.fillStyle = `rgba(80, 50, 60, ${0.4 + depth*0.05})`;
+                ctx.lineWidth = branchWidth;
+                ctx.lineCap = 'round';
 
-<div class="footer">
-    © Lederg Community. Все права защищены.
-</div>
+                ctx.translate(x, y);
+                ctx.rotate(angle);
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, -length);
+                ctx.stroke();
 
-<script>
-function toggleMenu() {
-    const menu = document.getElementById('menu');
-    menu.classList.toggle('active');
-}
-</script>
+                // Рисуем цветы на концах веток
+                if (depth === 0) {
+                    drawBlossom(ctx, 0, -length);
+                    ctx.restore();
+                    return;
+                }
 
+                // Рекурсивное создание веток
+                // Добавляем случайность для органичности
+                const numBranches = Math.random() > 0.2 ? 2 : 3;
+                for (let i = 0; i < numBranches; i++) {
+                    const newAngle = (Math.random() - 0.5) * 1.5; // Разброс угла
+                    const newLength = length * (0.6 + Math.random() * 0.2); // Уменьшение длины
+                    const newWidth = branchWidth * 0.6;
+                    
+                    // Рисуем следующую ветку
+                    setTimeout(() => {
+                        drawBranch(0, -length, newLength, newAngle, depth - 1, newWidth);
+                    }, 50); // Анимация роста
+                }
+
+                ctx.restore();
+            }
+
+            function drawBlossom(ctx, x, y) {
+                const petals = 5;
+                const radius = 3 + Math.random() * 4;
+                ctx.fillStyle = `rgba(255, 183, 197, ${0.7 + Math.random()*0.3})`; // Розовый цвет сакуры
+                ctx.beginPath();
+                for (let i = 0; i < petals; i++) {
+                    const angle = (i * 2 * Math.PI) / petals;
+                    const px = x + Math.cos(angle) * radius;
+                    const py = y + Math.sin(angle) * radius;
+                    ctx.arc(px, py, radius/2, 0, Math.PI * 2);
+                }
+                ctx.fill();
+            }
+
+            // Запуск роста дерева (глубина рекурсии 9)
+            drawBranch(startX, startY, initialLength, initialAngle, 9, 15);
+        }
+
+
+        // ===================================================================
+        // ФИЗИЧЕСКИЙ ДВИЖОК ПАДАЮЩИХ ЛИСТЬЕВ (Сакура)
+        // ===================================================================
+        const petalCanvas = document.getElementById('petals-canvas');
+        const pCtx = petalCanvas.getContext('2d');
+        
+        let petalsArray = [];
+        const numberOfPetals = 60; // Количество лепестков на экране
+
+        function resizePetalCanvas() {
+            petalCanvas.width = window.innerWidth;
+            petalCanvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', () => {
+            resizePetalCanvas();
+            // Перерисовываем деревья при изменении размера экрана (мгновенно)
+            const cL = document.getElementById('tree-left');
+            const cR = document.getElementById('tree-right');
+            cL.getContext('2d').clearRect(0,0,cL.width,cL.height);
+            cR.getContext('2d').clearRect(0,0,cR.width,cR.height);
+            drawFractalTree('tree-left', true);
+            drawFractalTree('tree-right', false);
+        });
+        resizePetalCanvas();
+
+        // Класс лепестка с 3D симуляцией поворота
+        class Petal {
+            constructor() {
+                this.x = Math.random() * petalCanvas.width;
+                this.y = Math.random() * petalCanvas.height - petalCanvas.height;
+                this.w = 10 + Math.random() * 8; // Ширина
+                this.h = 14 + Math.random() * 10; // Высота
+                this.opacity = 0.5 + Math.random() * 0.5;
+                
+                // Физика
+                this.speedX = -1 + Math.random() * 2; // Ветер
+                this.speedY = 1 + Math.random() * 2; // Гравитация
+                
+                // 3D вращение
+                this.angle3D = Math.random() * Math.PI * 2;
+                this.rotationSpeed = 0.02 + Math.random() * 0.03;
+                this.flip = Math.random() * Math.PI * 2;
+                this.flipSpeed = 0.02 + Math.random() * 0.03;
+            }
+
+            update() {
+                this.x += this.speedX + Math.sin(this.angle3D) * 0.5;
+                this.y += this.speedY;
+                this.angle3D += this.rotationSpeed;
+                this.flip += this.flipSpeed;
+
+                // Если лепесток упал за нижний край — возвращаем наверх
+                if (this.y > petalCanvas.height + this.h) {
+                    this.y = -this.h;
+                    this.x = Math.random() * petalCanvas.width;
+                    this.speedX = -1 + Math.random() * 2;
+                }
+            }
+
+            draw() {
+                pCtx.save();
+                pCtx.translate(this.x, this.y);
+                
+                // Симуляция 3D вращения через скейлинг
+                const scaleX = Math.cos(this.flip);
+                pCtx.scale(scaleX, 1);
+                pCtx.rotate(this.angle3D);
+
+                // Отрисовка формы лепестка сакуры (кривые Безье)
+                pCtx.beginPath();
+                pCtx.moveTo(0, this.h / 2);
+                pCtx.bezierCurveTo(this.w / 2, this.h / 2, this.w, this.h / 4, 0, -this.h / 2);
+                pCtx.bezierCurveTo(-this.w, this.h / 4, -this.w / 2, this.h / 2, 0, this.h / 2);
+                pCtx.closePath();
+
+                // Цвет лепестка
+                pCtx.fillStyle = `rgba(255, 183, 197, ${this.opacity})`;
+                pCtx.fill();
+                pCtx.restore();
+            }
+        }
+
+        // Инициализация массива лепестков
+        function initPetals() {
+            for (let i = 0; i < numberOfPetals; i++) {
+                petalsArray.push(new Petal());
+            }
+        }
+
+        // Главный цикл анимации
+        function animatePetals() {
+            pCtx.clearRect(0, 0, petalCanvas.width, petalCanvas.height);
+            for (let i = 0; i < petalsArray.length; i++) {
+                petalsArray[i].update();
+                petalsArray[i].draw();
+            }
+            requestAnimationFrame(animatePetals);
+        }
+
+        // ===================================================================
+        // СТАРТ ВСЕХ СИСТЕМ ПРИ ЗАГРУЗКЕ
+        // ===================================================================
+        window.onload = () => {
+            // Рисуем левое дерево
+            drawFractalTree('tree-left', true);
+            // Рисуем правое дерево
+            drawFractalTree('tree-right', false);
+            // Запускаем падающие листья
+            initPetals();
+            animatePetals();
+        };
+
+    </script>
 </body>
 </html>
