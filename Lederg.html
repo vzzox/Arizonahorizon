@@ -2,548 +2,508 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Божий Шепот | Поддержка и Утешение</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Божий Шепот</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet">
 
     <style>
         /* =========================================
-           CSS ПЕРЕМЕННЫЕ И СБРОС СТИЛЕЙ
+           БАЗОВЫЕ НАСТРОЙКИ И ПЕРЕМЕННЫЕ
         ========================================= */
         :root {
-            --primary-font: 'Cormorant Garamond', serif;
-            --secondary-font: 'Montserrat', sans-serif;
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.3);
-            --text-main: #2c3e50;
-            --text-light: #576574;
-            --accent: #ff9a9e;
-            --accent-hover: #fecfef;
+            --font-wide: 'Unbounded', sans-serif;
+            --font-text: 'Montserrat', sans-serif;
+            --bg-color: #0f172a; /* Темный глубокий фон */
+            --accent: #f472b6; /* Розовый акцент для 8 марта */
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-highlight: rgba(255, 255, 255, 0.2);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        body, html {
-            width: 100%;
-            height: 100%;
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-text);
+            overflow-x: hidden;
+            /* Плавный градиент на фоне */
+            background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
+            background-attachment: fixed;
+        }
+
+        /* Ползунок скролла (для десктопов) */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+        /* =========================================
+           ЭФФЕКТЫ LIQUID GLASS (iOS STYLE)
+        ========================================= */
+        .liquid-glass {
+            background: var(--glass-bg);
+            /* Мощный блюр как в iPhone */
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid var(--glass-highlight);
+            border-left: 1px solid var(--glass-highlight);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 
+                        inset 0 0 20px rgba(255, 255, 255, 0.02);
+            border-radius: 32px;
             overflow: hidden;
-            font-family: var(--secondary-font);
-            background: linear-gradient(-45deg, #fbc2eb, #a6c1ee, #fecfef, #e0c3fc);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-        }
-
-        /* =========================================
-           АНИМАЦИИ
-        ========================================= */
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-            100% { transform: translateY(0px); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 15px rgba(255, 154, 158, 0.4); }
-            50% { box-shadow: 0 0 30px rgba(255, 154, 158, 0.8); }
-            100% { box-shadow: 0 0 15px rgba(255, 154, 158, 0.4); }
-        }
-
-        /* =========================================
-           ХОЛСТЫ ДЛЯ ГРАФИКИ (КАНВАСЫ)
-        ========================================= */
-        #petals-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .corner-tree {
-            position: absolute;
-            bottom: 0;
-            z-index: 2;
-            pointer-events: none;
-            opacity: 0.85;
-        }
-
-        #tree-left { left: -50px; }
-        #tree-right { right: -50px; }
-
-        /* =========================================
-           ОСНОВНОЙ КОНТЕЙНЕР (GLASSMORPHISM)
-        ========================================= */
-        .wrapper {
             position: relative;
-            width: 100%;
-            height: 100%;
+        }
+
+        /* Блик на стекле */
+        .liquid-glass::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
+            transform: skewX(-20deg);
+            transition: 0.7s;
+            pointer-events: none;
+        }
+        .liquid-glass:hover::before { left: 150%; }
+
+        /* =========================================
+           ДЕРЕВЬЯ ПО КРАЯМ (СТАТИЧНЫЕ СИЛУЭТЫ)
+        ========================================= */
+        .edge-tree {
+            position: fixed;
+            top: 0;
+            height: 100vh;
+            width: 15vw;
+            min-width: 120px;
+            max-width: 300px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.15; /* Легкая прозрачность, чтобы не мешать контенту */
+            fill: #ffffff;
+            transition: opacity 0.5s ease;
+        }
+        .tree-left { left: 0; transform: scaleX(1); }
+        .tree-right { right: 0; transform: scaleX(-1); }
+
+        /* =========================================
+           КАНВАС ДЛЯ ЛИСТЬЕВ
+        ========================================= */
+        #leaves-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* =========================================
+           СТРУКТУРА ЛЕЙАУТА (СКРОЛЛ)
+        ========================================= */
+        .scroll-wrapper {
+            position: relative;
+            z-index: 10;
             display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        section {
+            min-height: 100vh;
+            width: 100%;
+            max-width: 1200px;
+            padding: 100px 20px;
+            display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 10;
-            padding: 20px;
-        }
-
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            padding: 50px 60px;
-            max-width: 700px;
             text-align: center;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 2s ease-out forwards, float 6s ease-in-out infinite;
         }
 
         /* =========================================
-           ТИПОГРАФИКА И КОНТЕНТ
+           ТИПОГРАФИКА
         ========================================= */
-        .holiday-greeting {
+        .greeting-badge {
             display: inline-block;
-            background: rgba(255, 255, 255, 0.3);
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            color: #d6336c;
-            font-weight: 500;
-            letter-spacing: 1px;
-            margin-bottom: 25px;
+            padding: 10px 24px;
+            background: rgba(244, 114, 182, 0.15);
+            border: 1px solid rgba(244, 114, 182, 0.3);
+            color: var(--accent);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            animation: pulse 3s infinite alternate;
         }
 
         h1 {
-            font-family: var(--primary-font);
-            font-size: 4.5rem;
-            color: var(--text-main);
-            margin-bottom: 20px;
-            font-weight: 600;
+            font-family: var(--font-wide);
+            font-size: clamp(2.5rem, 8vw, 6rem); /* Адаптивный огромный текст */
+            font-weight: 900;
             line-height: 1.1;
-            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+            letter-spacing: -1px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .subtitle {
-            font-size: 1.1rem;
-            color: var(--text-light);
-            line-height: 1.8;
+        p.desc {
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            color: var(--text-muted);
+            max-width: 600px;
+            line-height: 1.6;
             margin-bottom: 40px;
-            font-weight: 300;
-        }
-
-        .divider {
-            width: 50px;
-            height: 2px;
-            background: var(--accent);
-            margin: 0 auto 30px auto;
-            border-radius: 2px;
         }
 
         /* =========================================
            КНОПКИ
         ========================================= */
-        .button-group {
+        .btn-container {
             display: flex;
             gap: 20px;
+            flex-direction: row;
             justify-content: center;
-            flex-wrap: wrap;
+            width: 100%;
+            max-width: 500px;
         }
 
         .btn {
-            position: relative;
-            padding: 16px 32px;
-            border: none;
-            border-radius: 50px;
-            font-family: var(--secondary-font);
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            overflow: hidden;
-            transition: all 0.4s ease;
+            flex: 1;
+            padding: 20px 30px;
+            font-family: var(--font-wide);
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
             text-decoration: none;
-            display: inline-block;
+            text-align: center;
+            border-radius: 24px;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
             z-index: 1;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-            color: #fff;
-            box-shadow: 0 10px 20px rgba(255, 154, 158, 0.3);
-            animation: pulseGlow 3s infinite;
+        /* Кнопка Telegram (Акцентная) */
+        .btn-tg {
+            background: linear-gradient(135deg, #0088cc 0%, #005580 100%);
+            color: white;
+            box-shadow: 0 15px 35px rgba(0, 136, 204, 0.3), inset 0 2px 5px rgba(255,255,255,0.3);
+            border: none;
+        }
+        .btn-tg:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 136, 204, 0.5), inset 0 2px 5px rgba(255,255,255,0.4);
         }
 
-        .btn-primary:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 15px 25px rgba(255, 154, 158, 0.5);
-            color: #fff;
+        /* Кнопка Владелец (Glass) */
+        .btn-owner {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        .btn-owner:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: var(--text-main);
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.4);
-            transform: translateY(-3px);
-        }
-
-        /* Эффект ряби при клике */
-        .btn::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
+        /* =========================================
+           КАРТОЧКИ (КОНТЕНТ ПРИ СКРОЛЛЕ)
+        ========================================= */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
             width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.2);
-            z-index: -1;
-            transform: scaleY(0);
-            transform-origin: bottom center;
-            transition: transform 0.4s ease;
+            max-width: 1000px;
         }
 
-        .btn:hover::after {
-            transform: scaleY(1);
-        }
-
-        /* =========================================
-           АДАПТИВНОСТЬ
-        ========================================= */
-        @media (max-width: 768px) {
-            h1 { font-size: 3rem; }
-            .glass-card { padding: 40px 20px; }
-            .button-group { flex-direction: column; }
-            .btn { width: 100%; }
-        }
-
-        /* =========================================
-           ВСПЛЫВАЮЩИЕ ОКНА (МОДАЛКИ)
-        ========================================= */
-        .modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(5px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s ease;
-        }
-
-        .modal.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .modal-content {
-            background: #fff;
+        .content-card {
             padding: 40px;
-            border-radius: 20px;
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
+            text-align: left;
+            opacity: 0;
             transform: translateY(50px);
-            transition: transform 0.4s ease;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        .modal.active .modal-content {
+        .content-card.visible {
+            opacity: 1;
             transform: translateY(0);
         }
 
-        .close-btn {
-            margin-top: 20px;
-            background: #f1f2f6;
-            color: #2f3542;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-family: var(--secondary-font);
-            transition: background 0.3s;
+        .content-card h3 {
+            font-family: var(--font-wide);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #fff;
         }
 
-        .close-btn:hover {
-            background: #dfe4ea;
+        .content-card p {
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        /* Индикатор скролла */
+        .scroll-down {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0.6;
+            animation: float 2s ease-in-out infinite;
+        }
+        .mouse {
+            width: 24px; height: 36px;
+            border: 2px solid white;
+            border-radius: 12px;
+            position: relative;
+        }
+        .wheel {
+            width: 4px; height: 8px;
+            background: white;
+            border-radius: 2px;
+            position: absolute;
+            top: 6px; left: 50%;
+            transform: translateX(-50%);
+            animation: scrollWheel 2s infinite;
+        }
+
+        /* =========================================
+           АНИМАЦИИ
+        ========================================= */
+        @keyframes float {
+            0%, 100% { transform: translate(-50%, 0); }
+            50% { transform: translate(-50%, 10px); }
+        }
+        @keyframes scrollWheel {
+            0% { top: 6px; opacity: 1; }
+            100% { top: 18px; opacity: 0; }
+        }
+        @keyframes pulse {
+            from { box-shadow: 0 0 10px rgba(244, 114, 182, 0.2); }
+            to { box-shadow: 0 0 25px rgba(244, 114, 182, 0.6); }
+        }
+
+        /* =========================================
+           МОБИЛЬНАЯ АДАПТАЦИЯ
+        ========================================= */
+        @media (max-width: 768px) {
+            .btn-container { flex-direction: column; }
+            .btn { width: 100%; }
+            .content-card { padding: 30px 20px; }
+            .edge-tree { width: 25vw; opacity: 0.08; } /* На мобилках деревья прозрачнее, чтобы не мешать тексту */
+            section { padding: 80px 15px; }
         }
     </style>
 </head>
 <body>
 
-    <canvas id="petals-canvas"></canvas>
+    <svg class="edge-tree tree-left" viewBox="0 0 200 800" preserveAspectRatio="none">
+        <path d="M-50,800 C10,750 30,650 20,550 C10,450 40,350 60,250 C80,150 70,50 50,-20 L-50,-20 Z" fill="rgba(255,255,255,0.05)"/>
+        <path d="M-20,800 C40,700 60,550 40,400 C20,250 80,150 120,50 L-20,-20 Z" fill="rgba(255,255,255,0.03)"/>
+        <path d="M20,550 Q80,500 120,450" stroke="rgba(255,255,255,0.08)" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M40,400 Q120,350 160,280" stroke="rgba(255,255,255,0.08)" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path d="M60,250 Q140,200 180,100" stroke="rgba(255,255,255,0.08)" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </svg>
 
-    <canvas id="tree-left" class="corner-tree"></canvas>
-    <canvas id="tree-right" class="corner-tree"></canvas>
+    <svg class="edge-tree tree-right" viewBox="0 0 200 800" preserveAspectRatio="none">
+        <path d="M-50,800 C10,750 30,650 20,550 C10,450 40,350 60,250 C80,150 70,50 50,-20 L-50,-20 Z" fill="rgba(255,255,255,0.05)"/>
+        <path d="M-20,800 C40,700 60,550 40,400 C20,250 80,150 120,50 L-20,-20 Z" fill="rgba(255,255,255,0.03)"/>
+        <path d="M20,550 Q80,500 120,450" stroke="rgba(255,255,255,0.08)" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M40,400 Q120,350 160,280" stroke="rgba(255,255,255,0.08)" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path d="M60,250 Q140,200 180,100" stroke="rgba(255,255,255,0.08)" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </svg>
 
-    <div class="wrapper">
-        <main class="glass-card">
-            <div class="holiday-greeting">С праздником весны, с 8 Марта! 🌸</div>
-            <h1>Божий Шепот</h1>
-            <div class="divider"></div>
-            <p class="subtitle">
-                Здесь вы не одни. Мы создали это пространство, чтобы каждый мог найти утешение, 
-                поделиться своими тревогами и услышать тихий голос надежды. <br><br>
-                Остановитесь на мгновение. Сделайте глубокий вдох. Ваш путь к спокойствию и свету начинается здесь.
+    <canvas id="leaves-canvas"></canvas>
+
+    <div class="scroll-wrapper">
+        
+        <section id="hero">
+            <div class="greeting-badge">С 8 Марта! 🌸</div>
+            <h1>Божий<br>Шепот</h1>
+            <p class="desc">
+                Современное пространство поддержки. Место, где тебя услышат. Листай вниз, чтобы узнать больше, или свяжись с нами прямо сейчас.
             </p>
             
-            <div class="button-group">
-                <button class="btn btn-primary" onclick="openModal('supportModal')">Мне нужна поддержка</button>
-                <button class="btn btn-secondary" onclick="openModal('speakModal')">Выговориться</button>
+            <div class="btn-container">
+                <a href="https://t.me/твой_канал" target="_blank" class="btn btn-tg">Telegram</a>
+                <a href="#about" class="btn btn-owner">Владелец</a>
             </div>
-        </main>
-    </div>
 
-    <div id="supportModal" class="modal">
-        <div class="modal-content">
-            <h2 style="font-family: var(--primary-font); margin-bottom: 15px; font-size: 2rem;">Мы рядом</h2>
-            <p style="color: var(--text-light); line-height: 1.6;">
-                Иногда самое важное — просто знать, что кто-то готов выслушать. 
-                Наши специалисты и волонтеры готовы поддержать вас в трудную минуту. 
-                Вскоре здесь появится чат поддержки.
-            </p>
-            <button class="close-btn" onclick="closeModal('supportModal')">Закрыть</button>
-        </div>
-    </div>
+            <div class="scroll-down">
+                <div class="mouse">
+                    <div class="wheel"></div>
+                </div>
+            </div>
+        </section>
 
-    <div id="speakModal" class="modal">
-        <div class="modal-content">
-            <h2 style="font-family: var(--primary-font); margin-bottom: 15px; font-size: 2rem;">Ваша история важна</h2>
-            <p style="color: var(--text-light); line-height: 1.6;">
-                Выплесните свои эмоции. Все, что вы напишете здесь, останется анонимным. 
-                Освободите свою душу от тяжести.
-            </p>
-            <textarea style="width: 100%; height: 100px; margin-top: 15px; padding: 10px; border-radius: 10px; border: 1px solid #ccc; font-family: var(--secondary-font); resize: none;" placeholder="Начните писать здесь..."></textarea>
-            <button class="close-btn" style="background: var(--accent); color: white;" onclick="closeModal('speakModal')">Отправить в вечность</button>
-            <button class="close-btn" onclick="closeModal('speakModal')">Отмена</button>
-        </div>
+        <section id="about">
+            <div class="cards-grid">
+                <div class="content-card liquid-glass observe-me">
+                    <h3>О проекте</h3>
+                    <p>Мы создали этот уголок спокойствия в шумном цифровом мире. Здесь нет осуждения, только поддержка. Эффект матового стекла символизирует прозрачность наших намерений и теплоту общения.</p>
+                </div>
+                <div class="content-card liquid-glass observe-me" style="transition-delay: 0.2s;">
+                    <h3>Как это работает</h3>
+                    <p>Вы можете выговориться анонимно или обратиться напрямую. Мы верим, что каждое слово, сказанное в безопасной среде, имеет исцеляющую силу.</p>
+                </div>
+                <div class="content-card liquid-glass observe-me" style="transition-delay: 0.4s;">
+                    <h3>Для владельца</h3>
+                    <p>Этот проект разработан с использованием передовых веб-технологий: оптимизированный рендеринг, физика частиц и полная адаптация под любые устройства.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" style="min-height: 60vh;">
+            <div class="liquid-glass observe-me" style="padding: 60px 40px; max-width: 800px; width: 100%;">
+                <h2 style="font-family: var(--font-wide); font-size: 2rem; margin-bottom: 20px;">Остались вопросы?</h2>
+                <p class="desc" style="margin: 0 auto 30px auto;">Свяжитесь с нами через Telegram. Мы всегда на связи и готовы помочь.</p>
+                <div class="btn-container" style="margin: 0 auto;">
+                    <a href="https://t.me/твой_канал" target="_blank" class="btn btn-tg">Перейти в Telegram</a>
+                </div>
+            </div>
+        </section>
+
     </div>
 
     <script>
-        // --- Управление Модальными Окнами ---
-        function openModal(id) {
-            document.getElementById(id).classList.add('active');
-        }
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-        }
+        // 1. ЛОГИКА ПОЯВЛЕНИЯ ЭЛЕМЕНТОВ ПРИ СКРОЛЛЕ (Intersection Observer)
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.15 // Элемент появляется, когда 15% его видно на экране
+        };
 
-        // ===================================================================
-        // ДВИЖОК ГЕНЕРАТИВНЫХ ДЕРЕВЬЕВ (Фрактальная математика)
-        // ===================================================================
-        function drawFractalTree(canvasId, isLeft) {
-            const canvas = document.getElementById(canvasId);
-            const ctx = canvas.getContext('2d');
-            
-            // Настройка размера канваса
-            const width = window.innerWidth / 2.5;
-            const height = window.innerHeight * 0.7;
-            canvas.width = width;
-            canvas.height = height;
-
-            // Настройка начальной точки
-            const startX = isLeft ? 50 : width - 50;
-            const startY = height;
-            const initialLength = height / 4;
-            const initialAngle = isLeft ? -Math.PI / 2 + 0.2 : -Math.PI / 2 - 0.2;
-
-            function drawBranch(x, y, length, angle, depth, branchWidth) {
-                ctx.beginPath();
-                ctx.save();
-                ctx.strokeStyle = `rgba(80, 50, 60, ${0.4 + depth*0.05})`; // Цвет коры
-                ctx.fillStyle = `rgba(80, 50, 60, ${0.4 + depth*0.05})`;
-                ctx.lineWidth = branchWidth;
-                ctx.lineCap = 'round';
-
-                ctx.translate(x, y);
-                ctx.rotate(angle);
-                ctx.moveTo(0, 0);
-                ctx.lineTo(0, -length);
-                ctx.stroke();
-
-                // Рисуем цветы на концах веток
-                if (depth === 0) {
-                    drawBlossom(ctx, 0, -length);
-                    ctx.restore();
-                    return;
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target); // Анимируем только один раз
                 }
+            });
+        }, observerOptions);
 
-                // Рекурсивное создание веток
-                // Добавляем случайность для органичности
-                const numBranches = Math.random() > 0.2 ? 2 : 3;
-                for (let i = 0; i < numBranches; i++) {
-                    const newAngle = (Math.random() - 0.5) * 1.5; // Разброс угла
-                    const newLength = length * (0.6 + Math.random() * 0.2); // Уменьшение длины
-                    const newWidth = branchWidth * 0.6;
-                    
-                    // Рисуем следующую ветку
-                    setTimeout(() => {
-                        drawBranch(0, -length, newLength, newAngle, depth - 1, newWidth);
-                    }, 50); // Анимация роста
-                }
-
-                ctx.restore();
-            }
-
-            function drawBlossom(ctx, x, y) {
-                const petals = 5;
-                const radius = 3 + Math.random() * 4;
-                ctx.fillStyle = `rgba(255, 183, 197, ${0.7 + Math.random()*0.3})`; // Розовый цвет сакуры
-                ctx.beginPath();
-                for (let i = 0; i < petals; i++) {
-                    const angle = (i * 2 * Math.PI) / petals;
-                    const px = x + Math.cos(angle) * radius;
-                    const py = y + Math.sin(angle) * radius;
-                    ctx.arc(px, py, radius/2, 0, Math.PI * 2);
-                }
-                ctx.fill();
-            }
-
-            // Запуск роста дерева (глубина рекурсии 9)
-            drawBranch(startX, startY, initialLength, initialAngle, 9, 15);
-        }
-
-
-        // ===================================================================
-        // ФИЗИЧЕСКИЙ ДВИЖОК ПАДАЮЩИХ ЛИСТЬЕВ (Сакура)
-        // ===================================================================
-        const petalCanvas = document.getElementById('petals-canvas');
-        const pCtx = petalCanvas.getContext('2d');
-        
-        let petalsArray = [];
-        const numberOfPetals = 60; // Количество лепестков на экране
-
-        function resizePetalCanvas() {
-            petalCanvas.width = window.innerWidth;
-            petalCanvas.height = window.innerHeight;
-        }
-
-        window.addEventListener('resize', () => {
-            resizePetalCanvas();
-            // Перерисовываем деревья при изменении размера экрана (мгновенно)
-            const cL = document.getElementById('tree-left');
-            const cR = document.getElementById('tree-right');
-            cL.getContext('2d').clearRect(0,0,cL.width,cL.height);
-            cR.getContext('2d').clearRect(0,0,cR.width,cR.height);
-            drawFractalTree('tree-left', true);
-            drawFractalTree('tree-right', false);
+        document.querySelectorAll('.observe-me').forEach(el => {
+            observer.observe(el);
         });
-        resizePetalCanvas();
 
-        // Класс лепестка с 3D симуляцией поворота
-        class Petal {
+        // 2. ФИЗИЧЕСКИЙ ДВИЖОК ПАДАЮЩИХ ЛИСТЬЕВ
+        const canvas = document.getElementById('leaves-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let leaves = [];
+        const numLeaves = window.innerWidth < 768 ? 20 : 40; // Меньше листьев на мобилках для FPS
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Leaf {
             constructor() {
-                this.x = Math.random() * petalCanvas.width;
-                this.y = Math.random() * petalCanvas.height - petalCanvas.height;
-                this.w = 10 + Math.random() * 8; // Ширина
-                this.h = 14 + Math.random() * 10; // Высота
-                this.opacity = 0.5 + Math.random() * 0.5;
+                this.reset(true);
+            }
+
+            reset(initial = false) {
+                this.x = Math.random() * canvas.width;
+                // При инициализации разбрасываем по всему экрану, потом спавним сверху
+                this.y = initial ? Math.random() * canvas.height : -30;
+                this.size = Math.random() * 6 + 6;
+                this.speedY = Math.random() * 1 + 0.5; // Скорость падения
+                this.speedX = Math.random() * 1 - 0.5; // Ветер
+                this.angle = Math.random() * Math.PI * 2;
+                this.spin = (Math.random() - 0.5) * 0.05; // Вращение
+                this.opacity = Math.random() * 0.5 + 0.2;
                 
-                // Физика
-                this.speedX = -1 + Math.random() * 2; // Ветер
-                this.speedY = 1 + Math.random() * 2; // Гравитация
-                
-                // 3D вращение
-                this.angle3D = Math.random() * Math.PI * 2;
-                this.rotationSpeed = 0.02 + Math.random() * 0.03;
-                this.flip = Math.random() * Math.PI * 2;
-                this.flipSpeed = 0.02 + Math.random() * 0.03;
+                // Цвет ближе к розовому/светлому для весеннего настроения
+                const colors = ['255, 183, 197', '244, 114, 182', '255, 255, 255'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
             }
 
             update() {
-                this.x += this.speedX + Math.sin(this.angle3D) * 0.5;
                 this.y += this.speedY;
-                this.angle3D += this.rotationSpeed;
-                this.flip += this.flipSpeed;
+                // Добавляем синусоиду для эффекта покачивания на ветру
+                this.x += this.speedX + Math.sin(this.angle) * 0.5;
+                this.angle += this.spin;
 
-                // Если лепесток упал за нижний край — возвращаем наверх
-                if (this.y > petalCanvas.height + this.h) {
-                    this.y = -this.h;
-                    this.x = Math.random() * petalCanvas.width;
-                    this.speedX = -1 + Math.random() * 2;
+                // Если улетел за экран - возвращаем наверх
+                if (this.y > canvas.height + this.size || this.x > canvas.width + this.size || this.x < -this.size) {
+                    this.reset();
                 }
             }
 
             draw() {
-                pCtx.save();
-                pCtx.translate(this.x, this.y);
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
                 
-                // Симуляция 3D вращения через скейлинг
-                const scaleX = Math.cos(this.flip);
-                pCtx.scale(scaleX, 1);
-                pCtx.rotate(this.angle3D);
-
-                // Отрисовка формы лепестка сакуры (кривые Безье)
-                pCtx.beginPath();
-                pCtx.moveTo(0, this.h / 2);
-                pCtx.bezierCurveTo(this.w / 2, this.h / 2, this.w, this.h / 4, 0, -this.h / 2);
-                pCtx.bezierCurveTo(-this.w, this.h / 4, -this.w / 2, this.h / 2, 0, this.h / 2);
-                pCtx.closePath();
-
-                // Цвет лепестка
-                pCtx.fillStyle = `rgba(255, 183, 197, ${this.opacity})`;
-                pCtx.fill();
-                pCtx.restore();
+                ctx.beginPath();
+                // Рисуем форму, похожую на лепесток/листик
+                ctx.moveTo(0, -this.size);
+                ctx.quadraticCurveTo(this.size, -this.size, this.size, 0);
+                ctx.quadraticCurveTo(this.size, this.size, 0, this.size);
+                ctx.quadraticCurveTo(-this.size, this.size, -this.size, 0);
+                ctx.quadraticCurveTo(-this.size, -this.size, 0, -this.size);
+                
+                ctx.fillStyle = `rgba(${this.color}, ${this.opacity})`;
+                ctx.fill();
+                ctx.restore();
             }
         }
 
-        // Инициализация массива лепестков
-        function initPetals() {
-            for (let i = 0; i < numberOfPetals; i++) {
-                petalsArray.push(new Petal());
+        function initLeaves() {
+            for (let i = 0; i < numLeaves; i++) {
+                leaves.push(new Leaf());
             }
         }
 
-        // Главный цикл анимации
-        function animatePetals() {
-            pCtx.clearRect(0, 0, petalCanvas.width, petalCanvas.height);
-            for (let i = 0; i < petalsArray.length; i++) {
-                petalsArray[i].update();
-                petalsArray[i].draw();
-            }
-            requestAnimationFrame(animatePetals);
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            leaves.forEach(leaf => {
+                leaf.update();
+                leaf.draw();
+            });
+            requestAnimationFrame(animate);
         }
 
-        // ===================================================================
-        // СТАРТ ВСЕХ СИСТЕМ ПРИ ЗАГРУЗКЕ
-        // ===================================================================
-        window.onload = () => {
-            // Рисуем левое дерево
-            drawFractalTree('tree-left', true);
-            // Рисуем правое дерево
-            drawFractalTree('tree-right', false);
-            // Запускаем падающие листья
-            initPetals();
-            animatePetals();
-        };
+        initLeaves();
+        animate();
 
+        // 3. ПЛАВНЫЙ СКРОЛЛ ДЛЯ ЯКОРНЫХ ССЫЛОК
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
     </script>
 </body>
 </html>
