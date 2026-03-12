@@ -2,395 +2,284 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Календарь с заметками и генератором распорядка</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Календарь — тёмный миним (мобильный)</title>
 <style>
-/* ================================
-   БАЗОВАЯ ТИПОГРАФИЯ И ПАЛИТРА
-   ================================ */
+/* ===========================
+   Mobile-first dark minimal
+   greyscale gradients, glass, canvas effects
+   =========================== */
 :root{
-  --bg:#0f1724;
-  --card:#0b1220;
-  --accent1: linear-gradient(135deg,#7b61ff,#00e0b8);
-  --glass: rgba(255,255,255,0.04);
-  --muted: #9aa4b2;
-  --success: #3ddc84;
-  --danger: #ff6b6b;
-  --glass-2: rgba(255,255,255,0.02);
-  --shadow: 0 10px 30px rgba(2,6,23,0.6);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-}
-
-/* body */
-html,body{
-  height:100%;
-  margin:0;
-  background: radial-gradient(1200px 600px at 10% 10%, rgba(123,97,255,0.08), transparent),
-              radial-gradient(1000px 500px at 90% 90%, rgba(0,224,184,0.03), transparent),
-              var(--bg);
-  color: #e6eef6;
+  --bg-900: #070708;
+  --bg-800: #0b0b0c;
+  --bg-700: #111214;
+  --card: rgba(255,255,255,0.03);
+  --muted: rgba(255,255,255,0.5);
+  --accent: linear-gradient(90deg,#6e7176,#2b2e31);
+  --glass: rgba(255,255,255,0.02);
+  --radius: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:28px;
-  box-sizing:border-box;
 }
 
-/* container */
+/* base */
+html,body{height:100%;margin:0;background:var(--bg-900);color:#e6e6e6;}
+*{box-sizing:border-box}
 .app {
-  width:100%;
-  max-width:1100px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border-radius:14px;
-  padding:20px;
-  box-shadow: var(--shadow);
-  display:grid;
-  grid-template-columns: 1fr 360px;
-  gap:18px;
-  align-items:start;
-}
-
-/* LEFT: calendar and controls */
-.left {
-  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
-  border-radius:12px;
-  padding:18px;
-  min-height:540px;
-  box-sizing:border-box;
-}
-
-/* HEADER controls */
-.header {
+  min-height:100vh;
   display:flex;
+  flex-direction:column;
   gap:12px;
+  padding:14px;
+  position:relative;
+  overflow:hidden;
+}
+
+/* canvas background wrapper */
+.bg-wrap{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  display:block;
+}
+.canvas {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:0;
+}
+
+/* header (compact) */
+.header {
+  z-index:2;
+  display:flex;
+  gap:8px;
   align-items:center;
   justify-content:space-between;
-  margin-bottom:12px;
 }
+.brand {
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.logo {
+  width:44px;height:44px;border-radius:10px;
+  background:linear-gradient(180deg,#141516,#0f1011);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;color:#cfcfcf;font-size:18px;
+  border:1px solid rgba(255,255,255,0.03);
+}
+.title {font-weight:700;font-size:15px;}
+.subtitle {font-size:12px;color:var(--muted)}
 
+/* controls row */
 .controls {
   display:flex;
   gap:8px;
   align-items:center;
+  z-index:2;
 }
+.icon-btn {
+  background:transparent;border:0;padding:8px;border-radius:10px;color:inherit;
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+  backdrop-filter: blur(4px);
+}
+.icon-btn:active{transform:translateY(1px)}
 
-.logo {
-  display:flex;
-  gap:10px;
-  align-items:center;
+/* month title */
+.month {
+  text-align:center;
+  margin-top:4px;
+  z-index:2;
 }
-
-.logo .dot {
-  width:44px;
-  height:44px;
-  border-radius:10px;
-  background: var(--accent1);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow: 0 6px 18px rgba(123,97,255,0.12);
-  font-weight:700;
-  font-size:18px;
-  color:#071026;
+.month h2{margin:0;font-size:16px;font-weight:700}
+.weekdays {
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+  margin-top:6px;
+  z-index:2;
 }
-
-.h1 {
-  font-size:16px;
-  font-weight:600;
-  color:#e9f0ff;
-}
-
-.small {
-  font-size:12px;
-  color:var(--muted);
-}
-
-/* month nav */
-.month-nav {
-  display:flex;
-  align-items:center;
-  gap:8px;
-  background: var(--glass);
-  padding:6px;
-  border-radius:10px;
-}
-
-.btn {
-  border:0;
-  background:transparent;
-  color:inherit;
-  padding:8px;
-  border-radius:8px;
-  cursor:pointer;
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  transition: transform .12s ease, background .12s;
-}
-.btn:hover{ transform:translateY(-3px); background:rgba(255,255,255,0.02); }
-
-.month-title {
-  font-weight:700;
-  font-size:15px;
-  padding:0 8px;
-}
+.weekdays div { text-align:center;font-size:12px;color:var(--muted);padding:8px 0; }
 
 /* calendar grid */
-.calendar {
-  margin-top:14px;
+.grid {
   display:grid;
-  grid-template-columns: repeat(7,1fr);
+  grid-template-columns:repeat(7,1fr);
   gap:8px;
+  margin-top:8px;
+  z-index:2;
 }
-
-.weekday {
-  font-size:12px;
-  color:var(--muted);
-  text-align:center;
-  padding:6px 0;
-}
-
-.day {
-  min-height:90px;
+.cell {
   background: linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.008));
   border-radius:10px;
   padding:8px;
-  box-sizing:border-box;
-  position:relative;
-  overflow:hidden;
+  min-height:74px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
   cursor:pointer;
-  transition: transform .12s ease, box-shadow .12s;
+  border:1px solid rgba(255,255,255,0.02);
+  transition: transform .12s ease, box-shadow .12s ease;
 }
-.day:hover{ transform: translateY(-6px); box-shadow: 0 12px 30px rgba(3,8,22,0.6); }
-
-.day.other {
-  opacity:0.45;
-}
-
-.day .date {
+.cell:active{transform:translateY(1px)}
+.cell.other { opacity:0.45; }
+.cell .date {
   font-weight:700;
+  font-size:16px;
+  color:#f5f5f5;
 }
-
 .badges {
-  position:absolute;
-  left:8px;
-  bottom:8px;
   display:flex;
   gap:6px;
   flex-wrap:wrap;
-  right:8px;
 }
-
 .badge {
-  background: rgba(0,0,0,0.28);
-  padding:4px 8px;
+  background:rgba(255,255,255,0.03);
+  padding:6px 8px;
   border-radius:999px;
-  font-size:11px;
-  color:#dfe9f5;
-  display:inline-flex;
-  gap:6px;
-  align-items:center;
-}
-
-/* right panel */
-.right {
-  background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.008));
-  border-radius:12px;
-  padding:18px;
-  min-height:540px;
-  box-sizing:border-box;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-/* quick add */
-.quick {
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.input, textarea, select {
-  background:var(--glass-2);
-  border:1px solid rgba(255,255,255,0.03);
-  color: #e6eef6;
-  padding:10px 12px;
-  border-radius:10px;
-  outline:none;
-  font-size:14px;
-}
-
-.row { display:flex; gap:8px; align-items:center; }
-
-.generate-btn {
-  background: linear-gradient(90deg,#6f5bff,#00e0b8);
-  color:#071026;
-  border:0;
-  padding:10px;
-  border-radius:10px;
-  font-weight:700;
-  cursor:pointer;
-  box-shadow: 0 8px 22px rgba(12,22,50,0.3);
-}
-
-/* schedule preview */
-.preview {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  padding:12px;
-  border-radius:10px;
-  font-size:14px;
-  color: #dff6ee;
-  max-height:340px;
-  overflow:auto;
-}
-
-/* note list styles */
-.note {
-  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  padding:8px;
-  border-radius:8px;
-  display:flex;
-  gap:8px;
-  align-items:flex-start;
-  justify-content:space-between;
-  margin-bottom:8px;
-}
-
-.note .meta { font-size:12px; color:var(--muted); }
-.note .title { font-weight:700; font-size:13px; margin-bottom:4px; }
-
-/* modal */
-.modal-backdrop {
-  position:fixed;
-  inset:0;
-  background:rgba(2,6,23,0.6);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:40;
-}
-.modal {
-  width:680px;
-  max-width:95%;
-  background: linear-gradient(180deg,#071026, #081322);
-  border-radius:12px;
-  padding:16px;
-  box-shadow: 0 20px 50px rgba(2,6,23,0.8);
-}
-
-.modal h3 { margin:0 0 8px 0; }
-.form-row { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
-
-/* tiny helpers */
-.kv { font-weight:600; color:var(--muted); font-size:12px; }
-.smallmuted { font-size:12px; color:var(--muted); }
-
-/* footer */
-.footer {
-  margin-top:auto;
   font-size:12px;
   color:var(--muted);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
+  max-width:100%;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 
-/* responsive */
-@media (max-width:1000px){
-  .app{ grid-template-columns:1fr; padding:12px;}
-  .right{ order:2; }
-  .left{ order:1; }
+/* bottom sheet modal (mobile) */
+.sheet-backdrop{
+  position:fixed;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.6),rgba(0,0,0,0.65));
+  display:none;align-items:flex-end;justify-content:center;z-index:40;
 }
+.sheet {
+  width:100%;
+  max-width:720px;
+  border-top-left-radius:18px;border-top-right-radius:18px;
+  background: linear-gradient(180deg,#0c0c0d,#070708);
+  padding:14px;
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.7);
+  transform:translateY(0);
+}
+.sheet .handle {width:48px;height:5px;background:rgba(255,255,255,0.04);border-radius:999px;margin:6px auto}
+.sheet h3{margin:8px 0 6px 0;font-size:16px}
+.row {display:flex;gap:8px;align-items:center}
+.input, textarea, select {
+  background:transparent;border:1px solid rgba(255,255,255,0.04);padding:10px;border-radius:10px;color:#ddd;width:100%;
+  font-size:14px;outline:none;
+}
+.small {font-size:12px;color:var(--muted)}
+
+/* notes list */
+.note {
+  background:rgba(255,255,255,0.02);
+  border-radius:10px;padding:10px;margin:8px 0;display:flex;justify-content:space-between;gap:8px;
+}
+.note .left {max-width:80%}
+.note .title{font-weight:700}
+.note .meta{font-size:13px;color:var(--muted)}
+
+/* preview area */
+.preview {
+  margin-top:10px;
+  background:rgba(255,255,255,0.02);
+  border-radius:10px;padding:10px;max-height:220px;overflow:auto;font-size:14px;color:var(--muted)
+}
+
+/* footer controls row */
+.footer-controls{display:flex;gap:8px;margin-top:8px}
+.btn {
+  background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px;border-radius:10px;color:#ddd;cursor:pointer;font-weight:700;
+}
+.btn.primary {
+  background:linear-gradient(90deg,#1f2022,#2b2d2f);border:1px solid rgba(255,255,255,0.04);
+}
+
+/* responsive tweaks */
+@media(min-width:720px){
+  .app{padding:24px}
+  .grid .cell{min-height:96px}
+}
+
+/* subtle focus */
+.cell:focus { outline:2px solid rgba(255,255,255,0.03); outline-offset:2px; }
+.icon { opacity:0.9; font-size:16px; }
 </style>
 </head>
 <body>
-<div class="app" role="application" aria-label="Календарь с заметками и генератором распорядка">
-  <div class="left" id="left">
-    <div class="header">
-      <div class="logo">
-        <div class="dot">К</div>
-        <div>
-          <div class="h1">Календарь + Заметки</div>
-          <div class="small">Редактируй заметки, генерируй распорядок</div>
-        </div>
-      </div>
+<div class="bg-wrap">
+  <canvas id="bgCanvas" class="canvas"></canvas>
+</div>
 
-      <div class="controls">
-        <div class="month-nav" aria-hidden="false">
-          <button class="btn" id="prevBtn" title="Предыдущий месяц" aria-label="Предыдущий месяц">◀</button>
-          <div class="month-title" id="monthTitle">Месяц Год</div>
-          <button class="btn" id="nextBtn" title="Следующий месяц" aria-label="Следующий месяц">▶</button>
-        </div>
-        <button class="btn" id="todayBtn" title="Сегодня">Сегодня</button>
+<div class="app" role="application" aria-label="Тёмный минимальный календарь">
+  <div class="header">
+    <div class="brand">
+      <div class="logo">K</div>
+      <div>
+        <div class="title">Календарь</div>
+        <div class="subtitle">тёмный · миним · mobile</div>
       </div>
     </div>
 
-    <div class="calendar" id="calendar" aria-live="polite">
-      <!-- weekday headings -->
-      <div class="weekday">Пн</div><div class="weekday">Вт</div><div class="weekday">Ср</div><div class="weekday">Чт</div><div class="weekday">Пт</div><div class="weekday">Сб</div><div class="weekday">Вс</div>
-      <!-- days inserted here -->
+    <div class="controls" aria-hidden="false">
+      <button class="icon-btn" id="prev" title="Пред. месяц">◀</button>
+      <button class="icon-btn" id="today" title="Сегодня">●</button>
+      <button class="icon-btn" id="next" title="След. месяц">▶</button>
     </div>
   </div>
 
-  <aside class="right">
-    <div class="quick">
-      <div class="smallmuted">Выбранная дата: <span id="selectedDateDisplay">—</span></div>
-      <div class="row">
-        <input id="routineInput" class="input" placeholder="Опиши, какой распорядок дня тебе нужен (напр. 'утренняя рутина для продуктивной работы с тренировкой')" aria-label="Опиши распорядок"/>
-        <button id="generate" class="generate-btn">ИИ — сделать распорядок</button>
-      </div>
-      <div class="row">
-        <button id="applyToDay" class="btn" title="Применить выбранный распорядок к выбранной дате">Вставить в выбранную дату</button>
-        <button id="clearAll" class="btn" title="Очистить все заметки (локально)">Очистить всё</button>
-      </div>
+  <div class="month">
+    <h2 id="monthLabel">Месяц Год</h2>
+    <div class="weekdays" aria-hidden="true">
+      <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
     </div>
+  </div>
 
-    <div class="preview" id="preview" aria-live="polite">
-      <div class="smallmuted">Превью распорядка / сгенерированные заметки появятся здесь</div>
-    </div>
+  <div id="grid" class="grid" aria-live="polite" role="grid"></div>
 
-    <div>
-      <h4 style="margin:6px 0 8px 0">Заметки на дату</h4>
-      <div id="notesList" style="max-height:200px; overflow:auto;">
-        <div class="smallmuted">Выбери день в календаре чтобы увидеть заметки</div>
-      </div>
+  <!-- quick controls -->
+  <div style="z-index:2;display:flex;gap:8px;align-items:center;justify-content:space-between;">
+    <div style="display:flex;gap:8px;flex:1">
+      <input id="routine" class="input" placeholder="Опиши распорядок (напр. утренняя рутина с тренировкой)" aria-label="Описание распорядка" />
+      <button class="btn primary" id="gen">ИИ</button>
     </div>
-
-    <div class="footer">
-      <div>Сохраняется локально в браузере</div>
-      <div class="smallmuted">Можешь экспортировать/импортировать через консоль</div>
-    </div>
-  </aside>
+    <div style="width:8px"></div>
+    <button class="btn" id="export" title="Экспорт JSON">⬇</button>
+  </div>
 </div>
 
-<!-- modal for editing day details -->
-<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
-  <div class="modal" role="document">
+<!-- bottom sheet modal -->
+<div class="sheet-backdrop" id="sheet" aria-hidden="true">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Редактор заметок">
+    <div class="handle" role="img" aria-hidden="true"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;">
-      <h3 id="modalTitle">Заметки — <span id="modalDateText"></span></h3>
-      <div>
-        <button class="btn" id="closeModal">✖</button>
+      <h3 id="sheetTitle">Заметки — <span id="sheetDate">—</span></h3>
+      <div class="row">
+        <button class="icon-btn" id="closeSheet" aria-label="Закрыть">✖</button>
       </div>
     </div>
 
-    <div id="modalContent" style="margin-top:10px;">
-      <div id="notesContainer"></div>
+    <div id="notesArea">
+      <div class="small">Существующие заметки</div>
+      <div id="notesList" style="margin-top:8px"></div>
 
-      <hr style="border:none;height:1px;background:rgba(255,255,255,0.03);margin:12px 0;" />
+      <hr style="border:none;height:1px;background:rgba(255,255,255,0.02);margin:12px 0" />
 
-      <div>
-        <div class="form-row">
-          <input id="noteTime" class="input" type="time" value="09:00" style="width:120px" />
-          <input id="noteTitle" class="input" placeholder="Заголовок (например 'Тренировка')" />
-        </div>
-        <textarea id="noteDesc" class="input" placeholder="Описание заметки" rows="3" style="resize:vertical"></textarea>
-        <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end;">
-          <button class="btn" id="addNoteBtn">Добавить заметку</button>
-        </div>
+      <div class="small">Добавить заметку</div>
+      <div class="row" style="margin-top:8px">
+        <input id="noteTime" class="input" type="time" value="09:00" style="width:120px" />
+        <input id="noteTitle" class="input" placeholder="Заголовок" />
+      </div>
+      <textarea id="noteDesc" class="input" rows="3" placeholder="Описание..." style="margin-top:8px"></textarea>
+
+      <div class="footer-controls">
+        <button class="btn primary" id="addNote">Добавить</button>
+        <button class="btn" id="applyRoutine">Вставить распорядок</button>
+        <button class="btn" id="clearAll">Очистить всё</button>
+      </div>
+
+      <div class="preview" id="previewArea" aria-live="polite" style="margin-top:10px">
+        Сгенерированный распорядок появится здесь
       </div>
     </div>
   </div>
@@ -398,502 +287,387 @@ html,body{
 
 <script>
 /* ===========================
-   Простая модель данных
+   Simple calendar + notes
+   Mobile-first, localStorage
    =========================== */
-/*
-Structure in localStorage:
-  notes = {
-    "YYYY-MM-DD": [ {id, time, title, desc, createdAt} , ... ],
-    ...
-  }
-*/
-const LS_KEY = 'calendar_notes_v1';
+const LS = 'minical_v2';
+let notesStore = loadNotes();
 
-/* ===========================
-   Утилиты
-   =========================== */
-const $ = (sel, el=document) => el.querySelector(sel);
-const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
-const uid = (n=6) => Math.random().toString(36).slice(2,2+n);
-
-/* format Date <-> string */
-const toYMD = (d) => {
-  if(!d) return null;
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  const dd = String(d.getDate()).padStart(2,'0');
-  return `${yyyy}-${mm}-${dd}`;
-};
-const fromYMD = (s) => {
-  const parts = s.split('-');
-  return new Date(parts[0], parts[1]-1, parts[2]);
-};
-const niceDate = (s) => {
-  if(!s) return '—';
-  const d = fromYMD(s);
-  return d.toLocaleDateString('ru-RU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-};
-
-/* load/save */
-function loadNotes(){
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch(e){
-    console.error('loadNotes',e);
-    return {};
-  }
-}
-function saveNotes(obj){
-  localStorage.setItem(LS_KEY, JSON.stringify(obj));
-}
-
-/* ===========================
-   Календарь — рендер
-   =========================== */
-let state = {
+// state
+const state = {
   current: new Date(),
-  selectedDate: null,
-  notes: loadNotes()
+  selected: null,
+  lastGenerated: null,
 };
 
-function startOfMonth(d){
-  return new Date(d.getFullYear(), d.getMonth(), 1);
-}
-function endOfMonth(d){
-  return new Date(d.getFullYear(), d.getMonth()+1, 0);
-}
+/* util */
+const $ = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+const uid = (n=8) => Math.random().toString(36).slice(2,2+n);
+const toYMD = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const fromYMD = s => { const p=s.split('-'); return new Date(+p[0],+p[1]-1,+p[2]); };
+const nice = s => { if(!s) return '—'; return fromYMD(s).toLocaleDateString('ru-RU',{weekday:'long', day:'numeric', month:'long', year:'numeric'}); };
 
-/* render calendar grid */
-function renderCalendar(){
-  const cal = $('#calendar');
-  // remove old day cells (but keep weekday headings)
-  // weekday heading counts 7 elements at top, so remove everything after those
-  // simpler: clear all and re-add weekdays + days
-  cal.innerHTML = `
-    <div class="weekday">Пн</div><div class="weekday">Вт</div><div class="weekday">Ср</div><div class="weekday">Чт</div><div class="weekday">Пт</div><div class="weekday">Сб</div><div class="weekday">Вс</div>
-  `;
-  const d = state.current;
-  const start = startOfMonth(d);
-  const end = endOfMonth(d);
-  const month = d.getMonth();
-  // day of week: JS: 0 (Sun) .. 6 (Sat). We want Monday-first.
-  const startWeekday = (start.getDay() + 6) % 7; // 0..6, 0=Mon
-  // days from previous month to show
-  const daysPrev = startWeekday;
-  const totalCells = daysPrev + end.getDate();
-  // fill grid to complete weeks (7 columns)
-  const cells = (Math.ceil(totalCells / 7) * 7);
-  // fill each cell with a date
-  const firstCellDate = new Date(d.getFullYear(), d.getMonth(), 1 - daysPrev);
+/* storage */
+function loadNotes(){
+  try { const raw = localStorage.getItem(LS); return raw ? JSON.parse(raw) : {}; }
+  catch(e){ console.warn('loadNotes failed',e); return {}; }
+}
+function saveNotes(){ localStorage.setItem(LS, JSON.stringify(notesStore)); }
+
+/* calendar render */
+function startOfMonth(d){ return new Date(d.getFullYear(), d.getMonth(), 1); }
+function endOfMonth(d){ return new Date(d.getFullYear(), d.getMonth()+1, 0); }
+
+function render(){
+  const grid = $('#grid');
+  grid.innerHTML = '';
+  const cur = state.current;
+  const start = startOfMonth(cur);
+  const end = endOfMonth(cur);
+  // monday-first index 0..6
+  const pad = (start.getDay() + 6) % 7;
+  const total = pad + end.getDate();
+  const cells = Math.ceil(total/7)*7;
+  const first = new Date(start.getFullYear(), start.getMonth(), 1 - pad);
   for(let i=0;i<cells;i++){
-    const cellDate = new Date(firstCellDate.getFullYear(), firstCellDate.getMonth(), firstCellDate.getDate()+i);
-    const cellYMD = toYMD(cellDate);
-    const isOther = cellDate.getMonth() !== month;
-    const el = document.createElement('div');
-    el.className = 'day' + (isOther ? ' other':'');
-    el.tabIndex = 0;
-    el.setAttribute('role','button');
-    el.setAttribute('aria-label', `День ${cellDate.toLocaleDateString('ru-RU')}`);
-    el.innerHTML = `<div class="date">${cellDate.getDate()}</div><div class="badges" aria-hidden="true"></div>`;
-    // badges for notes
-    const badges = el.querySelector('.badges');
-    const notesForDay = (state.notes[cellYMD] || []);
-    // show up to 3 badges
-    notesForDay.slice(0,3).forEach(note => {
+    const d = new Date(first.getFullYear(), first.getMonth(), first.getDate()+i);
+    const ymd = toYMD(d);
+    const isOther = d.getMonth() !== cur.getMonth();
+    const cell = document.createElement('button');
+    cell.className = 'cell' + (isOther ? ' other':'');
+    cell.type = 'button';
+    cell.setAttribute('aria-label', d.toLocaleDateString());
+    cell.innerHTML = `<div><div class="date">${d.getDate()}</div></div><div class="badges"></div>`;
+    // badges
+    const badges = cell.querySelector('.badges');
+    const arr = notesStore[ymd] || [];
+    arr.slice(0,3).forEach(n=>{
       const b = document.createElement('div');
       b.className = 'badge';
-      b.textContent = (note.time ? note.time + ' ' : '') + (note.title || 'Заметка');
+      b.title = (n.time ? n.time + ' ' : '') + (n.title||'');
+      b.textContent = (n.time ? n.time + ' ' : '') + (n.title||'Заметка');
       badges.appendChild(b);
     });
-    if(notesForDay.length > 3){
-      const b = document.createElement('div');
-      b.className = 'badge';
-      b.textContent = `+${notesForDay.length-3}`;
-      badges.appendChild(b);
+    if(arr.length>3){
+      const extra = document.createElement('div');
+      extra.className = 'badge';
+      extra.textContent = `+${arr.length-3}`;
+      badges.appendChild(extra);
     }
-    // click handler
-    el.addEventListener('click', ()=> openDay(cellYMD));
-    el.addEventListener('keypress', (e)=>{ if(e.key === 'Enter' || e.key === ' ') openDay(cellYMD); });
-    cal.appendChild(el);
+    cell.addEventListener('click', ()=> openSheet(ymd));
+    grid.appendChild(cell);
   }
-
-  // update month label
-  const monthTitle = state.current.toLocaleDateString('ru-RU',{month:'long', year:'numeric'});
-  $('#monthTitle').textContent = monthTitle.charAt(0).toUpperCase() + monthTitle.slice(1);
+  // month label
+  const label = state.current.toLocaleDateString('ru-RU',{month:'long', year:'numeric'});
+  $('#monthLabel').textContent = label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-/* ===========================
-   Модал дня — просмотр/редактирование
-   =========================== */
-const modal = $('#modalBackdrop');
-function openDay(ymd){
-  state.selectedDate = ymd;
-  $('#selectedDateDisplay').textContent = niceDate(ymd);
-  $('#modalDateText').textContent = niceDate(ymd);
-  renderNotesModal();
-  modal.style.display = 'flex';
-  modal.setAttribute('aria-hidden','false');
-  // scroll into view
+/* sheet modal */
+const sheet = $('#sheet');
+function openSheet(ymd){
+  state.selected = ymd;
+  $('#sheetDate').textContent = nice(ymd);
+  refreshNotesList();
+  sheet.style.display = 'flex';
+  sheet.setAttribute('aria-hidden','false');
   document.body.style.overflow = 'hidden';
 }
-function closeModal(){
-  modal.style.display = 'none';
-  modal.setAttribute('aria-hidden','true');
+function closeSheet(){
+  sheet.style.display = 'none';
+  sheet.setAttribute('aria-hidden','true');
   document.body.style.overflow = '';
 }
 
-function renderNotesModal(){
-  const notesContainer = $('#notesContainer');
-  notesContainer.innerHTML = '';
-  const notes = state.notes[state.selectedDate] || [];
-  if(notes.length === 0){
-    notesContainer.innerHTML = `<div class="smallmuted">Заметок нет. Добавь ниже новую заметку.</div>`;
-  } else {
-    // sort by time
-    notes.sort((a,b)=> (a.time||'').localeCompare(b.time||'') || a.createdAt - b.createdAt);
-    notes.forEach(n=>{
-      const node = document.createElement('div');
-      node.className = 'note';
-      node.innerHTML = `
-        <div style="flex:1">
-          <div class="title">${escapeHtml(n.title || 'Без названия')}</div>
-          <div class="meta">${n.time ? n.time + ' • ' : ''}${escapeHtml(n.desc || '')}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-          <button class="btn edit" data-id="${n.id}">✎</button>
-          <button class="btn del" data-id="${n.id}">🗑</button>
-        </div>
-      `;
-      notesContainer.appendChild(node);
-    });
-    // attach handlers
-    notesContainer.querySelectorAll('.edit').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const id = btn.dataset.id;
-        openEditNote(id);
-      });
-    });
-    notesContainer.querySelectorAll('.del').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const id = btn.dataset.id;
-        if(confirm('Удалить заметку навсегда?')) {
-          deleteNote(id);
-        }
-      });
-    });
+function refreshNotesList(){
+  const out = $('#notesList');
+  out.innerHTML = '';
+  const arr = notesStore[state.selected] || [];
+  if(arr.length === 0) {
+    out.innerHTML = `<div class="small" style="opacity:.6">Нет заметок</div>`;
+    return;
   }
+  // sort by time
+  arr.sort((a,b)=> (a.time||'').localeCompare(b.time||'') || a.created - b.created);
+  arr.forEach(n=>{
+    const node = document.createElement('div');
+    node.className = 'note';
+    node.innerHTML = `<div class="left"><div class="title">${escape(n.title)}</div><div class="meta">${n.time ? n.time + ' • ' : ''}${escape(n.desc)}</div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+        <button class="btn edit" data-id="${n.id}">✎</button>
+        <button class="btn del" data-id="${n.id}">🗑</button>
+      </div>`;
+    out.appendChild(node);
+  });
+  // handlers
+  $$('.edit', out).forEach(b=> b.addEventListener('click', (e)=>{
+    const id = b.dataset.id;
+    editNote(id);
+  }));
+  $$('.del', out).forEach(b=> b.addEventListener('click', (e)=>{
+    const id = b.dataset.id;
+    if(confirm('Удалить заметку?')) {
+      notesStore[state.selected] = (notesStore[state.selected]||[]).filter(x=>x.id !== id);
+      saveNotes();
+      refreshNotesList(); render();
+    }
+  }));
 }
 
-function openEditNote(id){
-  const notes = state.notes[state.selectedDate] || [];
-  const n = notes.find(x=>x.id === id);
+/* add note */
+function addNote(){
+  const time = $('#noteTime').value || '';
+  const title = $('#noteTitle').value.trim() || 'Без названия';
+  const desc = $('#noteDesc').value.trim() || '';
+  if(!state.selected){ alert('Выберите дату.'); return; }
+  const note = { id: uid(8), time, title, desc, created: Date.now() };
+  if(!notesStore[state.selected]) notesStore[state.selected] = [];
+  notesStore[state.selected].push(note);
+  saveNotes();
+  $('#noteTime').value = '09:00';
+  $('#noteTitle').value = '';
+  $('#noteDesc').value = '';
+  refreshNotesList();
+  render();
+}
+
+/* edit note (simple inline load) */
+function editNote(id){
+  const arr = notesStore[state.selected] || [];
+  const n = arr.find(x=>x.id === id);
   if(!n) return;
   $('#noteTime').value = n.time || '09:00';
   $('#noteTitle').value = n.title || '';
   $('#noteDesc').value = n.desc || '';
-  // change add button to save
-  const addBtn = $('#addNoteBtn');
-  addBtn.textContent = 'Сохранить';
-  addBtn.onclick = () => {
+  // modify add button to save
+  const saveBtn = $('#addNote');
+  const prev = saveBtn.textContent;
+  saveBtn.textContent = 'Сохранить';
+  saveBtn.removeEventListener('click', addNoteHandlerWrapper);
+  saveBtn.addEventListener('click', function saver(){
     n.time = $('#noteTime').value;
-    n.title = $('#noteTitle').value;
-    n.desc = $('#noteDesc').value;
-    saveNotes(state.notes);
-    renderNotesModal();
-    renderCalendar();
-    // reset button
-    addBtn.textContent = 'Добавить заметку';
-    addBtn.onclick = addNoteHandler;
-    // clear inputs
+    n.title = $('#noteTitle').value.trim() || 'Без названия';
+    n.desc = $('#noteDesc').value.trim() || '';
+    saveNotes();
+    refreshNotesList(); render();
+    // restore
     $('#noteTime').value = '09:00';
     $('#noteTitle').value = '';
     $('#noteDesc').value = '';
-  };
+    saveBtn.textContent = prev;
+    saveBtn.removeEventListener('click', saver);
+    saveBtn.addEventListener('click', addNoteHandlerWrapper);
+  });
 }
 
-/* add note */
-function addNoteHandler(){
-  const time = $('#noteTime').value;
-  const title = $('#noteTitle').value.trim();
-  const desc = $('#noteDesc').value.trim();
-  if(!state.selectedDate){
-    alert('Выбери дату в календаре чтобы добавить заметку.');
-    return;
-  }
-  const newNote = {
-    id: uid(8),
-    time: time || '',
-    title: title || 'Без названия',
-    desc: desc || '',
-    createdAt: Date.now()
-  };
-  if(!state.notes[state.selectedDate]) state.notes[state.selectedDate] = [];
-  state.notes[state.selectedDate].push(newNote);
-  saveNotes(state.notes);
-  renderNotesModal();
-  renderCalendar();
-  // clear inputs
-  $('#noteTime').value = '09:00';
-  $('#noteTitle').value = '';
-  $('#noteDesc').value = '';
-}
-$('#addNoteBtn').addEventListener('click', addNoteHandler);
-
-/* delete note */
-function deleteNote(id){
-  const arr = state.notes[state.selectedDate] || [];
-  state.notes[state.selectedDate] = arr.filter(x=>x.id !== id);
-  saveNotes(state.notes);
-  renderNotesModal();
-  renderCalendar();
+/* clear all */
+function clearAll(){
+  if(!confirm('Удалить все заметки локально?')) return;
+  notesStore = {};
+  saveNotes();
+  refreshNotesList(); render();
 }
 
-/* simple escaping */
-function escapeHtml(s){
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+/* export */
+function exportJson(){
+  const data = JSON.stringify(notesStore, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'minical_notes.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
 }
 
-/* ===========================
-   Генератор распорядка (локальный "ИИ")
-   =========================== */
-/*
-  Подход:
-    - Простая семантическая обработка: ищем ключевые слова
-    - Набор шаблонов для утро/день/вечер/спорт/работа/сон/питание
-    - Генерируем последовательность блоков с временем
-    - Выдаём красиво отформатированный HTML
-    - Предлагаем вставить в выбранную дату как заметки
-*/
+/* simple escape for text */
+function escape(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* generator (local "ИИ") */
 const templates = {
   morning: [
-    {dur:20, title:'Пробуждение и гидратация', desc:'Выпить стакан воды, растяжка 3–5 минут, глубокое дыхание.'},
-    {dur:30, title:'Физическая активность', desc:'Короткая зарядка, йога или кардио.'},
-    {dur:20, title:'Утренняя гигиена и одевание', desc:'Душ, чистка зубов, выбор одежды.'},
-    {dur:30, title:'Фокусное время (работа/учёба)', desc:'Первый рабочий блок — самое продуктивное за день.'},
+    {dur:15,title:'Пробуждение',desc:'Выпить воды, легкая растяжка'},
+    {dur:30,title:'Тренировка',desc:'Короткая зарядка / домашняя тренировка'},
+    {dur:25,title:'Душ и подготовка',desc:'Душ, одежда, 5 минут планирования дня'}
   ],
-  productiveDay: [
-    {dur:90, title:'Глубокая работа', desc:'Одно важное задание, без уведомлений.'},
-    {dur:15, title:'Короткий отдых', desc:'Прогулка, глаза от экрана.'},
-    {dur:90, title:'Второй трудовой блок', desc:'Завершаем приоритетную задачу.'},
-    {dur:60, title:'Обед и отдых', desc:'Полноценный перерыв, отключаемся от задач.'}
+  work: [
+    {dur:90,title:'Глубокая работа',desc:'Одна приоритетная задача, без отвлекающих факторов'},
+    {dur:15,title:'Перерыв',desc:'Прогулка или разминка'},
+    {dur:60,title:'Второй блок работы',desc:'Задачи средней важности'}
   ],
   evening: [
-    {dur:30, title:'Лёгкая активность', desc:'Прогулка или растяжка.'},
-    {dur:45, title:'Ритуал отбоя', desc:'Ограничить экраны, мягкое чтение или музыка.'},
-    {dur:8*60, title:'Сон', desc:'Качественный сон — залог продуктивного дня.'}
+    {dur:45,title:'Отдых',desc:'Прогулка, чтение или подкаст'},
+    {dur:30,title:'Подготовка ко сну',desc:'Отключаем экраны, расслабление'}
   ],
-  sport: [
-    {dur:10, title:'Разминка', desc:'Разогрев суставов и мышц.'},
-    {dur:40, title:'Тренировка', desc:'Силовая/кардио — в зависимости от цели.'},
-    {dur:10, title:'Заминка и растяжка', desc:'Плавное восстановление.'},
-  ],
-  light: [
-    {dur:20, title:'Кофе/чай', desc:'Короткий ритуал для бодрости.'},
-    {dur:15, title:'Планирование', desc:'Составь список трёх важных задач на день.'}
+  quick: [
+    {dur:10,title:'Кофе/чай',desc:'Мини-ритуал для бодрости'},
+    {dur:10,title:'Планировка',desc:'3 главные задачи на день'}
   ]
 };
-
-/* keyword groups */
 const KEYWORDS = [
-  {words:['утр','утрен','утром','утренняя'], tag:'morning'},
-  {words:['продукт','продуктивн','работа','учёб','учеба','задание','фокус'], tag:'productiveDay'},
-  {words:['вечер','ночь','вечерняя','сон'], tag:'evening'},
-  {words:['трен','спорт','тренировка','фитнес','спортом'], tag:'sport'},
-  {words:['легк','быстр','быстро','распорядок'], tag:'light'}
+  {words:['утр','утрен','утром'],'tag':'morning'},
+  {words:['работа','продукт','фокус','учеб','учёб'],'tag':'work'},
+  {words:['вечер','сон','ночь'],'tag':'evening'},
+  {words:['быстр','легк','коротк'],'tag':'quick'},
+  {words:['трен','спорт','тренировка','фитнес'],'tag':'morning'}
 ];
 
-function analyzePrompt(prompt){
-  const p = (prompt || '').toLowerCase();
+function analyze(prompt){
+  const p = (prompt||'').toLowerCase();
   const found = new Set();
   KEYWORDS.forEach(k=>{
-    for(const w of k.words){
-      if(p.includes(w)){
-        found.add(k.tag);
-        break;
-      }
-    }
+    for(const w of k.words) if(p.includes(w)) { found.add(k.tag); break; }
   });
-  // fallback: if user mentions "весь день" or long, use productiveDay
-  if(p.includes('весь') || p.includes('целый') || p.includes('день')) found.add('productiveDay');
-  // if nothing found, default to morning+productive
-  if(found.size === 0) {
-    found.add('morning');
-    found.add('productiveDay');
-    found.add('evening');
-  }
+  if(found.size===0){ found.add('morning'); found.add('work'); found.add('evening'); }
   return Array.from(found);
 }
-
-/* build schedule blocks with concrete times */
-function buildScheduleBlocks(tags, options={}){
-  // start from a sensible morning start
-  const preferredStart = options.startHour || 7; // 7:00
-  let currentMin = preferredStart * 60; // minutes from midnight
-  const result = [];
-  // order: morning -> productiveDay -> sport -> evening -> light
-  const order = ['morning','light','sport','productiveDay','evening'];
-  order.forEach(o=>{
-    if(tags.includes(o)){
-      const tpl = templates[o] || [];
-      tpl.forEach(block=>{
-        const startHour = Math.floor(currentMin/60);
-        const startMin = currentMin % 60;
-        const startStr = `${String(startHour).padStart(2,'0')}:${String(startMin).padStart(2,'0')}`;
-        result.push({
-          start: startStr,
-          duration: block.dur,
-          title: block.title,
-          desc: block.desc
-        });
-        currentMin += block.dur;
+function buildBlocks(tags, startHour=7){
+  let cur = startHour*60;
+  const out = [];
+  const order = ['morning','quick','work','evening'];
+  order.forEach(k=>{
+    if(tags.includes(k)){
+      const tpl = templates[k] || [];
+      tpl.forEach(b=>{
+        const hh = Math.floor(cur/60), mm = cur%60;
+        const start = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+        out.push({...b, start});
+        cur += b.dur + 6; // small buffer
       });
-      // small buffer
-      currentMin += 6;
     }
   });
-  return result;
+  return out;
 }
-
-/* pretty render schedule */
-function renderScheduleHtml(blocks, prompt){
-  if(!blocks || blocks.length===0) return '<div class="smallmuted">Пустой распорядок.</div>';
-  const frag = document.createElement('div');
-  frag.innerHTML = `<div style="font-size:13px;margin-bottom:8px;color:var(--muted)">Сгенерировано по запросу: «${escapeHtml(prompt)}»</div>`;
+function renderGenerated(blocks, prompt){
+  if(!blocks || blocks.length===0) return 'Пустой распорядок';
+  const wrap = document.createElement('div');
+  const header = document.createElement('div');
+  header.style.color='rgba(255,255,255,0.6)';
+  header.style.fontSize='13px';
+  header.style.marginBottom='8px';
+  header.textContent = `По запросу: ${prompt||'авто'}`;
+  wrap.appendChild(header);
   blocks.forEach(b=>{
-    const el = document.createElement('div');
-    el.style.display='flex';
-    el.style.gap='10px';
-    el.style.marginBottom='8px';
-    el.innerHTML = `
-      <div style="width:72px;font-weight:700">${b.start}</div>
-      <div style="flex:1">
-        <div style="font-weight:700">${escapeHtml(b.title)} <span style="color:var(--muted);font-weight:400">• ${b.duration} мин</span></div>
-        <div style="color:var(--muted);font-size:13px">${escapeHtml(b.desc)}</div>
-      </div>
-    `;
-    frag.appendChild(el);
+    const row = document.createElement('div');
+    row.style.display='flex';
+    row.style.justifyContent='space-between';
+    row.style.marginBottom='8px';
+    row.innerHTML = `<div style="font-weight:700">${b.start} · ${escape(b.title)}</div><div style="color:var(--muted)">${b.dur} мин</div>
+      <div style="color:var(--muted);font-size:13px;margin-top:4px">${escape(b.desc)}</div>`;
+    wrap.appendChild(row);
   });
-  return frag.innerHTML;
+  return wrap.innerHTML;
 }
 
-/* main generator glue */
 function generateRoutine(){
-  const prompt = $('#routineInput').value.trim();
-  const tags = analyzePrompt(prompt);
-  const blocks = buildScheduleBlocks(tags, {startHour:7});
-  const html = renderScheduleHtml(blocks, prompt || 'Автогенерация');
-  $('#preview').innerHTML = html;
-  // store last generated schedule in state for apply
+  const prompt = $('#routine').value.trim();
+  const tags = analyze(prompt);
+  const blocks = buildBlocks(tags, 7);
+  $('#previewArea').innerHTML = renderGenerated(blocks, prompt);
   state.lastGenerated = {blocks, prompt};
 }
 
-/* apply generated schedule to selected date as notes */
-function applyToSelectedDate(){
-  if(!state.lastGenerated || !state.lastGenerated.blocks || state.lastGenerated.blocks.length===0){
-    alert('Сначала сгенерируй распорядок нажатием «ИИ — сделать распорядок».');
-    return;
-  }
-  if(!state.selectedDate){
-    alert('Сначала выбери дату в календаре.');
-    return;
-  }
-  // convert blocks into notes
-  const blocks = state.lastGenerated.blocks;
-  if(!state.notes[state.selectedDate]) state.notes[state.selectedDate] = [];
-  blocks.forEach(b=>{
-    state.notes[state.selectedDate].push({
-      id: uid(8),
-      time: b.start,
-      title: b.title,
-      desc: b.desc,
-      createdAt: Date.now()
-    });
+/* apply to selected date */
+function applyRoutineToDate(){
+  if(!state.selected) { alert('Открой дату (тап по дню)'); return; }
+  if(!state.lastGenerated || !state.lastGenerated.blocks) { alert('Сначала сгенерируй распорядок (ИИ)'); return; }
+  if(!notesStore[state.selected]) notesStore[state.selected] = [];
+  state.lastGenerated.blocks.forEach(b=>{
+    notesStore[state.selected].push({id: uid(8), time: b.start, title: b.title, desc: b.desc, created: Date.now()});
   });
-  saveNotes(state.notes);
-  renderNotesModal();
-  renderCalendar();
-  alert('Распорядок вставлен в выбранную дату.');
+  saveNotes();
+  refreshNotesList(); render();
+  alert('Распорядок добавлен в выбранную дату.');
 }
 
-/* ===========================
-   Экспорт/импорт/утилиты управления
-   =========================== */
-function clearAllNotes(){
-  if(!confirm('Удалить все заметки в localStorage? Это действие необратимо.')) return;
-  state.notes = {};
-  saveNotes(state.notes);
-  renderCalendar();
-  // close modal if open
-  renderNotesModal();
-  alert('Все заметки удалены.');
-}
-
-/* ===========================
-   Навигация месяца
-   =========================== */
-function goNext(){
-  state.current = new Date(state.current.getFullYear(), state.current.getMonth()+1, 1);
-  renderCalendar();
-}
-function goPrev(){
-  state.current = new Date(state.current.getFullYear(), state.current.getMonth()-1, 1);
-  renderCalendar();
-}
-function goToday(){
-  state.current = new Date();
-  renderCalendar();
-}
-
-/* ===========================
-   Инициализация + обработчики
-   =========================== */
+/* handlers wiring */
+function addNoteHandlerWrapper(e){ addNote(); }
 document.addEventListener('DOMContentLoaded', ()=>{
-  renderCalendar();
+  render();
+  $('#prev').addEventListener('click', ()=>{ state.current = new Date(state.current.getFullYear(), state.current.getMonth()-1, 1); render(); });
+  $('#next').addEventListener('click', ()=>{ state.current = new Date(state.current.getFullYear(), state.current.getMonth()+1, 1); render(); });
+  $('#today').addEventListener('click', ()=>{ state.current = new Date(); render(); });
+  $('#closeSheet').addEventListener('click', closeSheet);
+  $('#addNote').addEventListener('click', addNoteHandlerWrapper);
+  $('#clearAll').addEventListener('click', clearAll);
+  $('#export').addEventListener('click', exportJson);
+  $('#gen').addEventListener('click', generateRoutine);
+  $('#applyRoutine').addEventListener('click', applyRoutineToDate);
 
-  $('#prevBtn').addEventListener('click', goPrev);
-  $('#nextBtn').addEventListener('click', goNext);
-  $('#todayBtn').addEventListener('click', goToday);
-
-  // close modal
-  $('#closeModal').addEventListener('click', closeModal);
-  $('#modalBackdrop').addEventListener('click', (e)=>{
-    if(e.target === modal) closeModal();
-  });
-
-  // generator
-  $('#generate').addEventListener('click', generateRoutine);
-  $('#applyToDay').addEventListener('click', applyToSelectedDate);
-  $('#clearAll').addEventListener('click', clearAllNotes);
-
-  // keyboard shortcut: G to generate
-  document.addEventListener('keydown', (e)=>{
-    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase() === 'g'){
-      e.preventDefault();
-      generateRoutine();
-    }
-    if(e.key === 'Escape') {
-      if(modal.style.display === 'flex') closeModal();
-    }
-  });
-
-  // simple drag-drop: double click outside day to close modal
-  // init selected date display
-  $('#selectedDateDisplay').textContent = '—';
-
-  // detect and add handler for add button default (in case it was changed)
-  window.addEventListener('beforeunload', ()=> saveNotes(state.notes));
+  // keyboard: g to generate (desktop)
+  document.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey) && e.key === 'g'){ e.preventDefault(); generateRoutine(); } });
+  // close sheet on backdrop click
+  $('#sheet').addEventListener('click', (ev)=>{ if(ev.target === $('#sheet')) closeSheet(); });
 });
 
-/* expose some helpers for console (debug) */
-window._calendar = {
-  state,
-  saveNotes,
-  loadNotes,
-  exportJson: ()=> JSON.stringify(state.notes, null, 2),
-  importJson: (jsonStr)=> { state.notes = JSON.parse(jsonStr); saveNotes(state.notes); renderCalendar(); },
-  clearAll: clearAllNotes
-};
+/* ===========================
+   Canvas background: subtle animated noise + soft radial gradients
+   =========================== */
+(function bgCanvasInit(){
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let w=0,h=0, t0=0, noise=[];
+
+  function resize(){
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    w = canvas.width = Math.ceil(window.innerWidth * dpr);
+    h = canvas.height = Math.ceil(window.innerHeight * dpr);
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    ctx.scale(dpr,dpr);
+    // regenerate noise layers
+    noise = [];
+    for(let i=0;i<3;i++){
+      noise.push({x: Math.random()*1000, y:Math.random()*1000, s: 0.2 + i*0.2, speed: 0.0008 + i*0.0006});
+    }
+  }
+  function draw(time){
+    if(!t0) t0 = time;
+    const t = (time - t0) * 0.001;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // base radial vignette
+    const g = ctx.createLinearGradient(0,0,w, h);
+    g.addColorStop(0, 'rgba(20,20,21,0.12)');
+    g.addColorStop(0.5, 'rgba(8,8,9,0.06)');
+    g.addColorStop(1, 'rgba(0,0,0,0.18)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    // soft moving grayscale blobs
+    for(let i=0;i<3;i++){
+      const nx = Math.sin(t * (0.2 + i*0.1) + noise[i].x) * 0.3 + 0.5;
+      const ny = Math.cos(t * (0.15 + i*0.08) + noise[i].y) * 0.25 + 0.5;
+      const rad = Math.min(window.innerWidth, window.innerHeight) * (0.45 - i*0.1);
+      const grad = ctx.createRadialGradient(nx*window.innerWidth, ny*window.innerHeight, rad*0.05, nx*window.innerWidth, ny*window.innerHeight, rad);
+      const alpha = 0.06 + i*0.03;
+      const tone = 40 + i*15;
+      grad.addColorStop(0, `rgba(${tone},${tone},${tone},${alpha})`);
+      grad.addColorStop(1, `rgba(4,4,5,0)`);
+      ctx.globalCompositeOperation = i===0 ? 'source-over' : 'lighter';
+      ctx.fillStyle = grad;
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+    }
+
+    // subtle animated grain
+    const imgData = ctx.createImageData( Math.min(200, Math.floor(window.innerWidth/4)), Math.min(200, Math.floor(window.innerHeight/4)) );
+    for(let i=0;i<imgData.data.length;i+=4){
+      const v = 220 + Math.floor(Math.sin((i + t*1000)*0.01) * 12 * Math.sin(i*0.001));
+      imgData.data[i] = imgData.data[i+1] = imgData.data[i+2] = v;
+      imgData.data[i+3] = 8; // low alpha
+    }
+    ctx.globalCompositeOperation = 'overlay';
+    ctx.putImageData(imgData, Math.random()*10 - 5, Math.random()*10 - 5);
+
+    ctx.globalCompositeOperation = 'source-over';
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(draw);
+})();
+
+/* autosave on unload */
+window.addEventListener('beforeunload', ()=> saveNotes());
 </script>
 </body>
 </html>
